@@ -515,7 +515,8 @@
     }, 400);
   }
   function initMapPicker(id, lat, lng, onPick, searchText) {
-    if (!window.L || !document.getElementById(id)) return;
+    if (!document.getElementById(id)) return;
+    if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initMapPicker(id, lat, lng, onPick, searchText)); return; }
     if (_mapRegistry[id]) { try { _mapRegistry[id].map.remove(); } catch (e) { /* noop */ } }
     const dark = (document.documentElement.getAttribute("data-theme") || "dark") === "dark";
     const tiles = dark
@@ -725,7 +726,8 @@
   }
 
   function initAppraisalMap(id, lat, lng, onPin, polygon, onPlot, searchText) {
-    if (!window.L || !document.getElementById(id)) return;
+    if (!document.getElementById(id)) return;
+    if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initAppraisalMap(id, lat, lng, onPin, polygon, onPlot, searchText)); return; }
     if (_mapRegistry[id]) { try { _mapRegistry[id].map.remove(); } catch (e) { /* noop */ } }
     const dark = (document.documentElement.getAttribute("data-theme") || "dark") === "dark";
     const tiles = dark
@@ -6196,7 +6198,8 @@
   }
   function initListingStaticMap(id, lat, lng) {
     const el = document.getElementById(id);
-    if (!window.L || !el) return;
+    if (!el) return;
+    if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initListingStaticMap(id, lat, lng)); return; }
     const latN = parseFloat(lat), lngN = parseFloat(lng);
     if (!isFinite(latN) || !isFinite(lngN)) { el.innerHTML = '<div class="dim">No map pin set for this listing.</div>'; return; }
     const dark = (document.documentElement.getAttribute("data-theme") || "dark") === "dark";
