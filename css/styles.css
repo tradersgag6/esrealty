@@ -627,7 +627,7 @@ table.data .num { font-family: var(--font-mono); text-align: right; white-space:
 .notice-banner.err svg { color: var(--red); }
 .ms-chk { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text-dim); cursor: pointer; min-height: 40px; }
 .ms-chk input { accent-color: var(--accent); width: 15px; height: 15px; }
-.ms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; margin-top: 14px; }
+.ms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 14px; margin-top: 14px; }
 .ms-card { background: var(--surface); border: 1px solid var(--stroke); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; transition: border-color .15s; }
 .ms-card:hover { border-color: var(--accent); }
 .ms-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
@@ -1439,4 +1439,36 @@ table.data .num { font-family: var(--font-mono); text-align: right; white-space:
   .users-access .cloud-user-card .user-card-buttons .btn { flex: 1 1 100%; justify-content: center; }
   .user-card-title-row { flex-direction: column; gap: 6px; }
   .user-card-badges { justify-content: flex-start; }
+}
+
+/* ============ MOBILE APP — ALL ROLES ============ */
+@media (max-width: 700px) {
+  .hero .actions { flex-wrap: wrap; }
+  .sig-block { flex-wrap: wrap; }
+  .sig-block > div { flex: 1 1 220px; }
+  .topbar-actions { gap: 8px; flex-wrap: wrap; }
+  .deal-picker { max-width: 140px; font-size: 11px; padding: 6px 10px; }
+  .modal-overlay { padding: 14px 10px; }
+  .modal-head, .modal-foot { padding: 13px 16px; }
+  .modal-body .field { width: 100%; }
+  .modal-foot { flex-wrap: wrap; }
+  .notice-banner.password-required { padding: 14px; font-size: 13.5px; }
+  .notice-banner.password-required strong { font-size: 17px; }
+  .lead-board { grid-template-columns: 1fr; }
+  .deal-list li { flex-wrap: wrap; }
+  .table-wrap, .tabs-row { -webkit-overflow-scrolling: touch; }
+}
+@media (max-width: 480px) {
+  .content { padding: 14px 12px 44px; }
+  .hero { align-items: flex-start; }
+  .hero h1 { font-size: 18px; }
+  .hero .actions .btn { flex: 1 1 auto; }
+  .topbar { flex-wrap: wrap; padding: 10px 12px; }
+  .topbar-title { font-size: 14px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-actions .deal-picker { order: 6; width: 100%; max-width: none; }
+  .card, .card-pad { padding: 16px; }
+  .auth-card { padding: 24px 18px; }
+  .modal-head h3 { font-size: 15px; }
+  .kpi .k-value { font-size: 17px; }
+  .btn { white-space: normal; }
 }
