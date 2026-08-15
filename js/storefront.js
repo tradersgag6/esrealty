@@ -44,7 +44,9 @@
       '<span class="sf-brand-mark">ER</span><span><b>ES Realty</b><small>Property, clearly.</small></span></a>' +
       '<nav class="sf-nav"><a href="#/home">Home</a><a href="#/search">Properties</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>Services</a></nav>' +
       '<div class="sf-header-actions"><button class="sf-link-btn" data-sf-auth="signin">Sign in</button>' +
-      '<button class="sf-primary-btn" data-sf-auth="signup">Create account</button></div></header>';
+      '<button class="sf-primary-btn" data-sf-auth="signup">Create account</button>' +
+      '<button class="sf-menu-btn" data-sf-menu aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button></div>' +
+      '<div class="sf-menu" data-sf-menu-panel><a href="#/home">Home</a><a href="#/search">Properties</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>Services</a><button data-sf-auth="signin">Sign in</button><button data-sf-auth="signup">Create account</button></div></header>';
   }
 
   function footer() {
@@ -183,9 +185,9 @@
     var chips = cities.map(function (city) { return '<a href="#/search?city=' + encodeURIComponent(city) + '">' + esc(city) + '</a>'; }).join("");
     return shell('<section class="sf-hero"><div class="sf-hero-copy"><p class="sf-eyebrow">PHILIPPINE SHOPHOUSE SPECIALISTS</p><h1>Shophouses that <em>work</em> harder.</h1>' +
       '<p>Storefront below, living space above — one address for your business, family, and investment. ES Realty verifies live-work listings across the Philippines.</p>' +
-      '<div class="sf-hero-actions"><a class="sf-hero-btn" href="#/search?property_type=shophouse">Browse Shophouse Listings <span>→</span></a><button class="sf-hero-link" type="button" data-sf-scroll="#sf-contact">Talk to a Shophouse Specialist</button></div>' +
+      '<div class="sf-hero-actions"><a class="sf-hero-btn" href="#/project-bt">Learn about Project B.T <span>→</span></a><button class="sf-hero-link" type="button" data-sf-scroll="#sf-contact">Talk to a Shophouse Specialist</button></div>' +
       '<div class="sf-proof"><span><b>Verified</b> live-work listings</span><span><b>Direct</b> developer access</span><span><b>Feasibility</b> guidance</span></div></div>' +
-      '<div class="sf-hero-art"><div class="sf-hero-frame">' + (heroImage ? '<img src="' + esc(heroImage) + '" alt="Two-storey shophouse with retail below and living space above">' : '') + '<span>Live-work, done right</span></div><div class="sf-floating-stat"><b>Business below.</b><span>Living above.</span></div></div></section>' +
+      '<div class="sf-hero-art"><div class="sf-hero-frame">' + (heroImage ? '<img src="' + esc(heroImage) + '" alt="Two-storey shophouse with retail below and living space above" fetchpriority="high" decoding="async">' : '') + '<span>Live-work, done right</span></div><div class="sf-floating-stat"><b>Business below.</b><span>Living above.</span></div></div></section>' +
 
       '<section class="sf-why"><div class="sf-why-head"><div><p class="sf-eyebrow">WHY SHOPHOUSES</p><h2>One address. <em>Three kinds of value.</em></h2></div><p>The shophouse is the backbone of Philippine daily commerce — and one of the most durable live-work investments you can make.</p></div>' +
       '<div class="sf-why-grid">' +
@@ -342,19 +344,35 @@
   function mountMap() {
     var listing = viewState.result && viewState.result.data;
     var element = document.getElementById("sf-detail-map");
-    if (!element || !listing || !window.L || listing.latitude == null || listing.longitude == null) return;
+    if (!element || !listing || listing.latitude == null || listing.longitude == null) return;
+    if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(function () { mountMap(); }); return; }
     element.innerHTML = "";
     var map = L.map(element, { scrollWheelZoom: false }).setView([Number(listing.latitude), Number(listing.longitude)], 15);
     L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 20, attribution: "&copy; OpenStreetMap &copy; CARTO" }).addTo(map);
     L.marker([Number(listing.latitude), Number(listing.longitude)]).addTo(map);
   }
 
+  function toggleMenu(open) {
+    var btn = document.querySelector("[data-sf-menu]");
+    var panel = document.querySelector("[data-sf-menu-panel]");
+    if (!btn || !panel) return;
+    var isOpen = typeof open === "boolean" ? open : btn.getAttribute("aria-expanded") !== "true";
+    btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    btn.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+    panel.classList.toggle("open", isOpen);
+  }
+
   function bind() {
     if (document.documentElement.getAttribute("data-storefront-bound") === "true") return;
     document.documentElement.setAttribute("data-storefront-bound", "true");
-    window.addEventListener("hashchange", function () { if (active) loadCurrent(); });
+    window.addEventListener("hashchange", function () { if (active) { toggleMenu(false); loadCurrent(); } });
     document.addEventListener("click", function (event) {
       if (!active) return;
+      var menuState = document.querySelector("[data-sf-menu]");
+      if (menuState && menuState.getAttribute("aria-expanded") === "true" && !event.target.closest("[data-sf-menu]") && !event.target.closest("[data-sf-menu-panel]")) toggleMenu(false);
+      var menuBtn = event.target.closest("[data-sf-menu]");
+      if (menuBtn) { toggleMenu(); return; }
+      if (event.target.closest("[data-sf-menu-panel]")) toggleMenu(false);
       var auth = event.target.closest("[data-sf-auth]");
       if (auth) { openAuth(auth.getAttribute("data-sf-auth")); return; }
       var services = event.target.closest("[data-sf-services]");
