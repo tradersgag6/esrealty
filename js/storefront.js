@@ -41,7 +41,7 @@
 
   function header() {
     return '<header class="sf-header"><a class="sf-brand" href="#/home" aria-label="ES Realty home">' +
-      '<span class="sf-brand-mark">ER</span><span><b>ES Realty</b><small>Property, clearly.</small></span></a>' +
+      '<span class="sf-brand-mark">ES</span><span><b>ES Realty</b><small>Property, clearly.</small></span></a>' +
       '<nav class="sf-nav"><a href="#/home">Home</a><a href="#/search">Properties</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>Services</a></nav>' +
       '<div class="sf-header-actions"><button class="sf-link-btn" data-sf-auth="signin">Sign in</button>' +
       '<button class="sf-primary-btn" data-sf-auth="signup">Create account</button>' +
@@ -50,7 +50,7 @@
   }
 
   function footer() {
-    return '<footer class="sf-footer"><div class="sf-brand"><span class="sf-brand-mark">ER</span><span><b>ES Realty</b><small>Philippine property intelligence</small></span></div>' +
+    return '<footer class="sf-footer"><div class="sf-brand"><span class="sf-brand-mark">ES</span><span><b>ES Realty</b><small>Philippine property intelligence</small></span></div>' +
       '<p>Find, compare, and inquire about verified properties from one secure platform.</p>' +
       '<div><a href="#/search">Browse properties</a><button data-sf-auth="signin">Agent sign in</button></div></footer>';
   }
@@ -145,7 +145,7 @@
 
   function card(listing) {
     var price = money(listing.display_price, listing.offer_type === "rent" ? "/mo" : "");
-    return '<article class="sf-property-card ' + (viewState.mode === "list" ? "is-list" : "") + '">' +
+    return '<article class="sf-property-card sf-reveal sf-reveal-up ' + (viewState.mode === "list" ? "is-list" : "") + '">' +
       '<button class="sf-card-open" data-sf-listing="' + esc(listing.id) + '" aria-label="Open ' + esc(listing.title) + '"></button>' +
       '<div class="sf-card-media">' + cardMedia(listing) +
       '<div class="sf-card-tags"><span>' + esc(listing.offer_type === "rent" ? "For rent" : "For sale") + '</span>' + (listing.featured ? '<span class="featured">Featured</span>' : '') + '</div>' +
@@ -157,7 +157,7 @@
   }
 
   function empty(message) {
-    return '<div class="sf-empty"><div>ER</div><h3>No properties found</h3><p>' + esc(message || "Try changing your filters.") + '</p></div>';
+    return '<div class="sf-empty"><div>ES</div><h3>No properties found</h3><p>' + esc(message || "Try changing your filters.") + '</p></div>';
   }
 
   function skeletons(count) {
@@ -177,57 +177,183 @@
       '<button type="submit">Search properties</button></form>';
   }
 
+  function constructionSection() {
+    return '<section class="sf-construction"><div class="sf-construction-track sf-motion-track"><div class="sf-construction-sticky">' +
+      '<div class="sf-construction-heading"><p class="sf-eyebrow">BUILT IN MOTION</p><h2>Shophouse. <em>One thriving address.</em></h2><p>Scroll to develop a connected live-work row, layer by architectural layer.</p></div>' +
+      '<div class="sf-construction-stage"><svg class="sf-construction-svg" viewBox="0 0 720 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three connected two-storey shophouses being developed">' +
+        '<defs>' +
+          '<linearGradient id="sf-glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d9eff8"/><stop offset=".48" stop-color="#82b7cc"/><stop offset="1" stop-color="#47778d"/></linearGradient>' +
+          '<linearGradient id="sf-wall" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#e8e9e6"/></linearGradient>' +
+          '<linearGradient id="sf-concrete" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c7c9c8"/><stop offset="1" stop-color="#858b8d"/></linearGradient>' +
+          '<linearGradient id="sf-night" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#1e3439"/><stop offset="1" stop-color="#101d20"/></linearGradient>' +
+          '<pattern id="sf-roof-tiles" width="18" height="12" patternUnits="userSpaceOnUse"><rect width="18" height="12" fill="#4c4b47"/><path d="M0 1Q4.5 8 9 1M9 1Q13.5 8 18 1" fill="none" stroke="#74716a" stroke-width="1"/></pattern>' +
+          '<pattern id="sf-grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="#6a737d" stroke-width=".6" opacity=".18"/></pattern>' +
+          '<g id="sf-upper-window"><rect width="52" height="66" rx="2" fill="url(#sf-glass)" stroke="#355d6c"/><path d="M26 1V65M1 33H51" stroke="#f3fbff" stroke-width="1.4" opacity=".72"/><path d="M5 5H22L5 28Z" fill="#fff" opacity=".16"/></g>' +
+          '<g id="sf-storefront"><rect width="128" height="76" rx="2" fill="url(#sf-night)" stroke="#263c42"/><path d="M42 1V75M86 1V75M1 18H127" stroke="#78909a" stroke-width="1.3"/><path d="M8 25H37L8 66Z" fill="#fff" opacity=".1"/></g>' +
+          '<filter id="sf-shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="18" stdDeviation="15" flood-color="#1b2027" flood-opacity=".16"/></filter>' +
+        '</defs>' +
+        '<rect x="28" y="20" width="664" height="456" rx="28" fill="url(#sf-grid)"/>' +
+        '<ellipse cx="360" cy="419" rx="270" ry="30" fill="#1b2027" opacity=".08"/>' +
+        '<g class="sf-phase sf-phase-ground" data-phase="1">' +
+          '<rect x="72" y="397" width="576" height="35" rx="3" fill="#e6e7e3" stroke="#a8afaa"/><rect x="72" y="432" width="576" height="44" fill="#777b7a"/>' +
+          '<path d="M72 430H648M72 443H648" stroke="#f8f8f5" stroke-width="2"/><path d="M115 462H196M320 462H400M524 462H605" stroke="#d8dbd8" stroke-width="2" stroke-dasharray="18 12"/>' +
+          '<path class="sf-draw-line" d="M105 396V158M275 396V158M445 396V158M615 396V158M105 397H615" fill="none" stroke="#8f9993" stroke-width="1" stroke-dasharray="6 7"/>' +
+          '<circle cx="105" cy="397" r="4" fill="#f97316"/><circle cx="275" cy="397" r="4" fill="#f97316"/><circle cx="445" cy="397" r="4" fill="#f97316"/><circle cx="615" cy="397" r="4" fill="#f97316"/>' +
+        '</g>' +
+        '<g class="sf-phase sf-phase-foundation" data-phase="2" filter="url(#sf-shadow)">' +
+          '<rect x="99" y="382" width="522" height="22" rx="2" fill="url(#sf-concrete)" stroke="#747b7d"/><rect x="105" y="367" width="160" height="15" fill="#b6bab9"/><rect x="280" y="367" width="160" height="15" fill="#aeb3b2"/><rect x="455" y="367" width="160" height="15" fill="#a5abaa"/>' +
+          '<path d="M275 368V404M445 368V404" stroke="#666e70" stroke-width="2"/>' +
+        '</g>' +
+        '<g class="sf-phase sf-phase-structure" data-phase="3">' +
+          '<g fill="#c2c6c5" stroke="#7e8586" stroke-width="1.2"><rect x="105" y="171" width="14" height="211"/><rect x="268" y="171" width="14" height="211"/><rect x="438" y="171" width="14" height="211"/><rect x="601" y="171" width="14" height="211"/></g>' +
+          '<rect x="101" y="288" width="518" height="15" fill="#aeb3b2" stroke="#7e8586"/><rect x="101" y="171" width="518" height="14" fill="#babfbd" stroke="#7e8586"/>' +
+          '<path class="sf-draw-line" d="M112 178H608M112 295H608M112 375H608" fill="none" stroke="#f97316" stroke-width="2" stroke-dasharray="7 8"/>' +
+        '</g>' +
+        '<g class="sf-phase sf-phase-envelope" data-phase="4" filter="url(#sf-shadow)">' +
+          '<rect x="109" y="178" width="502" height="204" fill="url(#sf-wall)" stroke="#c2c7c4"/>' +
+          '<rect x="109" y="284" width="502" height="18" fill="#e1e2df" stroke="#b9bfbb"/><rect x="99" y="174" width="522" height="13" fill="#f8f8f5" stroke="#b9bfbb"/>' +
+          '<g fill="#f5f5f2" stroke="#c5cac7"><rect x="101" y="164" width="22" height="222"/><rect x="267" y="164" width="22" height="222"/><rect x="437" y="164" width="22" height="222"/><rect x="597" y="164" width="22" height="222"/></g>' +
+          '<path d="M109 207H611M109 277H611M109 310H611" stroke="#d0d4d1"/>' +
+        '</g>' +
+        '<g class="sf-phase sf-phase-glazing" data-phase="5">' +
+          '<use href="#sf-upper-window" x="132" y="213"/><use href="#sf-upper-window" x="191" y="213"/><use href="#sf-upper-window" x="302" y="213"/><use href="#sf-upper-window" x="361" y="213"/><use href="#sf-upper-window" x="472" y="213"/><use href="#sf-upper-window" x="531" y="213"/>' +
+          '<use href="#sf-storefront" x="126" y="306"/><use href="#sf-storefront" x="296" y="306"/><use href="#sf-storefront" x="466" y="306"/>' +
+        '</g>' +
+        '<g class="sf-phase sf-phase-roof" data-phase="6">' +
+          '<path d="M105 171L124 137H266L282 171Z" fill="url(#sf-roof-tiles)" stroke="#393936"/><path d="M275 171L294 137H436L452 171Z" fill="url(#sf-roof-tiles)" stroke="#393936"/><path d="M445 171L464 137H606L622 171Z" fill="url(#sf-roof-tiles)" stroke="#393936"/>' +
+          '<path d="M96 169H624V181H96Z" fill="#f2f2ee" stroke="#b4bab6"/><g fill="#f6f6f2" stroke="#b8bdb9"><path d="M99 169V130H115V169Z"/><path d="M269 169V126H285V169Z"/><path d="M439 169V126H455V169Z"/><path d="M609 169V130H625V169Z"/></g>' +
+          '<g><path d="M121 300H259L251 327H129Z" fill="#292d2d"/><path d="M291 300H429L421 327H299Z" fill="#292d2d"/><path d="M461 300H599L591 327H469Z" fill="#292d2d"/></g>' +
+        '</g>' +
+        '<g class="sf-phase sf-phase-final" data-phase="7">' +
+          '<g font-family="Inter,sans-serif" font-size="10" font-weight="700" letter-spacing="2" fill="#f4f2eb" text-anchor="middle"><text x="190" y="318">SHOP 01</text><text x="360" y="318">SHOP 02</text><text x="530" y="318">SHOP 03</text></g>' +
+          '<g fill="#ffd18c" class="sf-window-light" opacity=".22"><rect x="132" y="219" width="111" height="54"/><rect x="302" y="219" width="111" height="54"/><rect x="472" y="219" width="111" height="54"/></g>' +
+          '<g><circle cx="118" cy="373" r="12" fill="#6a737d"/><path d="M118 383V401" stroke="#5f6771" stroke-width="4"/><path d="M102 403H134L130 386H106Z" fill="#a96e40"/><circle cx="603" cy="373" r="12" fill="#6a737d"/><path d="M603 383V401" stroke="#5f6771" stroke-width="4"/><path d="M587 403H619L615 386H591Z" fill="#a96e40"/></g>' +
+          '<path class="sf-phase-glow" d="M99 174H621M105 404H615M275 171V404M445 171V404" fill="none" stroke="#f97316" stroke-width="2.5" opacity=".48"/>' +
+          '<text x="360" y="500" text-anchor="middle" font-family="Georgia,serif" font-size="18" fill="#3f464e" font-style="italic">Three businesses. Three homes. One connected community.</text>' +
+        '</g>' +
+      '</svg><div class="sf-construction-step"><span>01</span><b>Scroll to build</b></div></div>' +
+      '<div class="sf-construction-labels"><span data-phase="1">Site</span><span data-phase="2">Foundation</span><span data-phase="3">Structure</span><span data-phase="4">Envelope</span><span data-phase="5">Glazing</span><span data-phase="6">Details</span><span data-phase="7">Complete</span></div>' +
+      '<div class="sf-construction-progress"></div>' +
+    '</div></div></section>';
+  }
+
+  function whyShopSection() {
+    return '<section class="sf-why-shop"><div class="sf-why-shop-track sf-motion-track"><div class="sf-construction-sticky">' +
+      '<div class="sf-construction-heading"><p class="sf-eyebrow">WHY SHOPHOUSES</p><h2>Shophouse. <em>Two ways to earn.</em></h2><p>See every unit combine ground-floor retail with residential income above.</p></div>' +
+      '<div class="sf-construction-stage"><svg class="sf-construction-svg" viewBox="0 0 720 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three two-storey shophouses with businesses below and residences above">' +
+        '<defs>' +
+          '<linearGradient id="sf2-warm" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f7b25a"/><stop offset="1" stop-color="#d97b2e"/></linearGradient>' +
+          '<linearGradient id="sf2-upper" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f7dcab"/><stop offset="1" stop-color="#e2ac5c"/></linearGradient>' +
+          '<linearGradient id="sf2-meter" x1="0" y1="1" x2="0" y2="0"><stop stop-color="#b9853f"/><stop offset="1" stop-color="#f5b04a"/></linearGradient>' +
+          '<linearGradient id="sf2-meter2" x1="0" y1="1" x2="0" y2="0"><stop stop-color="#d99b45"/><stop offset="1" stop-color="#f7dcab"/></linearGradient>' +
+          '<marker id="sf2-arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#f97316"/></marker>' +
+        '</defs>' +
+        '<rect x="24" y="18" width="672" height="464" rx="26" fill="url(#sf-grid)"/>' +
+        '<g class="sf-phase sf2-sh1" data-phase="1">' +
+          '<ellipse cx="360" cy="438" rx="260" ry="12" fill="#1e2a3a" opacity=".07"/>' +
+          '<rect x="40" y="435" width="640" height="4" fill="#eef0f1"/><rect x="40" y="439" width="640" height="45" fill="#777b7a"/>' +
+          '<g fill="url(#sf-wall)" stroke="#9aa4ae" stroke-width="1.2"><rect x="190" y="190" width="104" height="248"/><rect x="308" y="190" width="104" height="248"/><rect x="426" y="190" width="104" height="248"/></g>' +
+          '<g stroke="#3f464e" stroke-width="1.2"><polygon points="186,190 242,158 298,190" fill="#68737d"/><polygon points="304,190 360,148 416,190" fill="#7b858e"/><polygon points="422,190 478,158 534,190" fill="#68737d"/></g>' +
+          '<g fill="#eef0f1"><rect x="186" y="188" width="112" height="5"/><rect x="304" y="188" width="112" height="5"/><rect x="422" y="188" width="112" height="5"/></g>' +
+          '<rect x="184" y="330" width="352" height="16" fill="#a5afb9" stroke="#7d8791"/>' +
+          '<path class="sf-draw-line" d="M190 190V438M294 190V438M308 190V438M412 190V438M426 190V438M530 190V438" fill="none" stroke="#f97316" stroke-width="1.2" stroke-dasharray="6 7"/>' +
+        '</g>' +
+        '<g class="sf-phase sf2-sh2" data-phase="2">' +
+          '<g fill="url(#sf2-warm)" opacity=".92"><rect x="196" y="346" width="92" height="100"/><rect x="314" y="346" width="92" height="100"/><rect x="432" y="346" width="92" height="100"/></g>' +
+          '<g fill="#f97316"><path d="M188 344H296L290 322H194Z"/><path d="M306 344H414L408 322H312Z"/><path d="M424 344H532L526 322H430Z"/></g>' +
+          '<g fill="#fff" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" font-weight="700" letter-spacing="2"><text x="242" y="340">SHOP</text><text x="360" y="340">SHOP</text><text x="478" y="340">SHOP</text></g>' +
+          '<g fill="url(#sf-glass)" stroke="#355d6c"><rect x="202" y="356" width="80" height="64" rx="3"/><rect x="320" y="356" width="80" height="64" rx="3"/><rect x="438" y="356" width="80" height="64" rx="3"/></g>' +
+          '<g class="sf2-window-glow" fill="#ffd18c" opacity=".3"><rect x="206" y="360" width="72" height="56" rx="2"/><rect x="324" y="360" width="72" height="56" rx="2"/><rect x="442" y="360" width="72" height="56" rx="2"/></g>' +
+          '<g stroke="#f3fbff" stroke-width="1.2" opacity=".55"><path d="M242 356V420M202 388H282"/><path d="M360 356V420M320 388H400"/><path d="M478 356V420M438 388H518"/></g>' +
+          '<g class="sf2-coins"><circle cx="242" cy="378" r="6" fill="#f5b04a" stroke="#b9853f"/><circle cx="360" cy="378" r="6" fill="#f5b04a" stroke="#b9853f"/><circle cx="478" cy="378" r="6" fill="#f5b04a" stroke="#b9853f"/></g>' +
+          '<text x="42" y="404" font-family="Georgia,serif" font-size="13" font-style="italic" fill="#3f464e">Retail below</text><path d="M136 400L178 392" stroke="#5f6771" stroke-width="1" fill="none"/>' +
+        '</g>' +
+        '<g class="sf-phase sf2-sh3" data-phase="3">' +
+          '<g fill="url(#sf2-upper)" opacity=".92"><rect x="196" y="204" width="92" height="126"/><rect x="314" y="204" width="92" height="126"/><rect x="432" y="204" width="92" height="126"/></g>' +
+          '<g class="sf2-window-glow" fill="#ffd18c" opacity=".5" stroke="#c08a3f"><rect x="210" y="220" width="64" height="72" rx="2"/><rect x="328" y="220" width="64" height="72" rx="2"/><rect x="446" y="220" width="64" height="72" rx="2"/></g>' +
+          '<g stroke="#c08a3f" stroke-width="1.4"><path d="M242 220V292M210 256H274"/><path d="M360 220V292M328 256H392"/><path d="M478 220V292M446 256H510"/></g>' +
+          '<rect x="184" y="330" width="352" height="5" fill="#5f6b76"/><g stroke="#5f6b76" stroke-width="2"><path d="M196 330V320M242 330V320M288 330V320M314 330V320M360 330V320M406 330V320M432 330V320M478 330V320M524 330V320"/></g>' +
+          '<g class="sf2-coins"><circle cx="242" cy="256" r="6" fill="#f5b04a" stroke="#b9853f"/><circle cx="360" cy="256" r="6" fill="#f5b04a" stroke="#b9853f"/><circle cx="478" cy="256" r="6" fill="#f5b04a" stroke="#b9853f"/></g>' +
+          '<text x="42" y="300" font-family="Georgia,serif" font-size="13" font-style="italic" fill="#3f464e">Homes above</text><path d="M142 296L178 284" stroke="#5f6771" stroke-width="1" fill="none"/>' +
+        '</g>' +
+        '<g class="sf-phase sf2-sh4" data-phase="4">' +
+          '<rect x="602" y="292" width="36" height="148" rx="18" fill="#e9ebec" stroke="#c5cdd6"/>' +
+          '<rect x="608" y="388" width="24" height="46" rx="12" fill="url(#sf2-meter)"/>' +
+          '<path class="sf-flow" d="M512 400C560 404 575 408 598 410" fill="none" stroke="#f97316" stroke-width="2.5" stroke-dasharray="6 7" marker-end="url(#sf2-arr)"/>' +
+          '<path class="sf-flow" d="M512 300C560 310 578 330 598 350" fill="none" stroke="#d4a66e" stroke-width="2.5" stroke-dasharray="6 7" marker-end="url(#sf2-arr)"/>' +
+          '<circle cx="592" cy="404" r="6" fill="#f5b04a" stroke="#b9853f"/><circle cx="594" cy="344" r="6" fill="#f5b04a" stroke="#b9853f"/>' +
+          '<text x="620" y="266" text-anchor="middle" font-size="8" font-weight="700" letter-spacing="2" fill="#6a737d">INCOME</text><text x="620" y="284" text-anchor="middle" font-family="Georgia,serif" font-size="13" fill="#3f464e">&#8369;</text>' +
+        '</g>' +
+        '<g class="sf-phase sf2-sh5" data-phase="5">' +
+          '<rect class="sf2-meter-rise" x="608" y="320" width="24" height="68" rx="12" fill="url(#sf2-meter2)"/>' +
+          '<g class="sf2-pop"><circle cx="620" cy="308" r="6" fill="#f5b04a" stroke="#b9853f"/><circle cx="606" cy="326" r="6" fill="#f5b04a" stroke="#b9853f"/><circle cx="634" cy="326" r="6" fill="#f5b04a" stroke="#b9853f"/></g>' +
+          '<text x="360" y="90" text-anchor="middle" font-size="8" font-weight="700" letter-spacing="1.6" fill="#6a737d">POTENTIAL YIELD</text><rect x="320" y="99" width="80" height="30" rx="15" fill="#f97316"/><text x="360" y="119" text-anchor="middle" font-weight="800" font-size="13" fill="#fff">6–8%</text>' +
+          '<path class="sf2-appr-line" d="M60 240C92 232 118 214 150 188" fill="none" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/><circle class="sf2-appr-dot" cx="60" cy="240" r="3.2" fill="#f97316"/><circle class="sf2-appr-dot" cx="150" cy="188" r="3.2" fill="#f97316"/>' +
+          '<text x="42" y="262" font-size="9" font-weight="700" letter-spacing="2" fill="#6a737d">APPRECIATION</text>' +
+          '<path class="sf-phase-glow" d="M190 190L242 158L294 190V438H190ZM308 190L360 148L412 190V438H308ZM426 190L478 158L530 190V438H426Z" fill="none" stroke="#f97316" stroke-width="2.2" opacity=".45"/>' +
+        '</g>' +
+      '</svg></div>' +
+      '<div class="sf-why-equation" aria-label="Three shophouses with retail and residential income"><span><small>Three ground floors</small><b>Retail income</b></span><i>+</i><span><small>Three upper floors</small><b>Residential income</b></span><i>=</i><strong>Three assets<br>Six income paths</strong></div>' +
+      '<div class="sf-construction-labels"><span data-phase="1">Three properties</span><span data-phase="2">Retail income</span><span data-phase="3">Home income</span><span data-phase="4">Cash flow</span><span data-phase="5">Value growth</span></div>' +
+      '<div class="sf-construction-progress"></div>' +
+    '</div></div></section>';
+  }
+
   function home() {
     var listings = viewState.result && viewState.result.data || [];
     var cards = viewState.loading ? skeletons(3) : listings.length ? listings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
     var heroImage = listings.length ? firstImage(listings[0]) : "";
     var cities = ["Batangas City", "Lipa", "Tanauan", "Santo Tomas", "Imus", "Bacoor", "Dasmariñas", "General Trias", "Santa Rosa", "Calamba", "Biñan", "Angeles", "San Fernando", "Antipolo", "Taytay", "Iloilo City", "Cebu City", "Lapu-Lapu", "Cagayan de Oro", "Davao City", "General Santos"];
-    var chips = cities.map(function (city) { return '<a href="#/search?city=' + encodeURIComponent(city) + '">' + esc(city) + '</a>'; }).join("");
+    var chips = cities.map(function (city, i) { return '<a class="sf-reveal sf-reveal-zoom" style="--d:' + (Math.min(i, 11) * 0.05).toFixed(2) + 's" href="#/search?city=' + encodeURIComponent(city) + '">' + esc(city) + '</a>'; }).join("");
     return shell('<section class="sf-hero"><div class="sf-hero-copy"><p class="sf-eyebrow">PHILIPPINE SHOPHOUSE SPECIALISTS</p><h1>Shophouses that <em>work</em> harder.</h1>' +
       '<p>Storefront below, living space above — one address for your business, family, and investment. ES Realty verifies live-work listings across the Philippines.</p>' +
       '<div class="sf-hero-actions"><a class="sf-hero-btn" href="#/project-bt">Learn about Project B.T <span>→</span></a><button class="sf-hero-link" type="button" data-sf-scroll="#sf-contact">Talk to a Shophouse Specialist</button></div>' +
       '<div class="sf-proof"><span><b>Verified</b> live-work listings</span><span><b>Direct</b> developer access</span><span><b>Feasibility</b> guidance</span></div></div>' +
-      '<div class="sf-hero-art"><div class="sf-hero-frame">' + (heroImage ? '<img src="' + esc(heroImage) + '" alt="Two-storey shophouse with retail below and living space above" fetchpriority="high" decoding="async">' : '') + '<span>Live-work, done right</span></div><div class="sf-floating-stat"><b>Business below.</b><span>Living above.</span></div></div></section>' +
+      '<div class="sf-hero-art"><div class="sf-hero-frame">' + (heroImage ? '<img src="' + esc(heroImage) + '" alt="Two-storey shophouse with retail below and living space above" fetchpriority="high" decoding="async">' : '') + '<span>Live-work, done right</span></div><div class="sf-floating-stat"><b>Business below.</b><span>Living above.</span></div></div><div class="sf-scroll-cue" aria-hidden="true"><i></i></div></section>' +
 
-      '<section class="sf-why"><div class="sf-why-head"><div><p class="sf-eyebrow">WHY SHOPHOUSES</p><h2>One address. <em>Three kinds of value.</em></h2></div><p>The shophouse is the backbone of Philippine daily commerce — and one of the most durable live-work investments you can make.</p></div>' +
+      '<div class="sf-marquee" aria-hidden="true"><div class="sf-marquee-track">' + cities.concat(cities).map(function (c) { return '<span>' + esc(c) + '</span>'; }).join('<b>&bull;</b>') + '<b>&bull;</b></div></div>' +
+
+      '<section class="sf-why"><div class="sf-why-head sf-reveal"><div><p class="sf-eyebrow">WHY SHOPHOUSES</p><h2>One address. <em>Three kinds of value.</em></h2></div><p>The shophouse is the backbone of Philippine daily commerce — and one of the most durable live-work investments you can make.</p></div>' +
       '<div class="sf-why-grid">' +
-      '<article class="sf-why-card"><div class="sf-why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V5.5L12 3v18M12 21v-8h7v8M12 8.5h1.6M12 12h1.6M16 8.5h1.6M16 12h1.6"/></svg></div><h3>Built for business</h3><p>Ground-floor retail with residence above — a storefront and a home on a single lot, designed for how Philippine communities actually trade.</p></article>' +
-      '<article class="sf-why-card"><div class="sf-why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21h16M4 21V4l8-2v19M12 21V11h8v10M8 8h1.6M8 12h1.6M8 16h1.6"/></svg></div><h3>Two income streams</h3><p>Run the shop and rent the residence, or rent both. Owners routinely earn from every half of the same building.</p></article>' +
-      '<article class="sf-why-card"><div class="sf-why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1.2 12.2a1 1 0 0 1-1 .8H8.2a1 1 0 0 1-1-.8L6 8z"/><path d="M9 11V7a3 3 0 0 1 6 0v4"/></svg></div><h3>Everyday demand</h3><p>Sari-sari stores, clinics, cafés, and service shops need street-facing space — shophouses answer that demand where it lives.</p></article>' +
-      '<article class="sf-why-card"><div class="sf-why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-8"/><path d="M14 7h6v6"/></svg></div><h3>Long-term appreciation</h3><p>Commercial corner positions in growing corridors hold value across cycles — an asset that keeps earning while it appreciates.</p></article>' +
+      '<article class="sf-why-card sf-reveal sf-reveal-up"><div class="sf-why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V5.5L12 3v18M12 21v-8h7v8M12 8.5h1.6M12 12h1.6M16 8.5h1.6M16 12h1.6"/></svg></div><h3>Built for business</h3><p>Ground-floor retail with residence above — a storefront and a home on a single lot, designed for how Philippine communities actually trade.</p></article>' +
+      '<article class="sf-why-card sf-reveal sf-reveal-up"><div class="sf-why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21h16M4 21V4l8-2v19M12 21V11h8v10M8 8h1.6M8 12h1.6M8 16h1.6"/></svg></div><h3>Two income streams</h3><p>Run the shop and rent the residence, or rent both. Owners routinely earn from every half of the same building.</p></article>' +
+      '<article class="sf-why-card sf-reveal sf-reveal-up"><div class="sf-why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1.2 12.2a1 1 0 0 1-1 .8H8.2a1 1 0 0 1-1-.8L6 8z"/><path d="M9 11V7a3 3 0 0 1 6 0v4"/></svg></div><h3>Everyday demand</h3><p>Sari-sari stores, clinics, cafés, and service shops need street-facing space — shophouses answer that demand where it lives.</p></article>' +
+      '<article class="sf-why-card sf-reveal sf-reveal-up"><div class="sf-why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 7-8"/><path d="M14 7h6v6"/></svg></div><h3>Long-term appreciation</h3><p>Commercial corner positions in growing corridors hold value across cycles — an asset that keeps earning while it appreciates.</p></article>' +
       '</div></section>' +
+      constructionSection() +
+      whyShopSection() +
 
-      '<section class="sf-section"><div class="sf-section-head"><div><p class="sf-eyebrow">FEATURED LISTINGS</p><h2>Shophouses &amp; live-work spaces, handpicked</h2></div><a href="#/search">View all properties →</a></div>' +
-      '<div class="sf-featured-filter">' + searchFields(new URLSearchParams(), true) + '</div>' +
+      '<section class="sf-section"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">FEATURED LISTINGS</p><h2>Shophouses &amp; live-work spaces, handpicked</h2></div><a href="#/search">View all properties →</a></div>' +
+      '<div class="sf-featured-filter sf-reveal sf-reveal-zoom">' + searchFields(new URLSearchParams(), true) + '</div>' +
       '<div class="sf-property-grid">' + cards + '</div></section>' +
 
-      '<section class="sf-locations"><div class="sf-locations-wrap"><div><p class="sf-eyebrow">LOCATIONS WE COVER</p><h2>Where shophouse demand is growing.</h2><p>From CALABARZON to Central Visayas, ES Realty tracks live-work listings in the provinces where daily commerce is on the rise. Tap a city to browse its current inventory.</p></div>' +
+      '<section class="sf-locations"><div class="sf-locations-wrap"><div class="sf-reveal"><p class="sf-eyebrow">LOCATIONS WE COVER</p><h2>Where shophouse demand is growing.</h2><p>From CALABARZON to Central Visayas, ES Realty tracks live-work listings in the provinces where daily commerce is on the rise. Tap a city to browse its current inventory.</p></div>' +
       '<div class="sf-loc-chips">' + chips + '</div></div></section>' +
 
-      '<section class="sf-testimonials"><div class="sf-section-head"><div><p class="sf-eyebrow">CLIENT VOICES</p><h2>Owners who put the ground floor to work.</h2></div></div><div class="sf-quote-grid">' +
-      '<figure class="sf-quote"><blockquote>&ldquo;We run the store downstairs and rent the room upstairs. Two incomes from one lot — that changed our math.&rdquo;</blockquote><figcaption><b>Aling Cora</b><span>Sari-sari store owner · Lipa, Batangas</span></figcaption></figure>' +
-      '<figure class="sf-quote"><blockquote>&ldquo;ES Realty walked us through feasibility and financing on the same call. Our clinic signed a five-year lease within months.&rdquo;</blockquote><figcaption><b>Dr. Marquez</b><span>Dental clinic founder · Dasmariñas, Cavite</span></figcaption></figure>' +
-      '<figure class="sf-quote"><blockquote>&ldquo;I started with one shophouse and now hold four. The pipeline they showed me is exactly what I bought.&rdquo;</blockquote><figcaption><b>Robert T.</b><span>Repeat investor · Santa Rosa, Laguna</span></figcaption></figure>' +
+      '<section class="sf-testimonials"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">CLIENT VOICES</p><h2>Owners who put the ground floor to work.</h2></div></div><div class="sf-quote-grid">' +
+      '<figure class="sf-quote sf-reveal sf-reveal-up"><blockquote>&ldquo;We run the store downstairs and rent the room upstairs. Two incomes from one lot — that changed our math.&rdquo;</blockquote><figcaption><b>Aling Cora</b><span>Sari-sari store owner · Lipa, Batangas</span></figcaption></figure>' +
+      '<figure class="sf-quote sf-reveal sf-reveal-up"><blockquote>&ldquo;ES Realty walked us through feasibility and financing on the same call. Our clinic signed a five-year lease within months.&rdquo;</blockquote><figcaption><b>Dr. Marquez</b><span>Dental clinic founder · Dasmariñas, Cavite</span></figcaption></figure>' +
+      '<figure class="sf-quote sf-reveal sf-reveal-up"><blockquote>&ldquo;I started with one shophouse and now hold four. The pipeline they showed me is exactly what I bought.&rdquo;</blockquote><figcaption><b>Robert T.</b><span>Repeat investor · Santa Rosa, Laguna</span></figcaption></figure>' +
       '</div></section>' +
 
-      '<section class="sf-roi"><div><p class="sf-eyebrow">THE INVESTOR CASE</p><h2>A shophouse pays you <em>twice.</em></h2><p>Ground-floor trade covers operations while the residence above rents or appreciates. Most of our buyers target returns from both halves of the same building.</p>' +
-      '<div class="sf-roi-stats"><div class="sf-roi-stat"><b>6–8%</b><span>Indicative gross rental yield on shophouse units</span></div><div class="sf-roi-stat"><b>2</b><span>Income streams — retail ground floor and residence above</span></div><div class="sf-roi-stat"><b>3+</b><span>Potential tenants a single unit can host over its life</span></div></div></div>' +
-      '<div class="sf-guide"><h3>Download the Shophouse Investment Guide</h3><p>Financing paths, a location checklist, and unit economics — free for buyers who want the full picture before they view.</p>' +
+      '<section class="sf-roi"><div class="sf-reveal"><p class="sf-eyebrow">THE INVESTOR CASE</p><h2>A shophouse pays you <em>twice.</em></h2><p>Ground-floor trade covers operations while the residence above rents or appreciates. Most of our buyers target returns from both halves of the same building.</p>' +
+      '<div class="sf-roi-stats"><div class="sf-roi-stat sf-reveal sf-reveal-up"><b>6–8%</b><span>Indicative gross rental yield on shophouse units</span></div><div class="sf-roi-stat sf-reveal sf-reveal-up"><b data-count="2">2</b><span>Income streams — retail ground floor and residence above</span></div><div class="sf-roi-stat sf-reveal sf-reveal-up"><b data-count="3" data-suffix="+">3+</b><span>Potential tenants a single unit can host over its life</span></div></div></div>' +
+      '<div class="sf-guide sf-reveal sf-reveal-right"><h3>Download the Shophouse Investment Guide</h3><p>Financing paths, a location checklist, and unit economics — free for buyers who want the full picture before they view.</p>' +
       '<form data-sf-guide><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><button type="submit">Send me the guide →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>' +
 
-      '<section class="sf-process" id="sf-process"><div class="sf-section-head"><div><p class="sf-eyebrow">REAL ESTATE SERVICES</p><h2>Local guidance for every <em>property decision.</em></h2></div><p>Practical real estate support for buyers, sellers, landlords, investors, and developers across the Philippines.</p></div><div class="sf-process-steps">' +
-      '<article class="sf-process-step"><b>01</b><h3>Property Sales &amp; Acquisition</h3><p>Buy or sell residential, commercial, land, condominium, townhouse, and shophouse properties with transaction guidance.</p></article>' +
-      '<article class="sf-process-step"><b>02</b><h3>Leasing &amp; Tenant Placement</h3><p>Find suitable spaces, screen tenant requirements, and structure leasing conversations for homes and businesses.</p></article>' +
-      '<article class="sf-process-step"><b>03</b><h3>Investment &amp; Feasibility</h3><p>Review purchase costs, financing, rental potential, development options, cash flow, and expected returns.</p></article>' +
-      '<article class="sf-process-step"><b>04</b><h3>Property Appraisal &amp; Valuation</h3><p>Prepare market-based valuation guidance using location, comparable properties, improvements, and current demand.</p></article>' +
-      '<article class="sf-process-step"><b>05</b><h3>Property Management</h3><p>Support owners with tenant coordination, rent tracking, maintenance, property records, and day-to-day oversight.</p></article>' +
-      '<article class="sf-process-step"><b>06</b><h3>Due Diligence Coordination</h3><p>Organize checks for title, zoning, taxes, permits, documents, site condition, and other closing requirements.</p></article>' +
-      '<article class="sf-process-step"><b>07</b><h3>Project Development Advisory</h3><p>Assess sites, highest and best use, product positioning, unit economics, and development planning.</p></article>' +
-      '<article class="sf-process-step"><b>08</b><h3>Commercial &amp; Shophouse Advisory</h3><p>Match business concepts with visible locations, flexible layouts, tenant demand, and practical operating plans.</p></article>' +
+      '<section class="sf-process" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">REAL ESTATE SERVICES</p><h2>Local guidance for every <em>property decision.</em></h2></div><p>Practical real estate support for buyers, sellers, landlords, investors, and developers across the Philippines.</p></div><div class="sf-process-steps">' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Property Sales &amp; Acquisition</h3><p>Buy or sell residential, commercial, land, condominium, townhouse, and shophouse properties with transaction guidance.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>02</b><h3>Leasing &amp; Tenant Placement</h3><p>Find suitable spaces, screen tenant requirements, and structure leasing conversations for homes and businesses.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>03</b><h3>Investment &amp; Feasibility</h3><p>Review purchase costs, financing, rental potential, development options, cash flow, and expected returns.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>04</b><h3>Property Appraisal &amp; Valuation</h3><p>Prepare market-based valuation guidance using location, comparable properties, improvements, and current demand.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>05</b><h3>Property Management</h3><p>Support owners with tenant coordination, rent tracking, maintenance, property records, and day-to-day oversight.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>06</b><h3>Due Diligence Coordination</h3><p>Organize checks for title, zoning, taxes, permits, documents, site condition, and other closing requirements.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>07</b><h3>Project Development Advisory</h3><p>Assess sites, highest and best use, product positioning, unit economics, and development planning.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>08</b><h3>Commercial &amp; Shophouse Advisory</h3><p>Match business concepts with visible locations, flexible layouts, tenant demand, and practical operating plans.</p></article>' +
       '</div></section>' +
 
-      '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div><p class="sf-eyebrow">' + esc(siteContact.eyebrow) + '</p><h2>' + esc(siteContact.title) + '</h2><p>' + esc(siteContact.description) + '</p><div class="sf-contact-details"><a href="tel:' + encodeURIComponent(String(siteContact.phone || "").replace(/[^\d+]/g, "")) + '">' + esc(siteContact.phone) + '</a><a href="mailto:' + encodeURIComponent(siteContact.email || "") + '">' + esc(siteContact.email) + '</a><span>' + esc(siteContact.address) + '</span><span>' + esc(siteContact.hours) + '</span></div></div>' +
-      '<form class="sf-cta-form" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="+63 900 000 0000"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Province, budget, and business idea..."></textarea></label><button type="submit">Request a call →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>');
+      '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div class="sf-reveal"><p class="sf-eyebrow">' + esc(siteContact.eyebrow) + '</p><h2>' + esc(siteContact.title) + '</h2><p>' + esc(siteContact.description) + '</p><div class="sf-contact-details"><a href="tel:' + encodeURIComponent(String(siteContact.phone || "").replace(/[^\d+]/g, "")) + '">' + esc(siteContact.phone) + '</a><a href="mailto:' + encodeURIComponent(siteContact.email || "") + '">' + esc(siteContact.email) + '</a><span>' + esc(siteContact.address) + '</span><span>' + esc(siteContact.hours) + '</span></div></div>' +
+      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="+63 900 000 0000"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Province, budget, and business idea..."></textarea></label><button type="submit">Request a call →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>');
   }
 
   function btStars(score) {
@@ -239,7 +365,7 @@
     var conceptImage = "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=82";
     return shell('<section class="bt-hero"><div class="bt-hero-copy"><p class="bt-eyebrow">ES REALTY / DEVELOPMENT CONCEPT 01</p><h1>Project B.T <span>— Bahay Tindahan</span></h1>' +
       '<p class="bt-hero-lede">A modern mixed-use real estate concept combining commercial and residential spaces in a single two-storey building.</p>' +
-      '<div class="bt-actions"><button class="bt-button bt-button-dark" data-bt-inquire="Project B.T">Inquire About Project B.T <span>↗</span></button><a class="bt-link" href="#bt-concept">Explore the concept <span>↓</span></a></div>' +
+      '<div class="bt-actions"><button class="bt-button bt-button-dark" data-bt-inquire="Project B.T">Inquire About Project B.T <span>↗</span></button><a class="bt-link" href="#bt-concept" data-sf-scroll="#bt-concept">Explore the concept <span>↓</span></a></div>' +
       '<div class="bt-hero-proof"><span><b>01</b> Business below</span><span><b>02</b> Living above</span><span><b>∞</b> Value over time</span></div></div>' +
       '<div class="bt-hero-media"><img src="' + heroImage + '" alt="Modern white and wood two-storey shophouse exterior"><div class="bt-image-label"><span>Mixed-use by design</span><b>Built for business. Made for living.</b></div><div class="bt-hero-stamp">B.T<br><small>BAHAY<br>TINDAHAN</small></div></div></section>' +
 
@@ -298,14 +424,56 @@
       '<button class="sf-outline-btn" data-sf-save="' + esc(listing.id) + '">♡ Save this property</button><form data-sf-inquiry="' + esc(listing.id) + '"><h3>Request more information</h3><label>Full name<input name="full_name" required maxlength="160"></label><label>Email<input type="email" name="email" maxlength="254"></label><label>Phone<input name="phone" required maxlength="50"></label><label>Message<textarea name="message" rows="4" maxlength="5000" placeholder="I would like to know more about this property."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to the processing of my contact details for this inquiry.</span></label><button type="submit">Send inquiry</button><p class="sf-form-status" aria-live="polite"></p></form></aside></div></section>');
   }
 
+  function patchHome() {
+    var listings = viewState.result && viewState.result.data || [];
+    var cards = viewState.loading ? skeletons(3) : listings.length ? listings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
+    var grid = host.querySelector(".sf-property-grid");
+    if (grid) grid.innerHTML = cards;
+
+    var frame = host.querySelector(".sf-hero-frame");
+    if (frame) {
+      var image = frame.querySelector("img");
+      var heroImage = listings.length ? firstImage(listings[0]) : "";
+      if (heroImage) {
+        if (!image) {
+          image = document.createElement("img");
+          image.alt = "Two-storey shophouse with retail below and living space above";
+          image.fetchPriority = "high";
+          image.decoding = "async";
+          frame.insertBefore(image, frame.firstChild);
+        }
+        if (image.src !== heroImage) image.src = heroImage;
+      } else if (image) image.remove();
+    }
+
+    var contact = host.querySelector("#sf-contact .sf-cta-band > div");
+    if (contact) {
+      var eyebrow = contact.querySelector(".sf-eyebrow");
+      var title = contact.querySelector("h2");
+      var description = contact.querySelector("p:not(.sf-eyebrow)");
+      var details = contact.querySelectorAll(".sf-contact-details > *");
+      if (eyebrow) eyebrow.textContent = siteContact.eyebrow;
+      if (title) title.textContent = siteContact.title;
+      if (description) description.textContent = siteContact.description;
+      if (details[0]) { details[0].textContent = siteContact.phone; details[0].href = "tel:" + String(siteContact.phone || "").replace(/[^\d+]/g, ""); }
+      if (details[1]) { details[1].textContent = siteContact.email; details[1].href = "mailto:" + (siteContact.email || ""); }
+      if (details[2]) details[2].textContent = siteContact.address;
+      if (details[3]) details[3].textContent = siteContact.hours;
+    }
+  }
+
   function renderCurrent() {
     if (!active || !host) return;
     var current = route();
     if (current.path === "project-bt") host.innerHTML = projectBtPage();
     else if (current.path.indexOf("listing/") === 0) host.innerHTML = detailPage(viewState.result && viewState.result.data);
     else if (current.path === "search") host.innerHTML = searchPage(current.params);
+    else if (host.querySelector(".sf-hero")) patchHome();
     else host.innerHTML = home();
     mountMap();
+    bindHomeMotion();
+    bindBtMotion();
+    if (current.path === "home" || current.path === "") bindConstruction();
   }
 
   function loadCurrent(force) {
@@ -360,6 +528,147 @@
     btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
     btn.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
     panel.classList.toggle("open", isOpen);
+  }
+
+  var _homeMotionObs = null;
+  var _homeParallax = null;
+
+  function runCount(el) {
+    if (!el || !el.getAttribute || !el.hasAttribute("data-count")) return;
+    var target = parseFloat(el.getAttribute("data-count"));
+    var suffix = el.getAttribute("data-suffix") || "";
+    if (isNaN(target)) return;
+    var t0 = null;
+    var dur = 1200;
+    function step(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min(1, (ts - t0) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var val = target % 1 === 0 ? Math.round(target * eased) : (target * eased).toFixed(1);
+      el.textContent = val + suffix;
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = target + suffix;
+    }
+    requestAnimationFrame(step);
+  }
+
+  function bindHomeMotion() {
+    if (_homeMotionObs) { _homeMotionObs.disconnect(); _homeMotionObs = null; }
+    if (_homeParallax) { window.removeEventListener("scroll", _homeParallax); _homeParallax = null; }
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var reveals = document.querySelectorAll(".sf-reveal");
+    if (reduced) {
+      reveals.forEach(function (el) { el.classList.add("in"); });
+      return;
+    }
+    if (!reveals.length && !document.querySelector(".sf-hero-frame")) return;
+    _homeMotionObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("in");
+        if (entry.target.matches("[data-count]")) runCount(entry.target);
+        else entry.target.querySelectorAll && entry.target.querySelectorAll("[data-count]").forEach(runCount);
+        _homeMotionObs.unobserve(entry.target);
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+    reveals.forEach(function (el) { _homeMotionObs.observe(el); });
+    var frame = document.querySelector(".sf-hero-frame");
+    if (!frame || window.matchMedia("(max-width:760px)").matches) return;
+    var ticking = false;
+    _homeParallax = function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        ticking = false;
+        var r = frame.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > window.innerHeight) return;
+        var pct = (window.innerHeight - r.top) / (window.innerHeight + r.height);
+        frame.style.transform = "translateY(" + Math.round((pct - 0.5) * -34) + "px)";
+      });
+    };
+    window.addEventListener("scroll", _homeParallax, { passive: true });
+    _homeParallax();
+  }
+
+  var _btMotionObs = null;
+
+  function bindBtMotion() {
+    if (_btMotionObs) { _btMotionObs.disconnect(); _btMotionObs = null; }
+    var page = document.querySelector(".bt-hero");
+    if (!page) return;
+    var selector = [
+      ".bt-intro-grid > *", ".bt-mission > *", ".bt-section-head > *",
+      ".bt-concept-card", ".bt-tier-card", ".bt-table-wrap", ".bt-market > *",
+      ".bt-site-grid > *", ".bt-checklist > div", ".bt-timeline-head > *",
+      ".bt-timeline-steps > div", ".bt-timeline-steps > i", ".bt-highlights > *",
+      ".bt-highlight-grid article", ".bt-contact > *", ".bt-thanks > *"
+    ].join(",");
+    var elements = document.querySelectorAll(selector);
+    elements.forEach(function (element, index) {
+      element.classList.add("bt-motion");
+      element.style.setProperty("--bt-delay", ((index % 3) * 0.08).toFixed(2) + "s");
+    });
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+      elements.forEach(function (element) { element.classList.add("bt-in"); });
+      return;
+    }
+    _btMotionObs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("bt-in");
+        _btMotionObs.unobserve(entry.target);
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -7% 0px" });
+    elements.forEach(function (element) { _btMotionObs.observe(element); });
+  }
+
+  var _constructionObs = null;
+  var _constructionScroll = null;
+
+  function bindConstruction() {
+    if (_constructionObs) { _constructionObs.disconnect(); _constructionObs = null; }
+    if (_constructionScroll) { window.removeEventListener("scroll", _constructionScroll, true); _constructionScroll = null; }
+    var tracks = document.querySelectorAll(".sf-motion-track");
+    if (!tracks.length) return;
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      tracks.forEach(function (t) {
+        t.querySelectorAll(".sf-phase").forEach(function (p) { p.classList.add("vis"); });
+        var b = t.querySelector(".sf-construction-progress"); if (b) b.style.width = "100%";
+        t.querySelectorAll(".sf-construction-labels span").forEach(function (l) { l.classList.add("active"); });
+      });
+      return;
+    }
+    var ticking = false;
+    _constructionScroll = function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        ticking = false;
+        tracks.forEach(function (track) {
+          var rect = track.getBoundingClientRect();
+          if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+          var scrolled = -rect.top;
+          var dist = rect.height - window.innerHeight;
+          if (dist <= 0) return;
+          var pct = Math.max(0, Math.min(1, scrolled / dist));
+          var phases = track.querySelectorAll(".sf-phase");
+          var total = phases.length;
+          phases.forEach(function (p, i) {
+            var threshold = (i + 0.55) / (total + 0.9);
+            p.classList.toggle("vis", pct >= threshold);
+          });
+          var bar = track.querySelector(".sf-construction-progress");
+          if (bar) bar.style.width = Math.round(pct * 100) + "%";
+          track.querySelectorAll(".sf-construction-labels span").forEach(function (l, i) {
+            var threshold = (i + 0.55) / (total + 0.9);
+            l.classList.toggle("active", pct >= threshold);
+          });
+        });
+      });
+    };
+    window.addEventListener("scroll", _constructionScroll, { capture: true, passive: true });
+    _constructionScroll();
   }
 
   function bind() {
