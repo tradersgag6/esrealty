@@ -16,3 +16,4 @@ jobs:
         run: |
           curl -sS -o /dev/null -w "site-settings: %{http_code}\n" "https://mrngaqtbaseewzcsogqi.supabase.co/functions/v1/listing-api/api/site-settings" || true
           curl -sS -o /dev/null -w "listings: %{http_code}\n" "https://mrngaqtbaseewzcsogqi.supabase.co/functions/v1/listing-api/api/listings?limit=1" || true
+          curl -sS -o /dev/null -w "vercel-market-scan: %{http_code}\n" "https://esrealty-market-scan.vercel.app/api/ping" || true
