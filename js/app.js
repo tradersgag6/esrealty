@@ -5707,7 +5707,7 @@
   }
 
   /* ================= MARKET SCAN ================= */
-  const MS_API = "http://localhost:8932";
+  const MS_API = (location.hostname === "localhost" || location.hostname === "127.0.0.1") ? "http://localhost:8932" : "https://esrealty-market-scan.vercel.app";
   const MS_TYPES = ["", "Vacant Lot", "House & Lot", "Townhouse", "Condominium Unit", "Apartment", "Shophouse", "Commercial", "Warehouse", "Office"];
   function marketLocationForCity(city) {
     for (const r of D.PH_REGIONS) {
@@ -5734,9 +5734,9 @@
     const province = savedLocation.province;
     const cities = region && province ? D.citiesFor(region, province) : [];
     let html = '<div class="hero"><div><h1>Market Scan</h1><p>Search for-sale / for-rent listings across property portals and social sources.</p></div></div>';
-    html += '<div class="notice-banner">' + icon("search", 14) + ' <span>Live sources (DotProperty.com.ph, MyProperty.ph, OnePropertee, Carousell Philippines, Web Search, and publicly indexed Facebook posts) are fetched on demand by the local <b>Market Scan</b> server. Login-gated or private content is reported separately. Always verify a listing before transacting.</span></div>';
+    html += '<div class="notice-banner">' + icon("search", 14) + ' <span>Live sources (DotProperty.com.ph, MyProperty.ph, OnePropertee, Carousell Philippines, Web Search, and publicly indexed Facebook posts) are fetched on demand by the hosted <b>Market Scan</b> service. Login-gated or private content is reported separately. Always verify a listing before transacting.</span></div>';
     if (st.error) {
-      html += '<div class="notice-banner err">' + icon("pin", 14) + ' <span>Market Scan backend not reachable. Double-click <b>start_esrealty.cmd</b> once (or run <code>powershell -ExecutionPolicy Bypass -File market-scan\\market_scan_server.ps1</code>), then press Run again.</span></div>';
+      html += '<div class="notice-banner err">' + icon("pin", 14) + ' <span>Market Scan backend not reachable. Please try again in a moment — the first cloud scan can take up to a minute.</span></div>';
     }
     html += '<div class="card card-pad mt-16"><div class="row" style="gap:12px;align-items:end">' +
       '<div class="field col-2"><label>Region</label><select class="input" id="ms-region"><option value="">All regions</option>' + D.regionNames().map(x => '<option value="' + esc(x) + '"' + (x === region ? " selected" : "") + '>' + esc(x) + '</option>').join("") + '</select></div>' +
