@@ -3909,6 +3909,48 @@
   function pmsPaySum(list, statuses) {
     return list.filter(p => statuses.indexOf(p.status) !== -1).reduce((s, p) => s + C.num(p.amount, 0), 0);
   }
+  function pmsPaidByMonth(leaseId) {
+    const map = {};
+    pmsActivePayments().forEach(p => {
+      if (p.lease_id !== leaseId || p.status !== "paid") return;
+      let key = String(p.month || "").trim().toLowerCase();
+      if (!key && p.date) {
+        const dt = new Date(String(p.date).slice(0, 10) + "T00:00:00");
+        if (!isNaN(dt.getTime())) key = pmsMonthLabel(new Date(dt.getFullYear(), dt.getMonth(), 1)).toLowerCase();
+      }
+      if (key) map[key] = (map[key] || 0) + C.num(p.amount, 0);
+    });
+    return map;
+  }
+  function pmsLeaseArrears(l) {
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const pays = pmsActivePayments().filter(p => p.lease_id === l.id);
+    if (l.rent_type === "lease") {
+      const end = l.end ? new Date(String(l.end).slice(0, 10) + "T00:00:00") : null;
+      if (end && end.getTime() >= today.getTime()) return 0;
+      const paidTotal = pays.filter(p => p.status === "paid").reduce((s, p) => s + C.num(p.amount, 0), 0);
+      return Math.max(0, C.num(l.rent, 0) - paidTotal);
+    }
+    const paidByMonth = pmsPaidByMonth(l.id);
+    const start = l.start ? new Date(String(l.start).slice(0, 10) + "T00:00:00") : new Date(today.getFullYear(), today.getMonth(), 1);
+    const end = l.end ? new Date(String(l.end).slice(0, 10) + "T00:00:00") : null;
+    const dd = pmsDueDay(l);
+    let total = 0, guard = 0;
+    for (let y = start.getFullYear(), mo = start.getMonth(); guard < 120; guard++) {
+      const monthStart = new Date(y, mo, 1);
+      if (monthStart > today) break;
+      if (end && monthStart > end) break;
+      const dueDate = new Date(y, mo, dd);
+      if (dueDate.getTime() < today.getTime()) {
+        const label = pmsMonthLabel(monthStart).toLowerCase();
+        const amt = C.num(l.rent, 0);
+        total += Math.max(0, amt - Math.min(paidByMonth[label] || 0, amt));
+      }
+      mo++; if (mo > 11) { mo = 0; y++; }
+    }
+    return total;
+  }
+  function pmsArrearsFor(list) { return (list || []).reduce((s, l) => s + pmsLeaseArrears(l), 0); }
   function pmsMonthLabel(d) { return d.toLocaleString("en-US", { month: "long", year: "numeric" }); }
   function pmsMonthOptions(extra) {
     const out = [], seen = {};
@@ -4089,7 +4131,7 @@
       tenants = pmsActiveTenants(), leases = pmsActiveLeases(), payments = pmsActivePayments();
     const activeLeases = leases.filter(l => l.status === "active");
     const collected = pmsPaySum(payments, ["paid"]);
-    const arrears = pmsPaySum(payments, ["pending", "late"]);
+    const arrears = pmsArrearsFor(activeLeases);
     const nb = PMS_NEW[tab];
     let html = '<div class="hero"><div><h1>Property Management</h1><p>Manage properties, units, owners, tenants, leases, and finances.</p></div>' +
       (canManage && nb ? '<div class="actions"><button class="btn btn-primary" data-pms-new="' + nb[0] + '">' + icon("plus", 15) + " New " + nb[1] + "</button></div>" : "") + '</div>';
@@ -4102,7 +4144,7 @@
       kpi("Tenants", tenants.length, "on file", "blue", "star") +
       kpi("Active Leases", activeLeases.length, "of " + leases.length + " leases", "green", "doc") +
       kpi("Collected", C.money(collected), "all-time paid", "green", "dollar") +
-      kpi("Arrears", C.money(arrears), "pending + late", arrears > 0 ? "red" : "green", "trending") + '</div>';
+      kpi("Arrears", C.money(arrears), "overdue rent", arrears > 0 ? "red" : "green", "trending") + '</div>';
     html += '<div class="tabs">' + PMS_TABS.map(t => '<button class="tab' + (state.pmsTab === t[0] ? " active" : "") + '" data-pmtab="' + t[0] + '">' + t[1] + '</button>').join("") + '</div>';
     html += renderPMSList();
     return html;
@@ -4237,7 +4279,7 @@
     list.forEach(t => {
       const leases = pmsActiveLeases().filter(l => l.tenant_id === t.id);
       const active = leases.filter(l => l.status === "active");
-      const out = pmsPaySum(pmsActivePayments().filter(p => leases.some(l => l.id === p.lease_id)), ["pending", "late"]);
+      const out = pmsArrearsFor(leases);
       const accountStatus = t.accountStatus || (t.authUserId ? "pending" : "");
       h += '<tr><td><b>' + esc(t.name || "—") + '</b>' + (accountStatus ? '<div class="mt-8"><span class="badge ' + (accountStatus === "approved" ? "green" : accountStatus === "rejected" ? "red" : "gold") + '">User: ' + esc(accountStatus) + '</span></div>' : "") + '</td>' +
         '<td>' + (t.email ? '<div>' + esc(t.email) + '</div>' : "") + (t.phone ? '<div class="dim tiny">' + esc(t.phone) + '</div>' : "") + '</td>' +
@@ -4433,13 +4475,13 @@
       payments = pmsActivePayments(), expenses = pmsActiveExpenses();
     const occupied = units.filter(u => u.status === "occupied").length;
     const paid = pmsPaySum(payments, ["paid"]);
-    const arrears = pmsPaySum(payments, ["pending", "late"]);
+    const arrears = pmsArrearsFor(leases.filter(l => l.status === "active"));
     const totalExp = expenses.reduce((s, e) => s + C.num(e.amount, 0), 0);
     const occPct = units.length ? Math.round(occupied / units.length * 100) : 0;
     let html = '<div class="grid grid-4 mb-24">' +
       kpi("Occupancy", occPct + "%", occupied + " of " + units.length + " units", occPct >= 80 ? "green" : occPct >= 50 ? "gold" : "red", "check") +
       kpi("Collected", C.money(paid), "all-time rent paid", "green", "dollar") +
-      kpi("Arrears", C.money(arrears), "pending + late", arrears > 0 ? "red" : "green", "trending") +
+      kpi("Arrears", C.money(arrears), "overdue rent", arrears > 0 ? "red" : "green", "trending") +
       kpi("Expenses", C.money(totalExp), "all-time operating", "gold", "briefcase") + '</div>';
     if (!props.length) {
       html += '<div class="card card-pad empty">' + icon("chart", 46) + "<h3>No data to report yet</h3><p>Add properties, leases, and payments to see occupancy and income reports.</p></div>";
@@ -4457,7 +4499,7 @@
     props.forEach(p => {
       const monthly = leases.filter(l => l.property_id === p.id && l.status === "active" && l.rent_type !== "lease").reduce((s, l) => s + C.num(l.rent, 0), 0);
       const coll = pmsPaySum(payments.filter(x => x.property_id === p.id), ["paid"]);
-      const arr = pmsPaySum(payments.filter(x => x.property_id === p.id), ["pending", "late"]);
+      const arr = pmsArrearsFor(leases.filter(x => x.property_id === p.id && x.status === "active"));
       const ex = expenses.filter(x => x.property_id === p.id).reduce((s, e) => s + C.num(e.amount, 0), 0);
       html += '<tr><td>' + esc(p.title) + '</td><td class="num">' + C.money(monthly) + '</td><td class="num">' + C.money(coll) + '</td><td class="num">' + C.money(arr) + '</td><td class="num">' + C.money(ex) + '</td><td class="num"><b>' + C.money(coll - ex) + '</b></td></tr>';
     });
@@ -4467,7 +4509,7 @@
       const u = pmsActiveUnits().filter(x => x.property_id === p.id);
       const lc = pmsActiveLeases().filter(x => x.property_id === p.id && (x.status === "active" || x.status === "expiring"));
       const pc = pmsPaySum(pmsActivePayments().filter(x => x.property_id === p.id), ["paid"]);
-      const ac = pmsPaySum(pmsActivePayments().filter(x => x.property_id === p.id), ["pending", "late"]);
+      const ac = pmsArrearsFor(pmsActiveLeases().filter(x => x.property_id === p.id && x.status === "active"));
       html += '<tr><td>' + esc(p.title) + '</td><td class="num">' + u.length + '</td><td class="num">' + lc.length + '</td><td class="num">' + C.money(pc) + '</td><td class="num">' + C.money(ac) + '</td>' +
         '<td><button class="btn btn-ghost btn-sm" data-pms-printrep="property:' + p.id + '">' + icon("print", 13) + " Print Report</button></td></tr>";
     });
@@ -4494,7 +4536,7 @@
       pmsActiveProperties().forEach(p => {
         const monthly = pmsActiveLeases().filter(l => l.property_id === p.id && l.status === "active" && l.rent_type !== "lease").reduce((s, l) => s + C.num(l.rent, 0), 0);
         const coll = pmsPaySum(pmsActivePayments().filter(x => x.property_id === p.id), ["paid"]);
-        const arr = pmsPaySum(pmsActivePayments().filter(x => x.property_id === p.id), ["pending", "late"]);
+        const arr = pmsArrearsFor(pmsActiveLeases().filter(x => x.property_id === p.id && x.status === "active"));
         const ex = pmsActiveExpenses().filter(x => x.property_id === p.id).reduce((s, e) => s + C.num(e.amount, 0), 0);
         rows.push([p.title, monthly, coll, arr, ex, coll - ex]);
       });
@@ -4522,11 +4564,11 @@
     const payIds = leases.map(l => l.id);
     const payments = pmsActivePayments().filter(p => payIds.indexOf(p.lease_id) !== -1);
     const active = leases.filter(l => l.status === "active");
-    const due = pmsPaySum(payments, ["pending", "late"]);
+    const due = pmsArrearsFor(leases);
     const paid = pmsPaySum(payments, ["paid"]);
     html += '<div class="grid grid-4 mb-24">' +
       kpi("Active Leases", active.length, "of " + leases.length + " leases", "green", "doc") +
-      kpi("Rent Due", C.money(due), "pending + late", due > 0 ? "red" : "green", "dollar") +
+      kpi("Rent Due", C.money(due), "overdue rent", due > 0 ? "red" : "green", "dollar") +
       kpi("Paid", C.money(paid), "all-time", "green", "check") +
       kpi("Tenant", esc(tenant.name || "—").slice(0, 18), esc(tenant.phone || ""), "blue", "star") + '</div>';
     html += '<div class="card card-pad mb-24"><h3 class="mb-16">Your Leases</h3>';
@@ -4588,7 +4630,7 @@
     const openMaint = myMaint.filter(m => m.status !== "completed");
     const openMaintCost = openMaint.reduce((s, m) => s + C.num(m.cost, 0), 0);
     const myDocs = pmsActiveDocuments().filter(d => propIds.indexOf(d.property_id) !== -1);
-    const due = pmsPaySum(payments, ["pending", "late"]);
+    const due = pmsArrearsFor(leases);
     const paid = pmsPaySum(payments, ["paid"]);
     html += '<div class="grid grid-4 mb-24">' +
       kpi("Properties", myProps.length, "owned by you", "green", "briefcase") +
@@ -4597,7 +4639,7 @@
       kpi("Active Leases", active.length, "of " + leases.length + " leases", "green", "doc") + '</div>';
     html += '<div class="grid grid-4 mb-24">' +
       kpi("Collected", C.money(paid), "all-time paid", "green", "dollar") +
-      kpi("Arrears", C.money(due), "pending + late", due > 0 ? "red" : "green", "trending") +
+      kpi("Arrears", C.money(due), "overdue rent", due > 0 ? "red" : "green", "trending") +
       kpi("Owner", esc(owner.name || "—").slice(0, 18), esc(owner.email || ""), "purple", "star") +
       kpi("Bank", esc(owner.bank || "—"), esc(owner.account_number || ""), "gold", "credit-card") + '</div>';
     const netPosition = paid - totalExpenses;
@@ -4776,7 +4818,7 @@
     const occPct = units.length ? Math.round(occ / units.length * 100) : 0;
     const monthly = leases.filter(l => l.status === "active" && l.rent_type !== "lease").reduce((s, l) => s + C.num(l.rent, 0), 0);
     const paid = pmsPaySum(pays, ["paid"]);
-    const arr = pmsPaySum(pays, ["pending", "late"]);
+    const arr = pmsArrearsFor(pmsActiveLeases().filter(x => x.property_id === p.id && x.status === "active"));
     const totalExp = exps.reduce((s, e) => s + C.num(e.amount, 0), 0);
 
     const unitRows = units.map(u => {
