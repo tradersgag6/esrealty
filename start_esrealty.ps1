@@ -13,4 +13,20 @@ if (-not $up) {
   }
 }
 
-Start-Process (Join-Path $proj "index.html")
+# Serve the app over HTTP (Supabase auth requires a real origin; file:// breaks login).
+$node = "C:\Program Files\nodejs\node.exe"
+$appUp = $false
+try { $r = Invoke-WebRequest "http://localhost:8931/index.html" -UseBasicParsing -TimeoutSec 2; $appUp = ($r.StatusCode -eq 200) } catch {}
+if (-not $appUp -and (Test-Path $node)) {
+  Start-Process -FilePath $node -ArgumentList ('"' + (Join-Path $proj "serve.js") + '"') -WindowStyle Hidden
+  for ($i = 0; $i -lt 12 -and -not $appUp; $i++) {
+    Start-Sleep -Milliseconds 750
+    try { $r = Invoke-WebRequest "http://localhost:8931/index.html" -UseBasicParsing -TimeoutSec 2; $appUp = ($r.StatusCode -eq 200) } catch {}
+  }
+}
+
+if ($appUp) {
+  Start-Process "http://localhost:8931/"
+} else {
+  Start-Process (Join-Path $proj "index.html")
+}
