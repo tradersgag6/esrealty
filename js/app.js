@@ -7530,8 +7530,16 @@
       sort_order: rec.sortOrder
     };
   }
+  function playbookErrorText(error) {
+    return String((error && (error.message || error.details || error.hint)) || error || "");
+  }
+  function playbookPermissionError(error) {
+    return /(42501|42504|permission denied|row-level security|violates row-level)/i.test(playbookErrorText(error));
+  }
   function playbookMissingSchema(error) {
-    return /sales_playbooks|schema cache|does not exist|querying schema|relation "public\.sales_playbooks"/i.test(String(error && error.message || error || ""));
+    const text = playbookErrorText(error);
+    if (playbookPermissionError(error)) return false;
+    return /(PGRST205|PGRST202|could not find the table|does not exist|schema cache|querying schema)/i.test(text);
   }
   async function loadCloudPlaybooks() {
     if (!playbookAllowed()) { cloudPlaybooksReady = null; return; }
@@ -7665,6 +7673,7 @@
       closePlaybookModal(); render(); toast(isNew ? "Sales playbook created" : "Sales playbook updated");
     } catch (error) {
       if (playbookMissingSchema(error)) { cloudPlaybooksReady = "missing"; toast("Run supabase/sales_playbooks.sql before saving", "err"); }
+      else if (playbookPermissionError(error)) { toast("The server rejected this save: your session does not pass the Super Admin check. Sign out, sign back in, and confirm this account is an approved Super Admin in Users & Access.", "err"); }
       else toast("Could not save playbook: " + esc(friendlyErr(error.message)), "err");
       if (button) button.disabled = false;
     }
