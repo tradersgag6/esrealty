@@ -7,7 +7,16 @@
   "use strict";
   const C = window.ESREALTY.core;
   const D = window.ESREALTY.data;
-  const SB = window.ESREALTY_SUPABASE;
+  /* Supabase loads lazily (async) so it may not exist yet at parse time.
+   * SB stays live-bound: picked up immediately or as soon as the client lands. */
+  let SB = window.ESREALTY_SUPABASE || null;
+  if (!SB) {
+    let sbTries = 0;
+    const sbTimer = setInterval(function () {
+      if (window.ESREALTY_SUPABASE) { SB = window.ESREALTY_SUPABASE; clearInterval(sbTimer); }
+      else if (++sbTries > 60) clearInterval(sbTimer);
+    }, 200);
+  }
   const LISTINGS_API = window.ESREALTY_LISTINGS_API;
   const IS_LOCAL_DEV = ["localhost", "127.0.0.1"].indexOf(window.location.hostname) !== -1;
 
