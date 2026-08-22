@@ -5058,7 +5058,34 @@ function bindPerView() {
     return h;
   }
 
+  async function loadPmsInsights() {
+    if (state.pmsInsightsLoaded) return;
+    state.pmsInsightsLoaded = true;
+    if (!SB || !currentUser || !currentUser.id || currentUser.demo) { state.pmsInsights = null; return; }
+    try {
+      const r = await SB.rpc("pms_insights");
+      if (r.error) throw r.error;
+      state.pmsInsights = r.data || {};
+      render();
+    } catch (e) { toast("Could not load portfolio insights: " + esc(friendlyErr(e.message)), "err"); }
+  }
+  function pmsInsightsCard() {
+    const d = state.pmsInsights;
+    if (!d || !Object.keys(d).length) return "";
+    const money = k => C.money(Number(d[k] || 0));
+    const num = k => esc(String(d[k] != null ? d[k] : 0));
+    let card = '<div class="card card-pad mb-24"><div class="row spread"><h3>Portfolio Insights</h3>' +
+      '<button class="btn btn-ghost btn-sm" data-pi-refresh>' + icon("back", 13) + " Refresh</button></div>" +
+      '<p class="dim tiny mt-8">Aggregated from normalized cloud tables' + (roleIs("super-admin") ? " across all workspaces." : ".") + "</p>" +
+      '<div class="table-wrap"><table class="data"><tr><th>Properties</th><th>Units (occupied)</th><th>Active Leases</th><th>Collected</th><th>Arrears</th><th>Expenses</th><th>Open Maintenance</th><th>Documents</th></tr>' +
+      "<tr><td>" + num("properties_total") + "</td><td>" + num("units_total") + " (" + num("units_occupied") + ")</td><td>" + num("leases_active") + "</td><td class=\"num\">" + money("collected") + "</td><td class=\"num\">" + money("arrears_pending") + "</td><td class=\"num\">" + money("expenses_total") + "</td><td>" + num("maintenance_open") + "</td><td>" + num("documents_total") + "</td></tr></table></div>";
+    if (d.generated_at) card += '<p class="dim tiny mt-8">Updated ' + esc(String(d.generated_at).slice(0, 19).replace("T", " ")) + " UTC</p>";
+    card += "</div>";
+    return card;
+  }
+
   function pmsReports() {
+    loadPmsInsights();
     const props = pmsActiveProperties(), units = pmsActiveUnits(), leases = pmsActiveLeases(),
       payments = pmsActivePayments(), expenses = pmsActiveExpenses();
     const occupied = units.filter(u => u.status === "occupied").length;
@@ -5073,6 +5100,7 @@ function bindPerView() {
       kpi("Expenses", C.money(totalExp), "all-time operating", "gold", "briefcase") + '</div>';
     if (!props.length) {
       html += '<div class="card card-pad empty">' + icon("chart", 46) + "<h3>No data to report yet</h3><p>Add properties, leases, and payments to see occupancy and income reports.</p></div>";
+      html = pmsInsightsCard() + html;
       return html;
     }
     html += '<div class="card card-pad mb-24"><h3 class="mb-16">Occupancy by Property</h3><div class="table-wrap"><table class="data"><tr><th>Property</th><th class="num">Units</th><th class="num">Occupied</th><th class="num">Vacant</th><th class="num">Occupancy</th></tr>';
@@ -9720,7 +9748,9 @@ function bindPerView() {
     if (!finHooked) {
       finHooked = true;
       document.addEventListener("click", e => {
-        const tpr = e.target.closest("[data-tperf-refresh]");
+        const pir = e.target.closest("[data-pi-refresh]");
+    if (pir) { state.pmsInsightsLoaded = false; loadPmsInsights().then(() => render()); return; }
+const tpr = e.target.closest("[data-tperf-refresh]");
     if (tpr) { state.teamPerformanceLoaded = false; loadTeamPerformance().then(() => render()); return; }
 const ccBtn = e.target.closest("[data-cc-calc]");
     if (ccBtn) { ccClosingCosts(); return; }
