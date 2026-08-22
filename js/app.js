@@ -7592,6 +7592,7 @@
     ["closingScript", "Closing script"], ["followUpSequence", "Follow-up sequence"], ["coachingNotes", "Internal coaching notes"]
   ];
   let cloudPlaybooksReady = null;
+  const PLAYBOOK_SEED_ITEMS = window.ESREALTY_PLAYBOOK_SEED || [];
   let playbookHooked = false;
   let playbookSearchTimer = null;
   let playbookReturnFocus = null;
@@ -7599,6 +7600,34 @@
   function playbookAllowed() { return roleIs("super-admin") && can("playbook.manage"); }
   function playbookUsesCloud() { return !!(SB && currentUser && currentUser.id && !currentUser.demo && currentUser.registrationStatus === "approved"); }
   function playbookWritable() { return !playbookUsesCloud() || cloudPlaybooksReady === "ok"; }
+  async function seedStarterPlaybooks(btn) {
+    if (!playbookAllowed()) { toast("Super Admin access required", "err"); return; }
+    if (!PLAYBOOK_SEED_ITEMS.length) { toast("Starter playbooks unavailable", "err"); return; }
+    if (btn) btn.disabled = true;
+    try {
+      let n = 0;
+      if (playbookUsesCloud()) {
+        if (!playbookWritable()) throw new Error("Cloud playbooks are unavailable until the data loads successfully");
+        for (const item of PLAYBOOK_SEED_ITEMS) {
+          const rec = normalizePlaybook({ title: item.title, summary: item.summary, category: item.category, salesStage: item.sales_stage, propertyType: item.property_type, targetCustomer: item.target_customer, status: item.status, sections: item.sections, sortOrder: item.sort_order });
+          await persistPlaybook(rec, true);
+          n++;
+        }
+        await loadCloudPlaybooks();
+      } else {
+        PLAYBOOK_SEED_ITEMS.forEach(item => {
+          state.salesPlaybooks.push(normalizePlaybook({ title: item.title, summary: item.summary, category: item.category, salesStage: item.sales_stage, propertyType: item.property_type, targetCustomer: item.target_customer, status: item.status, sections: item.sections, sortOrder: item.sort_order }));
+          n++;
+        });
+        save();
+      }
+      toast("Loaded " + n + " starter playbooks");
+      render();
+    } catch (error) {
+      if (btn) btn.disabled = false;
+      toast("Could not load starter playbooks: " + esc(friendlyErr(error.message)), "err");
+    }
+  }
   function blankPlaybookSections() {
     const result = {};
     PLAYBOOK_SECTION_FIELDS.forEach(x => { result[x[0]] = ""; });
@@ -7713,7 +7742,9 @@
       const objective = rec.sections.objective || rec.summary || "No objective added yet.";
       return '<article class="card pb-card"><div class="pb-card-top"><div><div class="pb-card-meta">' + playbookStatusBadge(rec.status) + '<span>' + esc(rec.salesStage) + '</span><span>' + esc(rec.category) + '</span></div><h3>' + esc(rec.title) + '</h3></div><span class="pb-index">' + String(index + 1).padStart(2, "0") + '</span></div><p>' + esc(objective) + '</p><div class="pb-tags"><span>' + esc(rec.propertyType) + '</span>' + (rec.targetCustomer ? '<span>' + esc(rec.targetCustomer) + "</span>" : "") + '</div><div class="pb-card-foot"><small>Updated ' + esc(new Date(rec.updatedAt).toLocaleDateString()) + '</small><div class="pb-actions"><button class="icon-btn" data-pb-move="-1" data-pb-id="' + esc(rec.id) + '" title="Move up">&uarr;</button><button class="icon-btn" data-pb-move="1" data-pb-id="' + esc(rec.id) + '" title="Move down">&darr;</button><button class="btn btn-ghost btn-sm" data-pb-preview="' + esc(rec.id) + '">Preview</button><button class="btn btn-ghost btn-sm" data-pb-edit="' + esc(rec.id) + '">Edit</button><button class="icon-btn" data-pb-duplicate="' + esc(rec.id) + '" title="Duplicate">' + icon("doc", 14) + '</button><button class="icon-btn" data-pb-archive="' + esc(rec.id) + '" title="' + (rec.status === "archived" ? "Restore" : "Archive") + '">' + icon(rec.status === "archived" ? "refresh" : "archive", 14) + '</button><button class="icon-btn danger" data-pb-delete="' + esc(rec.id) + '" title="Delete">' + icon("trash", 14) + "</button></div></div></article>";
     }).join("") : '<div class="pb-empty"><span>' + icon("target", 28) + '</span><h3>No playbooks found</h3><p>Create a playbook or adjust the filters.</p></div>';
-    return '<div class="pb-page"><section class="pb-hero"><div><div class="eyebrow">SUPER ADMIN / SALES ENABLEMENT</div><h1>Sales Playbook</h1><p>Build repeatable scripts, qualification steps, objection responses, and follow-up sequences for every sales conversation.</p></div><button class="btn btn-primary" data-pb-new' + (!playbookWritable() ? " disabled" : "") + '>' + icon("plus", 15) + ' New Playbook</button></section>' + migration + loadError + '<section class="pb-stats"><div><b>' + all.length + '</b><span>Total</span></div><div><b>' + active + '</b><span>Active</span></div><div><b>' + draft + '</b><span>Drafts</span></div><div><b>' + archived + '</b><span>Archived</span></div></section><section class="card pb-filter"><label>Search<input class="input" id="pb-filter-q" value="' + esc(f.q || "") + '" placeholder="Title, audience, property type..."></label><label>Stage<select class="input" id="pb-filter-stage">' + playbookOptionList(PLAYBOOK_STAGES, f.stage, "All stages") + '</select></label><label>Category<select class="input" id="pb-filter-category">' + playbookOptionList(PLAYBOOK_CATEGORIES, f.category, "All categories") + '</select></label><label>Property<select class="input" id="pb-filter-property">' + playbookOptionList(PLAYBOOK_TYPES, f.propertyType, "All property types") + '</select></label><label>Status<select class="input" id="pb-filter-status"><option value="">All statuses</option><option value="draft"' + (f.status === "draft" ? " selected" : "") + '>Draft</option><option value="active"' + (f.status === "active" ? " selected" : "") + '>Active</option><option value="archived"' + (f.status === "archived" ? " selected" : "") + '>Archived</option></select></label><button class="btn btn-ghost" data-pb-clear>Clear</button></section><section class="pb-grid">' + cards + "</section></div>";
+    const canSeedStarters = PLAYBOOK_SEED_ITEMS.length > 0 && all.length === 0 && !f.q && !f.stage && !f.category && !f.propertyType && !f.status;
+    const starterBanner = canSeedStarters ? '<div class="notice-banner pb-migration" style="align-items:center;justify-content:space-between;gap:12px"><span style="display:flex;align-items:center;gap:8px">' + icon("target", 15) + '<span><b>No playbooks yet.</b> Load 10 ready-to-use Philippine market playbooks (scripts, objections, follow-ups) in one click.</span></span><button class="btn btn-primary btn-sm" data-pb-seed' + (playbookUsesCloud() && !playbookWritable() ? " disabled" : "") + '>Load starter playbooks</button></div>' : "";
+    return '<div class="pb-page"><section class="pb-hero"><div><div class="eyebrow">SUPER ADMIN / SALES ENABLEMENT</div><h1>Sales Playbook</h1><p>Build repeatable scripts, qualification steps, objection responses, and follow-up sequences for every sales conversation.</p></div><button class="btn btn-primary" data-pb-new' + (!playbookWritable() ? " disabled" : "") + '>' + icon("plus", 15) + ' New Playbook</button></section>' + migration + loadError + starterBanner + '<section class="pb-stats"><div><b>' + all.length + '</b><span>Total</span></div><div><b>' + active + '</b><span>Active</span></div><div><b>' + draft + '</b><span>Drafts</span></div><div><b>' + archived + '</b><span>Archived</span></div></section><section class="card pb-filter"><label>Search<input class="input" id="pb-filter-q" value="' + esc(f.q || "") + '" placeholder="Title, audience, property type..."></label><label>Stage<select class="input" id="pb-filter-stage">' + playbookOptionList(PLAYBOOK_STAGES, f.stage, "All stages") + '</select></label><label>Category<select class="input" id="pb-filter-category">' + playbookOptionList(PLAYBOOK_CATEGORIES, f.category, "All categories") + '</select></label><label>Property<select class="input" id="pb-filter-property">' + playbookOptionList(PLAYBOOK_TYPES, f.propertyType, "All property types") + '</select></label><label>Status<select class="input" id="pb-filter-status"><option value="">All statuses</option><option value="draft"' + (f.status === "draft" ? " selected" : "") + '>Draft</option><option value="active"' + (f.status === "active" ? " selected" : "") + '>Active</option><option value="archived"' + (f.status === "archived" ? " selected" : "") + '>Archived</option></select></label><button class="btn btn-ghost" data-pb-clear>Clear</button></section><section class="pb-grid">' + cards + "</section></div>";
   }
   function playbookEditor(id) {
     if (!playbookAllowed()) { toast("Super Admin access required", "err"); return; }
@@ -7844,7 +7875,8 @@
       const archive = event.target.closest("[data-pb-archive]"); if (archive) { const rec = state.salesPlaybooks.map(normalizePlaybook).find(x => x.id === archive.getAttribute("data-pb-archive")); if (rec) { rec.status = rec.status === "archived" ? "draft" : "archived"; await updatePlaybookRecord(rec, rec.status === "archived" ? "Playbook archived" : "Playbook restored as draft"); } return; }
       const remove = event.target.closest("[data-pb-delete]"); if (remove) { await removePlaybook(remove.getAttribute("data-pb-delete")); return; }
       const move = event.target.closest("[data-pb-move]"); if (move) { await movePlaybook(move.getAttribute("data-pb-id"), move.getAttribute("data-pb-move")); return; }
-      const clear = event.target.closest("[data-pb-clear]"); if (clear) { state.playbookFilters = { q: "", stage: "", category: "", propertyType: "", status: "" }; save(); render(); }
+      const seedBtn = event.target.closest("[data-pb-seed]"); if (seedBtn) { seedStarterPlaybooks(seedBtn); return; }
+    const clear = event.target.closest("[data-pb-clear]"); if (clear) { state.playbookFilters = { q: "", stage: "", category: "", propertyType: "", status: "" }; save(); render(); }
     });
     document.addEventListener("keydown", event => { if (event.key === "Escape" && document.getElementById("pb-modal")) closePlaybookModal(); });
   }
