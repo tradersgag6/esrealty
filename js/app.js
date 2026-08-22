@@ -383,6 +383,7 @@
     await loadCloudLeads();
     await loadCloudTransactions();
     await loadCloudPlaybooks();
+    try { await migrateVaultToCloud(); } catch (vaultMigrateErr) {}
   }
 
   /* ================= HELPERS ================= */
@@ -8777,6 +8778,39 @@
   /* ================= DOCUMENT VAULT ================= */
   const VAULT_CATEGORIES = ["Valid ID", "TIN", "Proof of Billing", "Proof of Income", "SPA", "Bank / Financing", "Contract", "Title / Deed", "Other"];
   const TX_VAULT_CATEGORIES = ["Reservation Agreement", "Contract to Sell", "Deed of Absolute Sale", "TCT / CCT", "Tax Declaration", "BIR CAR / eCAR", "Transfer Tax Receipt", "Registry of Deeds Receipt", "Proof of Payment", "Valid ID", "TIN", "SPA", "Bank / Financing", "Other"];
+  const VAULT_BUCKET = "private-documents";
+  function vaultSafeName(name) { return String(name || "file").replace(/[^A-Za-z0-9._ -]+/g, "_").replace(/ +/g, "_").slice(-80); }
+  async function vaultSignedUrl(doc, forDownload) {
+    if (doc.storagePath && SB) {
+      const res = await SB.storage.from(VAULT_BUCKET).createSignedUrl(doc.storagePath, 60, forDownload ? { download: doc.name || true } : undefined);
+      if (res.error || !res.data || !res.data.signedUrl) throw new Error(res.error ? res.error.message : "Cloud link unavailable");
+      return res.data.signedUrl;
+    }
+    if (doc.dataUrl) return doc.dataUrl;
+    throw new Error("Document data is unavailable");
+  }
+  async function migrateVaultToCloud() {
+    try {
+      if (!SB || !currentUser || !currentUser.id || currentUser.demo) return;
+      const docs = (state.docVault || []).slice();
+      (state.transactions || []).forEach(tx => (tx.documents || []).forEach(d => docs.push(d)));
+      const pending = docs.filter(d => d.dataUrl && !d.storagePath).slice(0, 25);
+      if (!pending.length) return;
+      let ok = 0;
+      for (const d of pending) {
+        try {
+          const blob = await (await fetch(d.dataUrl)).blob();
+          const vpath = currentUser.id + "/vault/" + d.id + "__" + vaultSafeName(d.name);
+          const up = await SB.storage.from(VAULT_BUCKET).upload(vpath, blob, { contentType: blob.type || "application/octet-stream", upsert: true });
+          if (up.error) throw up.error;
+          d.storagePath = vpath;
+          delete d.dataUrl;
+          ok++;
+        } catch (e2) {}
+      }
+      if (ok > 0) { save(); toast("Moved " + ok + " document" + (ok === 1 ? "" : "s") + " to cloud storage"); render(); }
+    } catch (e) {}
+  }
   function vaultDocs(ownerType, ownerId) {
     const local = (state.docVault || []).filter(d => d.ownerType === ownerType && d.ownerId === ownerId);
     if (ownerType !== "tx") return local;
@@ -8843,12 +8877,10 @@
     if (file.size > maxBytes) { toast("File is too large (maximum " + (maxBytes < 1000000 ? "900 KB" : "4 MB") + ")", "err"); return; }
     const saveButton = $("[data-vault-save]");
     if (saveButton) { saveButton.disabled = true; saveButton.textContent = "Uploading..."; }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const rec = { id: "doc-" + Date.now() + "-" + Math.floor(Math.random() * 999), name: file.name, category: catEl ? catEl.value : "Other", size: (file.size / 1024).toFixed(0) + " KB", dataUrl: String(reader.result), ownerType: ov ? ov.getAttribute("data-owner-type") : "", ownerId: ov ? ov.getAttribute("data-owner-id") : "", uploadedAt: new Date().toISOString() };
+    const finishUpload = (rec) => {
       if (rec.ownerType === "tx") {
-        const t = (state.transactions || []).find(x => x.id === rec.ownerId);
-        if (t) { t.documents = t.documents || []; t.documents.push(rec); t.updatedAt = new Date().toISOString(); persistTransactionToCloud(t); }
+        const tx = (state.transactions || []).find(x => x.id === rec.ownerId);
+        if (tx) { tx.documents = tx.documents || []; tx.documents.push(rec); tx.updatedAt = new Date().toISOString(); persistTransactionToCloud(tx); }
       } else {
         if (!state.docVault) state.docVault = [];
         state.docVault.push(rec);
@@ -8856,19 +8888,42 @@
       save(); render(); vaultRefresh(rec.ownerType, rec.ownerId);
       fileEl.value = ""; vaultFileSelected(fileEl);
       if (saveButton) { saveButton.disabled = false; saveButton.innerHTML = icon("upload", 15) + " Upload Document"; }
-      toast("Document uploaded");
+      toast("Document uploaded" + (rec.storagePath ? " (cloud)" : " (this browser)"));
     };
-    reader.onerror = () => {
+    const failUpload = (msg) => {
       if (saveButton) { saveButton.disabled = false; saveButton.innerHTML = icon("upload", 15) + " Upload Document"; }
-      toast("Could not read the selected file", "err");
+      toast(msg, "err");
     };
-    reader.readAsDataURL(file);
+    (async () => {
+      try {
+        const baseRec = { id: "doc-" + Date.now() + "-" + Math.floor(Math.random() * 999), name: file.name, category: catEl ? catEl.value : "Other", size: (file.size / 1024).toFixed(0) + " KB", ownerType: ov ? ov.getAttribute("data-owner-type") : "", ownerId: ov ? ov.getAttribute("data-owner-id") : "", uploadedAt: new Date().toISOString() };
+        if (SB && currentUser && currentUser.id && !currentUser.demo) {
+          const vpath = currentUser.id + "/vault/" + baseRec.id + "__" + vaultSafeName(file.name);
+          const up = await SB.storage.from(VAULT_BUCKET).upload(vpath, file, { contentType: file.type || "application/octet-stream" });
+          if (up.error) throw new Error(up.error.message || "Upload failed");
+          baseRec.storagePath = vpath;
+          finishUpload(baseRec);
+        } else {
+          const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result));
+            reader.onerror = () => reject(new Error("Could not read the selected file"));
+            reader.readAsDataURL(file);
+          });
+          baseRec.dataUrl = dataUrl;
+          finishUpload(baseRec);
+        }
+      } catch (error) {
+        failUpload(friendlyErr(error.message));
+      }
+    })();
   }
-  function vaultDelete(id) {
+  async function vaultDelete(id) {
     const doc = (state.docVault || []).find(d => d.id === id);
     const sharedTx = (state.transactions || []).find(t => (t.documents || []).some(d => d.id === id));
     const target = doc || (sharedTx && (sharedTx.documents || []).find(d => d.id === id));
     if (!target || !confirm('Remove "' + (target.name || "document") + '" from this record?')) return;
+    if (target.storagePath && SB) { try { await SB.storage.from(VAULT_BUCKET).remove([target.storagePath]); } catch (cloudErr) {} }
     state.docVault = (state.docVault || []).filter(d => d.id !== id);
     if (sharedTx) { sharedTx.documents = (sharedTx.documents || []).filter(d => d.id !== id); sharedTx.updatedAt = new Date().toISOString(); persistTransactionToCloud(sharedTx); }
     save(); render();
@@ -8876,17 +8931,19 @@
     if (ov) vaultRefresh(ov.getAttribute("data-owner-type"), ov.getAttribute("data-owner-id"));
     toast("Document removed", "err");
   }
-  function vaultOpenDoc(id) {
+  async function vaultOpenDoc(id) {
     const doc = vaultDocById(id);
-    if (!doc || !doc.dataUrl) { toast("Document data is unavailable", "err"); return; }
-    const win = window.open(doc.dataUrl, "_blank", "noopener");
-    if (!win) toast("Your browser blocked the document preview. Use Download instead.", "err");
+    let src;
+    try { src = await vaultSignedUrl(doc, false); } catch (e) { toast(friendlyErr(e.message), "err"); return; }
+    const win = window.open(src, "_blank", "noopener");    if (!win) toast("Your browser blocked the document preview. Use Download instead.", "err");
   }
-  function vaultDownloadDoc(id) {
+  async function vaultDownloadDoc(id) {
     const doc = vaultDocById(id);
-    if (!doc || !doc.dataUrl) { toast("Document data is unavailable", "err"); return; }
+    let src;
+    try { src = await vaultSignedUrl(doc, true); } catch (e) { toast(friendlyErr(e.message), "err"); return; }
     const a = document.createElement("a");
-    a.href = doc.dataUrl; a.download = doc.name || "document"; a.style.display = "none";
+    a.href = src;
+    a.download = doc.name || "document"; a.style.display = "none";
     document.body.appendChild(a); a.click(); a.remove();
   }
 
