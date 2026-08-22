@@ -372,10 +372,141 @@
     } catch (e) { toast("Signed in, but the property could not be saved: " + esc(friendlyErr(e.message)), "err"); }
   }
   /* ================= PRE-SELLING INVENTORY ================= */
+  function psScheduleRows(unitId) {
+    return (state.presellPayments || []).filter(p => p.unit_id === unitId).slice().sort((a, b) => String(a.due_date || "").localeCompare(String(b.due_date || "")));
+  }
+  function psOpenSchedule(unitId) {
+    const u = (state.presellUnits || []).find(x => x.id === unitId);
+    if (!u) return;
+    psModal("Payment Schedule — Unit " + (u.unit_no || ""),
+      '<div id="ps-sched-body">' + psScheduleBody(unitId) + "</div>",
+      "Close");
+    const saveBtn = document.querySelector("#ps-modal [data-ps-save]");
+    if (saveBtn) { saveBtn.setAttribute("data-ps-close", "1"); saveBtn.textContent = "Close"; }
+  }
+  function psScheduleBody(unitId) {
+    const rows = psScheduleRows(unitId);
+    let body = "";
+    if (!rows.length) {
+      body = '<p class="dim">No schedule generated yet for this unit.</p>';
+    } else {
+      let paid = 0, outstanding = 0;
+      rows.forEach(r => { const a = Number(r.amount || 0); if (r.status === "paid") paid += a; else if (r.status !== "waived") outstanding += a; });
+      body = '<div class="table-wrap"><table class="data"><tr><th>Due</th><th>Label</th><th class="num">Amount</th><th>Status</th><th></th></tr>';
+      rows.forEach(r => {
+        const canPay = managePresell() && r.status === "pending";
+        body += "<tr><td>" + esc(String(r.due_date || "").slice(0, 10)) + "</td><td>" + esc(r.label || "-") + '</td><td class="num">' + C.money(Number(r.amount || 0)) + "</td><td>" + psStatusBadge(r.status === "pending" && String(r.due_date).slice(0, 10) < new Date().toISOString().slice(0, 10) ? "late" : r.status) + "</td><td>" +
+          (canPay ? '<button class="btn btn-ghost btn-sm" data-ps-pay="' + esc(r.id) + '">Mark Paid</button>' : "") + "</td></tr>";
+      });
+      body += '<tr><td colspan="2"><b>Totals</b></td><td colspan="3"></td></tr>';
+      body += "</table></div>";
+      body += '<div class="row mt-8" style="gap:16px"><span>Paid: <b>' + C.money(paid) + "</b></span><span>Outstanding: <b>" + C.money(outstanding) + "</b></span>" + (managePresell() ? '<button class="btn btn-ghost btn-sm ml-auto" data-ps-regen="' + esc(unitId) + '">Regenerate Schedule</button>' : "") + "</div>";
+    }
+    if (managePresell()) {
+      body = '<div class="grid grid-2 mb-16">' +
+        psField("Total contract price", psText("psf-tcp", u2val(unitId, "total_contract_price") || "", "", "number")) +
+        psField("Reservation fee", psText("psf-resfee", u2val(unitId, "reservation_fee") || "0", "", "number")) +
+        psField("Equity months", psText("psf-dpmonths", u2val(unitId, "downpayment_months") || "24", "", "number")) +
+        psField("Loan %", psText("psf-loanpct", u2val(unitId, "loan_percent") != null ? u2val(unitId, "loan_percent") : "90", "", "number")) +
+        psField("Loan rate (% p.a.)", psText("psf-rate", u2val(unitId, "loan_rate_annual") != null ? u2val(unitId, "loan_rate_annual") : "7.5", "", "number")) +
+        psField("Loan term (years)", psText("psf-years", u2val(unitId, "loan_term_years") || "15", "", "number")) +
+        psField("Bank take-out start", psText("psf-loanstart", u2val(unitId, "loan_start_date") || "", "", "date")) +
+        "</div>" +
+        '<button class="btn btn-primary btn-sm" data-ps-gen="' + esc(unitId) + '">Generate / Update Schedule</button><hr style="margin:14px 0;border:none;border-top:1px solid var(--stroke)">' + body;
+    }
+    return body;
+  }
+  function u2val(unitId, key) {
+    const u = (state.presellUnits || []).find(x => x.id === unitId);
+    return u ? u[key] : null;
+  }
+  function managePresell() { return roleIs("super-admin"); }
+  async function psMarkPaid(paymentId) {
+    const row = (state.presellPayments || []).find(x => x.id === paymentId);
+    if (!row) return;
+    row.status = "paid"; row.paid_at = new Date().toISOString().slice(0, 10); row.method = "Manual";
+    save(); render();
+    const open = document.getElementById("ps-sched-body");
+    if (open) open.innerHTML = psScheduleBody(row.unit_id);
+    if (psCloud()) {
+      const r = await SB.from("presell_payments").update({ status: "paid", paid_at: row.paid_at, method: "Manual" }).eq("id", paymentId);
+      if (r.error) toast("Cloud update failed: " + esc(friendlyErr(r.error.message)), "err");
+    }
+  }
+  async function psGenerateSchedule(unitId, collectInputs) {
+    const u = (state.presellUnits || []).find(x => x.id === unitId);
+    if (!u) return;
+    if (collectInputs) {
+      const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
+      Object.assign(u, {
+        total_contract_price: Number(g("psf-tcp")) || Number(u.price || 0),
+        reservation_fee: Number(g("psf-resfee")) || 0,
+        downpayment_months: Math.max(1, parseInt(g("psf-dpmonths"), 10) || 24),
+        loan_percent: Number(g("psf-loanpct")), 
+        loan_rate_annual: Number(g("psf-rate")),
+        loan_term_years: Math.max(0, parseInt(g("psf-years"), 10) || 15),
+        loan_start_date: g("psf-loanstart") || null
+      });
+      save();
+    }
+    if (!Number(u.total_contract_price || 0) && !Number(u.price)) { toast("Set total contract price first", "err"); return; }
+    if (psCloud()) {
+      try {
+        const r = await SB.rpc("generate_presell_schedule", { p_unit: unitId });
+        if (r.error) throw r.error;
+        const pay = await SB.from("presell_payments").select("*").eq("unit_id", unitId);
+        state.presellPayments = (state.presellPayments || []).filter(x => x.unit_id !== unitId).concat(pay.data || []);
+        toast("Schedule generated (" + (r.data || 0) + " rows added)");
+        render();
+        const body = document.getElementById("ps-sched-body");
+        if (body) body.innerHTML = psScheduleBody(unitId);
+      } catch (e) { toast("Could not generate schedule: " + esc(friendlyErr(e.message)), "err"); }
+      return;
+    }
+    // local generator (demo)
+    const tcp = Number(u.total_contract_price || u.price || 0);
+    if (!state.presellPayments) state.presellPayments = [];
+    state.presellPayments = state.presellPayments.filter(p => !(p.unit_id === unitId && p.status === "pending"));
+    let created = 0;
+    const addRow = (due, label, amount, status) => {
+      if ((state.presellPayments || []).some(p => p.unit_id === unitId && String(p.label || "").toLowerCase() === label.toLowerCase())) return;
+      state.presellPayments.push({ id: "ppay-" + Date.now() + "-" + Math.floor(Math.random() * 999), unit_id: unitId, due_date: due, label: label, amount: amount, status: status || "pending", paid_at: status === "paid" ? due : null, notes: "" });
+      created++;
+    };
+    const resFee = Number(u.reservation_fee || 0);
+    if (!(state.presellPayments.some(p => p.unit_id === unitId && /reservation/i.test(p.label || "")))) addRow(String(u.reserved_at || "").slice(0, 10) || new Date().toISOString().slice(0, 10), "Reservation Fee", resFee, "paid");
+    const months = Math.max(parseInt(u.downpayment_months, 10) || 24, 1);
+    const eqTotal = tcp * (100 - Number(u.loan_percent)) / 100;
+    const eqMonthly = Math.round(eqTotal / months * 100) / 100;
+    let d = u.reserved_at ? new Date(u.reserved_at.slice(0, 10) + "T00:00:00") : new Date();
+    d.setMonth(d.getMonth() + 1);
+    for (let i = 1; i <= months; i++) {
+      const iso = d.toISOString().slice(0, 10);
+      addRow(iso, "Equity " + i + " of " + months, eqMonthly, "pending");
+      d.setMonth(d.getMonth() + 1);
+    }
+    const m = Math.max(parseInt(u.loan_term_years, 10) || 15, 0) * 12;
+    if (Number(u.loan_percent) > 0 && u.loan_start_date && m > 0) {
+      const principal = tcp * Number(u.loan_percent) / 100;
+      const rr = Number(u.loan_rate_annual) / 100 / 12;
+      const amort = Math.round(principal * rr / (1 - Math.pow(1 + rr, -m)) * 100) / 100;
+      const ld = new Date(u.loan_start_date + "T00:00:00");
+      for (let i = 1; i <= m; i++) {
+        const iso = ld.toISOString().slice(0, 10);
+        addRow(iso, "Amortization " + i + " of " + m, amort, "pending");
+        ld.setMonth(ld.getMonth() + 1);
+      }
+    }
+    save(); render(); toast("Schedule generated (" + created + " rows)");
+    const bodyEl = document.getElementById("ps-sched-body");
+    if (bodyEl) bodyEl.innerHTML = psScheduleBody(unitId);
+  }
+
   let psBound = false;
   function psEnsure() {
     if (!Array.isArray(state.presellProjects)) state.presellProjects = [];
     if (!Array.isArray(state.presellUnits)) state.presellUnits = [];
+    if (!Array.isArray(state.presellPayments)) state.presellPayments = [];
   }
   function psCloud() { return !!(SB && currentUser && currentUser.id && !currentUser.demo && currentUser.registrationStatus === "approved"); }
   function seedPresellSample() {
@@ -395,6 +526,16 @@
         mk("psp-seed-2", "SH-01", "", 1, "Commercial", 12500000, "available"),
         mk("psp-seed-2", "SH-02", "", 1, "Commercial", 12500000, "reserved", "L. Tan")
       );
+      if (!Array.isArray(state.presellPayments)) state.presellPayments = [];
+      if (!state.presellPayments.length) {
+        const pd = m => { const x = new Date(); x.setMonth(x.getMonth() + m); return x.toISOString().slice(0, 10); };
+        const mkp = (uid, due, label, amount, status) => ({ id: "ppay-" + label.replace(/[^A-Za-z0-9]+/g, "") + uid.slice(-4), unit_id: uid, due_date: due, label: label, amount: amount, status: status, paid_at: status === "paid" ? due : "", notes: "" });
+        state.presellPayments.push(
+          mkp("psu-psp-seed-1-1206", pd(0), "Equity 1 of 24", 95000, "paid"),
+          mkp("psu-psp-seed-1-1206", pd(1), "Equity 2 of 24", 95000, "pending"),
+          mkp("psu-psp-seed-1-1206", pd(2), "Equity 3 of 24", 95000, "pending")
+        );
+      }
     }
   }
   async function psLoadFromCloud(force) {
@@ -406,6 +547,7 @@
       if (un.error) throw un.error;
       state.presellProjects = pr.data || [];
       state.presellUnits = un.data || [];
+      try { const py = await SB.from("presell_payments").select("*").order("due_date"); if (!py.error) state.presellPayments = py.data || []; } catch (pyErr) {}
       save();
     } catch (e) { toast("Could not load pre-selling inventory: " + esc(friendlyErr(e.message)), "err"); }
   }
@@ -545,17 +687,24 @@
       html += '<div class="card card-pad empty">' + icon("layers", 36) + "<h3>No units match</h3><p>Add units or adjust the filters.</p></div>";
       return html;
     }
-    html += '<div class="card card-pad"><div class="table-wrap"><table class="data"><tr><th>Unit</th><th>Tower</th><th>Floor</th><th>Type</th><th class="num">Price</th><th>Status</th>' + (manage ? "<th>Client</th><th>Actions</th>" : "") + "</tr>";
+    html += '<div class="card card-pad"><div class="table-wrap"><table class="data"><tr><th>Unit</th><th>Tower</th><th>Floor</th><th>Type</th><th class="num">Price</th><th>Status</th>' + "<th>Actions</th>" + (manage ? "<th>Client</th>" : "") + "</tr>";
     units.slice().sort((a, b) => String(a.unit_no).localeCompare(String(b.unit_no))).forEach(u => {
       html += '<tr><td><b>' + esc(u.unit_no) + "</b></td><td>" + esc(u.tower || "-") + "</td><td>" + esc(u.floor == null ? "-" : u.floor) + "</td><td>" + esc(u.unit_type || "-") + "</td><td class=\"num\">" + (Number(u.price) > 0 ? C.money(Number(u.price)) : "-") + "</td><td>" + psStatusBadge(u.status) + "</td>";
       if (manage) {
-        html += "<td>" + esc(u.reserved_for || "-") + "</td><td><div class=\"row\" style=\"gap:6px\">";
-        if (u.status !== "reserved") html += '<button class="btn btn-ghost btn-sm" data-ps-reserve-btn="' + esc(u.id) + '\">Reserve</button>';
-        if (u.status !== "sold") html += '<button class="btn btn-ghost btn-sm" data-ps-mark="' + esc(u.id) + ':sold\">Sold</button>';
-        if (u.status !== "available") html += '<button class="btn btn-ghost btn-sm" data-ps-mark=\"' + esc(u.id) + ':available\">Release</button>';
-        if (roleIs("buyer") && u.status === "available") html += '<button class="btn btn-primary btn-sm" data-ps-self-reserve=\"' + esc(u.id) + '\">Reserve This Unit</button>';
-        html += '<button class=\"icon-btn btn-sm\" data-ps-edit-unit=\"' + esc(u.id) + '\" title=\"Edit\">' + icon("edit", 13) + "</button></div></td>";
+        html += "<td>" + esc(u.reserved_for || "-") + "</td>";
       }
+        html += '<td><div class="row" style="gap:6px">';
+        if (roleIs("buyer") && u.status === "available") {
+          html += '<button class="btn btn-primary btn-sm" data-ps-self-reserve="' + esc(u.id) + '">Reserve This Unit</button>';
+        }
+        if (manage) {
+          html += '<button class="btn btn-ghost btn-sm" data-ps-reserve-btn="' + esc(u.id) + '">Reserve</button>';
+          html += '<button class="btn btn-ghost btn-sm" data-ps-mark="' + esc(u.id) + ':sold">Sold</button>';
+          html += '<button class="btn btn-ghost btn-sm" data-ps-mark="' + esc(u.id) + ':available">Release</button>';
+        html += '<button class=\"icon-btn btn-sm\" data-ps-edit-unit=\"' + esc(u.id) + '\" title=\"Edit\">' + icon("edit", 13) + "</button>";
+        }
+        html += '<button class="btn btn-ghost btn-sm" data-ps-sched="' + esc(u.id) + '">Schedule</button>';
+        html += "</div></td>";
       html += "</tr>";
     });
     html += "</table></div></div>";
@@ -665,6 +814,14 @@
         if (u2) psOpenUnitEditor(u2.project_id, u2.id);
         return;
       }
+      const schedBtn = q("[data-ps-sched]");
+      if (schedBtn) { psOpenSchedule(schedBtn.getAttribute("data-ps-sched")); return; }
+      const genBtn = q("[data-ps-gen]");
+      if (genBtn) { await psGenerateSchedule(genBtn.getAttribute("data-ps-gen"), true); return; }
+      const payBtn = q("[data-ps-pay]");
+      if (payBtn) { await psMarkPaid(payBtn.getAttribute("data-ps-pay")); return; }
+      const closeSched = q("#ps-modal [data-ps-save][data-ps-close]");
+      if (closeSched) { closePsModal(); return; }
       const selfRes = q("[data-ps-self-reserve]");
       if (selfRes) {
         const uid3 = selfRes.getAttribute("data-ps-self-reserve");
