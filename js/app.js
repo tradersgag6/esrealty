@@ -8222,7 +8222,7 @@
       const approved = statusCount("approved");
       const rejected = statusCount("rejected");
       const tab = (["pending", "approved", "rejected", "all"].indexOf(state.usersTab) >= 0) ? state.usersTab : "pending";
-      const srcBadge = currentUser.demo ? '<span class="chip">Demo data</span>' : '<span class="chip">Live Supabase</span>';
+      const srcBadge = currentUser.demo ? '<span class="chip">Demo data</span>' : (roleIs("super-admin") ? '<span class="chip">Live Supabase</span>' : "");
       const shown = tab === "all" ? remoteProfiles : remoteProfiles.filter(u => u.registration_status === tab);
       const tabsHtml = '<div class="tabs">' +
         '<button class="tab' + (tab === "pending" ? " active" : "") + '" data-users-tab="pending">Pending (' + pending + ")</button>" +
@@ -9621,7 +9621,7 @@
     html += '<div class="user-card card card-pad"><div class="row" style="gap:12px;align-items:flex-start">' + leadAvatar(d.name, 44) +
       '<div class="grow"><div class="lead-card-name">' + esc(d.name || d.email) + '</div><div class="dim tiny">' + esc(d.email || "") + '</div>' +
       '<div class="row mt-8" style="gap:6px;flex-wrap:wrap">' + roleBadge + statusChip +
-      (cloud ? '<span class="chip">Live Supabase</span>' : demo ? '<span class="chip">Demo data</span>' : "") + "</div></div></div>";
+      (cloud && roleIs("super-admin") ? '<span class="chip">Live Supabase</span>' : demo ? '<span class="chip">Demo data</span>' : "") + "</div></div></div>";
     html += '<div class="card card-pad mt-16"><h3>Profile</h3>' + fields +
       '<div class="row mt-16" style="gap:8px"><button class="btn btn-primary" data-settings-save>' + icon("check", 15) + " Save Profile</button></div></div>";
     html += '<div class="card card-pad mt-16"><h3>Change password</h3><p class="dim">' + (cloud ? "Your login password is stored securely by Supabase." : "Demo mode: this updates the local demo password.") + '</p>' +
