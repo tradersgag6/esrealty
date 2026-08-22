@@ -9611,9 +9611,10 @@
       '<div class="field"><label>Full name</label><input class="input" id="st-name" type="text" value="' + esc(d.name) + '"></div>' +
       '<div class="field"><label>Email</label><input class="input" id="st-email" type="email" value="' + esc(d.email) + '"' + (cloud ? " disabled" : "") + '><div class="field-hint">' + (cloud ? "Your login email is managed by Supabase and cannot be changed here." : "Demo mode: you can edit your email.") + "</div></div>" +
       '<div class="field"><label>Phone</label><input class="input" id="st-phone" type="text" value="' + esc(d.phone) + '" placeholder="+63 ..."></div>' +
+      (userRole() === "owner" ? "" :
       '<div class="field"><label>Agency / company</label><input class="input" id="st-agency" type="text" value="' + esc(d.agency) + '" placeholder="e.g. Villanueva & Co."></div>' +
       '<div class="field"><label>PRC license no. (brokers)</label><input class="input" id="st-prc" type="text" value="' + esc(d.prc) + '" placeholder="12-digit PRC license"><div class="field-hint">Required for brokers per RA 9646.</div></div>' +
-      '<div class="field"><label>RESA accreditation no. (brokers)</label><input class="input" id="st-resa" type="text" value="' + esc(d.resa) + '" placeholder="e.g. RESA-2024-0881"></div>' +
+      '<div class="field"><label>RESA accreditation no. (brokers)</label><input class="input" id="st-resa" type="text" value="' + esc(d.resa) + '" placeholder="e.g. RESA-2024-0881"></div>') +
       "</div>";
     let html = '<div class="hero"><div><h1>Settings</h1><p>Edit your profile details.</p></div></div>';
     if (currentUser && currentUser.mustChangePassword) html += '<div class="notice-banner password-required">' + icon("shield", 22) + '<div><strong>Password change required.</strong><span>Your password was reset by an administrator. Change the temporary password below before continuing.</span></div></div>';
