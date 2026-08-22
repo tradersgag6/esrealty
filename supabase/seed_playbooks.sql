@@ -1,8 +1,30 @@
 -- Philippine Real Estate Sales Playbook Seed Data
 -- Run AFTER sales_playbooks.sql (table + RLS must exist).
 -- Creates 10 starter playbooks for the Philippine market.
+-- Safe to re-run: upgrades legacy CHECK constraints and skips existing rows.
 
 begin;
+
+-- ── Upgrade constraints on pre-existing tables ─────────────────────────
+-- create table if not exists does NOT update an already-deployed table,
+-- so older deployments keep the legacy domain lists. Drop and re-add.
+alter table public.sales_playbooks drop constraint if exists sales_playbooks_category_valid;
+alter table public.sales_playbooks drop constraint if exists sales_playbooks_stage_valid;
+alter table public.sales_playbooks drop constraint if exists sales_playbooks_property_type_valid;
+
+-- Remove rows using retired values so the new constraints can be applied.
+delete from public.sales_playbooks
+  where category not in ('OFW Buyer', 'First-Time Homebuyer', 'End-User', 'Investor', 'Balikbayan', 'Relocating Expat', 'Corporate Lease', 'Developer Bulk')
+     or sales_stage not in ('Lead Generation', 'Initial Consultation', 'Property Matching', 'Site Viewing', 'Price Negotiation', 'Reservation', 'Contract to Sell', 'Financing', 'Turnover', 'Post-Sale')
+     or property_type not in ('Condominium', 'House & Lot', 'Townhouse', 'Shophouse', 'Lot Only', 'Warehouse', 'Mixed-Use', 'Farm Lot');
+
+alter table public.sales_playbooks add constraint sales_playbooks_category_valid
+  check (category in ('OFW Buyer', 'First-Time Homebuyer', 'End-User', 'Investor', 'Balikbayan', 'Relocating Expat', 'Corporate Lease', 'Developer Bulk'));
+alter table public.sales_playbooks add constraint sales_playbooks_stage_valid
+  check (sales_stage in ('Lead Generation', 'Initial Consultation', 'Property Matching', 'Site Viewing', 'Price Negotiation', 'Reservation', 'Contract to Sell', 'Financing', 'Turnover', 'Post-Sale'));
+alter table public.sales_playbooks add constraint sales_playbooks_property_type_valid
+  check (property_type in ('Condominium', 'House & Lot', 'Townhouse', 'Shophouse', 'Lot Only', 'Warehouse', 'Mixed-Use', 'Farm Lot'));
+-- ────────────────────────────────────────────────────────────────────────
 
 insert into public.sales_playbooks (title,summary,category,sales_stage,property_type,target_customer,status,sections,sort_order) values (
   $$OFW Pre-Selling Condo Guide$$,

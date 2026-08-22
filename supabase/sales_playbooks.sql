@@ -37,6 +37,26 @@ create table if not exists public.sales_playbooks (
     check (jsonb_typeof(sections) = 'object')
 );
 
+-- ── Upgrade constraints on pre-existing tables ─────────────────────────
+-- create table if not exists does NOT update an already-deployed table,
+-- so older deployments keep the legacy domain lists. Drop and re-add.
+alter table public.sales_playbooks drop constraint if exists sales_playbooks_category_valid;
+alter table public.sales_playbooks drop constraint if exists sales_playbooks_stage_valid;
+alter table public.sales_playbooks drop constraint if exists sales_playbooks_property_type_valid;
+
+delete from public.sales_playbooks
+  where category not in ('OFW Buyer', 'First-Time Homebuyer', 'End-User', 'Investor', 'Balikbayan', 'Relocating Expat', 'Corporate Lease', 'Developer Bulk')
+     or sales_stage not in ('Lead Generation', 'Initial Consultation', 'Property Matching', 'Site Viewing', 'Price Negotiation', 'Reservation', 'Contract to Sell', 'Financing', 'Turnover', 'Post-Sale')
+     or property_type not in ('Condominium', 'House & Lot', 'Townhouse', 'Shophouse', 'Lot Only', 'Warehouse', 'Mixed-Use', 'Farm Lot');
+
+alter table public.sales_playbooks add constraint sales_playbooks_category_valid
+  check (category in ('OFW Buyer', 'First-Time Homebuyer', 'End-User', 'Investor', 'Balikbayan', 'Relocating Expat', 'Corporate Lease', 'Developer Bulk'));
+alter table public.sales_playbooks add constraint sales_playbooks_stage_valid
+  check (sales_stage in ('Lead Generation', 'Initial Consultation', 'Property Matching', 'Site Viewing', 'Price Negotiation', 'Reservation', 'Contract to Sell', 'Financing', 'Turnover', 'Post-Sale'));
+alter table public.sales_playbooks add constraint sales_playbooks_property_type_valid
+  check (property_type in ('Condominium', 'House & Lot', 'Townhouse', 'Shophouse', 'Lot Only', 'Warehouse', 'Mixed-Use', 'Farm Lot'));
+-- ────────────────────────────────────────────────────────────────────────
+
 create index if not exists sales_playbooks_status_updated_idx
   on public.sales_playbooks (status, updated_at desc);
 
