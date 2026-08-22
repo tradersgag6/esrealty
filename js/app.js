@@ -348,7 +348,9 @@
     throw new Error("Your registration is " + status + ".");
   }
   function firstAllowedView() {
-    if (currentUser && (currentUser.role === "owner" || currentUser.role === "tenant") && navAllowed("pms")) return "pms";
+    if (currentUser && currentUser.role === "owner" && navAllowed("pms")) return "pms";
+    if (currentUser && currentUser.role === "tenant" && navAllowed("pms")) return "pms";
+    if (currentUser && currentUser.role === "buyer" && navAllowed("portal")) return "portal";
     const views = ["dashboard", "wizard", "deal", "appraisal", "market", "leads", "listings", "portfolio", "pms", "assistant", "reports", "transactions", "financing", "playbook", "users", "admin", "settings"];
     return views.find(navAllowed) || "listings";
   }
@@ -468,7 +470,7 @@
     if (!u) return;
     psModal("Reserve Unit " + u.unit_no,
       psField("Client name *", psText("psf-res-name", u.reserved_for || "")) +
-      psField("Contact (phone / email)", psText("psf-res-contact", "")),
+      psField("Client account email (optional - links their Buyer Portal)", psText("psf-res-email", "", "buyer@email.com")),
       "Reserve Unit");
     const saveBtn = document.querySelector("#ps-modal [data-ps-save]");
     if (saveBtn) saveBtn.setAttribute("data-ps-reserve", unitId);
@@ -551,6 +553,7 @@
         if (u.status !== "reserved") html += '<button class="btn btn-ghost btn-sm" data-ps-reserve-btn="' + esc(u.id) + '\">Reserve</button>';
         if (u.status !== "sold") html += '<button class="btn btn-ghost btn-sm" data-ps-mark="' + esc(u.id) + ':sold\">Sold</button>';
         if (u.status !== "available") html += '<button class="btn btn-ghost btn-sm" data-ps-mark=\"' + esc(u.id) + ':available\">Release</button>';
+        if (roleIs("buyer") && u.status === "available") html += '<button class="btn btn-primary btn-sm" data-ps-self-reserve=\"' + esc(u.id) + '\">Reserve This Unit</button>';
         html += '<button class=\"icon-btn btn-sm\" data-ps-edit-unit=\"' + esc(u.id) + '\" title=\"Edit\">' + icon("edit", 13) + "</button></div></td>";
       }
       html += "</tr>";
@@ -595,11 +598,20 @@
     }
     save(); render();
   }
-  async function psSetUnitStatus(unitId, status, resName, resContact) {
+  async function psSetUnitStatusForBuyer(unitId) {
+    if (!currentUser || !currentUser.id) { toast("Sign in with your ES Realty account first", "err"); return; }
+    const u = (state.presellUnits || []).find(x => x.id === unitId);
+    if (!u || u.status !== "available") return;
+    const patch = { status: "reserved", reserved_for: (currentUser.name || currentUser.email || "Buyer"), reserved_by: currentUser.id, reserved_at: new Date().toISOString(), client_email: String(currentUser.email || "").toLowerCase() };
+    Object.assign(u, patch); u.reserved_at = patch.reserved_at;
+    save(); render(); toast("Unit reserved! Our team will contact you to complete the reservation agreement.");
+    if (psCloud()) { const r = await SB.from("presell_units").update(patch).eq("id", unitId); if (r.error) toast("Cloud update failed: " + esc(friendlyErr(r.error.message)), "err"); }
+  }
+  async function psSetUnitStatus(unitId, status, resName, resContact, resEmail) {
     const u = (state.presellUnits || []).find(x => x.id === unitId);
     if (!u) return;
     const patch = { status: status };
-    if (status === "reserved") { u.reserved_for = resName || ""; u.reserved_at = new Date().toISOString(); patch.reserved_for = u.reserved_for; patch.reserved_at = u.reserved_at; }
+    if (status === "reserved") { u.reserved_for = resName || ""; u.reserved_at = new Date().toISOString(); u.client_email = (resEmail || "").toLowerCase(); patch.reserved_for = u.reserved_for; patch.reserved_at = u.reserved_at; patch.client_email = u.client_email; patch.reserved_by = null; }
     if (status === "available") { u.reserved_for = ""; u.reserved_at = null; patch.reserved_for = ""; patch.reserved_at = null; }
     if (status === "sold" && !u.reserved_for && resName) { u.reserved_for = resName; patch.reserved_for = resName; }
     u.status = status;
@@ -623,7 +635,8 @@
         const ct = document.getElementById("psf-res-contact");
         const uid2 = doReserve.getAttribute("data-ps-reserve");
         closePsModal();
-        await psSetUnitStatus(uid2, "reserved", nm.value.trim(), ct ? ct.value.trim() : "");
+        const em2 = document.getElementById("psf-res-email");
+        await psSetUnitStatus(uid2, "reserved", nm.value.trim(), ct ? ct.value.trim() : "", em2 ? em2.value.trim().toLowerCase() : "");
         return;
       }
       const newProj = q("[data-ps-new-project]");
@@ -652,6 +665,13 @@
         if (u2) psOpenUnitEditor(u2.project_id, u2.id);
         return;
       }
+      const selfRes = q("[data-ps-self-reserve]");
+      if (selfRes) {
+        const uid3 = selfRes.getAttribute("data-ps-self-reserve");
+        if (!confirm("Reserve this unit under your account?")) return;
+        await psSetUnitStatusForBuyer(uid3);
+        return;
+      }
       const reserveBtn = q("[data-ps-reserve-btn]");
       if (reserveBtn) { psOpenReserve(reserveBtn.getAttribute("data-ps-reserve-btn")); return; }
       const mark = q("[data-ps-mark]");
@@ -675,6 +695,98 @@
     document.addEventListener("change", e => {
       if (e.target && e.target.id === "ps-sf") { state.psStatusFilter = e.target.value; render(); }
     });
+  }
+
+  /* ================= BUYER PORTAL ================= */
+  let portalLoadedKey = "";
+  function portalIsMe(u) { return currentUser && currentUser.email && String(u.client_email || "").toLowerCase() === String(currentUser.email).toLowerCase(); }
+  function seedPortalSample() {
+    psEnsure();
+    if (!state.presellProjects.some(p => p.id === "psp-portal")) {
+      state.presellProjects.push({ id: "psp-portal", name: "Solstice Residences", developer: "Villanueva Land Corp.", location: "Bacoor, Cavite", lts_no: "LTS-0324-001", turnover_date: "2027-12-31", description: "", status: "active" });
+      state.presellUnits.push({ id: "psu-portal-1", project_id: "psp-portal", unit_no: "1206", tower: "A", floor: 12, unit_type: "Studio", price: 2850000, status: "reserved", reserved_for: (currentUser ? currentUser.name : "") || "You", client_email: (currentUser ? currentUser.email : "").toLowerCase(), reserved_at: new Date().toISOString(), notes: "" });
+    }
+    if (!Array.isArray(state.portalInquiries)) state.portalInquiries = [
+      { id: "inq-seed-1", title: "2BR Condo in Makati", status: "contacted", created_at: new Date(Date.now() - 3 * 86400000).toISOString() },
+      { id: "inq-seed-2", title: "House & Lot in Cavite", status: "new", created_at: new Date(Date.now() - 1 * 86400000).toISOString() }
+    ];
+    if (!Array.isArray(state.portalSaved)) state.portalSaved = [
+      { id: "sv-seed-1", title: "Shophouse in Davao", price: 12500000, city: "Davao City" }
+    ];
+  }
+  async function loadBuyerPortal(force) {
+    if (!currentUser) return;
+    const key = currentUser.id || currentUser.email;
+    if (!force && portalLoadedKey === key) return;
+    portalLoadedKey = key;
+    if (!SB || !currentUser.id || currentUser.demo) { seedPortalSample(); return; }
+    try {
+      psEnsure();
+      const units = await SB.from("presell_units").select("*").eq("reserved_by", currentUser.id).order("reserved_at", { ascending: false });
+      if (!units.error && Array.isArray(units.data)) state.presellUnits = (state.presellUnits || []).filter(x => x.reserved_by !== currentUser.id).concat(units.data);
+      const emailMatch = await SB.from("presell_units").select("*").ilike("client_email", String(currentUser.email || "#").toLowerCase());
+      if (!emailMatch.error && Array.isArray(emailMatch.data)) {
+        emailMatch.data.forEach(u => { if (!(state.presellUnits || []).some(x => x.id === u.id)) (state.presellUnits = state.presellUnits || []).push(u); });
+      }
+      const inq = await SB.from("listing_inquiries").select("id,listing_id,full_name,status,created_at").eq("user_id", currentUser.id).order("created_at", { ascending: false }).limit(10);
+      state.portalInquiries = inq.error ? [] : (inq.data || []).map(r => ({ id: r.id, listingId: r.listing_id, status: r.status, created_at: r.created_at, title: r.listing_id }));
+      const saved = await SB.from("saved_listings").select("listing_id, created_at, shared_listings(title, price, city)").eq("user_id", currentUser.id).order("created_at", { ascending: false }).limit(12);
+      state.portalSaved = saved.error ? [] : (saved.data || []).map(r => ({ id: r.listing_id, listingId: r.listing_id, title: r.shared_listings ? r.shared_listings.title : r.listing_id, price: r.shared_listings ? r.shared_listings.price : null, city: r.shared_listings ? r.shared_listings.city : "" }));
+    } catch (e) { toast("Could not load your portal: " + esc(friendlyErr(e.message)), "err"); }
+  }
+  function renderBuyerPortal() {
+    if (!currentUser) return '<div class="card card-pad empty">Please sign in.</div>';
+    loadBuyerPortal();
+    psEnsure();
+    const myEmail = String(currentUser.email || "").toLowerCase();
+    const myUnits = (state.presellUnits || []).filter(u => u.reserved_by === currentUser.id || (u.client_email && String(u.client_email).toLowerCase() === myEmail));
+    const inquiries = Array.isArray(state.portalInquiries) ? state.portalInquiries : [];
+    const savedListings = Array.isArray(state.portalSaved) ? state.portalSaved : [];
+    const totalValue = myUnits.reduce((s, u) => s + Number(u.price || 0), 0);
+    let html = '<div class="hero"><div><h1>My Buyer Portal</h1><p>Your reservations, saved properties, and inquiries in one place.</p></div></div>';
+    html += '<div class="grid grid-4 mb-24">' +
+      kpi("Reserved Units", myUnits.length, "in pre-selling projects", "green", "layers") +
+      kpi("Total Reserved Value", C.money(totalValue), "your future home", "gold", "dollar") +
+      kpi("Saved Properties", savedListings.length, "shortlisted for you", "blue", "star") +
+      kpi("Inquiries", inquiries.length, "sent to brokers", "purple", "chat") + "</div>";
+    html += '<div class="card card-pad mb-24"><h3 class="mb-16">My Reservations</h3>';
+    if (!myUnits.length) {
+      html += '<p class="dim">No reserved units yet. Browse <b>Pre-Selling</b> projects and reserve the unit you love.</p>';
+    } else {
+      html += '<div class="table-wrap"><table class="data"><tr><th>Project</th><th>Unit</th><th>Type</th><th class="num">Price</th><th>Reserved On</th><th>Status</th></tr>';
+      myUnits.forEach(u => {
+        const proj = psProject(u.project_id) || {};
+        html += '<tr><td><b>' + esc(proj.name || "-") + '</b>' + (proj.lts_no ? ' <span class="badge blue">LTS ' + esc(proj.lts_no) + "</span>" : "") + "</td><td>" + esc((u.tower ? u.tower + "-" : "") + (u.unit_no || "")) + "</td><td>" + esc(u.unit_type || "-") + "</td><td class=\"num\">" + C.money(Number(u.price || 0)) + "</td><td>" + esc(String(u.reserved_at || "").slice(0, 10)) + "</td><td>" + psStatusBadge(u.status) + "</td></tr>";
+      });
+      html += "</table></div>";
+    }
+    html += "</div>";
+    html += '<div class="grid grid-2">';
+    html += '<div class="card card-pad"><h3 class="mb-16">My Inquiries</h3>';
+    if (!inquiries.length) {
+      html += '<p class="dim">No inquiries yet. Ask about any listing and it will appear here.</p>';
+    } else {
+      html += '<div class="table-wrap"><table class="data"><tr><th>Property</th><th>Status</th><th>Date</th></tr>';
+      inquiries.forEach(q => {
+        const m = { new: ["New", "blue"], contacted: ["Contacted", "gold"], qualified: ["Qualified", "green"], closed: ["Closed", "red"], spam: ["Spam", "red"] };
+        const c = m[q.status] || [q.status, "blue"];
+        html += '<tr><td><b>' + esc(typeof q.title === "string" && q.title.slice(0, 30) === q.title ? q.title : (q.title || "Listing") ) + "</b></td><td><span class=\"badge " + c[1] + "\">" + esc(c[0]) + "</span></td><td>" + esc(String(q.created_at || "").slice(0, 10)) + "</td></tr>";
+      });
+      html += "</table></div>";
+    }
+    html += "</div>";
+    html += '<div class="card card-pad"><h3 class="mb-16">Saved Properties</h3>';
+    if (!savedListings.length) {
+      html += '<p class="dim">Nothing saved yet. Tap \u2661 Save on any property in Listings.</p>';
+    } else {
+      html += '<div class="table-wrap"><table class="data"><tr><th>Property</th><th>Location</th><th class="num">Price</th></tr>';
+      savedListings.forEach(sv => {
+        html += '<tr><td><b>' + esc(sv.title || sv.id) + "</b></td><td>" + esc(sv.city || "-") + "</td><td class=\"num\">" + (Number(sv.price) > 0 ? C.money(Number(sv.price)) : "-") + "</td></tr>";
+      });
+      html += "</table></div>";
+    }
+    html += "</div></div>";
+    return html;
   }
 
   /* ================= NOTIFICATIONS ================= */
@@ -1305,7 +1417,7 @@
     const main = document.querySelector(".main");
     if (main) main.classList.remove("public-main");
     hideAuth();
-    const title = { dashboard: "Dashboard", wizard: "New Investment", deal: "Deal Analysis", portfolio: "Portfolio", pms: "Property Management", assistant: "AI Assistant", reports: "Reports", appraisal: "Appraisal", market: "Market Scan", listings: "Listings", leads: "CRM / Leads", transactions: "Transactions", financing: "Financing", presell: "Pre-Selling", playbook: "Sales Playbook", users: "Users & Access", admin: "Brokerage", settings: "Settings" };
+    const title = { dashboard: "Dashboard", wizard: "New Investment", deal: "Deal Analysis", portfolio: "Portfolio", pms: "Property Management", assistant: "AI Assistant", reports: "Reports", appraisal: "Appraisal", market: "Market Scan", listings: "Listings", leads: "CRM / Leads", transactions: "Transactions", financing: "Financing", presell: "Pre-Selling", portal: "Buyer Portal", playbook: "Sales Playbook", users: "Users & Access", admin: "Brokerage", settings: "Settings" };
     $("#topbar-title").textContent = (lang === "fil" ? (FIL_TITLES[state.view] || title[state.view]) : title[state.view]) || "ES Realty";
     $$("#nav .nav-item").forEach(b => b.classList.toggle("active", b.getAttribute("data-view") === state.view));
     $$("#nav .nav-item").forEach(b => {
@@ -1342,7 +1454,7 @@
     if (languageToggle) { languageToggle.textContent = lang === "fil" ? "FIL" : "EN"; languageToggle.title = lang === "fil" ? "Switch to English" : "Lumipat sa Filipino"; }
     const content = $("#content");
     destroyMapPickers();
-    const map = { dashboard: renderDashboard, wizard: renderWizard, deal: renderDeal, portfolio: renderPortfolio, pms: renderPMS, assistant: renderAssistant, reports: renderReports, appraisal: renderAppraisal, market: renderMarketScan, listings: renderListings, leads: renderLeads, transactions: renderTransactions, financing: renderFinancing, presell: renderPresell, playbook: renderPlaybook, users: renderUsers, admin: renderAdmin, settings: renderSettings };
+    const map = { dashboard: renderDashboard, wizard: renderWizard, deal: renderDeal, portfolio: renderPortfolio, pms: renderPMS, assistant: renderAssistant, reports: renderReports, appraisal: renderAppraisal, market: renderMarketScan, listings: renderListings, leads: renderLeads, transactions: renderTransactions, financing: renderFinancing, presell: renderPresell, portal: renderBuyerPortal, playbook: renderPlaybook, users: renderUsers, admin: renderAdmin, settings: renderSettings };
     content.innerHTML = map[state.view] ? map[state.view]() : "";
     updateDealPicker();
     fillIcons();
@@ -1677,6 +1789,7 @@
       saveUser(u);
       remoteProfiles = [];
       remoteProfilesLoaded = false;
+      if (!navAllowed(state.view)) applyPostLoginView();
       toast("Test login — welcome <b>" + esc(u.name) + "</b>");
       render();
     });
@@ -8344,12 +8457,12 @@
     "super-admin": ["*"],
     broker: ["dashboard.view", "presell.view", "appraisal.view", "market.view", "leads.view", "leads.manage", "listings.view", "listings.manage", "transactions.view", "transactions.manage", "financing.view", "financing.manage", "assistant.view", "brokerage.view", "commission.manage", "payout.approve", "inventory.view", "agents.supervise", "settings.view"],
     agent: ["dashboard.view", "presell.view", "leads.view", "leads.manage", "listings.view", "listings.manage", "transactions.view", "transactions.manage", "financing.view", "financing.manage", "assistant.view", "settings.view"],
-    buyer: ["dashboard.view", "presell.view", "listings.view", "financing.view", "assistant.view", "reports.view", "settings.view"],
+    buyer: ["presell.view", "buyer.portal.view", "listings.view", "financing.view", "assistant.view", "reports.view", "settings.view"],
     seller: ["dashboard.view", "presell.view", "listings.view", "financing.view", "assistant.view", "reports.view", "settings.view"],
     owner: ["pms.view", "settings.view"],
     tenant: ["pms.view", "settings.view"]
   };
-  const VIEW_CAPABILITY = { dashboard: "dashboard.view", wizard: "investments.manage", deal: "investments.manage", appraisal: "appraisal.view", market: "market.view", leads: "leads.view", listings: "listings.view", transactions: "transactions.view", financing: "financing.view", portfolio: "portfolio.view", presell: "presell.view", pms: "pms.view", assistant: "assistant.view", reports: "reports.view", playbook: "playbook.manage", users: "users.manage", admin: "brokerage.view", settings: "settings.view" };
+  const VIEW_CAPABILITY = { dashboard: "dashboard.view", wizard: "investments.manage", deal: "investments.manage", appraisal: "appraisal.view", market: "market.view", leads: "leads.view", listings: "listings.view", transactions: "transactions.view", financing: "financing.view", portfolio: "portfolio.view", presell: "presell.view", portal: "buyer.portal.view", pms: "pms.view", assistant: "assistant.view", reports: "reports.view", playbook: "playbook.manage", users: "users.manage", admin: "brokerage.view", settings: "settings.view" };
   function can(capability) {
     const caps = ROLE_CAPABILITIES[userRole()] || [];
     return caps.indexOf("*") >= 0 || caps.indexOf(capability) >= 0;
