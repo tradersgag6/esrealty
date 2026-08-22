@@ -4581,6 +4581,12 @@
     const payIds = leases.map(l => l.id);
     const payments = pmsActivePayments().filter(p => payIds.indexOf(p.lease_id) !== -1);
     const active = leases.filter(l => l.status === "active");
+    const myExpenses = pmsActiveExpenses().filter(e => propIds.indexOf(e.property_id) !== -1);
+    const totalExpenses = myExpenses.reduce((s, e) => s + C.num(e.amount, 0), 0);
+    const myMaint = pmsActiveMaintenance().filter(m => propIds.indexOf(m.property_id) !== -1);
+    const openMaint = myMaint.filter(m => m.status !== "completed");
+    const openMaintCost = openMaint.reduce((s, m) => s + C.num(m.cost, 0), 0);
+    const myDocs = pmsActiveDocuments().filter(d => propIds.indexOf(d.property_id) !== -1);
     const due = pmsPaySum(payments, ["pending", "late"]);
     const paid = pmsPaySum(payments, ["paid"]);
     html += '<div class="grid grid-4 mb-24">' +
@@ -4593,6 +4599,12 @@
       kpi("Arrears", C.money(due), "pending + late", due > 0 ? "red" : "green", "trending") +
       kpi("Owner", esc(owner.name || "—").slice(0, 18), esc(owner.email || ""), "purple", "star") +
       kpi("Bank", esc(owner.bank || "—"), esc(owner.account_number || ""), "gold", "credit-card") + '</div>';
+    const netPosition = paid - totalExpenses;
+    html += '<div class="grid grid-4 mb-24">' +
+      kpi("Total Expenses", C.money(totalExpenses), "all-time, your properties", totalExpenses > 0 ? "red" : "green", "dollar") +
+      kpi("Open Work Orders", openMaint.length, openMaintCost > 0 ? C.money(openMaintCost) + " est. cost" : "none in progress", openMaint.length ? "gold" : "green", "layers") +
+      kpi("Documents", myDocs.length, myDocs.length === 1 ? "document on file" : "documents on file", "blue", "doc") +
+      kpi("Net Position", C.money(netPosition), "collected minus expenses", netPosition >= 0 ? "green" : "red", "trending") + '</div>';
     html += '<div class="card card-pad mb-24"><h3 class="mb-16">Your Properties</h3>';
     if (!myProps.length) {
       html += '<p class="dim">No properties on file for your account.</p>';
@@ -4635,6 +4647,44 @@
           '<td>' + (proof
             ? '<a href="' + esc(proof) + '" target="_blank" rel="noopener" title="' + esc(p.proofName || "View proof") + '"><img src="' + esc(proof) + '" alt="proof" style="width:44px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--stroke)"></a>'
             : '<span class="dim">—</span>') + '</td></tr>';
+      });
+      html += '</table></div>';
+    }
+    html += '</div>';
+    const myExpensesSorted = myExpenses.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+    html += '<div class="card card-pad mb-24"><h3 class="mb-16">Expense History</h3>';
+    if (!myExpenses.length) {
+      html += '<p class="dim">No expenses recorded for your properties.</p>';
+    } else {
+      html += '<div class="table-wrap"><table class="data"><tr><th>Date</th><th>Property</th><th>Category</th><th>Description</th><th class="num">Amount</th></tr>';
+      myExpensesSorted.forEach(e => {
+        html += '<tr><td>' + esc(String(e.date || "").slice(0, 10)) + '</td><td>' + esc(pmsPropertyTitle(e.property_id)) + '</td><td>' + esc(e.category || "-") + '</td><td>' + esc(e.description || "-") + '</td><td class="num">' + C.money(C.num(e.amount, 0)) + '</td></tr>';
+      });
+      html += '<tr><td colspan="4"><b>Total Expenses</b></td><td class="num"><b>' + C.money(totalExpenses) + "</b></td></tr>";
+      html += '</table></div>';
+    }
+    html += '</div>';
+    const myMaintSorted = myMaint.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+    html += '<div class="card card-pad mb-24"><h3 class="mb-16">Maintenance</h3>';
+    if (!myMaint.length) {
+      html += '<p class="dim">No work orders on your properties yet.</p>';
+    } else {
+      html += '<div class="table-wrap"><table class="data"><tr><th>Date</th><th>Work Order</th><th>Property / Unit</th><th>Status</th><th class="num">Cost</th></tr>';
+      myMaintSorted.forEach(m => {
+        const sc = MAINT_STATUSES.find(x => x.value === m.status);
+        html += '<tr><td>' + esc(String(m.date || "").slice(0, 10)) + '</td><td><b>' + esc(m.title || "-") + '</b>' + (m.vendor ? '<div class="dim tiny">' + esc(m.vendor) + '</div>' : "") + '</td><td>' + esc(pmsPropertyTitle(m.property_id)) + (m.unit_id ? ' <span class="dim tiny">' + esc(pmsUnitName(m.unit_id)) + '</span>' : "") + '</td><td>' + pmsStatusBadge(sc, sc ? sc.label : (m.status || "-")) + '</td><td class="num">' + (C.num(m.cost, 0) > 0 ? C.money(C.num(m.cost, 0)) : "-") + '</td></tr>';
+      });
+      html += '</table></div>';
+    }
+    html += '</div>';
+    const myDocsSorted = myDocs.slice().sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+    html += '<div class="card card-pad"><h3 class="mb-16">Documents</h3>';
+    if (!myDocs.length) {
+      html += '<p class="dim">No documents on file for your properties.</p>';
+    } else {
+      html += '<div class="table-wrap"><table class="data"><tr><th>Name</th><th>Type</th><th>Category</th><th>Property / Unit</th><th class="num">Date</th><th>Notes</th></tr>';
+      myDocsSorted.forEach(d => {
+        html += '<tr><td><b>' + esc(d.name || "-") + '</b></td><td>' + esc(d.type || "-") + '</td><td>' + esc(d.category || "-") + '</td><td>' + esc(pmsPropertyTitle(d.property_id)) + (d.unit_id ? ' <span class="dim tiny">' + esc(pmsUnitName(d.unit_id)) + '</span>' : "") + '</td><td class="num">' + esc(String(d.date || "").slice(0, 10)) + '</td><td>' + esc(d.notes || "") + '</td></tr>';
       });
       html += '</table></div>';
     }
