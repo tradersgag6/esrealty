@@ -7625,7 +7625,12 @@
       render();
     } catch (error) {
       if (btn) btn.disabled = false;
-      toast("Could not load starter playbooks: " + esc(friendlyErr(error.message)), "err");
+      const msg = String(error.message || error || "");
+      if (/23514|check constraint/i.test(msg)) {
+        toast("Your database still has legacy playbook rules. Run supabase/fix_playbook_constraints.sql once in the Supabase SQL Editor, then click Load starter playbooks again.", "err");
+      } else {
+        toast("Could not load starter playbooks: " + esc(friendlyErr(error.message)), "err");
+      }
     }
   }
   function blankPlaybookSections() {
