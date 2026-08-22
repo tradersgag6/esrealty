@@ -20,6 +20,7 @@ module.exports = async function (req, res) {
   }
   try {
     const payload = await runMarketScan(req.query || {});
+    res.setHeader("Cache-Control", "public, s-maxage=900, stale-while-revalidate=300");
     res.status(200).json(payload);
   } catch (err) {
     res.status(500).json({ ok: false, error: String(err && err.message || err) });

@@ -2690,7 +2690,7 @@
     try { html = dealSummaryReportHTML(state.current); }
     catch (e) {
       root.innerHTML = "";
-      toast("Could not build the deal summary: " + (e.message || e), "err");
+      toast("Could not build the deal summary: " + esc(e.message || String(e)), "err");
       return;
     }
     root.innerHTML = html;
@@ -4788,7 +4788,7 @@
     ov.className = "modal-overlay";
     ov.id = "pms-modal";
     if (editId) ov.setAttribute("data-edit-id", editId);
-    ov.innerHTML = '<div class="modal-card"><div class="modal-head"><h3>' + title + '</h3><button class="icon-btn" data-pms-cancel title="Close">&times;</button></div>' +
+    ov.innerHTML = '<div class="modal-card"><div class="modal-head"><h3>' + esc(title) + '</h3><button class="icon-btn" data-pms-cancel title="Close">&times;</button></div>' +
       '<div class="modal-body">' + body + '</div>' +
       '<div class="modal-foot"><button class="btn btn-ghost" data-pms-cancel>Cancel</button><button class="btn btn-primary" data-pms-save="' + saveKind + '">' + icon("check", 15) + " Save</button></div></div>";
     document.body.appendChild(ov);
@@ -4801,7 +4801,7 @@
     const ov = document.createElement("div");
     ov.className = "modal-overlay";
     ov.id = "pms-modal";
-    ov.innerHTML = '<div class="modal-card"><div class="modal-head"><h3>' + title + '</h3><button class="icon-btn" data-pms-cancel title="Close">&times;</button></div>' +
+    ov.innerHTML = '<div class="modal-card"><div class="modal-head"><h3>' + esc(title) + '</h3><button class="icon-btn" data-pms-cancel title="Close">&times;</button></div>' +
       '<div class="modal-body">' + body + '</div>' +
       '<div class="modal-foot"><button class="btn btn-ghost" data-pms-cancel>Close</button><button class="btn btn-primary" data-pms-doprint>' + icon("print", 15) + " Print</button></div></div>";
     document.body.appendChild(ov);
@@ -5224,7 +5224,7 @@
     if (!tenant) return true;
     const leaseCount = (pms().leases || []).filter(l => l.tenant_id === tenant.id && l.archived !== true).length;
     if (!leaseCount) return true;
-    toast("Cannot delete tenant. " + leaseCount + " " + (leaseCount === 1 ? "lease" : "leases") + " on file for " + (tenant.name || tenant.email) + ".", "err");
+    toast("Cannot delete tenant. " + leaseCount + " " + (leaseCount === 1 ? "lease" : "leases") + " on file for " + esc(tenant.name || tenant.email) + ".", "err");
     return false;
   }
 
@@ -5512,7 +5512,7 @@
     const id = $("#pms-modal").getAttribute("data-edit-id") || null;
     const em = String(email).toLowerCase();
     const duplicate = (pms().tenants || []).find(t => t.id !== id && String(t.email || "").trim().toLowerCase() === em);
-    if (duplicate) { toast("Email already used by tenant " + (duplicate.name || duplicate.email) + " — each tenant needs a unique email", "err"); return; }
+    if (duplicate) { toast("Email already used by tenant " + esc(duplicate.name || duplicate.email) + " — each tenant needs a unique email", "err"); return; }
     const current = id ? (pms().tenants || []).find(t => t.id === id) : null;
     const saveButton = $('[data-pms-save="tenant"]');
     if (saveButton) { saveButton.disabled = true; saveButton.textContent = "Checking email..."; }

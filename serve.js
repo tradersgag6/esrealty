@@ -25,7 +25,8 @@ const server = http.createServer((req, res) => {
     let urlPath = decodeURIComponent((req.url || "/").split("?")[0]);
     if (urlPath.endsWith("/")) urlPath += "index.html";
     const filePath = path.normalize(path.join(ROOT, urlPath));
-    if (!filePath.startsWith(ROOT)) {
+    const rootWithSep = ROOT.endsWith(path.sep) ? ROOT : ROOT + path.sep;
+    if (filePath !== ROOT && !filePath.startsWith(rootWithSep)) {
       res.writeHead(403);
       return res.end("Forbidden");
     }
@@ -49,4 +50,4 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, () => console.log("ES Realty running at http://localhost:" + PORT));
+server.listen(PORT, "127.0.0.1", () => console.log("ES Realty running at http://localhost:" + PORT));
