@@ -10,12 +10,30 @@
   /* Supabase loads lazily (async) so it may not exist yet at parse time.
    * SB stays live-bound: picked up immediately or as soon as the client lands. */
   let SB = window.ESREALTY_SUPABASE || null;
+  let sbReadyResolve = null;
+  const sbReadyPromise = new Promise(function (resolve) { sbReadyResolve = resolve; });
+  function bindSb() {
+    if (!SB && window.ESREALTY_SUPABASE) {
+      SB = window.ESREALTY_SUPABASE;
+      if (sbReadyResolve) { const r = sbReadyResolve; sbReadyResolve = null; r(SB); }
+      return true;
+    }
+    return false;
+  }
+  bindSb();
   if (!SB) {
     let sbTries = 0;
     const sbTimer = setInterval(function () {
-      if (window.ESREALTY_SUPABASE) { SB = window.ESREALTY_SUPABASE; clearInterval(sbTimer); }
-      else if (++sbTries > 60) clearInterval(sbTimer);
+      if (bindSb() || ++sbTries > 90) clearInterval(sbTimer);
     }, 200);
+  }
+  /* Resolves true once the lazily-loaded client is bound; false on timeout. */
+  function sbUp(timeoutMs) {
+    if (SB) return Promise.resolve(true);
+    return Promise.race([
+      sbReadyPromise.then(function () { return true; }),
+      new Promise(function (resolve) { setTimeout(function () { resolve(false); }, timeoutMs || 12000); })
+    ]);
   }
   const LISTINGS_API = window.ESREALTY_LISTINGS_API;
   const IS_LOCAL_DEV = ["localhost", "127.0.0.1"].indexOf(window.location.hostname) !== -1;
@@ -351,7 +369,8 @@
     } catch (e) { toast("Signed in, but the property could not be saved: " + esc(friendlyErr(e.message)), "err"); }
   }
   async function restoreSupabaseSession() {
-    if (!SB) { toast("Supabase client could not load", "err"); return; }
+    if (!(await sbUp())) return;
+    if (!SB) return;
     const { data: sessionData, error: sessionError } = await SB.auth.getSession();
     if (sessionError || !sessionData.session) return;
     currentUser = await loadSupabaseProfile(sessionData.session.user);
@@ -1275,8 +1294,10 @@
     });
   }
   let authStateBound = false;
-  function bindAuthState() {
-    if (authStateBound || !SB || !SB.auth || !SB.auth.onAuthStateChange) return;
+  async function bindAuthState() {
+    if (authStateBound) return;
+    if (!(await sbUp()) || !SB || !SB.auth || !SB.auth.onAuthStateChange) return;
+    if (authStateBound) return;
     authStateBound = true;
     SB.auth.onAuthStateChange(event => {
       if (event !== "SIGNED_OUT" || !currentUser) return;
@@ -9911,7 +9932,7 @@
     currentUser = loadUser();
     if (currentUser && currentUser.role === "admin") { currentUser.role = "super-admin"; saveUser(currentUser); }
     let restoredCloud = false;
-    try { if (SB) { await restoreSupabaseSession(); restoredCloud = !!currentUser; } } catch (e) { toast("Cloud session could not be restored: " + esc(e.message || "Unknown error"), "err"); }
+    try { if (await sbUp(10000)) { await restoreSupabaseSession(); restoredCloud = !!currentUser; } } catch (e) { toast("Cloud session could not be restored: " + esc(e.message || "Unknown error"), "err"); }
     if (!restoredCloud && !currentUser) currentUser = loadUser();
     ensureListings();
     ensureLeads();
