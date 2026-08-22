@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ES Realty — Shophouses for Sale in the Philippines | Live-Work Property Specialists</title>
+<meta name="description" content="Buy or sell a shophouse in the Philippines. ES Realty connects you with verified live-work listings, financing guidance, and direct developer access across CALABARZON, Central Visayas, and beyond.">
+<meta name="author" content="ES Realty">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0A0E14">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ES Realty — AI Real Estate Investment Intelligence">
+<meta property="og:description" content="Analyze Philippine real estate opportunities — from input to recommendation in under 60 seconds. Feasibility, financing, risk, appraisal, and portfolio tools in one app.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com">
+<link rel="preconnect" href="https://mrngaqtbaseewzcsogqi.supabase.co">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"></noscript>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-bg"></div>
+
+  <!-- ===== AUTH OVERLAY ===== -->
+  <div id="auth-screen" class="auth-screen hidden">
+    <div class="auth-card">
+      <button type="button" class="auth-close" id="auth-close" aria-label="Close sign in">&times;</button>
+      <div class="brand-row">
+        <div class="brand-mark">ES</div>
+        <div class="brand-text">
+          <div class="brand-name">ES Realty</div>
+          <div class="brand-sub">Investment Intelligence</div>
+        </div>
+      </div>
+      <h2 id="auth-title">Sign in to ES Realty</h2>
+      <p class="auth-sub">Analyze Philippine real estate opportunities — from input to recommendation in under 60 seconds.</p>
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" id="auth-tab-login">Login</button>
+        <button type="button" class="auth-tab" id="auth-tab-register">Register</button>
+        <button type="button" class="auth-tab" id="auth-tab-forgot">Forgot Password</button>
+      </div>
+      <div class="auth-msg" id="auth-form-msg" role="status"></div>
+      <form id="auth-form" novalidate>
+        <div class="field" id="auth-name-field" style="display:none">
+          <label>Full Name</label>
+          <input class="input" id="auth-name" type="text" placeholder="Juan Dela Cruz" autocomplete="name">
+          <div class="field-err" id="auth-err-name"></div>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input class="input" id="auth-email" type="email" placeholder="you@email.com" autocomplete="username">
+          <div class="field-err" id="auth-err-email"></div>
+        </div>
+        <div class="field" id="auth-pass-field">
+          <label>Password</label>
+          <input class="input" id="auth-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+          <div class="field-err" id="auth-err-pass"></div>
+        </div>
+        <div class="field" id="auth-confirm-field" style="display:none">
+          <label>Confirm Password</label>
+          <input class="input" id="auth-confirm" type="password" placeholder="••••••••" autocomplete="new-password">
+          <div class="field-err" id="auth-err-confirm"></div>
+        </div>
+        <div class="field" id="auth-request-role-field" style="display:none">
+          <label>Requested role <span class="field-hint">(final role is assigned by Admin)</span></label>
+          <select class="input" id="auth-request-role">
+            <option value="">— No preference —</option>
+            <option value="broker">Licensed Broker</option>
+            <option value="agent">Agent</option>
+            <option value="buyer">Buyer / Client</option>
+            <option value="seller">Seller / Developer</option>
+            <option value="owner">Owner</option>
+            <option value="tenant">Tenant</option>
+          </select>
+        </div>
+        <div class="field" id="auth-role-field" style="display:none">
+          <label>Test role (localhost only)</label>
+          <select class="input" id="auth-role">
+            <option value="super-admin">Super Admin</option>
+            <option value="broker">Licensed Broker</option>
+            <option value="agent">Agent</option>
+            <option value="buyer">Buyer / Client</option>
+            <option value="seller">Seller / Developer</option>
+            <option value="owner">Owner</option>
+            <option value="tenant">Tenant</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="auth-submit">Login</button>
+      </form>
+      <div class="auth-links" id="auth-links">
+        <button type="button" class="link-btn" id="auth-forgot">Forgot password?</button>
+      </div>
+      <div class="auth-links" id="auth-back-links" style="display:none">
+        <button type="button" class="link-btn" id="auth-back-login">‹ Back to Login</button>
+      </div>
+      <button type="button" class="btn btn-test btn-block" id="auth-test">
+        <span data-ic="zap"></span> Test Login
+      </button>
+      <p class="auth-note" id="auth-note">Sign in securely with your ES Realty account.</p>
+    </div>
+  </div>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">ES</div>
+      <div class="brand-text">
+        <div class="brand-name">ES Realty</div>
+        <div class="brand-sub">Investment Intelligence</div>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <button class="nav-item active" data-view="dashboard"><span class="nav-ic" data-ic="dashboard"></span>Dashboard</button>
+      <button class="nav-item accent" data-view="wizard"><span class="nav-ic" data-ic="plus"></span>New Investment</button>
+      <div class="nav-section" data-section="ANALYSIS">ANALYSIS</div>
+      <button class="nav-item" data-view="deal"><span class="nav-ic" data-ic="chart"></span>Deal Analysis</button>
+      <button class="nav-item" data-view="appraisal"><span class="nav-ic" data-ic="scale"></span>Appraisal</button>
+      <button class="nav-item" data-view="market"><span class="nav-ic" data-ic="search"></span>Market Scan</button>
+      <div class="nav-section" data-section="WORKSPACE">WORKSPACE</div>
+      <button class="nav-item" data-view="leads"><span class="nav-ic" data-ic="users"></span>CRM / Leads</button>
+      <button class="nav-item" data-view="listings"><span class="nav-ic" data-ic="home"></span>Listings</button>
+      <button class="nav-item" data-view="transactions"><span class="nav-ic" data-ic="file"></span>Transactions</button>
+      <button class="nav-item" data-view="financing"><span class="nav-ic" data-ic="dollar"></span>Financing</button>
+      <button class="nav-item" data-view="portfolio"><span class="nav-ic" data-ic="briefcase"></span>Portfolio</button>
+      <button class="nav-item" data-view="pms"><span class="nav-ic" data-ic="layers"></span>Property Manager</button>
+      <button class="nav-item" data-view="assistant"><span class="nav-ic" data-ic="chat"></span>AI Assistant</button>
+      <button class="nav-item" data-view="reports"><span class="nav-ic" data-ic="file"></span>Reports</button>
+      <div class="nav-section" data-section="BROKERAGE">BROKERAGE</div>
+      <button class="nav-item" data-view="playbook"><span class="nav-ic" data-ic="target"></span>Sales Playbook</button>
+      <button class="nav-item" data-view="users"><span class="nav-ic" data-ic="users"></span>Users &amp; Access</button>
+      <button class="nav-item" data-view="admin"><span class="nav-ic" data-ic="briefcase"></span>Brokerage Admin</button>
+      <div class="nav-section" data-section="ACCOUNT">ACCOUNT</div>
+      <button class="nav-item" data-view="settings"><span class="nav-ic" data-ic="settings"></span>Settings</button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="loan-mini">
+        <div class="loan-mini-head">Portfolio Value</div>
+        <div class="loan-mini-val" id="side-portfolio-value">₱0</div>
+      </div>
+      <div class="user-row">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div class="user-meta">
+          <div class="user-name" id="user-name">Guest</div>
+          <button class="link-btn" id="btn-signout">Sign out</button>
+        </div>
+      </div>
+      <div class="user-role">
+          <div class="role-label" id="user-role-label">Role</div>
+        <select class="input role-select" id="user-role-select">
+          <option value="super-admin">Super Admin</option>
+          <option value="broker">Licensed Broker</option>
+          <option value="agent">Agent</option>
+          <option value="buyer">Buyer / Client</option>
+          <option value="seller">Seller / Developer</option>
+          <option value="owner">Owner</option>
+          <option value="tenant">Tenant</option>
+        </select>
+      </div>
+      <div class="version">ES Realty v2.0</div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menu-btn" title="Toggle menu"><span data-ic="menu"></span></button>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="language-toggle" title="Switch to Filipino">EN</button>
+        <div class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode"><span data-ic="sun"></span></div>
+        <div class="deal-picker" id="deal-picker" title="Current deal">No deal loaded</div>
+        <button class="btn btn-primary" id="tb-new-deal"><span class="ic-sm" data-ic="plus"></span>New Investment</button>
+      </div>
+    </header>
+
+    <div class="content" id="content"></div>
+  </main>
+
+  <!-- ===== PRINT REPORT ===== -->
+  <div id="print-root" class="print-root"></div>
+
+  <!-- ===== TOASTS ===== -->
+  <div class="toasts" id="toasts"></div>
+
+  <noscript>
+    <div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0A0E14;color:#E6EBF2;font-family:sans-serif;padding:24px;text-align:center">
+      <div><h2>ES Realty needs JavaScript</h2><p>Please enable JavaScript in your browser to use the app.</p></div>
+    </div>
+  </noscript>
+
+  <script>window.ESREALTY_LEAFLET = { ensure: function () { if (window.L) return Promise.resolve(); if (!this._p) this._p = new Promise(function (resolve) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "vendor/leaflet/leaflet.css"; document.head.appendChild(l); var s = document.createElement("script"); s.src = "vendor/leaflet/leaflet.js"; s.onload = s.onerror = function () { resolve(); }; document.head.appendChild(s); }); return this._p; } };</script>
+  <script src="vendor/supabase/supabase.js" defer></script>
+  <script src="js/supabase-config.js" defer></script>
+  <script src="js/listings-api.js" defer></script>
+  <script src="js/storefront.js" defer></script>
+  <script src="js/data.js" defer></script>
+  <script src="js/core.js" defer></script>
+  <script src="js/app.js" defer></script>
+</body>
+</html>
