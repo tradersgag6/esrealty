@@ -369,6 +369,314 @@
       toast("Property saved to your dashboard");
     } catch (e) { toast("Signed in, but the property could not be saved: " + esc(friendlyErr(e.message)), "err"); }
   }
+  /* ================= PRE-SELLING INVENTORY ================= */
+  let psBound = false;
+  function psEnsure() {
+    if (!Array.isArray(state.presellProjects)) state.presellProjects = [];
+    if (!Array.isArray(state.presellUnits)) state.presellUnits = [];
+  }
+  function psCloud() { return !!(SB && currentUser && currentUser.id && !currentUser.demo && currentUser.registrationStatus === "approved"); }
+  function seedPresellSample() {
+    psEnsure();
+    const today = new Date();
+    if (!state.presellProjects.length) {
+      state.presellProjects.push({ id: "psp-seed-1", name: "Solstice Residences", developer: "Villanueva Land Corp.", location: "Bacoor, Cavite", lts_no: "LTS-0324-001", turnover_date: "2027-12-31", description: "Mid-rise condo community near CALAX exit.", status: "active" });
+      state.presellProjects.push({ id: "psp-seed-2", name: "Harbor Row Shophouses", developer: "ES Realty Development", location: "Davao City", lts_no: "LTS-0325-014", turnover_date: "2026-12-31", description: "Three-storey commercial shophouse strip.", status: "active" });
+    }
+    if (!state.presellUnits.length) {
+      const mk = (pid, no, tw, fl, ty, pr, st, rf) => ({ id: "psu-" + pid + "-" + no, project_id: pid, unit_no: no, tower: tw, floor: fl, unit_type: ty, price: pr, status: st, reserved_for: rf || "", reserved_at: st === "reserved" ? today.toISOString() : null, notes: "" });
+      state.presellUnits.push(
+        mk("psp-seed-1", "1205", "A", 12, "Studio", 2800000, "sold", "K. Reyes"),
+        mk("psp-seed-1", "1206", "A", 12, "Studio", 2850000, "reserved", "M. Dizon"),
+        mk("psp-seed-1", "1207", "A", 12, "1BR", 4100000, "available"),
+        mk("psp-seed-1", "2101", "B", 10, "2BR", 6300000, "available"),
+        mk("psp-seed-2", "SH-01", "", 1, "Commercial", 12500000, "available"),
+        mk("psp-seed-2", "SH-02", "", 1, "Commercial", 12500000, "reserved", "L. Tan")
+      );
+    }
+  }
+  async function psLoadFromCloud(force) {
+    if (!psCloud()) return;
+    try {
+      const pr = await SB.from("presell_projects").select("*").order("created_at", { ascending: false });
+      if (pr.error) throw pr.error;
+      const un = await SB.from("presell_units").select("*").order("unit_no");
+      if (un.error) throw un.error;
+      state.presellProjects = pr.data || [];
+      state.presellUnits = un.data || [];
+      save();
+    } catch (e) { toast("Could not load pre-selling inventory: " + esc(friendlyErr(e.message)), "err"); }
+  }
+  function psProject(id) { return (state.presellProjects || []).find(p => p.id === id); }
+  function psUnitCounts(pid) {
+    const u = (state.presellUnits || []).filter(x => x.project_id === pid);
+    return { total: u.length, available: u.filter(x => x.status === "available").length, reserved: u.filter(x => x.status === "reserved").length, sold: u.filter(x => x.status === "sold").length };
+  }
+  const PS_UNIT_TYPES = [["Studio", "Studio"], ["1BR", "1-Bedroom"], ["2BR", "2-Bedroom"], ["3BR", "3-Bedroom"], ["Penthouse", "Penthouse"], ["Commercial", "Commercial / Shophouse"]];
+  function psStatusBadge(s) {
+    const m = { available: ["Available", "green"], reserved: ["Reserved", "gold"], sold: ["Sold", "red"], blocked: ["Blocked", "blue"] };
+    const c = m[s] || [s || "-", "blue"];
+    return '<span class="badge ' + c[1] + '">' + esc(c[0]) + "</span>";
+  }
+  function psModal(title, bodyHtml, onSaveLabel) {
+    closePsModal();
+    const ov = document.createElement("div");
+    ov.className = "modal-overlay"; ov.id = "ps-modal";
+    ov.innerHTML = '<div class="modal-card"><div class="modal-head"><h3>' + esc(title) + '</h3><button class="icon-btn" data-ps-cancel title="Close">&times;</button></div><div class="modal-body">' + bodyHtml + '</div><div class="modal-foot"><button class="btn btn-ghost" data-ps-cancel>Cancel</button><button class="btn btn-primary" data-ps-save>' + esc(onSaveLabel || "Save") + "</button></div></div>";
+    document.body.appendChild(ov);
+    ov.addEventListener("click", ev => { if (ev.target === ov) closePsModal(); });
+  }
+  function closePsModal() { const m = document.getElementById("ps-modal"); if (m) m.remove(); }
+  function psField(label, inner) { return '<label class="field"><span>' + esc(label) + "</span>" + inner + "</label>"; }
+  function psText(id, val, ph, type) { return '<input class="input" id="' + id + '" type="' + (type || "text") + '" value="' + esc(val == null ? "" : val) + '" placeholder="' + esc(ph || "") + '">'; }
+  function psSelect(id, opts, cur) {
+    return '<select class="input" id="' + id + '">' + opts.map(o => { const v = Array.isArray(o) ? o[0] : o; const l = Array.isArray(o) ? o[1] : o; return '<option value="' + esc(v) + '"' + (v === cur ? " selected" : "") + ">" + esc(l) + "</option>"; }).join("") + "</select>";
+  }
+  function psOpenProjectEditor(id) {
+    const rec = id ? psProject(id) : null;
+    psModal(rec ? "Edit Project" : "New Pre-Selling Project",
+      '<div class="grid grid-2">' +
+      psField("Project name *", psText("psf-name", rec ? rec.name : "", "e.g. Solstice Residences")) +
+      psField("Developer", psText("psf-dev", rec ? rec.developer : "")) +
+      psField("Location", psText("psf-loc", rec ? rec.location : "", "City, Province")) +
+      psField("DHSUD LTS No.", psText("psf-lts", rec ? rec.lts_no : "", "Required on ads")) +
+      psField("Turnover date", psText("psf-turnover", rec ? rec.turnover_date : "", "YYYY-MM-DD", "date")) +
+      psField("Status", psSelect("psf-status", [["active", "Pre-selling"], ["ready_for_occupancy", "Ready for Occupancy"], ["sold_out", "Sold Out"], ["archived", "Archived"]], rec ? rec.status : "active")) +
+      "</div>" +
+      psField("Description", '<textarea class="input" id="psf-desc" rows="2">' + esc(rec ? rec.description : "") + "</textarea>") ,
+      rec ? "Save Changes" : "Create Project");
+    const saveBtn = document.querySelector("#ps-modal [data-ps-save]");
+    if (saveBtn) saveBtn.setAttribute("data-ps-save-project", id || "");
+  }
+  function psOpenUnitEditor(projectId, id) {
+    const rec = id ? (state.presellUnits || []).find(u => u.id === id) : null;
+    psModal(rec ? "Edit Unit" : "Add Unit",
+      '<div class="grid grid-2">' +
+      psField("Unit no. *", psText("psf-unit-no", rec ? rec.unit_no : "", "e.g. 1205")) +
+      psField("Tower / Building", psText("psf-unit-tower", rec ? rec.tower : "", "e.g. A")) +
+      psField("Floor", psText("psf-unit-floor", rec ? rec.floor : "", "", "number")) +
+      psField("Unit type", psSelect("psf-unit-type", PS_UNIT_TYPES, rec ? rec.unit_type : "")) +
+      psField("Price (PHP)", psText("psf-unit-price", rec ? rec.price : "", "", "number")) +
+      psField("Notes", psText("psf-unit-notes", rec ? rec.notes : "")) +
+      "</div>",
+      rec ? "Save Changes" : "Add Unit");
+    const saveBtn = document.querySelector("#ps-modal [data-ps-save]");
+    if (saveBtn) saveBtn.setAttribute("data-ps-save-unit", (rec ? rec.id : "") + "|" + projectId);
+  }
+  function psOpenReserve(unitId) {
+    const u = (state.presellUnits || []).find(x => x.id === unitId);
+    if (!u) return;
+    psModal("Reserve Unit " + u.unit_no,
+      psField("Client name *", psText("psf-res-name", u.reserved_for || "")) +
+      psField("Contact (phone / email)", psText("psf-res-contact", "")),
+      "Reserve Unit");
+    const saveBtn = document.querySelector("#ps-modal [data-ps-save]");
+    if (saveBtn) saveBtn.setAttribute("data-ps-reserve", unitId);
+  }
+  function psCanManage() { return roleIs("super-admin"); }
+  function renderPresell() {
+    psEnsure();
+    const manage = psCanManage();
+    if (!state.presellProjects.length && !state.presellUnits.length && !psCloud()) seedPresellSample();
+    const pid = state.psProjectId || "";
+    if (pid && !psProject(pid)) state.psProjectId = "";
+    return state.psProjectId ? psDetailView(manage) : psListView(manage);
+  }
+  function psListView(manage) {
+    const active = state.presellProjects.filter(p => p.status !== "archived");
+    const counts = psUnitCountsAll();
+    let html = '<div class="hero"><div><h1>Pre-Selling Projects</h1><p>Inventory matrix for pre-selling developments - track every unit from available to sold.</p></div>' +
+      (manage ? '<div class="actions"><button class="btn btn-primary" data-ps-new-project>' + icon("plus", 15) + " New Project</button></div>" : "") + "</div>";
+    html += '<div class="grid grid-4 mb-24">' +
+      kpi("Projects", active.length, "in pipeline", "green", "briefcase") +
+      kpi("Total Units", counts.total, "across projects", "blue", "layers") +
+      kpi("Available", counts.available, "open for reservation", "green", "check") +
+      kpi("Reserved / Sold", counts.reserved + counts.sold, counts.reserved + " reserved · " + counts.sold + " sold", "gold", "doc") + "</div>";
+    if (!active.length) {
+      html += '<div class="card card-pad empty">' + icon("layers", 40) + "<h3>No pre-selling projects yet</h3><p>Create your first project to start tracking its unit inventory.</p></div>";
+      return html;
+    }
+    html += '<div class="grid grid-2">';
+    active.forEach(p => {
+      const c = counts.byProject[p.id] || { total: 0, available: 0, reserved: 0, sold: 0 };
+      html += '<article class="card card-pad"><div class="row spread"><h3 style="margin:0">' + esc(p.name) + "</h3>" + psStatusBadge(p.status === "sold_out" ? "sold" : p.status === "archived" ? "blocked" : "available") + "</div>" +
+        '<p class="dim tiny mt-8">' + esc(p.developer || "-") + " · " + esc(p.location || "-") + "</p>" +
+        (p.lts_no ? '<p class="tiny mt-4"><span class="badge blue">LTS ' + esc(p.lts_no) + "</span></p>" : "") +
+        '<div class="row mt-8 dim tiny">' + c.total + " units · " + c.available + " available · " + c.reserved + " reserved · " + c.sold + " sold</div>" +
+        '<div class="row mt-16" style="gap:8px"><button class="btn btn-primary btn-sm" data-ps-open="' + esc(p.id) + '\">Open Inventory</button>' +
+        (manage ? '<button class="btn btn-ghost btn-sm" data-ps-edit-project="' + esc(p.id) + '\">Edit</button><button class="btn btn-danger btn-sm" data-ps-archive-project="' + esc(p.id) + '\">Archive</button>' : "") +
+        "</div></article>";
+    });
+    html += "</div>";
+    return html;
+  }
+  function psUnitCountsAll() {
+    const out = { total: 0, available: 0, reserved: 0, sold: 0, byProject: {} };
+    (state.presellUnits || []).forEach(u => {
+      out.total++;
+      if (out[u.status] != null) out[u.status]++;
+      out.byProject[u.project_id] = out.byProject[u.project_id] || { total: 0, available: 0, reserved: 0, sold: 0 };
+      const b = out.byProject[u.project_id];
+      b.total++;
+      if (b[u.status] != null) b[u.status]++;
+    });
+    return out;
+  }
+  function psDetailView(manage) {
+    const proj = psProject(state.psProjectId);
+    if (!proj) return psListView(manage);
+    const q = String(state.psQuery || "").toLowerCase();
+    const sf = state.psStatusFilter || "";
+    let units = (state.presellUnits || []).filter(u => u.project_id === proj.id);
+    if (sf) units = units.filter(u => u.status === sf);
+    if (q) units = units.filter(u => ((u.unit_no || "") + " " + (u.tower || "") + " " + (u.unit_type || "") + " " + (u.reserved_for || "")).toLowerCase().indexOf(q) !== -1);
+    const c = psUnitCounts(proj.id);
+    let html = '<div class="hero"><div><button class="btn btn-ghost btn-sm mb-8" data-ps-back>&larr; All Projects</button><h1>' + esc(proj.name) + "</h1><p>" + esc(proj.developer || "") + (proj.lts_no ? " · LTS " + esc(proj.lts_no) : "") + (proj.turnover_date ? " · Turnover " + esc(String(proj.turnover_date).slice(0, 10)) : "") + "</p></div>" +
+      (manage ? '<div class="actions"><button class="btn btn-primary" data-ps-add-unit="' + esc(proj.id) + '">' + icon("plus", 15) + " Add Unit</button></div>" : "") + "</div>";
+    html += '<div class="grid grid-4 mb-24">' +
+      kpi("Total Units", c.total, "in this project", "blue", "layers") +
+      kpi("Available", c.available, "open for reservation", "green", "check") +
+      kpi("Reserved", c.reserved, "awaiting completion", "gold", "doc") +
+      kpi("Sold", c.sold, "closed units", "red", "dollar") + "</div>";
+    html += '<section class="card pb-filter"><label>Search<input class="input" id="ps-q" value="' + esc(state.psQuery || "") + '" placeholder="Unit, tower, client..."></label><label>Status<select class="input" id="ps-sf">' + psSelect("_x", [["", "All statuses"], ["available", "Available"], ["reserved", "Reserved"], ["sold", "Sold"], ["blocked", "Blocked"]], sf).replace(/^<select[^>]*>|<\/select>$/g, "") + "</select></label></section>";
+    if (!units.length) {
+      html += '<div class="card card-pad empty">' + icon("layers", 36) + "<h3>No units match</h3><p>Add units or adjust the filters.</p></div>";
+      return html;
+    }
+    html += '<div class="card card-pad"><div class="table-wrap"><table class="data"><tr><th>Unit</th><th>Tower</th><th>Floor</th><th>Type</th><th class="num">Price</th><th>Status</th>' + (manage ? "<th>Client</th><th>Actions</th>" : "") + "</tr>";
+    units.slice().sort((a, b) => String(a.unit_no).localeCompare(String(b.unit_no))).forEach(u => {
+      html += '<tr><td><b>' + esc(u.unit_no) + "</b></td><td>" + esc(u.tower || "-") + "</td><td>" + esc(u.floor == null ? "-" : u.floor) + "</td><td>" + esc(u.unit_type || "-") + "</td><td class=\"num\">" + (Number(u.price) > 0 ? C.money(Number(u.price)) : "-") + "</td><td>" + psStatusBadge(u.status) + "</td>";
+      if (manage) {
+        html += "<td>" + esc(u.reserved_for || "-") + "</td><td><div class=\"row\" style=\"gap:6px\">";
+        if (u.status !== "reserved") html += '<button class="btn btn-ghost btn-sm" data-ps-reserve-btn="' + esc(u.id) + '\">Reserve</button>';
+        if (u.status !== "sold") html += '<button class="btn btn-ghost btn-sm" data-ps-mark="' + esc(u.id) + ':sold\">Sold</button>';
+        if (u.status !== "available") html += '<button class="btn btn-ghost btn-sm" data-ps-mark=\"' + esc(u.id) + ':available\">Release</button>';
+        html += '<button class=\"icon-btn btn-sm\" data-ps-edit-unit=\"' + esc(u.id) + '\" title=\"Edit\">' + icon("edit", 13) + "</button></div></td>";
+      }
+      html += "</tr>";
+    });
+    html += "</table></div></div>";
+    return html;
+  }
+  async function psSaveProject(editId) {
+    const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
+    const name = g("psf-name");
+    if (!name) { toast("Project name is required", "err"); return; }
+    const payload = { name: name, developer: g("psf-dev"), location: g("psf-loc"), lts_no: g("psf-lts"), turnover_date: g("psf-turnover") || null, status: g("psf-status") || "active", description: g("psf-desc") };
+    closePsModal();
+    if (editId) {
+      Object.assign(psProject(editId) || {}, payload);
+      if (psCloud()) { const r = await SB.from("presell_projects").update(payload).eq("id", editId); if (r.error) toast("Cloud update failed: " + esc(friendlyErr(r.error.message)), "err"); }
+      toast("Project updated");
+    } else {
+      const rec = Object.assign({ id: "psp-" + Date.now(), created_at: new Date().toISOString() }, payload);
+      state.presellProjects.unshift(rec);
+      if (psCloud()) { delete rec.id; const r = await SB.from("presell_projects").insert(payload).select("*").single(); if (r.error) { toast("Cloud save failed: " + esc(friendlyErr(r.error.message)), "err"); } else { Object.assign(rec, r.data); rec._localId = undefined; } }
+      toast("Project created");
+    }
+    save(); render();
+  }
+  async function psSaveUnit(editId, projectId) {
+    const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
+    const unitNo = g("psf-unit-no");
+    if (!unitNo) { toast("Unit number is required", "err"); return; }
+    const payload = { unit_no: unitNo, tower: g("psf-unit-tower"), floor: g("psf-unit-floor") ? Number(g("psf-unit-floor")) : null, unit_type: g("psf-unit-type"), price: Number(g("psf-unit-price")) || 0, notes: g("psf-unit-notes") };
+    closePsModal();
+    if (editId) {
+      const u = (state.presellUnits || []).find(x => x.id === editId);
+      if (u) Object.assign(u, payload);
+      if (psCloud()) { const r = await SB.from("presell_units").update(payload).eq("id", editId); if (r.error) toast("Cloud update failed: " + esc(friendlyErr(r.error.message)), "err"); }
+      toast("Unit updated");
+    } else {
+      const rec = Object.assign({ id: "psu-" + Date.now(), project_id: projectId, status: "available", reserved_for: "", reserved_at: null }, payload);
+      state.presellUnits.push(rec);
+      if (psCloud()) { const baseId = rec.id; delete rec.id; const r = await SB.from("presell_units").insert(Object.assign({ project_id: projectId }, payload)).select("*").single(); if (r.error) { toast("Cloud save failed: " + esc(friendlyErr(r.error.message)), "err"); rec.id = baseId; } else { Object.assign(rec, r.data); } }
+      toast("Unit added");
+    }
+    save(); render();
+  }
+  async function psSetUnitStatus(unitId, status, resName, resContact) {
+    const u = (state.presellUnits || []).find(x => x.id === unitId);
+    if (!u) return;
+    const patch = { status: status };
+    if (status === "reserved") { u.reserved_for = resName || ""; u.reserved_at = new Date().toISOString(); patch.reserved_for = u.reserved_for; patch.reserved_at = u.reserved_at; }
+    if (status === "available") { u.reserved_for = ""; u.reserved_at = null; patch.reserved_for = ""; patch.reserved_at = null; }
+    if (status === "sold" && !u.reserved_for && resName) { u.reserved_for = resName; patch.reserved_for = resName; }
+    u.status = status;
+    save(); render();
+    if (psCloud()) { const r = await SB.from("presell_units").update(patch).eq("id", unitId); if (r.error) toast("Cloud update failed: " + esc(friendlyErr(r.error.message)), "err"); }
+  }
+  function bindPresellOnce() {
+    if (psBound) return;
+    psBound = true;
+    document.addEventListener("click", async e => {
+      const q = s => e.target.closest(s);
+      if (q("[data-ps-cancel]")) { closePsModal(); return; }
+      const saveProj = q("[data-ps-save-project]");
+      if (saveProj) { await psSaveProject(saveProj.getAttribute("data-ps-save-project") || ""); return; }
+      const saveUnit = q("[data-ps-save-unit]");
+      if (saveUnit) { const parts = (saveUnit.getAttribute("data-ps-save-unit") || "|").split("|"); await psSaveUnit(parts[0], parts[1]); return; }
+      const doReserve = q("[data-ps-reserve]");
+      if (doReserve) {
+        const nm = document.getElementById("psf-res-name");
+        if (!nm || !nm.value.trim()) { toast("Client name is required", "err"); return; }
+        const ct = document.getElementById("psf-res-contact");
+        const uid2 = doReserve.getAttribute("data-ps-reserve");
+        closePsModal();
+        await psSetUnitStatus(uid2, "reserved", nm.value.trim(), ct ? ct.value.trim() : "");
+        return;
+      }
+      const newProj = q("[data-ps-new-project]");
+      if (newProj) { psOpenProjectEditor(""); return; }
+      const editProj = q("[data-ps-edit-project]");
+      if (editProj) { psOpenProjectEditor(editProj.getAttribute("data-ps-edit-project")); return; }
+      const archProj = q("[data-ps-archive-project]");
+      if (archProj) {
+        const pid2 = archProj.getAttribute("data-ps-archive-project");
+        if (!confirm("Archive this project? Its units stay intact.")) return;
+        const pj = psProject(pid2);
+        if (pj) pj.status = "archived";
+        save();
+        if (psCloud()) { const r = await SB.from("presell_projects").update({ status: "archived" }).eq("id", pid2); if (r.error) toast("Cloud update failed", "err"); }
+        toast("Project archived");
+        render(); return;
+      }
+      const openProj = q("[data-ps-open]");
+      if (openProj) { state.psProjectId = openProj.getAttribute("data-ps-open"); state.psQuery = ""; state.psStatusFilter = ""; render(); return; }
+      if (q("[data-ps-back]")) { state.psProjectId = ""; render(); return; }
+      const addUnit = q("[data-ps-add-unit]");
+      if (addUnit) { psOpenUnitEditor(addUnit.getAttribute("data-ps-add-unit"), ""); return; }
+      const editUnit = q("[data-ps-edit-unit]");
+      if (editUnit) {
+        const u2 = (state.presellUnits || []).find(x => x.id === editUnit.getAttribute("data-ps-edit-unit"));
+        if (u2) psOpenUnitEditor(u2.project_id, u2.id);
+        return;
+      }
+      const reserveBtn = q("[data-ps-reserve-btn]");
+      if (reserveBtn) { psOpenReserve(reserveBtn.getAttribute("data-ps-reserve-btn")); return; }
+      const mark = q("[data-ps-mark]");
+      if (mark) {
+        const parts = (mark.getAttribute("data-ps-mark") || ":").split(":");
+        if (parts[1] === "sold") {
+          const u3 = (state.presellUnits || []).find(x => x.id === parts[0]);
+          await psSetUnitStatus(parts[0], "sold", u3 ? u3.reserved_for : "");
+        } else {
+          await psSetUnitStatus(parts[0], parts[1]);
+        }
+        return;
+      }
+    });
+    document.addEventListener("input", e => {
+      if (e.target && e.target.id === "ps-q") {
+        clearTimeout(window.__psQT);
+        window.__psQT = setTimeout(() => { state.psQuery = e.target.value; render(); const el2 = document.getElementById("ps-q"); if (el2) { el2.focus(); el2.setSelectionRange(el2.value.length, el2.value.length); } }, 250);
+      }
+    });
+    document.addEventListener("change", e => {
+      if (e.target && e.target.id === "ps-sf") { state.psStatusFilter = e.target.value; render(); }
+    });
+  }
+
   /* ================= NOTIFICATIONS ================= */
   let notifItems = [];
   let notifChannel = null;
@@ -997,7 +1305,7 @@
     const main = document.querySelector(".main");
     if (main) main.classList.remove("public-main");
     hideAuth();
-    const title = { dashboard: "Dashboard", wizard: "New Investment", deal: "Deal Analysis", portfolio: "Portfolio", pms: "Property Management", assistant: "AI Assistant", reports: "Reports", appraisal: "Appraisal", market: "Market Scan", listings: "Listings", leads: "CRM / Leads", transactions: "Transactions", financing: "Financing", playbook: "Sales Playbook", users: "Users & Access", admin: "Brokerage", settings: "Settings" };
+    const title = { dashboard: "Dashboard", wizard: "New Investment", deal: "Deal Analysis", portfolio: "Portfolio", pms: "Property Management", assistant: "AI Assistant", reports: "Reports", appraisal: "Appraisal", market: "Market Scan", listings: "Listings", leads: "CRM / Leads", transactions: "Transactions", financing: "Financing", presell: "Pre-Selling", playbook: "Sales Playbook", users: "Users & Access", admin: "Brokerage", settings: "Settings" };
     $("#topbar-title").textContent = (lang === "fil" ? (FIL_TITLES[state.view] || title[state.view]) : title[state.view]) || "ES Realty";
     $$("#nav .nav-item").forEach(b => b.classList.toggle("active", b.getAttribute("data-view") === state.view));
     $$("#nav .nav-item").forEach(b => {
@@ -1034,7 +1342,7 @@
     if (languageToggle) { languageToggle.textContent = lang === "fil" ? "FIL" : "EN"; languageToggle.title = lang === "fil" ? "Switch to English" : "Lumipat sa Filipino"; }
     const content = $("#content");
     destroyMapPickers();
-    const map = { dashboard: renderDashboard, wizard: renderWizard, deal: renderDeal, portfolio: renderPortfolio, pms: renderPMS, assistant: renderAssistant, reports: renderReports, appraisal: renderAppraisal, market: renderMarketScan, listings: renderListings, leads: renderLeads, transactions: renderTransactions, financing: renderFinancing, playbook: renderPlaybook, users: renderUsers, admin: renderAdmin, settings: renderSettings };
+    const map = { dashboard: renderDashboard, wizard: renderWizard, deal: renderDeal, portfolio: renderPortfolio, pms: renderPMS, assistant: renderAssistant, reports: renderReports, appraisal: renderAppraisal, market: renderMarketScan, listings: renderListings, leads: renderLeads, transactions: renderTransactions, financing: renderFinancing, presell: renderPresell, playbook: renderPlaybook, users: renderUsers, admin: renderAdmin, settings: renderSettings };
     content.innerHTML = map[state.view] ? map[state.view]() : "";
     updateDealPicker();
     fillIcons();
@@ -1470,6 +1778,7 @@
   }
 
   function bindPerView() {
+    bindPresellOnce();
     $$("#content [data-view]").forEach(b => b.addEventListener("click", () => navigate(b.getAttribute("data-view"))));
     $$("#content [data-step]").forEach(b => b.addEventListener("click", () => { state.wizardStep = +b.getAttribute("data-step"); save(); render(); }));
     $$("#content [data-open-deal]").forEach(b => b.addEventListener("click", () => {
@@ -8033,14 +8342,14 @@
   function roleIs() { const r = userRole(); return Array.prototype.slice.call(arguments).indexOf(r) >= 0; }
   const ROLE_CAPABILITIES = {
     "super-admin": ["*"],
-    broker: ["dashboard.view", "appraisal.view", "market.view", "leads.view", "leads.manage", "listings.view", "listings.manage", "transactions.view", "transactions.manage", "financing.view", "financing.manage", "assistant.view", "brokerage.view", "commission.manage", "payout.approve", "inventory.view", "agents.supervise", "settings.view"],
-    agent: ["dashboard.view", "leads.view", "leads.manage", "listings.view", "listings.manage", "transactions.view", "transactions.manage", "financing.view", "financing.manage", "assistant.view", "settings.view"],
-    buyer: ["dashboard.view", "listings.view", "financing.view", "assistant.view", "reports.view", "settings.view"],
-    seller: ["dashboard.view", "listings.view", "financing.view", "assistant.view", "reports.view", "settings.view"],
+    broker: ["dashboard.view", "presell.view", "appraisal.view", "market.view", "leads.view", "leads.manage", "listings.view", "listings.manage", "transactions.view", "transactions.manage", "financing.view", "financing.manage", "assistant.view", "brokerage.view", "commission.manage", "payout.approve", "inventory.view", "agents.supervise", "settings.view"],
+    agent: ["dashboard.view", "presell.view", "leads.view", "leads.manage", "listings.view", "listings.manage", "transactions.view", "transactions.manage", "financing.view", "financing.manage", "assistant.view", "settings.view"],
+    buyer: ["dashboard.view", "presell.view", "listings.view", "financing.view", "assistant.view", "reports.view", "settings.view"],
+    seller: ["dashboard.view", "presell.view", "listings.view", "financing.view", "assistant.view", "reports.view", "settings.view"],
     owner: ["pms.view", "settings.view"],
     tenant: ["pms.view", "settings.view"]
   };
-  const VIEW_CAPABILITY = { dashboard: "dashboard.view", wizard: "investments.manage", deal: "investments.manage", appraisal: "appraisal.view", market: "market.view", leads: "leads.view", listings: "listings.view", transactions: "transactions.view", financing: "financing.view", portfolio: "portfolio.view", pms: "pms.view", assistant: "assistant.view", reports: "reports.view", playbook: "playbook.manage", users: "users.manage", admin: "brokerage.view", settings: "settings.view" };
+  const VIEW_CAPABILITY = { dashboard: "dashboard.view", wizard: "investments.manage", deal: "investments.manage", appraisal: "appraisal.view", market: "market.view", leads: "leads.view", listings: "listings.view", transactions: "transactions.view", financing: "financing.view", portfolio: "portfolio.view", presell: "presell.view", pms: "pms.view", assistant: "assistant.view", reports: "reports.view", playbook: "playbook.manage", users: "users.manage", admin: "brokerage.view", settings: "settings.view" };
   function can(capability) {
     const caps = ROLE_CAPABILITIES[userRole()] || [];
     return caps.indexOf("*") >= 0 || caps.indexOf(capability) >= 0;
