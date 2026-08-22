@@ -8991,7 +8991,39 @@
     } else { maxAffordable = affordableMonthly * c.years * 12; }
     maxAffordable = Math.min(maxAffordable, 6000000);
     return { income: income, affordableMonthly: affordableMonthly, maxAffordable: maxAffordable, eligible: maxAffordable >= c.loan, monthly: c.monthly };
+  }  function ccClosingCosts() {
+    const $v = id => { const el = document.getElementById(id); return el ? el.value : ""; };
+    const P = Number($v("cc-price")) || 0;
+    const type = $v("cc-type") || "house-lot";
+    const inMM = $v("cc-loc") === "mm";
+    const conv = $v("cc-conv") || "std";
+    const vatNew = document.getElementById("cc-vatnew") && document.getElementById("cc-vatnew").checked;
+    const commPct = Number($v("cc-comm")) || 0;
+    const out = document.getElementById("cc-out");
+    if (!out) return;
+    if (P <= 0) { out.innerHTML = '<p class="dim">Enter a selling price first.</p>'; return; }
+    const thresholds = { "lot": 1919500, "house-lot": 3600000, "condo": 3199200, "commercial": Infinity };
+    let vat = 0;
+    if (vatNew && P > thresholds[type]) vat = P * 0.12;
+    const cgt = P * 0.06;
+    const dst = P * 0.015;
+    const transfer = P * (inMM ? 0.0075 : 0.005);
+    const registration = P * 0.0025;
+    const commission = P * commPct / 100;
+    let seller = [["Capital gains tax (6%)", cgt], ["Documentary stamp tax (1.5%)", dst]];
+    let buyer = [["Transfer tax (" + (inMM ? "0.75" : "0.5") + "%)", transfer], ["Registration fee (0.25%)", registration]];
+    if (commPct > 0) seller.push(["Agent commission (" + commPct + "%)", commission]);
+    if (conv === "buyer") { buyer = buyer.concat(seller.splice(0)); }
+    else if (conv === "seller") { seller = seller.concat(buyer.splice(0)); }
+    const sum = arr => arr.reduce((s, r) => s + r[1], 0);
+    const rows = arr => arr.map(r => '<tr><td>' + r[0] + '</td><td class="num">' + C.money(r[1]) + '</td></tr>').join("");
+    let html = '';
+    if (vat > 0) html += '<table class="data mb-16"><tr><th colspan="2">VAT (12%) - added on top of price</th></tr><tr><td>If your quoted price is VAT-inclusive, do not add this line; instead divide price by 1.12 for the tax base.</td><td class="num">' + C.money(vat) + '</td></tr></table>';
+    html += '<div class="grid grid-2"><div><b>Seller pays</b><table class="data mt-8">' + rows(seller) + '<tr><td><b>Total</b></td><td class="num"><b>' + C.money(sum(seller)) + '</b></td></tr></table></div>';
+    html += '<div><b>Buyer pays</b><table class="data mt-8">' + rows(buyer) + '<tr><td><b>Cash needed to close</b></td><td class="num"><b>' + C.money(sum(buyer)) + '</b></td></tr></table></div></div>';
+    out.innerHTML = html;
   }
+
   function renderFinancing() {
     const last = state.financingDraft || (state.financingScenarios || [])[0] || {};
     const c = finCompute(last);
@@ -9036,7 +9068,8 @@
       '<div class="table-wrap mt-8"><table class="data"><thead><tr><th>Label</th><th>Price</th><th>DP</th><th>Loan</th><th>Monthly</th><th></th></tr></thead><tbody>' +
       state.financingScenarios.map(s => '<tr><td>' + esc(s.label || "Scenario") + "</td><td>" + C.money(s.price) + "</td><td>" + s.dpPct + "%</td><td>" + C.money(s.price - (s.price * s.dpPct / 100)) + "</td><td>" + C.money(s.monthly) + "</td>" +
         '<td><button class="icon-btn btn-sm" data-fin-open="' + esc(s.id) + '" title="Load">' + icon("back", 14) + '</button> <button class="icon-btn btn-sm" data-fin-vault="' + esc(s.id) + '" title="Pre-approval documents">' + icon("folder", 14) + '</button> <button class="icon-btn btn-sm" data-fin-del="' + esc(s.id) + '" title="Delete">' + icon("trash", 13) + '</button></td></tr>').join("") +
-      "</tbody></table></div>" : '<div class="dim mt-8">No saved scenarios yet — compute and save one above.</div>') + "</div>";
+      "</tbody></table></div>" : '<div class="dim mt-8">No saved scenarios yet — compute and save one above.</div>') + "</div>" +
+      '<div class="card card-pad mb-24" id="closing-costs"><h3 class="mb-16">Closing Cost Calculator</h3><p class="dim tiny mb-16">Philippine practice estimates. LGU rates vary; confirm final figures with BIR / Register of Deeds.</p><div class="grid grid-2"><label class="field"><span>Selling price (PHP)</span><input class="input input-num" id="cc-price" type="number" min="0" placeholder="5000000"></label><label class="field"><span>Property type</span><select class="input" id="cc-type"><option value="house-lot">House & Lot</option><option value="condo">Condominium</option><option value="lot">Residential Lot</option><option value="commercial">Commercial / Other</option></select></label><label class="field"><span>Location</span><select class="input" id="cc-loc"><option value="mm">Metro Manila</option><option value="prov">Province</option></select></label><label class="field"><span>Paying convention</span><select class="input" id="cc-conv"><option value="std">Standard PH split</option><option value="buyer">Buyer pays everything</option><option value="seller">Seller pays everything</option></select></label><label class="field" style="display:flex;align-items:center;gap:8px;margin-top:8px"><input type="checkbox" id="cc-vatnew"> <span>Brand-new / developer sale (VAT-registered)</span></label><label class="field"><span>Agent commission % (seller side)</span><input class="input input-num" id="cc-comm" type="number" min="0" max="20" step="0.25" value="0"></label></div><button class="btn btn-primary mt-8" data-cc-calc>Compute Closing Costs</button><div id="cc-out"></div></div>';
     return html;
   }
   function finFromForm() {
@@ -9074,7 +9107,9 @@
     if (!finHooked) {
       finHooked = true;
       document.addEventListener("click", e => {
-        const cal = e.target.closest("[data-fin-calc]");
+        const ccBtn = e.target.closest("[data-cc-calc]");
+    if (ccBtn) { ccClosingCosts(); return; }
+    const cal = e.target.closest("[data-fin-calc]");
         if (cal) { const p = finFromForm(); const c = finCompute(p); state.financingDraft = p; save(); render(); toast("Computed: ₱" + C.fmtNum(Math.round(c.monthly)) + "/mo"); return; }
         const nw = e.target.closest("[data-fin-new]");
         if (nw) { state.financingDraft = null; save(); render(); return; }

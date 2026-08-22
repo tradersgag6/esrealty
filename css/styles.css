@@ -1775,3 +1775,5 @@ table.data .num { font-family: var(--font-mono); text-align: right; white-space:
 body.preload .sidebar,
 body.preload .main,
 body.preload .topbar { visibility: hidden !important; }
+
+.sf-dhsud { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid var(--stroke); border-radius: 10px; font-size: 13px; color: var(--muted); margin-bottom: 18px; }
