@@ -20,6 +20,16 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"></noscript>
 <link rel="stylesheet" href="css/styles.css">
+
+  <script>window.ESREALTY_LEAFLET = { ensure: function () { if (window.L) return Promise.resolve(); if (!this._p) this._p = new Promise(function (resolve) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "vendor/leaflet/leaflet.css"; document.head.appendChild(l); var s = document.createElement("script"); s.src = "vendor/leaflet/leaflet.js"; s.onload = s.onerror = function () { resolve(); }; document.head.appendChild(s); }); return this._p; } };</script>
+  <script src="js/supabase-config.js" defer></script>
+  <script src="js/listings-api.js" defer></script>
+  <script src="js/storefront.js" defer></script>
+  <script src="js/data.js" defer></script>
+  <script src="js/core.js" defer></script>
+  <script src="js/app.js" defer></script>
+  <script>window.setTimeout(function () { document.body.classList.remove("preload"); }, 2500);</script>
+</head>
 </head>
 <body class="preload">
   <div class="app-bg"></div>
@@ -192,15 +202,5 @@
       <div><h2>ES Realty needs JavaScript</h2><p>Please enable JavaScript in your browser to use the app.</p></div>
     </div>
   </noscript>
-
-  <script>window.ESREALTY_LEAFLET = { ensure: function () { if (window.L) return Promise.resolve(); if (!this._p) this._p = new Promise(function (resolve) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "vendor/leaflet/leaflet.css"; document.head.appendChild(l); var s = document.createElement("script"); s.src = "vendor/leaflet/leaflet.js"; s.onload = s.onerror = function () { resolve(); }; document.head.appendChild(s); }); return this._p; } };</script>
-  <script src="vendor/supabase/supabase.js" defer></script>
-  <script src="js/supabase-config.js" defer></script>
-  <script src="js/listings-api.js" defer></script>
-  <script src="js/storefront.js" defer></script>
-  <script src="js/data.js" defer></script>
-  <script src="js/core.js" defer></script>
-  <script src="js/app.js" defer></script>
-  <script>window.setTimeout(function () { document.body.classList.remove("preload"); }, 2500);</script>
 </body>
 </html>

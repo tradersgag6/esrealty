@@ -361,7 +361,7 @@
   }
 
   function projectBtPage() {
-    var heroImage = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1800&q=88";
+    var heroImage = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1440&q=80";
     var conceptImage = "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=82";
     return shell('<section class="bt-hero"><div class="bt-hero-copy"><p class="bt-eyebrow">ES REALTY / DEVELOPMENT CONCEPT 01</p><h1>Project B.T <span>— Bahay Tindahan</span></h1>' +
       '<p class="bt-hero-lede">A modern mixed-use real estate concept combining commercial and residential spaces in a single two-storey building.</p>' +

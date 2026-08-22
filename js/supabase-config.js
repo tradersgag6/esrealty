@@ -2,6 +2,13 @@
  * protect data; never place a secret/service-role key in this browser file. */
 (function () {
   "use strict";
+  /* Lazy-load the vendored Supabase client: public storefront visitors skip
+   * the download entirely; it arrives async and boot() picks it up below. */
+  var sbScript = document.createElement("script");
+  sbScript.src = "vendor/supabase/supabase.js";
+  sbScript.defer = true;
+  document.head.appendChild(sbScript);
+
   const url = "https://mrngaqtbaseewzcsogqi.supabase.co";
   const publishableKey = "sb_publishable_OtrE6VXTJb4OrSCe6Z-f6g_qAcKyOvk";
   window.ESREALTY_API_BASE = url + "/functions/v1/listing-api/api";
