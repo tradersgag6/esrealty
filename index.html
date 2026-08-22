@@ -13,6 +13,8 @@
 <meta property="og:description" content="Analyze Philippine real estate opportunities — from input to recommendation in under 60 seconds. Feasibility, financing, risk, appraisal, and portfolio tools in one app.">
 <meta name="twitter:card" content="summary">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#1e2a3a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://images.unsplash.com">
@@ -209,5 +211,11 @@
       <div><h2>ES Realty needs JavaScript</h2><p>Please enable JavaScript in your browser to use the app.</p></div>
     </div>
   </noscript>
+
+  <script>
+    if (location.protocol === "https:" || location.hostname === "localhost") {
+      if ("serviceWorker" in navigator) window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+    }
+  </script>
 </body>
 </html>

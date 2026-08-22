@@ -415,6 +415,11 @@
     if (!listing) return shell('<section class="sf-detail">' + empty(viewState.error || "This listing is unavailable.") + '</section>');
     var images = Array.isArray(listing.images) ? listing.images.map(function (item) { return safeImage(item.url || item); }).filter(Boolean) : [];
     var gallery = detailGallery(listing, images);
+    try { var ldEl = document.getElementById("sf-jsonld"); if (ldEl) ldEl.remove();
+      var ld = document.createElement("script"); ld.type = "application/ld+json"; ld.id = "sf-jsonld";
+      ld.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": "RealEstateListing", name: listing.title, description: (listing.description || "").slice(0, 300), image: images.filter(function (x) { return /^https:/.test(x); }).slice(0, 5), address: { "@type": "PostalAddress", addressLocality: listing.city, addressRegion: listing.province, addressCountry: "PH" }, offers: { "@type": "Offer", priceCurrency: "PHP", price: Number(listing.price || 0), availability: "https://schema.org/InStock" } });
+      document.head.appendChild(ld);
+    } catch (ldErr) {}
     return shell('<section class="sf-detail"><button class="sf-back" data-sf-back>← Back to properties</button>' + gallery +
       '<div class="sf-detail-layout"><article class="sf-detail-copy"><p class="sf-eyebrow">' + esc(typeLabel(listing.property_type)) + ' · ' + esc(listing.offer_type === "rent" ? "FOR RENT" : "FOR SALE") + '</p>' +
       '<h1>' + esc(listing.title) + '</h1><p class="sf-detail-location">' + esc(locationText(listing)) + '</p><div class="sf-key-stats"><span><b>' + esc(listing.bedrooms || 0) + '</b> Bedrooms</span><span><b>' + esc(listing.bathrooms || 0) + '</b> Bathrooms</span><span><b>' + esc(listing.floor_area_sqm || 0) + '</b> Floor sqm</span><span><b>' + esc(listing.lot_size_sqm || 0) + '</b> Lot sqm</span></div>' +

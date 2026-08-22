@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+Disallow: /functions/
+Sitemap: https://mrngaqtbaseewzcsogqi.supabase.co/functions/v1/seo/sitemap.xml
