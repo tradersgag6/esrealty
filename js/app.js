@@ -9700,7 +9700,9 @@
     if (!finHooked) {
       finHooked = true;
       document.addEventListener("click", e => {
-        const ccBtn = e.target.closest("[data-cc-calc]");
+        const tpr = e.target.closest("[data-tperf-refresh]");
+    if (tpr) { state.teamPerformanceLoaded = false; loadTeamPerformance().then(() => render()); return; }
+const ccBtn = e.target.closest("[data-cc-calc]");
     if (ccBtn) { ccClosingCosts(); return; }
     const cal = e.target.closest("[data-fin-calc]");
         if (cal) { const p = finFromForm(); const c = finCompute(p); state.financingDraft = p; save(); render(); toast("Computed: ₱" + C.fmtNum(Math.round(c.monthly)) + "/mo"); return; }
@@ -10217,7 +10219,45 @@
   function ensurePayoutAll() {
     brokerageTransactions().forEach(t => ensurePayout(t));
   }
+  async function loadTeamPerformance() {
+    if (state.teamPerformanceLoaded) return;
+    state.teamPerformanceLoaded = true;
+    if (!SB || !currentUser || currentUser.demo) {
+      state.teamPerformance = [
+        { full_name: "Marco Villanueva", role: "broker", leads_total: 42, leads_open: 11, leads_closed: 9, deals_closed: 6, sales_volume: 47800000, listings_active: 7 },
+        { full_name: "Angel Santos", role: "agent", leads_total: 31, leads_open: 14, leads_closed: 5, deals_closed: 3, sales_volume: 18900000, listings_active: 4 },
+        { full_name: "Rina Lopez", role: "agent", leads_total: 24, leads_open: 16, leads_closed: 2, deals_closed: 1, sales_volume: 6400000, listings_active: 3 }
+      ];
+      return;
+    }
+    try {
+      const r = await SB.rpc("team_performance");
+      if (r.error) throw r.error;
+      state.teamPerformance = r.data || [];
+      render();
+    } catch (e) { toast("Could not load team performance: " + esc(friendlyErr(e.message)), "err"); }
+  }
+  function teamPerfCard() {
+    const rows = Array.isArray(state.teamPerformance) ? state.teamPerformance.slice().sort((a, b) => Number(b.sales_volume || 0) - Number(a.sales_volume || 0)) : [];
+    let card = '<div class="card card-pad mb-24"><div class="row spread"><h3>Team Performance</h3>' +
+      '<button class="btn btn-ghost btn-sm" data-tperf-refresh>' + icon("back", 13) + " Refresh</button></div>";
+    if (!rows.length) {
+      card += '<p class="dim">No team data available yet. Performance builds as agents are assigned leads and close transactions.</p>';
+    } else {
+      card += '<div class="table-wrap"><table class="data"><tr><th>#</th><th>Agent</th><th>Role</th><th class="num">Leads</th><th class="num">Closed Leads</th><th class="num">Conv %</th><th class="num">Deals</th><th class="num">Sales Volume</th><th class="num">Active Listings</th></tr>';
+      rows.forEach((r, i) => {
+        const conv = r.leads_total ? Math.round((Number(r.leads_closed) / Number(r.leads_total)) * 100) + "%" : "-";
+        card += "<tr><td>" + (i + 1) + "</td><td><b>" + esc(r.full_name || "-") + '</b></td><td><span class="badge ' + (r.role === "broker" ? "purple" : "blue") + '">' + esc(r.role) + "</span></td>" +
+          '<td class="num">' + esc(String(r.leads_total)) + '</td><td class="num">' + esc(String(r.leads_closed)) + '</td><td class="num">' + conv + '</td><td class="num">' + esc(String(r.deals_closed)) + '</td><td class="num"><b>' + C.money(Number(r.sales_volume || 0)) + '</b></td><td class="num">' + esc(String(r.listings_active)) + "</td></tr>";
+      });
+      card += "</table></div>";
+    }
+    card += "</div>";
+    return card;
+  }
+
   function adminAnalytics() {
+    loadTeamPerformance();
     const stats = state.listingStats || {};
     const listings = brokerageListings();
     const listingIds = listings.map(l => l.id);
@@ -10238,6 +10278,7 @@
       topListings.map(l => "<tr><td>" + esc(l.title) + "</td><td>" + (stats[l.id] ? stats[l.id].views || 0 : 0) + "</td><td>" + (stats[l.id] ? stats[l.id].inquiries || 0 : 0) + "</td></tr>").join("") +
       "</tbody></table></div>" : '<div class="dim mt-8">No views recorded yet.</div>') + "</div>";
     html += "</div>";
+    html = teamPerfCard() + html;
     return html;
   }
   function adminInventory() {
