@@ -4625,10 +4625,12 @@
     const payments = pmsActivePayments().filter(p => payIds.indexOf(p.lease_id) !== -1);
     const active = leases.filter(l => l.status === "active");
     const myExpenses = pmsActiveExpenses().filter(e => propIds.indexOf(e.property_id) !== -1);
-    const totalExpenses = myExpenses.reduce((s, e) => s + C.num(e.amount, 0), 0);
     const myMaint = pmsActiveMaintenance().filter(m => propIds.indexOf(m.property_id) !== -1);
     const openMaint = myMaint.filter(m => m.status !== "completed");
     const openMaintCost = openMaint.reduce((s, m) => s + C.num(m.cost, 0), 0);
+    const maintCost = myMaint.reduce((s, m) => s + C.num(m.cost, 0), 0);
+    const expenseSum = myExpenses.reduce((s, e) => s + C.num(e.amount, 0), 0);
+    const totalExpenses = expenseSum + maintCost;
     const myDocs = pmsActiveDocuments().filter(d => propIds.indexOf(d.property_id) !== -1);
     const due = pmsArrearsFor(leases);
     const paid = pmsPaySum(payments, ["paid"]);
@@ -4644,7 +4646,7 @@
       kpi("Bank", esc(owner.bank || "—"), esc(owner.account_number || ""), "gold", "credit-card") + '</div>';
     const netPosition = paid - totalExpenses;
     html += '<div class="grid grid-4 mb-24">' +
-      kpi("Total Expenses", C.money(totalExpenses), "all-time, your properties", totalExpenses > 0 ? "red" : "green", "dollar") +
+      kpi("Total Expenses", C.money(totalExpenses), "operating + maintenance", totalExpenses > 0 ? "red" : "green", "dollar") +
       kpi("Open Work Orders", openMaint.length, openMaintCost > 0 ? C.money(openMaintCost) + " est. cost" : "none in progress", openMaint.length ? "gold" : "green", "layers") +
       kpi("Documents", myDocs.length, myDocs.length === 1 ? "document on file" : "documents on file", "blue", "doc") +
       kpi("Net Position", C.money(netPosition), "collected minus expenses", netPosition >= 0 ? "green" : "red", "trending") + '</div>';
@@ -4703,7 +4705,7 @@
       myExpensesSorted.forEach(e => {
         html += '<tr><td>' + esc(String(e.date || "").slice(0, 10)) + '</td><td>' + esc(pmsPropertyTitle(e.property_id)) + '</td><td>' + esc(e.category || "-") + '</td><td>' + esc(e.description || "-") + '</td><td class="num">' + C.money(C.num(e.amount, 0)) + '</td></tr>';
       });
-      html += '<tr><td colspan="4"><b>Total Expenses</b></td><td class="num"><b>' + C.money(totalExpenses) + "</b></td></tr>";
+      html += '<tr><td colspan="4"><b>Total operating expenses</b></td><td class="num"><b>' + C.money(expenseSum) + "</b></td></tr>";
       html += '</table></div>';
     }
     html += '</div>';
@@ -4717,6 +4719,7 @@
         const sc = MAINT_STATUSES.find(x => x.value === m.status);
         html += '<tr><td>' + esc(String(m.date || "").slice(0, 10)) + '</td><td><b>' + esc(m.title || "-") + '</b>' + (m.vendor ? '<div class="dim tiny">' + esc(m.vendor) + '</div>' : "") + '</td><td>' + esc(pmsPropertyTitle(m.property_id)) + (m.unit_id ? ' <span class="dim tiny">' + esc(pmsUnitName(m.unit_id)) + '</span>' : "") + '</td><td>' + pmsStatusBadge(sc, sc ? sc.label : (m.status || "-")) + '</td><td class="num">' + (C.num(m.cost, 0) > 0 ? C.money(C.num(m.cost, 0)) : "-") + '</td></tr>';
       });
+      html += '<tr><td colspan="4"><b>Total maintenance cost</b></td><td class="num"><b>' + C.money(maintCost) + "</b></td></tr>";
       html += '</table></div>';
     }
     html += '</div>';
