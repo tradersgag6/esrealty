@@ -21,7 +21,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"></noscript>
 <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="preload">
   <div class="app-bg"></div>
 
   <!-- ===== AUTH OVERLAY ===== -->
@@ -201,5 +201,6 @@
   <script src="js/data.js" defer></script>
   <script src="js/core.js" defer></script>
   <script src="js/app.js" defer></script>
+  <script>window.setTimeout(function () { document.body.classList.remove("preload"); }, 2500);</script>
 </body>
 </html>

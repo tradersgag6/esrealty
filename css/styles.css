@@ -1770,3 +1770,8 @@ table.data .num { font-family: var(--font-mono); text-align: right; white-space:
   .sf-marquee { padding: 14px 0; }
   .sf-hero-copy > * { animation-duration: .7s; }
 }
+
+/* Anti-flash: hide app shell until auth restore + role-based nav filtering are applied */
+body.preload .sidebar,
+body.preload .main,
+body.preload .topbar { visibility: hidden !important; }

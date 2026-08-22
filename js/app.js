@@ -898,6 +898,7 @@
     fillIcons();
     bindPerView();
     updateSidebar();
+    document.body.classList.remove("preload");
   }
 
   function showAuth() {
