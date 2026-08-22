@@ -1890,7 +1890,27 @@
     });
   }
 
-  function bindPerView() {
+  let cbBound = false;
+  function bindCobrokeOnce() {
+    if (cbBound) return; cbBound = true;
+    document.addEventListener("click", async e => {
+      const q = s => e.target.closest(s);
+      if (q("[data-cb-new]")) { openCobrokeModal(); return; }
+      if (q("[data-cb-cancel]")) { closeCbModal(); return; }
+      if (q("[data-cb-propose]")) { await proposeCobroke(); return; }
+      const acc = q("[data-cb-accept]");
+      if (acc) { await setCobrokeStatus(acc.getAttribute("data-cb-accept"), "accepted"); return; }
+      const dec = q("[data-cb-decline]");
+      if (dec) { await setCobrokeStatus(dec.getAttribute("data-cb-decline"), "declined"); return; }
+      const comp = q("[data-cb-complete]");
+      if (comp) { await setCobrokeStatus(comp.getAttribute("data-cb-complete"), "completed"); return; }
+      const can = q("[data-cb-cancel]");
+      if (can) { if (confirm("Cancel this proposal?")) await setCobrokeStatus(can.getAttribute("data-cb-cancel"), "cancelled"); return; }
+    });
+  }
+
+function bindPerView() {
+    bindCobrokeOnce();
     bindPresellOnce();
     $$("#content [data-view]").forEach(b => b.addEventListener("click", () => navigate(b.getAttribute("data-view"))));
     $$("#content [data-step]").forEach(b => b.addEventListener("click", () => { state.wizardStep = +b.getAttribute("data-step"); save(); render(); }));
@@ -10159,19 +10179,177 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     }
   }
   function adminTabAllowed(tab) {
-    const capability = { overview: "brokerage.view", commission: "commission.manage", payouts: "payout.approve", analytics: "brokerage.view", inventory: "inventory.view" };
+    const capability = { overview: "brokerage.view", commission: "commission.manage", payouts: "payout.approve", analytics: "brokerage.view", cobroke: "brokerage.view", inventory: "inventory.view" };
     return can(capability[tab] || "brokerage.view");
   }
+  function adminCobroke() {
+    loadCobroke();
+    const me = currentUser ? currentUser.id : "";
+    const myEmail = currentUser ? String(currentUser.email || "").toLowerCase() : "";
+    const rows = Array.isArray(state.cobrokeAgreements) ? state.cobrokeAgreements.slice().sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || ""))) : [];
+    const canPropose = roleIs("super-admin") || roleIs("broker");
+    let html = '<div class="card card-pad mb-24"><div class="row spread"><h3>Co-Broking Agreements</h3>' +
+      (canPropose ? '<button class="btn btn-primary btn-sm" data-cb-new>' + icon("plus", 14) + " New Agreement</button>" : "") + "</div>" +
+      '<p class="dim tiny mt-8">Share a listing with another licensed broker at an agreed commission split. Standard PH practice is 50 / 50 between listing and selling brokers.</p></div>';
+    const pending = rows.filter(r => r.status === "proposed" && (r.selling_broker_id === me || (r.partner_email || "").toLowerCase() === myEmail) && String(r.listing_broker_id) !== String(me));
+    if (pending.length) {
+      html += '<div class="notice-banner mb-16"><span><b>' + pending.length + ' invitation' + (pending.length === 1 ? "" : "s") + " waiting for your response.</b></span></div>";
+      html += '<div class="card card-pad mb-24"><h3 class="mb-16">Incoming Proposals</h3><div class="table-wrap"><table class="data"><tr><th>Listing</th><th>From</th><th class="num">Your Split</th><th>Notes</th><th>Actions</th></tr>';
+      pending.forEach(r => {
+        html += '<tr><td><b>' + esc(cbListingTitle(r.listing_id)) + "</b></td><td>" + esc(cbPartnerName(r.listing_broker_id, r.partner_email)) + '</td><td class="num"><b>' + Number(r.split_selling_pct) + "%</b></td><td>" + esc(r.notes || "-") + '</td><td><div class="row" style="gap:6px">' +
+          '<button class="btn btn-primary btn-sm" data-cb-accept="' + esc(r.id) + '">Accept</button>' +
+          '<button class="btn btn-danger btn-sm" data-cb-decline="' + esc(r.id) + '">Decline</button></div></td></tr>';
+      });
+      html += "</table></div></div>";
+    }
+    html += '<div class="card card-pad"><h3 class="mb-16">All Agreements</h3>';
+    if (!rows.length) {
+      html += '<p class="dim">No co-broking agreements yet. Propose one from a published listing to another broker.</p>';
+    } else {
+      html += '<div class="table-wrap"><table class="data"><tr><th>Listing</th><th>Counterparty</th><th>Your Side</th><th class="num">Your %</th><th>Status</th><th>Actions</th></tr>';
+      rows.forEach(r => {
+        const iAmOwner = String(r.listing_broker_id) === String(me);
+        const counterparty = iAmOwner ? cbPartnerName(r.selling_broker_id, r.partner_email) : cbPartnerName(r.listing_broker_id, "");
+        const myPct = iAmOwner ? r.split_listing_pct : r.split_selling_pct;
+        const side = iAmOwner ? "Listing broker" : "Selling broker";
+        const m = { proposed: ["Proposed", "gold"], accepted: ["Accepted", "green"], declined: ["Declined", "red"], completed: ["Completed", "purple"], cancelled: ["Cancelled", "red"] };
+        const c = m[r.status] || [r.status, "blue"];
+        html += '<tr><td><b>' + esc(cbListingTitle(r.listing_id)) + "</b></td><td>" + esc(counterparty) + "</td><td>" + esc(side) + '</td><td class="num">' + Number(myPct) + '%</td><td><span class="badge ' + c[1] + '">' + esc(c[0]) + "</span></td><td><div class=\"row\" style=\"gap:6px\">";
+        if (r.status === "accepted") html += '<button class="btn btn-primary btn-sm" data-cb-complete="' + esc(r.id) + '">Mark Completed</button>';
+        if (r.status === "proposed" && iAmOwner) html += '<button class="btn btn-danger btn-sm" data-cb-cancel="' + esc(r.id) + '">Cancel</button>';
+        html += "</div></td></tr>";
+      });
+      html += "</table></div>";
+    }
+    html += "</div>";
+    return html;
+  }
+  function cbListingTitle(listingId) {
+    const l = brokerageListings().find(x => x.id === listingId);
+    return (l && l.title) || listingId;
+  }
+  function cbPartnerName(uid, emailFallback) {
+    if (uid) {
+      const u = remoteProfiles.find(p => p.id === uid) || (state.users || []).find(x => x.authUserId === uid);
+      if (u) return u.full_name || u.name || emailFallback || "Broker";
+      const cached = (state.cobrokePartners || []).find(p => p.user_id === uid);
+      if (cached) return cached.full_name;
+    }
+    return emailFallback || "Broker";
+  }
+  async function loadCobroke(force) {
+    const key = currentUser ? (currentUser.id || currentUser.email) : "";
+    if (!force && state.cobrokeLoadedFor === key) return;
+    state.cobrokeLoadedFor = key;
+    if (!SB || !currentUser || !currentUser.id || currentUser.demo) {
+      seedCobrokeSample();
+      render();
+      return;
+    }
+    try {
+      const r = await SB.from("cobroke_agreements").select("*").order("created_at", { ascending: false });
+      if (r.error) throw r.error;
+      state.cobrokeAgreements = r.data || [];
+      try {
+        const p = await SB.rpc("list_cobroke_partners");
+        if (!p.error && p.data) state.cobrokePartners = p.data;
+      } catch (e2) {}
+      save(); render();
+    } catch (e) { toast("Could not load co-broking agreements: " + esc(friendlyErr(e.message)), "err"); }
+  }
+  function seedCobrokeSample() {
+    if (Array.isArray(state.cobrokeAgreements) && state.cobrokeAgreements.length) return;
+    ensureListings();
+    const anyListing = brokerageListings()[0];
+    state.cobrokeAgreements = [
+      { id: "cb-seed-1", listing_id: anyListing ? anyListing.id : "seed-listing", listing_broker_id: "user-other-broker", partner_email: currentUser ? currentUser.email : "", selling_broker_id: null, split_listing_pct: 50, split_selling_pct: 50, status: "proposed", notes: "Buyer relocating next month - quick close preferred.", created_at: new Date(Date.now() - 86400000).toISOString() },
+      { id: "cb-seed-2", listing_id: anyListing ? anyListing.id : "seed-listing", listing_broker_id: currentUser ? currentUser.id : "me", partner_email: "partner@esrealty.ph", selling_broker_id: null, split_listing_pct: 40, split_selling_pct: 60, status: "accepted", notes: "", created_at: new Date(Date.now() - 5 * 86400000).toISOString() }
+    ];
+  }
+  function openCobrokeModal() {
+    closeCbModal();
+    let listings = brokerageListings().filter(l => l.isPublished !== false);
+    if (!listings.length) {
+      const isDemo = !SB || !currentUser || !currentUser.id || currentUser.demo;
+      if (isDemo) {
+        ensureListings();
+        state.listings.push({ id: "lst-cb-demo-1", title: "3BR House and Lot - BF Homes", price: 8500000, city: "Para\u00f1aque", isPublished: true });
+        state.listings.push({ id: "lst-cb-demo-2", title: "Studio Condo - Ortigas", price: 3200000, city: "Pasig", isPublished: true });
+        save();
+        listings = brokerageListings();
+      }
+    }
+    const partners = Array.isArray(state.cobrokePartners) ? state.cobrokePartners : [];
+    const ov = document.createElement("div");
+    ov.className = "modal-overlay"; ov.id = "cb-modal";
+    ov.innerHTML = '<div class="modal-card"><div class="modal-head"><h3>New Co-Broking Agreement</h3><button class="icon-btn" data-cb-cancel>&times;</button></div><div class="modal-body">' +
+      '<label class="field"><span>Listing *</span><select class="input" id="cbf-listing">' + listings.map(l => '<option value="' + esc(l.id) + '">' + esc(l.title || l.ref || l.id) + "</option>").join("") + "</select></label>" +
+      '<label class="field"><span>Partner broker *</span><select class="input" id="cbf-partner">' + partners.map(p => '<option value="' + esc(p.email || "") + '" data-pid="' + esc(p.user_id || "") + '">' + esc((p.full_name || p.email) + (p.agency ? " · " + p.agency : "") + " (" + p.role + ")") + "</option>").join("") + "</select></label>" +
+      '<label class="field"><span>Or partner email (if not listed)</span><input class="input" id="cbf-email" type="email" placeholder="broker@email.com"></label>' +
+      '<div class="grid grid-2">' +
+      '<label class="field"><span>Listing broker % *</span><input class="input input-num" id="cbf-lpct" type="number" min="0" max="100" value="50"></label>' +
+      '<label class="field"><span>Selling broker % *</span><input class="input input-num" id="cbf-spct" type="number" min="0" max="100" value="50"></label></div>' +
+      '<label class="field"><span>Notes</span><textarea class="input" id="cbf-notes" rows="2" placeholder="Deal context, timeline..."></textarea></label>' +
+      "</div><div class=\"modal-foot\"><button class=\"btn btn-ghost\" data-cb-cancel>Cancel</button><button class=\"btn btn-primary\" data-cb-propose>Send Proposal</button></div></div>";
+    document.body.appendChild(ov);
+    ov.addEventListener("click", ev => { if (ev.target === ov) closeCbModal(); });
+    const lp = document.getElementById("cbf-lpct");
+    const sp = document.getElementById("cbf-spct");
+    lp.addEventListener("input", () => { sp.value = Math.max(0, Math.min(100, 100 - (Number(lp.value) || 0))); });
+    sp.addEventListener("input", () => { lp.value = Math.max(0, Math.min(100, 100 - (Number(sp.value) || 0))); });
+  }
+  function closeCbModal() { const m = document.getElementById("cb-modal"); if (m) m.remove(); }
+  async function proposeCobroke() {
+    const g = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
+    const listingId = g("cbf-listing");
+    const partnerSel = document.getElementById("cbf-partner");
+    const partnerOption = partnerSel ? partnerSel.options[partnerSel.selectedIndex] : null;
+    const partnerId = partnerOption ? partnerOption.getAttribute("data-pid") : "";
+    const email = g("cbf-email") || (partnerOption ? partnerOption.getAttribute("value") : "") || g("cbf-partner");
+    const lp = Number(g("cbf-lpct"));
+    const sp = Number(g("cbf-spct"));
+    if (!listingId) { toast("Choose a listing first", "err"); return; }
+    if (!email) { toast("Pick a partner broker or enter their email", "err"); return; }
+    if (!(lp >= 0 && lp <= 100) || !(sp >= 0 && sp <= 100) || lp + sp !== 100) { toast("Split must total exactly 100%", "err"); return; }
+    closeCbModal();
+    const rec = { listing_id: listingId, listing_broker_id: currentUser.id, partner_email: email.toLowerCase(), split_listing_pct: lp, split_selling_pct: sp, status: "proposed", notes: g("cbf-notes"), responded_at: null, completed_at: null };
+    const local = Object.assign({ id: "cb-" + Date.now(), selling_broker_id: partnerId || null }, rec);
+    state.cobrokeAgreements.unshift(local);
+    save(); render();
+    if (psCloud()) {
+      delete local.id; delete local.selling_broker_id;
+      const r = await SB.from("cobroke_agreements").insert(rec).select("*").single();
+      if (r.error) toast("Cloud save failed: " + esc(friendlyErr(r.error.message)), "err");
+      else Object.assign(local, r.data);
+    }
+    toast("Co-broke proposal sent");
+  }
+  async function setCobrokeStatus(id, status) {
+    const r = (state.cobrokeAgreements || []).find(x => x.id === id);
+    if (!r) return;
+    r.status = status;
+    if (status === "completed") r.completed_at = new Date().toISOString();
+    if (status === "accepted" || status === "declined") r.responded_at = new Date().toISOString();
+    save(); render();
+    if (psCloud()) {
+      const patch = { status: status };
+      if (status === "completed") patch.completed_at = r.completed_at;
+      if (status !== "proposed") patch.responded_at = r.responded_at;
+      const res = await SB.from("cobroke_agreements").update(patch).eq("id", id);
+      if (res.error) toast("Cloud update failed: " + esc(friendlyErr(res.error.message)), "err");
+    }
+  }
+
   function renderAdmin() {
     if (!canBroker()) return '<div class="hero"><div><h1>Brokerage</h1></div></div><div class="card card-pad empty">' + icon("shield", 40) + "<h3>Brokers / admins only</h3><p>Commission, payouts, analytics, and inventory are restricted to brokerage roles.</p></div>";
-    const tabs = [["overview", "Overview"], ["commission", "Commission"], ["payouts", "Payouts"], ["analytics", "Analytics"], ["inventory", "Inventory"]].filter(x => adminTabAllowed(x[0]));
+    const tabs = [["overview", "Overview"], ["commission", "Commission"], ["payouts", "Payouts"], ["analytics", "Analytics"], ["cobroke", "Co-Broke"], ["inventory", "Inventory"]].filter(x => adminTabAllowed(x[0]));
     const tab = adminTabAllowed(state.adminTab) ? state.adminTab : "overview";
     if (state.adminTab !== tab) state.adminTab = tab;
     let html = '<div class="hero"><div><h1>Brokerage</h1><p>Commission management, payouts, team performance, and developer inventory.</p></div>' +
       '<div class="actions"><button class="btn btn-ghost btn-sm" data-tl-toggle>' + icon("moon", 14) + (lang === "fil" ? " English" : " Filipino") + "</button></div></div>";
     if (roleIs("broker")) html += '<div class="notice-banner">' + icon("shield", 14) + '<span><b>Private brokerage workspace:</b> transactions, commissions, payouts, and team leads belong to ' + esc((currentUser && currentUser.name) || "this broker") + '. Listings and Inventory use the shared catalog.</span></div>';
     html += '<div class="tabs-row mb-16">' + tabs.map(x => '<button class="tab-btn' + (tab === x[0] ? " on" : "") + '" data-admin-tab="' + x[0] + '">' + x[1] + "</button>").join("") + "</div>";
-    html += '<div id="admin-body">' + (tab === "overview" ? adminOverview() : tab === "commission" ? adminCommission() : tab === "payouts" ? adminPayouts() : tab === "analytics" ? adminAnalytics() : tab === "inventory" ? adminInventory() : "") + "</div>";
+    html += '<div id="admin-body">' + (tab === "overview" ? adminOverview() : tab === "commission" ? adminCommission() : tab === "payouts" ? adminPayouts() : tab === "cobroke" ? adminCobroke() : tab === "analytics" ? adminAnalytics() : tab === "inventory" ? adminInventory() : "") + "</div>";
     return html;
   }
   function adminOverview() {
