@@ -168,6 +168,7 @@
     chart: '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>',
     briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>',
     chat: '<path d="M21 12a8 8 0 01-8 8H4l-1 3 3-3a8 8 0 1115-8z"/>',
+    bell: '<path d="M18 9a6 6 0 10-12 0c0 6-2.5 7.5-2.5 7.5h17S18 15 18 9z"/><path d="M10 20a2 2 0 004 0"/>',
     file: '<path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6"/>',
     menu: '<path d="M3 6h18M3 12h18M3 18h18"/>',
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
@@ -368,6 +369,116 @@
       toast("Property saved to your dashboard");
     } catch (e) { toast("Signed in, but the property could not be saved: " + esc(friendlyErr(e.message)), "err"); }
   }
+  /* ================= NOTIFICATIONS ================= */
+  let notifItems = [];
+  let notifChannel = null;
+  let notifLoadedAt = 0;
+  function notifIsCloud() { return !!(SB && currentUser && currentUser.id && !currentUser.demo); }
+  function notifUnreadCount() { return notifItems.filter(n => !n.read_at).length; }
+  function timeAgo(iso) {
+    const s = Math.max(1, (Date.now() - new Date(iso).getTime()) / 1000);
+    if (s < 60) return "just now";
+    if (s < 3600) return Math.floor(s / 60) + "m ago";
+    if (s < 86400) return Math.floor(s / 3600) + "h ago";
+    return Math.floor(s / 86400) + "d ago";
+  }
+  async function refreshNotifications() {
+    if (!notifIsCloud()) { notifReset(); return; }
+    try {
+      const res = await SB.from("notifications").select("id,type,title,body,link_view,read_at,created_at").order("created_at", { ascending: false }).limit(20);
+      if (res.error) throw res.error;
+      notifItems = res.data || [];
+      notifLoadedAt = Date.now();
+      notifUpdateChrome();
+      if (document.getElementById("notif-panel") && !document.getElementById("notif-panel").classList.contains("hidden")) renderNotifPanel();
+    } catch (e) {}
+  }
+  function notifUpdateChrome() {
+    const wrap = document.getElementById("notif-wrap");
+    if (!wrap) return;
+    wrap.classList.toggle("hidden", !notifIsCloud());
+    const badge = document.getElementById("notif-badge");
+    if (!badge) return;
+    const n = notifUnreadCount();
+    badge.textContent = n > 9 ? "9+" : String(n);
+    badge.classList.toggle("hidden", n === 0);
+  }
+  function notifReset() {
+    notifItems = [];
+    notifLoadedAt = 0;
+    if (notifChannel && SB) { try { SB.removeChannel(notifChannel); } catch (e) {} notifChannel = null; }
+    notifUpdateChrome();
+    const p = document.getElementById("notif-panel");
+    if (p) { p.classList.add("hidden"); p.innerHTML = ""; }
+  }
+  function notifSubscribeRealtime() {
+    if (!notifIsCloud() || notifChannel || !SB.channel) return;
+    notifChannel = SB.channel("ntf-" + currentUser.id)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: "user_id=eq." + currentUser.id }, payload => {
+        const row = payload.new || {};
+        if (notifItems.some(n => n.id === row.id)) return;
+        notifItems.unshift(row);
+        notifUpdateChrome();
+        toast("<b>" + esc(row.title || "Notification") + "</b>", "info");
+        const pnl = document.getElementById("notif-panel");
+        if (pnl && !pnl.classList.contains("hidden")) renderNotifPanel();
+      })
+      .subscribe();
+  }
+  function renderNotifPanel() {
+    const pnl = document.getElementById("notif-panel");
+    if (!pnl) return;
+    if (!notifItems.length) { pnl.innerHTML = '<div class="ntf-empty">No notifications yet.</div>'; return; }
+    const items = notifItems.map(n => {
+      const meta = JSON.stringify({ id: n.id, link: n.link_view || "" });
+      return '<button type="button" class="ntf-item' + (n.read_at ? "" : " unread") + '" data-ntf="' + esc(meta) + '">' +
+        (!n.read_at ? '<span class="ntf-dot"></span>' : "") +
+        '<span class="ntf-main"><b>' + esc(n.title || "Notification") + "</b>" +
+        (n.body ? '<span class="ntf-body">' + esc(n.body) + "</span>" : "") +
+        '<span class="ntf-time">' + esc(timeAgo(n.created_at)) + "</span></span></button>";
+    }).join("");
+    pnl.innerHTML = '<div class="ntf-head"><b>Notifications</b><button type="button" class="link-btn" id="ntf-markall">Mark all read</button></div>' + items;
+  }
+  async function notifMarkRead(id) {
+    const local = notifItems.find(n => n.id === id);
+    if (local && !local.read_at) { local.read_at = new Date().toISOString(); notifUpdateChrome(); }
+    if (SB) { try { await SB.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", id); } catch (e) {} }
+    renderNotifPanel();
+  }
+  async function notifMarkAllRead() {
+    const ids = notifItems.filter(n => !n.read_at).map(n => n.id);
+    notifItems.forEach(n => { if (!n.read_at) n.read_at = new Date().toISOString(); });
+    notifUpdateChrome(); renderNotifPanel();
+    if (ids.length && SB) { try { await SB.from("notifications").update({ read_at: new Date().toISOString() }).in("id", ids); } catch (e) {} }
+  }
+  function bindNotifications() {
+    const bell = document.getElementById("notif-bell");
+    const pnl = document.getElementById("notif-panel");
+    if (!bell || !pnl) return;
+    bell.addEventListener("click", async e => {
+      e.stopPropagation();
+      const willOpen = pnl.classList.contains("hidden");
+      pnl.classList.toggle("hidden", !willOpen);
+      if (!willOpen) return;
+      renderNotifPanel();
+      if (Date.now() - notifLoadedAt > 30000) await refreshNotifications();
+      renderNotifPanel();
+    });
+    document.addEventListener("click", e => {
+      if (!e.target.closest("#notif-wrap")) pnl.classList.add("hidden");
+    });
+    pnl.addEventListener("click", async ev => {
+      const markAll = ev.target.closest("#ntf-markall");
+      if (markAll) { ev.stopPropagation(); await notifMarkAllRead(); return; }
+      const item = ev.target.closest("[data-ntf]");
+      if (!item) return;
+      let info = {};
+      try { info = JSON.parse(item.getAttribute("data-ntf")); } catch (err) {}
+      await notifMarkRead(info.id);
+      pnl.classList.add("hidden");
+      if (info.link && navAllowed(info.link)) navigate(info.link);
+    });
+  }
   async function restoreSupabaseSession() {
     if (!(await sbUp())) return;
     if (!SB) return;
@@ -384,6 +495,8 @@
     await loadCloudTransactions();
     await loadCloudPlaybooks();
     try { await migrateVaultToCloud(); } catch (vaultMigrateErr) {}
+    await refreshNotifications();
+    notifSubscribeRealtime();
   }
 
   /* ================= HELPERS ================= */
@@ -1308,6 +1421,7 @@
       brokerTeamCache = null;
       brokerTeamList = [];
       localStorage.removeItem(AUTH_KEY);
+      notifReset();
       state = loadState();
       render();
     });
@@ -10032,6 +10146,7 @@
     bindGlobal();
     bindAuth();
     bindAuthState();
+    bindNotifications();
     render();
   });
 })();

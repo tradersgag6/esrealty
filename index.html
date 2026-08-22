@@ -182,7 +182,11 @@
       <button class="icon-btn menu-btn" id="menu-btn" title="Toggle menu"><span data-ic="menu"></span></button>
       <div class="topbar-title" id="topbar-title">Dashboard</div>
       <div class="topbar-actions">
-        <button class="icon-btn" id="language-toggle" title="Switch to Filipino">EN</button>
+              <div class="notif-wrap hidden" id="notif-wrap">
+        <button class="icon-btn" id="notif-bell" title="Notifications"><span data-ic="bell"></span><span class="notif-badge hidden" id="notif-badge"></span></button>
+        <div class="notif-panel hidden" id="notif-panel"></div>
+      </div>
+      <button class="icon-btn" id="language-toggle" title="Switch to Filipino">EN</button>
         <div class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode"><span data-ic="sun"></span></div>
         <div class="deal-picker" id="deal-picker" title="Current deal">No deal loaded</div>
         <button class="btn btn-primary" id="tb-new-deal"><span class="ic-sm" data-ic="plus"></span>New Investment</button>
