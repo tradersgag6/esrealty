@@ -860,7 +860,7 @@
     $$("#nav .nav-item").forEach(b => b.classList.toggle("active", b.getAttribute("data-view") === state.view));
     $$("#nav .nav-item").forEach(b => {
       const view = b.getAttribute("data-view");
-      b.classList.toggle("nav-hidden", !navAllowed(view) || ((roleIs("broker") || roleIs("owner")) && view === "dashboard"));
+      b.classList.toggle("nav-hidden", !navAllowed(view) || ((roleIs("broker") || roleIs("owner") || roleIs("tenant")) && view === "dashboard"));
     });
     const langIndex = lang === "fil" ? 1 : 0;
     $$("#nav .nav-item").forEach(b => {
@@ -7855,7 +7855,7 @@
     buyer: ["dashboard.view", "listings.view", "financing.view", "assistant.view", "reports.view", "settings.view"],
     seller: ["dashboard.view", "listings.view", "financing.view", "assistant.view", "reports.view", "settings.view"],
     owner: ["pms.view", "settings.view"],
-    tenant: ["dashboard.view", "pms.view", "settings.view"]
+    tenant: ["pms.view", "settings.view"]
   };
   const VIEW_CAPABILITY = { dashboard: "dashboard.view", wizard: "investments.manage", deal: "investments.manage", appraisal: "appraisal.view", market: "market.view", leads: "leads.view", listings: "listings.view", transactions: "transactions.view", financing: "financing.view", portfolio: "portfolio.view", pms: "pms.view", assistant: "assistant.view", reports: "reports.view", playbook: "playbook.manage", users: "users.manage", admin: "brokerage.view", settings: "settings.view" };
   function can(capability) {
