@@ -1297,13 +1297,35 @@
     "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
   ];
   function fetchNearbyCounts(lat, lng, cb, errCb) {
+    var statusEl = document.getElementById("wz-ai-loc-status");
+    var base = "";
+    if (window.ESREALTY_API_BASE) base = String(window.ESREALTY_API_BASE).replace(/\/functions\/v1\/listing-api\/api$/, "");
+    else if (window.ESREALTY_SUPABASE && window.ESREALTY_SUPABASE.supabaseUrl) base = window.ESREALTY_SUPABASE.supabaseUrl;
+    else base = "https://mrngaqtbaseewzcsogqi.supabase.co";
+    var edgeUrl = base + "/functions/v1/nearby-scan";
+    var anonKey = (window.ESREALTY_SUPABASE && window.ESREALTY_SUPABASE.supabaseKey) || "";
+    if (statusEl) statusEl.textContent = "Scanning nearby establishments via cloud...";
+    fetch(edgeUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + anonKey, "apikey": anonKey },
+      body: JSON.stringify({ lat: lat, lng: lng })
+    }).then(function (r) { if (!r.ok) throw new Error("edge " + r.status); return r.json(); })
+      .then(function (data) {
+        if (data && data.ok && data.counts) { if (statusEl) statusEl.textContent = "Scan complete — " + data.counts.present + " nearby type(s) found."; cb(data.counts); return; }
+        throw new Error("edge returned no data");
+      })
+      .catch(function () {
+        if (statusEl) statusEl.textContent = "Cloud scan unavailable, trying direct Overpass...";
+        fetchNearbyDirect(lat, lng, cb, errCb, statusEl);
+      });
+  }
+  function fetchNearbyDirect(lat, lng, cb, errCb, statusEl) {
     const parts = NEARBY_CATEGORY_QUERIES.map(c => c[1].replace("{LAT}", lat).replace("{LNG}", lng) + "\nout count;\n");
     const query = "[out:json][timeout:25];\n" + parts.join("");
     function tryMirror(idx) {
       if (idx >= OVERPASS_MIRRORS.length) { if (errCb) errCb(); return; }
       var ctl = new AbortController();
       var timer = setTimeout(() => ctl.abort(), 30000);
-      var statusEl = document.getElementById("wz-ai-loc-status");
       if (statusEl && idx > 0) statusEl.textContent = "Retrying with backup mirror (" + (idx + 1) + "/" + OVERPASS_MIRRORS.length + ")...";
       fetch(OVERPASS_MIRRORS[idx], {
         method: "POST",
