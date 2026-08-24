@@ -1291,11 +1291,7 @@
       .then(j => cb(j))
       .catch(() => cb(null));
   }
-  const OVERPASS_MIRRORS = [
-    "https://overpass-api.de/api/interpreter",
-    "https://overpass.kumi.systems/api/interpreter",
-    "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
-  ];
+  
   function fetchNearbyCounts(lat, lng, cb, errCb) {
     var statusEl = document.getElementById("wz-ai-loc-status");
     var base = "";
@@ -1319,49 +1315,75 @@
         fetchNearbyDirect(lat, lng, cb, errCb, statusEl);
       });
   }
+    const OVERPASS_MIRRORS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://lz4.overpass-api.de/api/interpreter"
+  ];
   function fetchNearbyDirect(lat, lng, cb, errCb, statusEl) {
-    const parts = NEARBY_CATEGORY_QUERIES.map(c => c[1].replace("{LAT}", lat).replace("{LNG}", lng) + "\nout count;\n");
-    const query = "[out:json][timeout:25];\n" + parts.join("");
-    function tryMirror(idx) {
-      if (idx >= OVERPASS_MIRRORS.length) { if (errCb) errCb(); return; }
+    var BATCH = 3;
+    var batches = [];
+    for (var i = 0; i < NEARBY_CATEGORY_QUERIES.length; i += BATCH) batches.push(NEARBY_CATEGORY_QUERIES.slice(i, i + BATCH));
+    var res = { found: {}, present: 0 };
+    var done = 0, failed = 0;
+    NEARBY_CATEGORY_QUERIES.forEach(function (c) { res.found[c[0]] = 0; });
+
+    function runBatch(bIdx, mirrorIdx) {
+      if (bIdx >= batches.length) {
+        if (done >= batches.length) cb(res);
+        else if (done === 0 && errCb) errCb();
+        else cb(res);
+        return;
+      }
+      var batch = batches[bIdx];
+      var parts = batch.map(function (c) { return c[1].replace("{LAT}", lat).replace("{LNG}", lng) + "\nout count;\n"; });
+      var query = "[out:json][timeout:15];\n" + parts.join("");
       var ctl = new AbortController();
-      var timer = setTimeout(() => ctl.abort(), 30000);
-      if (statusEl && idx > 0) statusEl.textContent = "Retrying with backup mirror (" + (idx + 1) + "/" + OVERPASS_MIRRORS.length + ")...";
-      fetch(OVERPASS_MIRRORS[idx], {
+      var timer = setTimeout(function () { ctl.abort(); }, 20000);
+      if (statusEl && bIdx > 0) statusEl.textContent = "Scanning nearby (" + (bIdx * BATCH + 1) + "-" + Math.min((bIdx + 1) * BATCH, NEARBY_CATEGORY_QUERIES.length) + " of " + NEARBY_CATEGORY_QUERIES.length + ")...";
+      fetch(OVERPASS_MIRRORS[mirrorIdx], {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ESRealty-LocationScan/1.0" },
         body: "data=" + encodeURIComponent(query),
         signal: ctl.signal
-      }).then(r => { clearTimeout(timer); if (!r.ok) throw new Error(r.status); return r.json(); })
-        .then(j => { clearTimeout(timer); parseOverpassResults(j, cb); })
-        .catch(() => { clearTimeout(timer); tryMirror(idx + 1); });
+      }).then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(function (j) {
+          var els = (j && j.elements) || [];
+          batch.forEach(function (c, k) {
+            var el = els[k];
+            var count = 0;
+            if (el && el.groups) el.groups.forEach(function (g) { count += (g.count || 0); });
+            else if (el && el.tags) count = (parseInt(el.tags.nodes || 0) + parseInt(el.tags.ways || 0) + parseInt(el.tags.relations || 0)) || parseInt(el.tags.total || 0);
+            res.found[c[0]] = count;
+          });
+          done++;
+          runBatch(bIdx + 1, 0);
+        })
+        .catch(function () {
+          clearTimeout(timer);
+          if (mirrorIdx + 1 < OVERPASS_MIRRORS.length) {
+            runBatch(bIdx, mirrorIdx + 1);
+          } else {
+            failed++;
+            if (statusEl && failed < batches.length) statusEl.textContent = "Some categories unavailable, continuing...";
+            runBatch(bIdx + 1, 0);
+          }
+        });
     }
-    tryMirror(0);
+    runBatch(0, 0);
   }
   function parseOverpassResults(j, cb) {
-    const els = (j && j.elements) || [];
-    const res = { found: {}, present: 0 };
-    NEARBY_CATEGORY_QUERIES.forEach((c, i) => {
-      const el = els[i];
-      let count = 0;
-      if (el && el.groups) el.groups.forEach(g => { count += g.count || 0; });
-      else if (el && el.tags) count = (C.num(el.tags.nodes, 0) + C.num(el.tags.ways, 0) + C.num(el.tags.relations, 0)) || C.num(el.tags.total, 0);
+    var els = (j && j.elements) || [];
+    var res = { found: {}, present: 0 };
+    NEARBY_CATEGORY_QUERIES.forEach(function (c, i) {
+      var el = els[i];
+      var count = 0;
+      if (el && el.groups) el.groups.forEach(function (g) { count += (g.count || 0); });
+      else if (el && el.tags) count = (parseInt(el.tags.nodes || 0) + parseInt(el.tags.ways || 0) + parseInt(el.tags.relations || 0)) || parseInt(el.tags.total || 0);
       res.found[c[0]] = count;
       if (count > 0) res.present++;
     });
     cb(res);
-  }
-  function findCityAdmin(name) {
-    const norm = v => String(v || "").toLowerCase().replace(/\b(city|municipality|municipal|metropolitan)\b/g, "").replace(/[^a-z0-9]/g, "");
-    const n = norm(name);
-    if (!n) return null;
-    for (const region of D.regionNames()) {
-      for (const province of D.provincesFor(region)) {
-        const c = D.citiesFor(region, province).find(x => norm(x) === n);
-        if (c) return { region: region, province: province, city: c };
-      }
-    }
-    return null;
   }
   function applyWizardLocationAnalysis(d, rev, counts) {
     const p = d.property, loc = d.location;
