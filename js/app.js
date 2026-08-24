@@ -2359,11 +2359,11 @@ function bindPerView() {
       html += '<div class="field col-12"><div class="map-tools"><button type="button" class="btn" id="wz-ai-loc">' + icon("spark", 14) + ' Analyze Location from Map</button>' +
         '<span class="dim tiny" id="wz-ai-loc-status">Drop a pin, then analyze to validate the address and scan nearby establishments (OpenStreetMap).</span></div></div>' +
         (d.location.analysis ? '<div class="field col-12"><div class="notice-banner"><span>' + icon("check", 14) + ' <b>Last analysis:</b> ' + esc(d.location.analysis.address || "Address resolved") + ' · ' + C.num(d.location.analysis.typesFound, 0) + ' type(s) found · ' + esc(new Date(d.location.analysis.analyzedAt).toLocaleString()) + '</span></div></div>' : "");
+      var scoreBar = function (val, max) { var pct = Math.min(100, Math.round((val / max) * 100)); var color = pct >= 60 ? "var(--green)" : pct >= 30 ? "var(--amber)" : "var(--text-faint)"; return '<div style="background:var(--surface-2);border-radius:4px;height:6px;width:100%"><div style="background:' + color + ';height:6px;border-radius:4px;width:' + pct + '%"></div></div>'; };
       var nc = d.location.nearbyCounts || {};
       var ncKeys = Object.keys(nc);
       if (ncKeys.length > 0) {
         var ncIcons = { School: "🎓", Hospital: "🏥", Bank: "🏦", "Convenience Store": "🏪", "Gas Station": "⛽", Market: "🛒", Church: "⛪", Restaurant: "🍽", Mall: "🏬", Transit: "🚌" };
-        var scoreBar = function (val, max) { var pct = Math.min(100, Math.round((val / max) * 100)); var color = pct >= 60 ? "var(--green)" : pct >= 30 ? "var(--amber)" : "var(--text-faint)"; return '<div style="background:var(--surface-2);border-radius:4px;height:6px;width:100%"><div style="background:' + color + ';height:6px;border-radius:4px;width:' + pct + '%"></div></div>'; };
         html += '<div class="field col-12"><label>' + icon("map-pin", 14) + ' Nearby Establishments (within 1 km)</label>';
         html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:8px">';
         ncKeys.forEach(function (k) {
