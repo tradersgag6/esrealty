@@ -1392,25 +1392,19 @@
     if (rev && rev.address) {
       const ad = rev.address;
       const cityNames = [ad.city, ad.town, ad.municipality, ad.county].filter(Boolean);
-      let chain = null;
-      for (const n of cityNames) { chain = findCityAdmin(n); if (chain) break; }
-      if (chain) {
-        p.region = chain.region; p.province = chain.province; p.city = chain.city;
-      } else {
-        const region = D.regionNames().find(r => (String(ad.region || ad.state_district || "").toLowerCase().indexOf(r.toLowerCase()) !== -1) || (String(r).toLowerCase().indexOf(String(ad.region || ad.state_district || "").toLowerCase()) !== -1));
-        if (region) {
-          p.region = region;
-          const prov = D.provincesFor(region).find(x => String(ad.state || ad.county || "").toLowerCase().indexOf(String(x).toLowerCase()) !== -1);
-          if (prov) {
-            p.province = prov;
-            const c = D.citiesFor(region, prov).find(x => cityNames.some(n => String(x).toLowerCase().indexOf(String(n).toLowerCase()) !== -1));
-            if (c) p.city = c;
-          }
+      const region = D.regionNames().find(r => (String(ad.region || ad.state_district || "").toLowerCase().indexOf(r.toLowerCase()) !== -1) || (String(r).toLowerCase().indexOf(String(ad.region || ad.state_district || "").toLowerCase()) !== -1));
+      if (region) {
+        p.region = region;
+        const prov = D.provincesFor(region).find(x => String(ad.state || ad.county || "").toLowerCase().indexOf(String(x).toLowerCase()) !== -1);
+        if (prov) {
+          p.province = prov;
+          const c = D.citiesFor(region, prov).find(x => cityNames.some(n => String(x).toLowerCase().indexOf(String(n).toLowerCase()) !== -1));
+          if (c) p.city = c;
         }
       }
       const brgy = ad.barangay || ad.village || ad.city_district || ad.neighbourhood;
       if (brgy) p.barangay = brgy;
-      if (!p.address && rev.display_name) p.address = rev.display_name;
+      if (rev.display_name) p.address = rev.display_name;
     }
     if (counts && counts.found) {
       const n = type => Math.min(C.num(counts.found[type], 0), 3);
