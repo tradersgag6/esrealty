@@ -2782,22 +2782,34 @@ function bindPerView() {
           const dd = gatherDeal();
           const ad = rev.address;
           const cityNames = [ad.city, ad.town, ad.municipality, ad.county].filter(Boolean);
-          let chain = null;
-          for (const n of cityNames) { chain = findCityAdmin(n); if (chain) break; }
-          if (chain) { dd.property.region = chain.region; dd.property.province = chain.province; dd.property.city = chain.city; }
-          else {
-            const region = D.regionNames().find(r => (String(ad.region || ad.state_district || "").toLowerCase().indexOf(r.toLowerCase()) !== -1) || (String(r).toLowerCase().indexOf(String(ad.region || ad.state_district || "").toLowerCase()) !== -1));
-            if (region) { dd.property.region = region; }
+          const region = D.regionNames().find(r => (String(ad.region || ad.state_district || "").toLowerCase().indexOf(r.toLowerCase()) !== -1) || (String(r).toLowerCase().indexOf(String(ad.region || ad.state_district || "").toLowerCase()) !== -1));
+          if (region) {
+            dd.property.region = region;
+            const prov = D.provincesFor(region).find(x => String(ad.state || ad.county || "").toLowerCase().indexOf(String(x).toLowerCase()) !== -1);
+            if (prov) {
+              dd.property.province = prov;
+              const c = D.citiesFor(region, prov).find(x => cityNames.some(n => String(x).toLowerCase().indexOf(String(n).toLowerCase()) !== -1));
+              if (c) dd.property.city = c;
+            }
           }
           const brgy = ad.barangay || ad.village || ad.city_district || ad.neighbourhood;
           if (brgy) dd.property.barangay = brgy;
           if (rev.display_name) dd.property.address = rev.display_name;
           save();
-          var fields = { "property.region": dd.property.region, "property.province": dd.property.province, "property.city": dd.property.city, "property.barangay": dd.property.barangay, "property.address": dd.property.address };
-          Object.keys(fields).forEach(k => {
-            var el = document.querySelector('[data-g="' + k + '"]');
-            if (el && fields[k]) el.value = fields[k];
-          });
+          var regionEl = document.getElementById("wz-region");
+          if (regionEl) { regionEl.value = dd.property.region || ""; regionEl.dispatchEvent(new Event("change")); }
+          setTimeout(() => {
+            var provEl = document.getElementById("wz-province");
+            if (provEl) { provEl.value = dd.property.province || ""; provEl.dispatchEvent(new Event("change")); }
+            setTimeout(() => {
+              var cityEl = document.getElementById("wz-city");
+              if (cityEl) { cityEl.value = dd.property.city || ""; cityEl.dispatchEvent(new Event("change")); }
+            }, 50);
+          }, 50);
+          var brgyEl = document.querySelector('[data-g="property.barangay"]');
+          if (brgyEl) brgyEl.value = dd.property.barangay || "";
+          var addrEl = document.querySelector('[data-g="property.address"]');
+          if (addrEl) addrEl.value = dd.property.address || "";
           var statusEl = document.getElementById("wz-ai-loc-status");
           if (statusEl) statusEl.textContent = "Pin moved — address auto-filled (" + (dd.property.city || "unknown city") + ", " + (dd.property.barangay || "unknown barangay") + ")";
         });
