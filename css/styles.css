@@ -1799,3 +1799,13 @@ body.preload .topbar { visibility: hidden !important; }
 .sf-map-hint { font-size: 12px; color: #6b7280; margin-top: 8px; }
 .sf-price-pin { display: inline-block; background: #1e2a3a; color: #fff; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,.25); border: 2px solid #fff; cursor: pointer; }
 .sf-price-pin:hover { background: #9a6d3a; }
+
+/* Wizard Location tab - score cards & nearby grid */
+.wz-loc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px; }
+.wz-score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+.wz-score-card { background: var(--surface); border-radius: 8px; padding: 10px 12px; border: 1px solid var(--border); overflow: hidden; }
+.wz-score-card .input-suffix { width: 100%; }
+.wz-score-card .input-suffix .input { min-width: 0; flex: 1; font-size: 13px; padding: 7px 10px; }
+.wz-score-card .input-suffix > span { font-size: 11px; padding: 0 8px; min-width: 0; }
+.wz-loc-grid .nc-card { border-radius: 8px; padding: 8px 10px; border: 1px solid var(--border); overflow: hidden; word-break: break-word; }
+@media (max-width: 600px) { .wz-score-grid { grid-template-columns: 1fr; } }

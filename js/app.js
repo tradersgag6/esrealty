@@ -2365,24 +2365,24 @@ function bindPerView() {
       if (ncKeys.length > 0) {
         var ncIcons = { School: "🎓", Hospital: "🏥", Bank: "🏦", "Convenience Store": "🏪", "Gas Station": "⛽", Market: "🛒", Church: "⛪", Restaurant: "🍽", Mall: "🏬", Transit: "🚌" };
         html += '<div class="field col-12"><label>' + icon("map-pin", 14) + ' Nearby Establishments (within 1 km)</label>';
-        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:8px">';
+        html += '<div class="wz-loc-grid">';
         ncKeys.forEach(function (k) {
           var c = nc[k] || 0;
           var bg = c > 0 ? "var(--surface)" : "var(--surface-2)";
-          html += '<div style="background:' + bg + ';border-radius:8px;padding:8px 10px;border:1px solid ' + (c > 0 ? "var(--green)" : "var(--border)") + '">';
+          html += '<div class="nc-card" style="background:' + bg + ';border-color:' + (c > 0 ? "var(--green)" : "var(--border)") + '">';
           html += '<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px">' + (ncIcons[k] || "📍") + ' ' + esc(k) + '</span><span style="font-weight:700;color:' + (c > 0 ? "var(--green)" : "var(--text-faint)") + '">' + c + '</span></div>';
           html += scoreBar(c, 5);
           html += '</div>';
         });
         html += '</div></div>';
         if (d.location.neighborhoodTags && d.location.neighborhoodTags.length > 0) {
-          html += '<div class="field col-12"><div class="ai-banner mt-8">' + icon("spark", 14) + ' <span><b>Neighborhood:</b> ' + d.location.neighborhoodTags.map(function (t) { return '<span style="display:inline-block;background:var(--green-bg,#e8f5e9);color:var(--green,#2e7d32);padding:2px 8px;border-radius:12px;font-size:11px;margin:2px">' + esc(t) + '</span>'; }).join(" ") + '</span></div></div>';
+          html += '<div class="field col-12"><div class="ai-banner mt-8">' + icon("spark", 14) + ' <span><b>Neighborhood:</b> ' + d.location.neighborhoodTags.map(function (t) { return '<span class="badge green" style="margin:2px">' + esc(t) + '</span>'; }).join(" ") + '</span></div></div>';
         }
         if (d.location.highlights && d.location.highlights.length > 0) {
           html += '<div class="field col-12"><div class="notice-banner mt-8"><span>' + icon("check", 14) + ' <b>Nearby:</b> ' + esc(d.location.highlights.join(" · ")) + '</span></div></div>';
         }
         if (d.location.riskFlags && d.location.riskFlags.length > 0) {
-          html += '<div class="field col-12"><div style="background:#fff3e0;border:1px solid #ff9800;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:13px">' + icon("zap", 14) + ' <b>Risks:</b> ' + d.location.riskFlags.map(function (r) { return esc(r); }).join(" · ") + '</div></div>';
+          html += '<div class="field col-12"><div class="notice-banner warn mt-8"><span>' + icon("zap", 14) + ' <b>Risks:</b> ' + d.location.riskFlags.map(function (r) { return esc(r); }).join(" · ") + '</span></div></div>';
         }
       } else {
         html += '<div class="field col-12"><label>Nearby Establishments</label><div class="opt-row">' +
@@ -2390,17 +2390,17 @@ function bindPerView() {
       }
       html += '<div class="field col-12"><div class="field-hint">Analyze Location from Map auto-fills the address and scores. You can still refine any result manually below.</div></div>';
       html += '<div class="field col-12"><label>' + icon("trending-up", 14) + ' Location Scores</label></div>';
-      html += '<div class="grid grid-2" style="gap:8px">';
+      html += '<div class="field col-12"><div class="wz-score-grid">';
       var scoreData = [["Accessibility", "accessibilityScore", 95], ["Traffic Load", "trafficScore", 90], ["Population", "populationScore", 95], ["Future Development", "futureDevScore", 92], ["Competition", "competitionScore", 85], ["Commercial Growth", "commercialGrowthScore", 95]];
       scoreData.forEach(function (sd) {
         var val = d.location[sd[1]] || 0;
-        html += '<div style="background:var(--surface);border-radius:8px;padding:10px;border:1px solid var(--border)">';
+        html += '<div class="wz-score-card">';
         html += '<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text-secondary)">' + sd[0] + '</span><span style="font-weight:700;font-size:14px">' + val + '<span style="color:var(--text-faint);font-weight:400;font-size:11px">/' + sd[2] + '</span></span></div>';
         html += scoreBar(val, sd[2]);
         html += numInp("location." + sd[1], val);
         html += '</div>';
       });
-      html += '</div>';
+      html += '</div></div>';
       html += '<div class="field col-12"><div class="ai-banner mt-8">' + icon("spark", 14) + ' <span><b>AI Location Analysis</b> — scores auto-computed from nearby establishments via OpenStreetMap. Press <b>Analyze Location from Map</b> to refresh.</span></div></div>';
     }
 
