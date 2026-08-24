@@ -1296,30 +1296,8 @@
   
   function fetchNearbyCounts(lat, lng, cb, errCb) {
     var statusEl = document.getElementById("wz-ai-loc-status");
-    var base = "";
-    if (window.ESREALTY_API_BASE) base = String(window.ESREALTY_API_BASE).replace(/\/functions\/v1\/listing-api\/api$/, "");
-    else if (window.ESREALTY_SUPABASE && window.ESREALTY_SUPABASE.supabaseUrl) base = window.ESREALTY_SUPABASE.supabaseUrl;
-    else base = "https://mrngaqtbaseewzcsogqi.supabase.co";
-    var edgeUrl = base + "/functions/v1/nearby-scan";
-    var anonKey = (window.ESREALTY_SUPABASE && window.ESREALTY_SUPABASE.supabaseKey) || "";
-    if (statusEl) statusEl.textContent = "Scanning nearby establishments…";
-    var edgeCtl = new AbortController();
-    var edgeTimer = setTimeout(function () { edgeCtl.abort(); }, 5000);
-    fetch(edgeUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + anonKey, "apikey": anonKey },
-      body: JSON.stringify({ lat: lat, lng: lng }),
-      signal: edgeCtl.signal
-    }).then(function (r) { clearTimeout(edgeTimer); if (!r.ok) throw new Error("edge " + r.status); return r.json(); })
-      .then(function (data) {
-        if (data && data.ok && data.counts) { if (statusEl) statusEl.textContent = "Scan complete — " + data.counts.present + " nearby type(s) found."; cb(data.counts); return; }
-        throw new Error("edge returned no data");
-      })
-      .catch(function () {
-        clearTimeout(edgeTimer);
-        if (statusEl) statusEl.textContent = "Scanning nearby establishments via Overpass…";
-        fetchNearbyDirect(lat, lng, cb, errCb, statusEl);
-      });
+    if (statusEl) statusEl.textContent = "Scanning nearby establishments via Overpass…";
+    fetchNearbyDirect(lat, lng, cb, errCb, statusEl);
   }
     const OVERPASS_MIRRORS = [
     "https://overpass-api.de/api/interpreter",
@@ -1329,35 +1307,50 @@
   function fetchNearbyDirect(lat, lng, cb, errCb, statusEl) {
     var res = { found: {}, present: 0 };
     NEARBY_CATEGORY_QUERIES.forEach(function (c) { res.found[c[0]] = 0; });
-
-    var parts = NEARBY_CATEGORY_QUERIES.map(function (c) { return c[1].replace(/\{LAT\}/g, lat).replace(/\{LNG\}/g, lng) + "\nout count;\n"; });
-    var query = "[out:json][timeout:40];\n" + parts.join("");
+    var tagged = NEARBY_CATEGORY_QUERIES.map(function (c, i) { return { name: c[0], tag: c[1].replace(/\{LAT\}/g, lat).replace(/\{LNG\}/g, lng), idx: i }; });
+    var parts = tagged.map(function (t) { return '  ' + t.tag + '\n'; });
+    var query = '[out:json][timeout:40];\n(\n' + parts.join('') + ');\nout body;';
 
     function tryMirror(mIdx) {
       if (mIdx >= OVERPASS_MIRRORS.length) {
         NEARBY_CATEGORY_QUERIES.forEach(function (c) { if (res.found[c[0]] > 0) res.present++; });
+        if (statusEl) statusEl.textContent = res.present > 0 ? "Scan complete — " + res.present + " nearby type(s) found." : "Scan complete — no nearby data found for this location.";
         if (res.present > 0) cb(res); else if (errCb) errCb(); else cb(res);
         return;
       }
-      if (statusEl) statusEl.textContent = "Scanning nearby establishments…";
+      if (statusEl) statusEl.textContent = "Scanning nearby via " + ["Overpass", "Kumi", "LZ4"][mIdx] + "…";
       var ctl = new AbortController();
-      var timer = setTimeout(function () { ctl.abort(); }, 45000);
+      var timer = setTimeout(function () { ctl.abort(); }, 50000);
       fetch(OVERPASS_MIRRORS[mIdx], {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ESRealty-LocationScan/1.0" },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: "data=" + encodeURIComponent(query),
         signal: ctl.signal
       }).then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
         .then(function (j) {
           var els = (j && j.elements) || [];
-          NEARBY_CATEGORY_QUERIES.forEach(function (c, k) {
-            var el = els[k];
-            var count = 0;
-            if (el && el.groups) el.groups.forEach(function (g) { count += (g.count || 0); });
-            else if (el && el.tags) count = (parseInt(el.tags.nodes || 0) + parseInt(el.tags.ways || 0) + parseInt(el.tags.relations || 0)) || parseInt(el.tags.total || 0);
-            res.found[c[0]] = count;
+          els.forEach(function (el) {
+            if (!el || !el.tags) return;
+            var amenity = el.tags.amenity || "";
+            var shop = el.tags.shop || "";
+            var railway = el.tags.railway || "";
+            var highway = el.tags.highway || "";
+            var pt = el.tags.public_transport || "";
+            tagged.forEach(function (t) {
+              if (t.name === "School" && /^school|kindergarten|college|university$/.test(amenity)) res.found["School"]++;
+              if (t.name === "Hospital" && /^hospital|clinic$/.test(amenity)) res.found["Hospital"]++;
+              if (t.name === "Bank" && /^bank|atm$/.test(amenity)) res.found["Bank"]++;
+              if (t.name === "Convenience Store" && shop === "convenience") res.found["Convenience Store"]++;
+              if (t.name === "Gas Station" && amenity === "fuel") res.found["Gas Station"]++;
+              if (t.name === "Market" && (amenity === "marketplace" || /^supermarket|wholesale$/.test(shop))) res.found["Market"]++;
+              if (t.name === "Church" && amenity === "place_of_worship") res.found["Church"]++;
+              if (t.name === "Restaurant" && /^restaurant|fast_food|cafe$/.test(amenity)) res.found["Restaurant"]++;
+              if (t.name === "Mall" && shop === "mall") res.found["Mall"]++;
+              if (t.name === "Transit" && (/^station|stop$/.test(railway) || pt === "station" || highway === "bus_stop")) res.found["Transit"]++;
+            });
           });
           NEARBY_CATEGORY_QUERIES.forEach(function (c) { if (res.found[c[0]] > 0) res.present++; });
+          console.log("[ESRealty Scan] " + els.length + " OSM elements, " + res.present + " types found:", JSON.stringify(res.found));
           if (statusEl) statusEl.textContent = "Scan complete — " + res.present + " nearby type(s) found.";
           cb(res);
         })
@@ -1462,8 +1455,12 @@
       }
       applyWizardLocationAnalysis(d, revResult, countsResult);
       save(); render();
-      var found = countsResult && countsResult.present ? countsResult.present : 0;
-      toast("Location analysis complete — address verified and <b>" + found + "</b> nearby establishment type(s) found", "ok");
+      var found = countsResult.present || 0;
+      if (found > 0) {
+        toast("Location analysis complete — <b>" + found + "</b> nearby type(s) found, scores updated", "ok");
+      } else {
+        toast("Address resolved — no nearby OpenStreetMap data found for this pin. Scores set to defaults.", "info");
+      }
     }
     reverseGeocodePin(lat, lng, rev => { revResult = rev || {}; tryFinish(); });
     fetchNearbyCounts(lat, lng, counts => { countsResult = counts; tryFinish(); }, () => { countsResult = { found: {}, present: 0 }; tryFinish(); });
