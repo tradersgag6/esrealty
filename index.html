@@ -23,7 +23,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"></noscript>
 <link rel="stylesheet" href="css/styles.css">
 
-  <script>window.ESREALTY_LEAFLET = { ensure: function () { if (window.L) return Promise.resolve(); if (!this._p) this._p = new Promise(function (resolve) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "vendor/leaflet/leaflet.css"; document.head.appendChild(l); var s = document.createElement("script"); s.src = "vendor/leaflet/leaflet.js"; s.onload = s.onerror = function () { resolve(); }; document.head.appendChild(s); }); return this._p; } };</script>
+  <script>window.ESREALTY_LEAFLET = { ensure: function () { if (window.L) return Promise.resolve(); if (!this._p) this._p = new Promise(function (resolve) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "vendor/leaflet/leaflet.css"; document.head.appendChild(l); var s = document.createElement("script"); s.src = "vendor/leaflet/leaflet.js?v=19"; s.onload = s.onerror = function () { resolve(); }; document.head.appendChild(s); }); return this._p; } };</script>
   <script src="js/supabase-config.js" defer></script>
   <script src="js/listings-api.js" defer></script>
   <script src="js/storefront.js" defer></script>

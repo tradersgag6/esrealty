@@ -7637,6 +7637,31 @@ function bindPerView() {
       toast("Could not load listings: " + esc(friendlyErr(e.message)), "err");
     }
   }
+  window.__geoGo = function () { var b = document.querySelector("[data-inv-geocode]"); if (b) geocodeInventoryMissing(b); };
+  async function geocodeInventoryMissing(btn) {
+    if (window.__geoBusy) return;
+    window.__geoBusy = true;
+    try {
+    if (btn) btn.disabled = true;
+    const targets = (state.listings || []).filter(l => !(Number(l.lat) && Number(l.lng))).slice(0, 8);
+    if (!targets.length) { toast("All listings already have coordinates", "info"); if (btn) btn.disabled = false; return; }
+    let ok = 0;
+    const changed = [];
+    for (const rec of targets) {
+      const q = [rec.title, rec.barangay, rec.city, rec.province, "Philippines"].filter(Boolean).join(", ");
+      try {
+        const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ph&q=" + encodeURIComponent(q), { headers: { Accept: "application/json" } });
+        const j = await r.json();
+        if (Array.isArray(j) && j[0]) { rec.lat = Number(j[0].lat); rec.lng = Number(j[0].lon); changed.push(rec); ok++; }
+      } catch (e) {}
+      await new Promise(res => setTimeout(res, 1100));
+    }
+    save(); render();
+    toast("Located " + ok + " of " + targets.length + " listings via OpenStreetMap");
+    if (psCloud()) { for (const rec of changed) { try { await persistListingToCloud(rec); } catch (cloudErr) {} } }
+    if (btn) btn.disabled = false;
+    } finally { window.__geoBusy = false; }
+  }
   async function persistListingToCloud(rec) {
     if (!LISTINGS_API || !currentUser || !currentUser.id || !rec) throw new Error("Listings API is unavailable");
     const result = rec._isNew ? await LISTINGS_API.create(listingToApi(rec)) : await LISTINGS_API.update(rec.id, listingToApi(rec));
@@ -10662,6 +10687,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
       (synced ? '<p class="dim tiny mt-8">' + icon("check", 12) + ' Last synced: ' + synced + "</p>" : '<p class="dim tiny mt-8">' + icon("refresh", 12) + ' Opens with the latest cloud data.</p>') +
       "</div>" +
       '<button class="btn btn-ghost btn-sm" data-inv-refresh>' + icon("refresh", 13) + ' Refresh</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="__geoGo()" data-inv-geocode title="Find coordinates for listings missing them">Auto-locate</button>' +
       "</div>" +
       (devs.length ?
       '<div class="table-wrap mt-8"><table class="data"><thead><tr><th>Developer / Project</th>' + statuses.map(s => "<th>" + labels[s] + "</th>").join("") + "<th>Total</th></tr></thead><tbody>" +

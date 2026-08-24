@@ -406,10 +406,70 @@
      return shell('<section class="sf-search-page"><div class="sf-search-intro"><p class="sf-eyebrow">PROPERTY SEARCH</p><h1>Find a property that fits.</h1><p>Browse current property inventory across the Philippines.</p></div>' +
       '<div class="sf-filter-stick">' + searchFields(params, true) + '</div><div class="sf-results-bar"><p><b>' + esc(result.total || 0) + '</b> properties</p>' +
       '<div><select data-sf-sort><option value="date_desc"' + (params.get("sort") === "date_desc" || !params.get("sort") ? " selected" : "") + '>Newest</option><option value="price_asc"' + (params.get("sort") === "price_asc" ? " selected" : "") + '>Price: Low to high</option><option value="price_desc"' + (params.get("sort") === "price_desc" ? " selected" : "") + '>Price: High to low</option></select>' +
-      '<button data-sf-mode="grid" class="' + (viewState.mode === "grid" ? "active" : "") + '">Grid</button><button data-sf-mode="list" class="' + (viewState.mode === "list" ? "active" : "") + '">List</button></div></div>' +
-      '<div class="sf-property-grid ' + (viewState.mode === "list" ? "list" : "") + '">' + cards + '</div>' + pager + '</section>');
+      '<button data-sf-mode="grid" class="' + (viewState.mode === "grid" ? "active" : "") + '">Grid</button><button data-sf-mode="list" class="' + (viewState.mode === "list" ? "active" : "") + '">List</button><button data-sf-mode="map" class="' + (viewState.mode === "map" ? "active" : "") + '">Map</button></div></div>' +
+      (viewState.mode === "map"
+        ? '<div class="sf-map-wrap"><div id="sf-map"></div><p class="sf-map-hint" id="sf-map-hint">Loading map…</p></div>'
+        : '<div class="sf-property-grid ' + (viewState.mode === "list" ? "list" : "") + '">' + cards + '</div>') + pager + '</section>');
   }
-
+  var sfMapRef = null;
+  window.__sfGo = function (id) { go("listing/" + encodeURIComponent(id)); };
+  function sfPriceShort(v) {
+    var n = Number(v || 0);
+    if (!n) return "";
+    if (n >= 1000000) return "₱" + (n / 1000000).toFixed(n % 1000000 ? 2 : 0) + "M";
+    if (n >= 1000) return "₱" + Math.round(n / 1000) + "K";
+    return "₱" + n;
+  }
+  function sfInitMap() {
+    window.__dbg = window.__dbg || {};
+    window.__dbg.entered = true;
+    var n = 0;
+    (function findEl() {
+      var el = document.getElementById("sf-map");
+      if (!el) { if (++n > 50) { window.__dbg.elNever = true; return; } setTimeout(findEl, 100); return; }
+      window.__dbg.elFound = true;
+      window.ESREALTY_LEAFLET.ensure().then(function () {
+        var m = 0;
+        (function waitL() {
+          if (!window.L) { if (++m > 30) { window.__dbg.lNever = true; return; } setTimeout(waitL, 150); return; }
+          window.__dbg.built = true;
+          sfBuildMap();
+        })();
+      });
+    })();
+  }
+  function sfBuildMap() {
+    {
+      var el = document.getElementById("sf-map");
+      if (!el || !window.L) return;
+      var L = window.L;
+      if (sfMapRef) { try { sfMapRef.remove(); } catch (e) {} sfMapRef = null; }
+      sfMapRef = L.map(el, { scrollWheelZoom: true });
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap &copy; CARTO" }).addTo(sfMapRef);
+      var items = (viewState.result && viewState.result.data) || [];
+      var pts = [];
+      items.forEach(function (l) {
+        var la = Number(l.latitude), ln = Number(l.longitude);
+        if (!isFinite(la) || !isFinite(ln) || (!la && !ln)) return;
+        pts.push([la, ln]);
+        var pin = document.createElement("span");
+        pin.className = "sf-price-pin";
+        pin.textContent = sfPriceShort(l.offer_type === "rent" ? l.rent : l.price);
+        var icon = L.divIcon({ className: "", html: pin, iconSize: null });
+        var mk = L.marker([la, ln], { icon: icon }).addTo(sfMapRef);
+        mk.bindPopup(sfPopupHtml(l));
+      });
+      var hint = document.getElementById("sf-map-hint");
+      if (hint) { var missing = items.length - pts.length; hint.textContent = pts.length + " mapped on map" + (missing ? " · " + missing + " listing" + (missing === 1 ? "" : "s") + " without location yet" : ""); }
+      if (pts.length) sfMapRef.fitBounds(pts, { padding: [30, 30] }); else sfMapRef.setView([12.8797, 121.774], 5);
+    }
+  }
+  function sfPopupHtml(l) {
+    var price = sfPriceShort(l.offer_type === "rent" ? l.rent : l.price);
+    return '<div style="min-width:180px"><b>' + esc(l.title || "Property") + '</b><br>' + esc(price)
+      + (l.city ? ' · ' + esc(l.city) : '')
+      + '<br><a class="btn btn-primary btn-sm" style="margin-top:6px;display:inline-block" href="#/listing/' + encodeURIComponent(l.id) + '">View details</a></div>';
+  }
   function detailPage(listing) {
     if (viewState.loading) return shell('<section class="sf-detail"><div class="sf-detail-loading">Loading property…</div></section>');
     if (!listing) return shell('<section class="sf-detail">' + empty(viewState.error || "This listing is unavailable.") + '</section>');
@@ -477,6 +537,7 @@
     else if (host.querySelector(".sf-hero")) patchHome();
     else host.innerHTML = home();
     mountMap();
+    if (current.path === "search" && viewState.mode === "map") setTimeout(sfInitMap, 60);
     bindHomeMotion();
     bindBtMotion();
     if (current.path === "home" || current.path === "") bindConstruction();

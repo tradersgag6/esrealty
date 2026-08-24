@@ -4,7 +4,7 @@
    - Cache-first for immutable vendor assets, fonts, map tiles.
    - Navigations: network-first with offline fallback to the shell. */
 const VERSION = "esrealty-v1";
-const VENDOR_CACHE = "esrealty-vendor-v1";
+const VENDOR_CACHE = "esrealty-vendor-v2";
 const IMG_CACHE = "esrealty-img-v1";
 
 self.addEventListener("install", (event) => {
