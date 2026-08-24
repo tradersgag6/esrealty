@@ -2078,8 +2078,9 @@
     bindNumFormatting();
     document.addEventListener("mousedown", function (e) {
       var t = e.target;
-      if (!t.closest("input, textarea, select, [contenteditable], .map-search, .leaflet-container, .wz-map")) {
-        if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+      if (!t.closest("input, textarea, select, [contenteditable], .leaflet-container, .map-search")) {
+        var el = document.activeElement;
+        if (el && el !== document.body && !el.closest(".leaflet-container")) el.blur();
       }
     });
     $("#nav").addEventListener("click", e => {

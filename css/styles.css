@@ -207,6 +207,8 @@ body {
   color: var(--text); font-size: 13px; font-family: var(--font-sans);
    outline: none; transition: border-color .15s, box-shadow .15s;
 }
+input, textarea, select { caret-color: transparent; }
+input:focus, textarea:focus, select:focus, .map-search input:focus { caret-color: var(--accent); }
 .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15); }
 .input::placeholder { color: var(--text-faint); }
 .input-num { font-family: var(--font-mono); text-align: right; }
@@ -596,7 +598,9 @@ table.data .num { font-family: var(--font-mono); text-align: right; white-space:
 .map-search { display: flex; gap: 8px; margin-bottom: 8px; }
 .map-search .input { flex: 1; }
 .map-picker { height: 340px; border-radius: 12px; overflow: hidden; position: relative; z-index: 1; border: 1px solid var(--stroke-strong); }
-.map-picker .leaflet-container { background: #0D1B2A; font-family: var(--font-sans); }
+.map-picker .leaflet-container { background: #0D1B2A; font-family: var(--font-sans); outline: none; caret-color: transparent !important; }
+.leaflet-container:focus { outline: none; }
+input:focus, textarea:focus, select:focus, .map-search input:focus { caret-color: var(--accent) !important; }
 [data-theme="light"] .map-picker .leaflet-container { background: #E8EEF5; }
 .map-picker .leaflet-control-attribution { font-size: 9px; }
 .map-coords { margin-top: 8px; font-size: 12px; color: var(--text-dim); }
