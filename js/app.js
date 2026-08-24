@@ -1413,12 +1413,37 @@
     if (counts && counts.found) {
       const n = type => Math.min(C.num(counts.found[type], 0), 3);
       D.NEARBY_TYPES.forEach(t => { loc.nearby[t] = counts.found[t] > 0; });
+      var nc = {};
+      NEARBY_CATEGORY_QUERIES.forEach(function (c) { nc[c[0]] = C.num(counts.found[c[0]], 0); });
+      loc.nearbyCounts = nc;
+      loc.nearbyPresent = counts.present || 0;
       loc.accessibilityScore = C.clamp(30 + n("Transit") * 14 + n("Market") * 8 + n("Convenience Store") * 5 + n("Gas Station") * 3 + n("School") * 4, 30, 95);
       loc.trafficScore = C.clamp(28 + n("Transit") * 12 + n("Market") * 8 + n("Mall") * 7 + n("Restaurant") * 4, 25, 90);
       loc.populationScore = C.clamp(32 + n("School") * 7 + n("Hospital") * 9 + n("Market") * 8 + n("Restaurant") * 4 + n("Convenience Store") * 4, 30, 95);
       loc.futureDevScore = C.clamp(38 + n("Transit") * 11 + n("Mall") * 8 + n("Hospital") * 6 + n("Bank") * 5, 30, 92);
       loc.competitionScore = C.clamp(20 + n("Restaurant") * 8 + n("Mall") * 10 + n("Market") * 6 + n("Convenience Store") * 4, 20, 85);
       loc.commercialGrowthScore = C.clamp(30 + n("Transit") * 9 + n("Mall") * 9 + n("Bank") * 6 + n("Market") * 7 + n("Restaurant") * 4, 30, 95);
+      var tags = [];
+      if (nc["School"] >= 3) tags.push("University District"); else if (nc["School"] >= 1) tags.push("School Zone");
+      if (nc["Hospital"] >= 2) tags.push("Medical Hub"); else if (nc["Hospital"] >= 1) tags.push("Healthcare Access");
+      if (nc["Mall"] >= 1 || nc["Restaurant"] >= 5) tags.push("Commercial Center"); else if (nc["Restaurant"] >= 2) tags.push("Dining Hub");
+      if (nc["Transit"] >= 3) tags.push("Transit Hub"); else if (nc["Transit"] >= 1) tags.push("Commuter-Friendly");
+      if (nc["Convenience Store"] >= 2 && nc["Market"] >= 1) tags.push("Daily Essentials");
+      if (nc["Church"] >= 2) tags.push("Community Area");
+      if (tags.length === 0) tags.push("Developing Area");
+      loc.neighborhoodTags = tags;
+      var hl = [];
+      ["School","Hospital","Bank","Mall","Restaurant","Market","Transit","Gas Station","Convenience Store","Church"].forEach(function (k) {
+        if (nc[k] > 0) hl.push(nc[k] + " " + k + (nc[k] > 1 ? "s" : ""));
+      });
+      loc.highlights = hl;
+      var risks = [];
+      if (nc["Hospital"] === 0) risks.push("No hospital within 1 km");
+      if (nc["Transit"] === 0) risks.push("No public transit access");
+      if (nc["School"] === 0 && nc["Convenience Store"] === 0) risks.push("Limited daily amenities");
+      if (nc["Bank"] === 0) risks.push("No bank or ATM nearby");
+      if (nc["Restaurant"] === 0 && nc["Market"] === 0) risks.push("No dining or market options");
+      loc.riskFlags = risks;
     }
     if (!C.num(p.marketValuePerSqm, 0) && p.city) p.marketValuePerSqm = D.benchmarkFor(p.city);
     loc.analysis = {
@@ -2333,17 +2358,50 @@ function bindPerView() {
       html += mapPickerHtml("wz-map", p.lat, p.lng);
       html += '<div class="field col-12"><div class="map-tools"><button type="button" class="btn" id="wz-ai-loc">' + icon("spark", 14) + ' Analyze Location from Map</button>' +
         '<span class="dim tiny" id="wz-ai-loc-status">Drop a pin, then analyze to validate the address and scan nearby establishments (OpenStreetMap).</span></div></div>' +
-        (d.location.analysis ? '<div class="field col-12"><div class="notice-banner"><span>' + icon("check", 14) + ' <b>Last map analysis:</b> ' + esc(d.location.analysis.address || "Address could not be resolved") + ' · ' + C.num(d.location.analysis.typesFound, 0) + ' nearby establishment type(s) found · ' + esc(new Date(d.location.analysis.analyzedAt).toLocaleString()) + '</span></div></div>' : "");
-      html += '<div class="field col-12"><label>Nearby Establishments (within ~1 km)</label><div class="opt-row">' +
-        D.NEARBY_TYPES.map(n => '<button class="opt' + (d.location.nearby[n] ? " on" : "") + '" data-near="' + n + '">' + n + '</button>').join("") + '</div></div>';
-      html += '<div class="field col-12"><div class="field-hint">Analyze Location from Map refreshes these establishment flags and the six location assessments below. You can still refine any result manually.</div></div>';
-      html += wfield("Accessibility (0-100)", numInp("location.accessibilityScore", d.location.accessibilityScore)) +
-        wfield("Traffic Load (0-100)", numInp("location.trafficScore", d.location.trafficScore)) +
-        wfield("Population Score (0-100)", numInp("location.populationScore", d.location.populationScore)) +
-        wfield("Future Development (0-100)", numInp("location.futureDevScore", d.location.futureDevScore)) +
-        wfield("Competition (0-100)", numInp("location.competitionScore", d.location.competitionScore)) +
-        wfield("Commercial Growth (0-100)", numInp("location.commercialGrowthScore", d.location.commercialGrowthScore));
-      html += '<div class="field col-12"><div class="ai-banner mt-8">' + icon("spark", 14) + ' <span><b>AI Location Analysis</b> — press <b>Analyze Location from Map</b> above to reverse-geocode the pin (auto-fills Region/Province/City/Barangay) and detect nearby establishments via OpenStreetMap; the scores below are then computed from the results. In production this runs on Google Places + OpenAI.</span></div></div>';
+        (d.location.analysis ? '<div class="field col-12"><div class="notice-banner"><span>' + icon("check", 14) + ' <b>Last analysis:</b> ' + esc(d.location.analysis.address || "Address resolved") + ' · ' + C.num(d.location.analysis.typesFound, 0) + ' type(s) found · ' + esc(new Date(d.location.analysis.analyzedAt).toLocaleString()) + '</span></div></div>' : "");
+      var nc = d.location.nearbyCounts || {};
+      var ncKeys = Object.keys(nc);
+      if (ncKeys.length > 0) {
+        var ncIcons = { School: "🎓", Hospital: "🏥", Bank: "🏦", "Convenience Store": "🏪", "Gas Station": "⛽", Market: "🛒", Church: "⛪", Restaurant: "🍽", Mall: "🏬", Transit: "🚌" };
+        var scoreBar = function (val, max) { var pct = Math.min(100, Math.round((val / max) * 100)); var color = pct >= 60 ? "var(--green)" : pct >= 30 ? "var(--amber)" : "var(--text-faint)"; return '<div style="background:var(--surface-2);border-radius:4px;height:6px;width:100%"><div style="background:' + color + ';height:6px;border-radius:4px;width:' + pct + '%"></div></div>'; };
+        html += '<div class="field col-12"><label>' + icon("map-pin", 14) + ' Nearby Establishments (within 1 km)</label>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:8px">';
+        ncKeys.forEach(function (k) {
+          var c = nc[k] || 0;
+          var bg = c > 0 ? "var(--surface)" : "var(--surface-2)";
+          html += '<div style="background:' + bg + ';border-radius:8px;padding:8px 10px;border:1px solid ' + (c > 0 ? "var(--green)" : "var(--border)") + '">';
+          html += '<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px">' + (ncIcons[k] || "📍") + ' ' + esc(k) + '</span><span style="font-weight:700;color:' + (c > 0 ? "var(--green)" : "var(--text-faint)") + '">' + c + '</span></div>';
+          html += scoreBar(c, 5);
+          html += '</div>';
+        });
+        html += '</div></div>';
+        if (d.location.neighborhoodTags && d.location.neighborhoodTags.length > 0) {
+          html += '<div class="field col-12"><div class="ai-banner mt-8">' + icon("spark", 14) + ' <span><b>Neighborhood:</b> ' + d.location.neighborhoodTags.map(function (t) { return '<span style="display:inline-block;background:var(--green-bg,#e8f5e9);color:var(--green,#2e7d32);padding:2px 8px;border-radius:12px;font-size:11px;margin:2px">' + esc(t) + '</span>'; }).join(" ") + '</span></div></div>';
+        }
+        if (d.location.highlights && d.location.highlights.length > 0) {
+          html += '<div class="field col-12"><div class="notice-banner mt-8"><span>' + icon("check", 14) + ' <b>Nearby:</b> ' + esc(d.location.highlights.join(" · ")) + '</span></div></div>';
+        }
+        if (d.location.riskFlags && d.location.riskFlags.length > 0) {
+          html += '<div class="field col-12"><div style="background:#fff3e0;border:1px solid #ff9800;border-radius:8px;padding:8px 12px;margin-top:8px;font-size:13px">' + icon("zap", 14) + ' <b>Risks:</b> ' + d.location.riskFlags.map(function (r) { return esc(r); }).join(" · ") + '</div></div>';
+        }
+      } else {
+        html += '<div class="field col-12"><label>Nearby Establishments</label><div class="opt-row">' +
+          D.NEARBY_TYPES.map(n => '<button class="opt' + (d.location.nearby[n] ? " on" : "") + '" data-near="' + n + '">' + n + '</button>').join("") + '</div></div>';
+      }
+      html += '<div class="field col-12"><div class="field-hint">Analyze Location from Map auto-fills the address and scores. You can still refine any result manually below.</div></div>';
+      html += '<div class="field col-12"><label>' + icon("trending-up", 14) + ' Location Scores</label></div>';
+      html += '<div class="grid grid-2" style="gap:8px">';
+      var scoreData = [["Accessibility", "accessibilityScore", 95], ["Traffic Load", "trafficScore", 90], ["Population", "populationScore", 95], ["Future Development", "futureDevScore", 92], ["Competition", "competitionScore", 85], ["Commercial Growth", "commercialGrowthScore", 95]];
+      scoreData.forEach(function (sd) {
+        var val = d.location[sd[1]] || 0;
+        html += '<div style="background:var(--surface);border-radius:8px;padding:10px;border:1px solid var(--border)">';
+        html += '<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:12px;color:var(--text-secondary)">' + sd[0] + '</span><span style="font-weight:700;font-size:14px">' + val + '<span style="color:var(--text-faint);font-weight:400;font-size:11px">/' + sd[2] + '</span></span></div>';
+        html += scoreBar(val, sd[2]);
+        html += numInp("location." + sd[1], val);
+        html += '</div>';
+      });
+      html += '</div>';
+      html += '<div class="field col-12"><div class="ai-banner mt-8">' + icon("spark", 14) + ' <span><b>AI Location Analysis</b> — scores auto-computed from nearby establishments via OpenStreetMap. Press <b>Analyze Location from Map</b> to refresh.</span></div></div>';
     }
 
     if (step === 3) {
