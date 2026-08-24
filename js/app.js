@@ -1215,6 +1215,7 @@
     if (!entry.marker) {
       entry.marker = L.marker(ll, { draggable: true }).addTo(entry.map);
       entry.marker.on("dragend", () => pinMap(id, entry.marker.getLatLng()));
+      entry.marker.on("drag", () => { if (entry.onDrag) entry.onDrag(); });
     } else {
       entry.marker.setLatLng(ll);
     }
@@ -1251,10 +1252,11 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: "abcd", maxZoom: 19
     }).addTo(map);
-    const entry = { map: map, marker: null, onPick: onPick, token: 0, deb: null };
+    const entry = { map: map, marker: null, onPick: onPick, onDrag: null, token: 0, deb: null };
     if (hasPin) {
       entry.marker = L.marker(center, { draggable: true }).addTo(map);
       entry.marker.on("dragend", () => pinMap(id, entry.marker.getLatLng()));
+      entry.marker.on("drag", () => { if (entry.onDrag) entry.onDrag(); });
     }
     map.on("click", e => pinMap(id, e.latlng));
     _mapRegistry[id] = entry;
@@ -1286,7 +1288,7 @@
   ];
 
   function reverseGeocodePin(lat, lng, cb) {
-    fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=16&addressdetails=1&accept-language=en&lat=" + lat + "&lon=" + lng, { headers: { "Accept": "application/json" } })
+    fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=16&addressdetails=1&accept-language=en&lat=" + lat + "&lon=" + lng, { headers: { "Accept": "application/json", "User-Agent": "ESRealty/1.0 (real-estate-map-picker)" } })
       .then(r => { if (!r.ok) throw new Error("Reverse geocoding unavailable"); return r.json(); })
       .then(j => cb(j))
       .catch(() => cb(null));
@@ -2771,50 +2773,75 @@ function bindPerView() {
     const searchText = wantSearch ? ((d0 && d0.property.city) || (d0 && d0.property.province) || "") : "";
     var _geoTimer = null;
     initMapPicker("wz-map", d0 && d0.property.lat, d0 && d0.property.lng, (lat, lng) => {
-      const d = gatherDeal();
+      const d = state.current || freshDeal();
       d.property.lat = lat;
       d.property.lng = lng;
       save();
+      var coordEl = document.getElementById("wz-map-coords");
+      if (!coordEl) {
+        var m = document.getElementById("wz-map");
+        if (m) {
+          var next = m.nextElementSibling;
+          if (next && next.classList && next.classList.contains("map-coords")) coordEl = next;
+        }
+      }
       clearTimeout(_geoTimer);
       _geoTimer = setTimeout(() => {
         reverseGeocodePin(lat, lng, rev => {
           if (!rev || !rev.address) return;
-          const dd = gatherDeal();
-          const ad = rev.address;
-          const cityNames = [ad.city, ad.town, ad.municipality, ad.county].filter(Boolean);
-          const region = D.regionNames().find(r => (String(ad.region || ad.state_district || "").toLowerCase().indexOf(r.toLowerCase()) !== -1) || (String(r).toLowerCase().indexOf(String(ad.region || ad.state_district || "").toLowerCase()) !== -1));
+          var dd = state.current || freshDeal();
+          var ad = rev.address;
+          var cityNames = [ad.city, ad.town, ad.municipality, ad.county].filter(Boolean);
+          var region = D.regionNames().find(r => (String(ad.region || ad.state_district || "").toLowerCase().indexOf(r.toLowerCase()) !== -1) || (String(r).toLowerCase().indexOf(String(ad.region || ad.state_district || "").toLowerCase()) !== -1));
           if (region) {
             dd.property.region = region;
-            const prov = D.provincesFor(region).find(x => String(ad.state || ad.county || "").toLowerCase().indexOf(String(x).toLowerCase()) !== -1);
+            var prov = D.provincesFor(region).find(x => String(ad.state || ad.county || "").toLowerCase().indexOf(String(x).toLowerCase()) !== -1);
             if (prov) {
               dd.property.province = prov;
-              const c = D.citiesFor(region, prov).find(x => cityNames.some(n => String(x).toLowerCase().indexOf(String(n).toLowerCase()) !== -1));
+              var c = D.citiesFor(region, prov).find(x => cityNames.some(n => String(x).toLowerCase().indexOf(String(n).toLowerCase()) !== -1));
               if (c) dd.property.city = c;
             }
           }
-          const brgy = ad.barangay || ad.village || ad.city_district || ad.neighbourhood;
+          var brgy = ad.barangay || ad.village || ad.city_district || ad.neighbourhood;
           if (brgy) dd.property.barangay = brgy;
           if (rev.display_name) dd.property.address = rev.display_name;
           save();
           var regionEl = document.getElementById("wz-region");
-          if (regionEl) { regionEl.value = dd.property.region || ""; regionEl.dispatchEvent(new Event("change")); }
-          setTimeout(() => {
-            var provEl = document.getElementById("wz-province");
-            if (provEl) { provEl.value = dd.property.province || ""; provEl.dispatchEvent(new Event("change")); }
-            setTimeout(() => {
-              var cityEl = document.getElementById("wz-city");
-              if (cityEl) { cityEl.value = dd.property.city || ""; cityEl.dispatchEvent(new Event("change")); }
-            }, 50);
-          }, 50);
+          if (regionEl && dd.property.region) {
+            regionEl.value = dd.property.region;
+          }
+          var provEl = document.getElementById("wz-province");
+          if (provEl && dd.property.province) {
+            provEl.innerHTML = '<option value="' + esc(dd.property.province) + '" selected>' + esc(dd.property.province) + '</option>';
+          } else if (provEl && dd.property.region) {
+            provEl.innerHTML = '<option value="">Select province…</option>' + D.provincesFor(dd.property.region).map(p => '<option value="' + esc(p) + '"' + (p === dd.property.province ? ' selected' : '') + '>' + esc(p) + '</option>').join('');
+            if (dd.property.province) provEl.value = dd.property.province;
+          }
+          var cityEl = document.getElementById("wz-city");
+          if (cityEl && dd.property.city) {
+            cityEl.innerHTML = '<option value="' + esc(dd.property.city) + '" selected>' + esc(dd.property.city) + '</option>';
+          } else if (cityEl && dd.property.province) {
+            cityEl.innerHTML = '<option value="">Select city / municipality…</option>' + D.citiesFor(dd.property.region, dd.property.province).map(c => '<option value="' + esc(c) + '"' + (c === dd.property.city ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
+            if (dd.property.city) cityEl.value = dd.property.city;
+          }
           var brgyEl = document.querySelector('[data-g="property.barangay"]');
           if (brgyEl) brgyEl.value = dd.property.barangay || "";
           var addrEl = document.querySelector('[data-g="property.address"]');
           if (addrEl) addrEl.value = dd.property.address || "";
-          var statusEl = document.getElementById("wz-ai-loc-status");
-          if (statusEl) statusEl.textContent = "Pin moved — address auto-filled (" + (dd.property.city || "unknown city") + ", " + (dd.property.barangay || "unknown barangay") + ")";
+          var coordText = coordEl;
+          if (coordText) coordText.innerHTML = "Pin: Latitude <b>" + esc(String(lat).substring(0, 8)) + "</b> &middot; Longitude <b>" + esc(String(lng).substring(0, 8)) + "</b> — " + esc(dd.property.city || "") + (dd.property.barangay ? ", " + esc(dd.property.barangay) : "");
         });
       }, 600);
     }, searchText);
+    var _mapEntry = _mapRegistry["wz-map"];
+    if (_mapEntry) {
+      _mapEntry.onDrag = function () {
+        var coordEl = document.getElementById("wz-map-coords");
+        if (!coordEl) { var m = document.getElementById("wz-map"); if (m && m.nextElementSibling && m.nextElementSibling.classList.contains("map-coords")) coordEl = m.nextElementSibling; }
+        var ll = _mapEntry.marker ? _mapEntry.marker.getLatLng() : null;
+        if (coordEl && ll) coordEl.innerHTML = "Pin: Latitude <b>" + ll.lat.toFixed(6) + "</b> &middot; Longitude <b>" + ll.lng.toFixed(6) + "</b> — <span style='color:var(--primary)'>Resolving…</span>";
+      };
+    }
     _forceMapSearch = false;
 
     const aiLoc = $("#wz-ai-loc");
