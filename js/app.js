@@ -1330,19 +1330,19 @@
     var done = 0, failed = 0;
     NEARBY_CATEGORY_QUERIES.forEach(function (c) { res.found[c[0]] = 0; });
 
-    function runBatch(bIdx, mirrorIdx) {
-      if (bIdx >= batches.length) {
-        if (done >= batches.length) cb(res);
-        else if (done === 0 && errCb) errCb();
-        else cb(res);
-        return;
+    function tryAllDone() {
+      if (done + failed >= batches.length) {
+        NEARBY_CATEGORY_QUERIES.forEach(function (c) { if (res.found[c[0]] > 0) res.present++; });
+        if (done > 0) cb(res); else if (errCb) errCb(); else cb(res);
       }
+    }
+
+    function runBatch(bIdx, mirrorIdx) {
       var batch = batches[bIdx];
       var parts = batch.map(function (c) { return c[1].replace("{LAT}", lat).replace("{LNG}", lng) + "\nout count;\n"; });
-      var query = "[out:json][timeout:15];\n" + parts.join("");
+      var query = "[out:json][timeout:10];\n" + parts.join("");
       var ctl = new AbortController();
-      var timer = setTimeout(function () { ctl.abort(); }, 20000);
-      if (statusEl && bIdx > 0) statusEl.textContent = "Scanning nearby (" + (bIdx * BATCH + 1) + "-" + Math.min((bIdx + 1) * BATCH, NEARBY_CATEGORY_QUERIES.length) + " of " + NEARBY_CATEGORY_QUERIES.length + ")...";
+      var timer = setTimeout(function () { ctl.abort(); }, 12000);
       fetch(OVERPASS_MIRRORS[mirrorIdx], {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ESRealty-LocationScan/1.0" },
@@ -1359,7 +1359,7 @@
             res.found[c[0]] = count;
           });
           done++;
-          runBatch(bIdx + 1, 0);
+          tryAllDone();
         })
         .catch(function () {
           clearTimeout(timer);
@@ -1367,12 +1367,12 @@
             runBatch(bIdx, mirrorIdx + 1);
           } else {
             failed++;
-            if (statusEl && failed < batches.length) statusEl.textContent = "Some categories unavailable, continuing...";
-            runBatch(bIdx + 1, 0);
+            tryAllDone();
           }
         });
     }
-    runBatch(0, 0);
+    if (batches.length === 0) { cb(res); return; }
+    for (var b = 0; b < batches.length; b++) runBatch(b, 0);
   }
   function parseOverpassResults(j, cb) {
     var els = (j && j.elements) || [];
@@ -1454,26 +1454,25 @@
     const lat = C.num(d.property.lat), lng = C.num(d.property.lng);
     if (!isFinite(lat) || !isFinite(lng) || !lat || !lng) { toast("Drop a pin on the map first, then analyze", "err"); return; }
     const btn = $("#wz-ai-loc"), status = $("#wz-ai-loc-status");
-    if (btn) btn.disabled = true;
-    if (status) status.innerHTML = "Validating pin, resolving the address, and scanning nearby establishments.";
-    reverseGeocodePin(lat, lng, rev => {
-      const country = rev && rev.address ? String(rev.address.country_code || "").toLowerCase() : "";
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Analyzing…'; }
+    if (status) status.innerHTML = "Scanning address + nearby establishments in parallel…";
+    var revResult = null, countsResult = null, countryChecked = false;
+    function tryFinish() {
+      if (revResult === null || countsResult === null) return;
+      if (btn) { btn.disabled = false; btn.innerHTML = icon("spark", 14) + ' Analyze Location from Map'; }
+      var country = revResult && revResult.address ? String(revResult.address.country_code || "").toLowerCase() : "";
       if (country && country !== "ph") {
-        if (btn) btn.disabled = false;
         if (status) status.textContent = "The pin appears to be outside the Philippines. Move it to the property location and try again.";
         toast("Move the pin to a Philippine property location before analyzing", "err");
         return;
       }
-      fetchNearbyCounts(lat, lng, counts => {
-        applyWizardLocationAnalysis(d, rev, counts);
-        save(); render();
-        toast("Location analysis complete — address verified and <b>" + counts.present + "</b> nearby establishment type(s) found", "ok");
-      }, () => {
-        applyWizardLocationAnalysis(d, rev, null);
-        save(); render();
-        toast("Address auto-filled; nearby scan unavailable (offline) — scores left as set", "info");
-      });
-    });
+      applyWizardLocationAnalysis(d, revResult, countsResult);
+      save(); render();
+      var found = countsResult && countsResult.present ? countsResult.present : 0;
+      toast("Location analysis complete — address verified and <b>" + found + "</b> nearby establishment type(s) found", "ok");
+    }
+    reverseGeocodePin(lat, lng, rev => { revResult = rev || {}; tryFinish(); });
+    fetchNearbyCounts(lat, lng, counts => { countsResult = counts; tryFinish(); }, () => { countsResult = { found: {}, present: 0 }; tryFinish(); });
   }
 
   function polygonAreaM2(points) {

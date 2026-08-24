@@ -412,6 +412,7 @@ table.data .num { font-family: var(--font-mono); text-align: right; white-space:
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
 .spinner { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--stroke); border-top-color: var(--accent); animation: spin .8s linear infinite; }
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 4px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ============ TOASTS ============ */
