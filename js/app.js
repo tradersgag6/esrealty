@@ -1291,31 +1291,43 @@
       .then(j => cb(j))
       .catch(() => cb(null));
   }
+  const OVERPASS_MIRRORS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter"
+  ];
   function fetchNearbyCounts(lat, lng, cb, errCb) {
     const parts = NEARBY_CATEGORY_QUERIES.map(c => c[1].replace("{LAT}", lat).replace("{LNG}", lng) + "\nout count;\n");
-    const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), 25000);
-    fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: "data=" + encodeURIComponent("[out:json][timeout:25];\n" + parts.join("")),
-      signal: ctl.signal
-    }).then(r => { if (!r.ok) throw new Error("Nearby scan unavailable"); return r.json(); })
-      .then(j => {
-        const els = (j && j.elements) || [];
-        const res = { found: {}, present: 0 };
-        NEARBY_CATEGORY_QUERIES.forEach((c, i) => {
-          const el = els[i];
-          let count = 0;
-          if (el && el.groups) el.groups.forEach(g => { count += g.count || 0; });
-          else if (el && el.tags) count = (C.num(el.tags.nodes, 0) + C.num(el.tags.ways, 0) + C.num(el.tags.relations, 0)) || C.num(el.tags.total, 0);
-          res.found[c[0]] = count;
-          if (count > 0) res.present++;
-        });
-        cb(res);
-      })
-      .catch(() => errCb && errCb())
-      .then(() => clearTimeout(timer));
+    const query = "[out:json][timeout:25];\n" + parts.join("");
+    function tryMirror(idx) {
+      if (idx >= OVERPASS_MIRRORS.length) { if (errCb) errCb(); return; }
+      var ctl = new AbortController();
+      var timer = setTimeout(() => ctl.abort(), 30000);
+      var statusEl = document.getElementById("wz-ai-loc-status");
+      if (statusEl && idx > 0) statusEl.textContent = "Retrying with backup mirror (" + (idx + 1) + "/" + OVERPASS_MIRRORS.length + ")...";
+      fetch(OVERPASS_MIRRORS[idx], {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "data=" + encodeURIComponent(query),
+        signal: ctl.signal
+      }).then(r => { clearTimeout(timer); if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(j => { clearTimeout(timer); parseOverpassResults(j, cb); })
+        .catch(() => { clearTimeout(timer); tryMirror(idx + 1); });
+    }
+    tryMirror(0);
+  }
+  function parseOverpassResults(j, cb) {
+    const els = (j && j.elements) || [];
+    const res = { found: {}, present: 0 };
+    NEARBY_CATEGORY_QUERIES.forEach((c, i) => {
+      const el = els[i];
+      let count = 0;
+      if (el && el.groups) el.groups.forEach(g => { count += g.count || 0; });
+      else if (el && el.tags) count = (C.num(el.tags.nodes, 0) + C.num(el.tags.ways, 0) + C.num(el.tags.relations, 0)) || C.num(el.tags.total, 0);
+      res.found[c[0]] = count;
+      if (count > 0) res.present++;
+    });
+    cb(res);
   }
   function findCityAdmin(name) {
     const norm = v => String(v || "").toLowerCase().replace(/\b(city|municipality|municipal|metropolitan)\b/g, "").replace(/[^a-z0-9]/g, "");
