@@ -205,7 +205,7 @@ body {
   width: 100%; padding: 9px 12px; border-radius: 9px;
   border: 1px solid var(--stroke); background: var(--surface-2);
   color: var(--text); font-size: 13px; font-family: var(--font-sans);
-  outline: none; transition: border-color .15s, box-shadow .15s;
+   outline: none; transition: border-color .15s, box-shadow .15s;
 }
 .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15); }
 .input::placeholder { color: var(--text-faint); }

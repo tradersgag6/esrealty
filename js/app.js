@@ -2076,6 +2076,12 @@
   function bindGlobal() {
     fillIcons();
     bindNumFormatting();
+    document.addEventListener("mousedown", function (e) {
+      var t = e.target;
+      if (!t.closest("input, textarea, select, [contenteditable], .map-search, .leaflet-container, .wz-map")) {
+        if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+      }
+    });
     $("#nav").addEventListener("click", e => {
       const b = e.target.closest(".nav-item");
       if (b) { $("#sidebar").classList.remove("open"); navigate(b.getAttribute("data-view")); }
