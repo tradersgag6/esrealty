@@ -1323,27 +1323,22 @@
     "https://lz4.overpass-api.de/api/interpreter"
   ];
   function fetchNearbyDirect(lat, lng, cb, errCb, statusEl) {
-    var BATCH = 3;
-    var batches = [];
-    for (var i = 0; i < NEARBY_CATEGORY_QUERIES.length; i += BATCH) batches.push(NEARBY_CATEGORY_QUERIES.slice(i, i + BATCH));
     var res = { found: {}, present: 0 };
-    var done = 0, failed = 0;
     NEARBY_CATEGORY_QUERIES.forEach(function (c) { res.found[c[0]] = 0; });
 
-    function tryAllDone() {
-      if (done + failed >= batches.length) {
-        NEARBY_CATEGORY_QUERIES.forEach(function (c) { if (res.found[c[0]] > 0) res.present++; });
-        if (done > 0) cb(res); else if (errCb) errCb(); else cb(res);
-      }
-    }
+    var parts = NEARBY_CATEGORY_QUERIES.map(function (c) { return c[1].replace(/\{LAT\}/g, lat).replace(/\{LNG\}/g, lng) + "\nout count;\n"; });
+    var query = "[out:json][timeout:25];\n" + parts.join("");
 
-    function runBatch(bIdx, mirrorIdx) {
-      var batch = batches[bIdx];
-      var parts = batch.map(function (c) { return c[1].replace("{LAT}", lat).replace("{LNG}", lng) + "\nout count;\n"; });
-      var query = "[out:json][timeout:10];\n" + parts.join("");
+    function tryMirror(mIdx) {
+      if (mIdx >= OVERPASS_MIRRORS.length) {
+        NEARBY_CATEGORY_QUERIES.forEach(function (c) { if (res.found[c[0]] > 0) res.present++; });
+        if (res.present > 0) cb(res); else if (errCb) errCb(); else cb(res);
+        return;
+      }
+      if (statusEl) statusEl.textContent = "Scanning nearby establishments…";
       var ctl = new AbortController();
-      var timer = setTimeout(function () { ctl.abort(); }, 12000);
-      fetch(OVERPASS_MIRRORS[mirrorIdx], {
+      var timer = setTimeout(function () { ctl.abort(); }, 25000);
+      fetch(OVERPASS_MIRRORS[mIdx], {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ESRealty-LocationScan/1.0" },
         body: "data=" + encodeURIComponent(query),
@@ -1351,28 +1346,23 @@
       }).then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
         .then(function (j) {
           var els = (j && j.elements) || [];
-          batch.forEach(function (c, k) {
+          NEARBY_CATEGORY_QUERIES.forEach(function (c, k) {
             var el = els[k];
             var count = 0;
             if (el && el.groups) el.groups.forEach(function (g) { count += (g.count || 0); });
             else if (el && el.tags) count = (parseInt(el.tags.nodes || 0) + parseInt(el.tags.ways || 0) + parseInt(el.tags.relations || 0)) || parseInt(el.tags.total || 0);
             res.found[c[0]] = count;
           });
-          done++;
-          tryAllDone();
+          NEARBY_CATEGORY_QUERIES.forEach(function (c) { if (res.found[c[0]] > 0) res.present++; });
+          if (statusEl) statusEl.textContent = "Scan complete — " + res.present + " nearby type(s) found.";
+          cb(res);
         })
         .catch(function () {
           clearTimeout(timer);
-          if (mirrorIdx + 1 < OVERPASS_MIRRORS.length) {
-            runBatch(bIdx, mirrorIdx + 1);
-          } else {
-            failed++;
-            tryAllDone();
-          }
+          tryMirror(mIdx + 1);
         });
     }
-    if (batches.length === 0) { cb(res); return; }
-    for (var b = 0; b < batches.length; b++) runBatch(b, 0);
+    tryMirror(0);
   }
   function parseOverpassResults(j, cb) {
     var els = (j && j.elements) || [];
