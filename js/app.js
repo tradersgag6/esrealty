@@ -1307,20 +1307,23 @@
   function fetchNearbyDirect(lat, lng, cb, errCb, statusEl) {
     var res = { found: {}, present: 0 };
     NEARBY_CATEGORY_QUERIES.forEach(function (c) { res.found[c[0]] = 0; });
-    var tagged = NEARBY_CATEGORY_QUERIES.map(function (c, i) { return { name: c[0], tag: c[1].replace(/\{LAT\}/g, lat).replace(/\{LNG\}/g, lng), idx: i }; });
-    var parts = tagged.map(function (t) { return '  ' + t.tag + '\n'; });
-    var query = '[out:json][timeout:40];\n(\n' + parts.join('') + ');\nout body;';
+    var query = '[out:json][timeout:30];\n' + NEARBY_CATEGORY_QUERIES.map(function (c) {
+      return '(' + c[1].replace(/\{LAT\}/g, lat).replace(/\{LNG\}/g, lng) + ');\nout count;';
+    }).join('\n');
 
     function tryMirror(mIdx) {
       if (mIdx >= OVERPASS_MIRRORS.length) {
         NEARBY_CATEGORY_QUERIES.forEach(function (c) { if (res.found[c[0]] > 0) res.present++; });
         if (statusEl) statusEl.textContent = res.present > 0 ? "Scan complete — " + res.present + " nearby type(s) found." : "Scan complete — no nearby data found for this location.";
+        console.log("[ESRealty Scan] mirrors exhausted. present=" + res.present, JSON.stringify(res.found));
         if (res.present > 0) cb(res); else if (errCb) errCb(); else cb(res);
         return;
       }
-      if (statusEl) statusEl.textContent = "Scanning nearby via " + ["Overpass", "Kumi", "LZ4"][mIdx] + "…";
+      var mirrorNames = ["Overpass", "Kumi", "LZ4"];
+      if (statusEl) statusEl.textContent = "Scanning nearby via " + (mirrorNames[mIdx] || "mirror " + mIdx) + "…";
+      console.log("[ESRealty Scan] trying " + OVERPASS_MIRRORS[mIdx] + " query_len=" + query.length);
       var ctl = new AbortController();
-      var timer = setTimeout(function () { ctl.abort(); }, 50000);
+      var timer = setTimeout(function () { ctl.abort(); }, 35000);
       fetch(OVERPASS_MIRRORS[mIdx], {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -1329,33 +1332,21 @@
       }).then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
         .then(function (j) {
           var els = (j && j.elements) || [];
-          els.forEach(function (el) {
-            if (!el || !el.tags) return;
-            var amenity = el.tags.amenity || "";
-            var shop = el.tags.shop || "";
-            var railway = el.tags.railway || "";
-            var highway = el.tags.highway || "";
-            var pt = el.tags.public_transport || "";
-            tagged.forEach(function (t) {
-              if (t.name === "School" && /^school|kindergarten|college|university$/.test(amenity)) res.found["School"]++;
-              if (t.name === "Hospital" && /^hospital|clinic$/.test(amenity)) res.found["Hospital"]++;
-              if (t.name === "Bank" && /^bank|atm$/.test(amenity)) res.found["Bank"]++;
-              if (t.name === "Convenience Store" && shop === "convenience") res.found["Convenience Store"]++;
-              if (t.name === "Gas Station" && amenity === "fuel") res.found["Gas Station"]++;
-              if (t.name === "Market" && (amenity === "marketplace" || /^supermarket|wholesale$/.test(shop))) res.found["Market"]++;
-              if (t.name === "Church" && amenity === "place_of_worship") res.found["Church"]++;
-              if (t.name === "Restaurant" && /^restaurant|fast_food|cafe$/.test(amenity)) res.found["Restaurant"]++;
-              if (t.name === "Mall" && shop === "mall") res.found["Mall"]++;
-              if (t.name === "Transit" && (/^station|stop$/.test(railway) || pt === "station" || highway === "bus_stop")) res.found["Transit"]++;
-            });
+          console.log("[ESRealty Scan] " + OVERPASS_MIRRORS[mIdx] + " returned " + els.length + " count elements");
+          els.forEach(function (el, k) {
+            if (k >= NEARBY_CATEGORY_QUERIES.length) return;
+            var count = 0;
+            if (el && el.tags) count = parseInt(el.tags.total || 0) || (parseInt(el.tags.nodes || 0) + parseInt(el.tags.ways || 0) + parseInt(el.tags.relations || 0));
+            res.found[NEARBY_CATEGORY_QUERIES[k][0]] = count;
           });
           NEARBY_CATEGORY_QUERIES.forEach(function (c) { if (res.found[c[0]] > 0) res.present++; });
-          console.log("[ESRealty Scan] " + els.length + " OSM elements, " + res.present + " types found:", JSON.stringify(res.found));
+          console.log("[ESRealty Scan] present=" + res.present, JSON.stringify(res.found));
           if (statusEl) statusEl.textContent = "Scan complete — " + res.present + " nearby type(s) found.";
           cb(res);
         })
-        .catch(function () {
+        .catch(function (e) {
           clearTimeout(timer);
+          console.log("[ESRealty Scan] " + OVERPASS_MIRRORS[mIdx] + " failed: " + e.message);
           tryMirror(mIdx + 1);
         });
     }
