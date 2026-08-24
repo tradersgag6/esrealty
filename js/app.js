@@ -1302,18 +1302,22 @@
     else base = "https://mrngaqtbaseewzcsogqi.supabase.co";
     var edgeUrl = base + "/functions/v1/nearby-scan";
     var anonKey = (window.ESREALTY_SUPABASE && window.ESREALTY_SUPABASE.supabaseKey) || "";
-    if (statusEl) statusEl.textContent = "Scanning nearby establishments via cloud...";
+    if (statusEl) statusEl.textContent = "Scanning nearby establishments…";
+    var edgeCtl = new AbortController();
+    var edgeTimer = setTimeout(function () { edgeCtl.abort(); }, 5000);
     fetch(edgeUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + anonKey, "apikey": anonKey },
-      body: JSON.stringify({ lat: lat, lng: lng })
-    }).then(function (r) { if (!r.ok) throw new Error("edge " + r.status); return r.json(); })
+      body: JSON.stringify({ lat: lat, lng: lng }),
+      signal: edgeCtl.signal
+    }).then(function (r) { clearTimeout(edgeTimer); if (!r.ok) throw new Error("edge " + r.status); return r.json(); })
       .then(function (data) {
         if (data && data.ok && data.counts) { if (statusEl) statusEl.textContent = "Scan complete — " + data.counts.present + " nearby type(s) found."; cb(data.counts); return; }
         throw new Error("edge returned no data");
       })
       .catch(function () {
-        if (statusEl) statusEl.textContent = "Cloud scan unavailable, trying direct Overpass...";
+        clearTimeout(edgeTimer);
+        if (statusEl) statusEl.textContent = "Scanning nearby establishments via Overpass…";
         fetchNearbyDirect(lat, lng, cb, errCb, statusEl);
       });
   }
@@ -1327,7 +1331,7 @@
     NEARBY_CATEGORY_QUERIES.forEach(function (c) { res.found[c[0]] = 0; });
 
     var parts = NEARBY_CATEGORY_QUERIES.map(function (c) { return c[1].replace(/\{LAT\}/g, lat).replace(/\{LNG\}/g, lng) + "\nout count;\n"; });
-    var query = "[out:json][timeout:25];\n" + parts.join("");
+    var query = "[out:json][timeout:40];\n" + parts.join("");
 
     function tryMirror(mIdx) {
       if (mIdx >= OVERPASS_MIRRORS.length) {
@@ -1337,7 +1341,7 @@
       }
       if (statusEl) statusEl.textContent = "Scanning nearby establishments…";
       var ctl = new AbortController();
-      var timer = setTimeout(function () { ctl.abort(); }, 25000);
+      var timer = setTimeout(function () { ctl.abort(); }, 45000);
       fetch(OVERPASS_MIRRORS[mIdx], {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded", "User-Agent": "ESRealty-LocationScan/1.0" },
