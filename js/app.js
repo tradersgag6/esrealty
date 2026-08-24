@@ -1407,7 +1407,7 @@
         }
       }
       const brgy = ad.barangay || ad.village || ad.city_district || ad.neighbourhood;
-      if (brgy && !p.barangay) p.barangay = brgy;
+      if (brgy) p.barangay = brgy;
       if (!p.address && rev.display_name) p.address = rev.display_name;
     }
     if (counts && counts.found) {
