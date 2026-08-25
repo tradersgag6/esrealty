@@ -7596,6 +7596,10 @@ premise: "Fee Simple / As Improved",
     if (f.rfo === "rfo") arr = arr.filter(l => l.status === "rfo");
     if (f.rfo === "pre-selling") arr = arr.filter(l => l.status === "pre-selling");
     if (f.favOnly) arr = arr.filter(l => lsFav(l.id));
+    if (f.dropOnly) arr = arr.filter(l => C.num(l.previousPrice, 0) > 0 && C.num(l.price, 0) < C.num(l.previousPrice, 0));
+    if (f.furnishing) arr = arr.filter(l => (l.furnishing || "") === f.furnishing);
+    if (f.pet) arr = arr.filter(l => (l.petFriendly || "") === f.pet);
+    if (f.balcony) arr = arr.filter(l => (l.balcony || "") === f.balcony);
     const sort = f.sort || "newest";
     arr.sort((a, b) => {
       if (sort === "price-asc") return C.num(a.price, 0) - C.num(b.price, 0);
@@ -7609,12 +7613,15 @@ premise: "Fee Simple / As Improved",
   function listingCard(l) {
     const img = listingMainPhoto(l);
     const ppsm = listingPriceSqm(l);
+    const dropAmt = (C.num(l.previousPrice, 0) > 0 && C.num(l.price, 0) > 0 && C.num(l.price, 0) < C.num(l.previousPrice, 0)) ? (C.num(l.previousPrice, 0) - C.num(l.price, 0)) : 0;
+    const ageDays = Math.floor((Date.now() - new Date(l.createdAt || Date.now()).getTime()) / 86400000);
+    const isStale = (l.isPublished !== false || !!l.autoUnpublishedAt) && ["available", "rfo"].indexOf(l.status) >= 0 && ageDays >= 90;
     const area = (C.num(l.lotArea, 0) > 0 ? C.num(l.lotArea, 0).toLocaleString() + " sqm" : "") + (C.num(l.floorArea, 0) > 0 ? (C.num(l.lotArea, 0) > 0 ? " · " : "") + C.num(l.floorArea, 0).toLocaleString() + " sqm floor" : "");
     return '<div class="ls-card card card-pad" data-ls-open="' + esc(l.id) + '">' +
       '<div class="ls-photo">' +
         '<div class="ls-photo-ph">' + icon("home", 30) + "<span>" + esc(listTypeLabel(l.propertyType)) + "</span></div>" +
         (img ? '<img class="ls-photo-img" src="' + esc(img) + '" alt="" loading="lazy" onerror="this.remove()">' : "") +
-        '<div class="ls-photo-top">' + listStatusBadge(l.status) + (l.isPublished === false ? '<span class="badge gold">Draft</span>' : "") + "</div>" +
+        '<div class="ls-photo-top">' + listStatusBadge(l.status) + (l.isPublished === false ? '<span class="badge gold">Draft</span>' : "") + (dropAmt > 0 ? '<span class="badge green" title="Price reduced">▼ ' + esc(C.money(dropAmt)) + '</span>' : "") + (isStale ? '<span class="badge red" title="' + (l.autoUnpublishedAt ? "Auto-drafted after 90 days — refresh to republish" : "Listing is getting stale — refresh or adjust price") + '">' + ageDays + 'd' + (l.autoUnpublishedAt ? " auto-drafted" : " stale") + '</span>' : (ageDays >= 30 ? '<span class="badge gold">' + ageDays + 'd listed</span>' : "")) + (l.furnishing ? '<span class="badge blue" title="Furnishing">' + esc(({ bare: "Bare", semi: "Semi-Furn", full: "Fully Furn." })[l.furnishing] || l.furnishing) + '</span>' : "") + (l.petFriendly === "yes" ? '<span class="badge purple" title="Pet-friendly">Pets OK</span>' : "") + (l.balcony === "yes" ? '<span class="badge cyan">Balcony</span>' : "") + "</div>" +
         (l.featured ? '<div class="ls-feat">' + icon("star", 12) + " Featured</div>" : "") +
         '<button class="ls-fav' + (lsFav(l.id) ? " on" : "") + '" data-ls-fav="' + esc(l.id) + '" title="Save to favorites">' + icon("star", 17) + "</button>" +
       "</div>" +
@@ -7648,7 +7655,7 @@ premise: "Fee Simple / As Improved",
     const opt = (opts, val, allLabel) => '<option value="">' + esc(allLabel || "All") + "</option>" + opts.map(o => '<option value="' + o[0] + '"' + (val === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>").join("");
     const cityOpts = '<option value="">All cities</option>' + lsCityList().map(c => '<option value="' + esc(c) + '"' + (f.city === c ? " selected" : "") + ">" + esc(c) + "</option>").join("");
     let html = '<div class="hero"><div><h1>Listings</h1><p>Browse the brokerage portfolio — filter, save favorites, and manage property listings.</p></div><div class="actions">' +
-      (can ? '<button class="btn btn-primary" data-ls-new>' + icon("plus", 15) + " Add Listing</button>" : "") + "</div></div>";
+      (can ? '<button class="btn btn-primary" data-ls-new>' + icon("plus", 15) + " Add Listing</button>" : "") + '<button class="btn btn-ghost" data-ls-export>' + icon("download", 15) + " Export CSV</button></div></div>";
     html += '<div class="card card-pad mb-24" id="ls-filters"><div class="grid grid-4">' +
       '<div class="field"><label>Search</label><input class="input" id="ls-q" type="text" value="' + esc(f.q || "") + '" placeholder="Title, city, developer…"></div>' +
       '<div class="field"><label>Property type</label><select class="input" id="ls-type">' + opt(LISTING_TYPES, f.type) + "</select></div>" +
@@ -7662,6 +7669,12 @@ premise: "Fee Simple / As Improved",
       '<div class="field"><label>RFO / Pre-Selling</label><select class="input" id="ls-rfo">' + opt([["rfo", "RFO"], ["pre-selling", "Pre-Selling"]], f.rfo) + "</select></div>" +
       '<div class="field"><label>Sort by</label><select class="input" id="ls-sort">' + opt(LISTING_SORTS, f.sort || "newest", "Newest") + "</select></div>" +
       '<div class="field" style="justify-content:flex-end"><label>&nbsp;</label><label class="ms-chk"><input type="checkbox" id="ls-fav"' + (f.favOnly ? " checked" : "") + "> Favorites only</label></div>" +
+      "</div>" +
+      '<div class="grid grid-4 mt-8">' +
+      '<div class="field"><label>Furnishing</label><select class="input" id="ls-furnishing">' + opt([["bare", "Bare"], ["semi", "Semi-Furnished"], ["full", "Fully Furnished"]], f.furnishing) + "</select></div>" +
+      '<div class="field"><label>Pet-friendly</label><select class="input" id="ls-pet">' + opt([["yes", "Yes"], ["no", "No"]], f.pet) + "</select></div>" +
+      '<div class="field"><label>Balcony</label><select class="input" id="ls-balcony">' + opt([["yes", "Yes"], ["no", "No"]], f.balcony) + "</select></div>" +
+      '<div class="field" style="justify-content:flex-end"><label>&nbsp;</label><label class="ms-chk"><input type="checkbox" id="ls-drop"' + (f.dropOnly ? " checked" : "") + "> Price drops only</label></div>" +
       "</div></div>";
     html += '<div id="ls-results">' + lsResultsHTML() + "</div>";
     return html;
@@ -7726,7 +7739,8 @@ premise: "Fee Simple / As Improved",
     html += '<div class="grid grid-3 mb-24">';
     html += '<div style="grid-column:span 2">' + lsCarouselHTML(l) + "</div>";
     html += '<div class="ls-side card card-pad">' +
-      '<div class="ls-price ls-price-big">' + listingDisplayPrice(l) + (ppsm > 0 ? '<div class="ls-ppsqm">' + C.money(Math.round(ppsm)) + " per sqm</div>" : "") + "</div>" +
+      '<div class="ls-price ls-price-big">' + listingDisplayPrice(l) + (ppsm > 0 ? '<div class="ls-ppsqm">' + C.money(Math.round(ppsm)) + " per sqm</div>" : "") +
+      (C.num(l.previousPrice, 0) > 0 && C.num(l.price, 0) > 0 && C.num(l.price, 0) < C.num(l.previousPrice, 0) ? '<div class="badge green" style="display:inline-block;margin-top:6px">▼ Reduced from ' + esc(C.money(C.num(l.previousPrice, 0))) + (l.priceDroppedAt ? " · " + esc(new Date(l.priceDroppedAt).toLocaleDateString()) : "") + "</div>" : "") + "</div>" +
       '<div class="ls-stats">' + lsStat("Bedrooms", l.bedrooms) + lsStat("Bathrooms", l.bathrooms) + lsStat("Parking", l.parking) + lsStat("Floors", l.floors) + "</div>" +
       '<div class="ls-stats">' + lsStat("Lot area", l.lotArea ? C.num(l.lotArea, 0).toLocaleString() + " sqm" : "—") + lsStat("Floor area", l.floorArea ? C.num(l.floorArea, 0).toLocaleString() + " sqm" : "—") + lsStat("Turnover", l.turnoverDate || "—") + lsStat("Status", listStatusLabel(l.status)) + "</div>";
     if (fin.length) html += '<div class="mt-16"><label class="ls-sublabel">Financing accepted</label><div class="chip-row">' + fin.map(x => '<span class="chip">' + esc((LISTING_FINANCING.find(z => z[0] === x) || [x, x])[1]) + "</span>").join("") + "</div></div>";
@@ -7746,6 +7760,11 @@ premise: "Fee Simple / As Improved",
         lsDetailRow("Title No.", l.titleNo) +
         lsDetailRow("Tax Declaration No.", l.taxDecNo) +
         lsDetailRow("Zoning Classification", l.zoning) +
+        lsDetailRow("Furnishing", l.furnishing ? ({ bare: "Bare", semi: "Semi-Furnished", full: "Fully Furnished" })[l.furnishing] || l.furnishing : "—") +
+        lsDetailRow("Pet-friendly", l.petFriendly ? (l.petFriendly === "yes" ? "Yes" : "No") : "—") +
+        lsDetailRow("Balcony", l.balcony ? (l.balcony === "yes" ? "Yes" : "No") : "—") +
+        lsDetailRow("Facing", l.facing ? l.facing.charAt(0).toUpperCase() + l.facing.slice(1) : "—") +
+        lsDetailRow("Access / RROW", l.accessNote || "—") +
         lsDetailRow("Turnover Date", l.turnoverDate) +
         (presell ? lsDetailRow("DHSUD License to Sell", l.licenseToSell || "Pending") : "") +
         (safeHttpsUrl(l.videoUrl) ? '<tr><td>Virtual Tour</td><td><a href="' + esc(safeHttpsUrl(l.videoUrl)) + '" target="_blank" rel="noopener">Watch video</a></td></tr>' : "") +
@@ -7843,10 +7862,33 @@ premise: "Fee Simple / As Improved",
   function lsPhotoThumb(url) {
     return '<div class="ls-photo-thumb"><img src="' + esc(url) + '" alt="Photo" loading="lazy"><button type="button" class="ls-photo-remove" data-ls-photo-remove title="Remove photo">&times;</button></div>';
   }
-  async function lsUploadPhotos(files) {
-    if (!SB || !SB.storage || !currentUser || !currentUser.id) { toast("Sign in to upload photos", "err"); return; }
+  async   function lsUploadPhotos(files) {
     const list = Array.from(files || []).filter(f => /^image\//.test(f.type || ""));
     if (!list.length) { toast("Choose a JPG, PNG or WebP image", "err"); return; }
+    // Local fallback (no cloud session): attach images as data URLs so demo/offline drafts keep photos.
+    if (!SB || !SB.storage || !currentUser || !currentUser.id) {
+      const status = $("#ls-photo-status");
+      let done = 0;
+      for (const file of list) {
+        if (file.size > 4 * 1024 * 1024) { toast(esc(file.name) + " is larger than 4 MB", "err"); done += 1; continue; }
+        const rd = new FileReader();
+        rd.onload = () => {
+          const ta = $("#ls-photos");
+          if (ta) {
+            const lines = ta.value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+            lines.push(rd.result);
+            ta.value = lines.join("\n");
+          }
+          const previews = $("#ls-photo-previews");
+          if (previews) previews.insertAdjacentHTML("beforeend", lsPhotoThumb(rd.result));
+          done += 1;
+          if (status) status.textContent = done < list.length ? ("Attached " + done + "/" + list.length + "…") : "Photos attached locally";
+        };
+        rd.readAsDataURL(file);
+        if (done >= 12) break; // sanity cap per batch
+      }
+      return;
+    }
     const status = $("#ls-photo-status");
     if (status) status.textContent = "Uploading " + list.length + " photo" + (list.length === 1 ? "" : "s") + "…";
     let done = 0;
@@ -7901,6 +7943,11 @@ premise: "Fee Simple / As Improved",
         lsFld("Bathrooms", lsNum("ls-baths", l.bathrooms)) +
         lsFld("Parking slots", lsNum("ls-park", l.parking)) +
         lsFld("Floors", lsNum("ls-floors", l.floors)) +
+        lsFld("Balcony", '<select class="input" id="ls-balcony">' + lsSelOpt([["", "—"], ["yes", "Yes"], ["no", "No"]], l.balcony || "") + "</select>") +
+        lsFld("Facing / Orientation", '<select class="input" id="ls-facing">' + lsSelOpt([["", "—"], ["north", "North"], ["south", "South"], ["east", "East"], ["west", "West"], ["ne", "Northeast"], ["nw", "Northwest"], ["se", "Southeast"], ["sw", "Southwest"]], l.facing || "") + "</select>") +
+        lsFld("Furnishing", '<select class="input" id="ls-furnishing">' + lsSelOpt([["", "—"], ["bare", "Bare"], ["semi", "Semi-Furnished"], ["full", "Fully Furnished"]], l.furnishing || "") + "</select>") +
+        lsFld("Pet-friendly", '<select class="input" id="ls-pet">' + lsSelOpt([["", "—"], ["yes", "Yes"], ["no", "No"]], l.petFriendly || "") + "</select>") +
+        lsFld("Access / Road RROW", lsTxt("ls-access", l.accessNote, "e.g. 12m asphalt road, titled RROW")) +
         lsFld("Region", '<select class="input" id="ls-m-region">' + lsGeoOpts(Object.keys(PH_GEO), gReg) + "</select>") +
         lsFld("Province", '<select class="input" id="ls-m-province">' + lsGeoOpts(lsGeoProvinces(gReg), gProv) + "</select>") +
         lsFld("City / Municipality", '<select class="input" id="ls-m-city">' + lsGeoOpts(lsGeoCities(gReg, gProv), gCity) + "</select>") +
@@ -7964,7 +8011,10 @@ premise: "Fee Simple / As Improved",
     rec.propertyType = $v("ls-type") || "house-and-lot";
     rec.dealType = $v("ls-deal") || "sale";
     rec.status = $v("ls-status") || "available";
+    const _prevPrice = editId ? C.num(rec.price, 0) : 0;
     rec.price = $n("ls-price");
+    if (_prevPrice > 0 && rec.price > 0 && rec.price < _prevPrice) { rec.previousPrice = _prevPrice; rec.priceDroppedAt = new Date().toISOString(); }
+    else if (_prevPrice > 0 && rec.price >= _prevPrice) { delete rec.previousPrice; delete rec.priceDroppedAt; }
     rec.rent = $n("ls-rent");
     rec.lotArea = $n("ls-lot");
     rec.floorArea = $n("ls-floor");
@@ -7976,6 +8026,9 @@ premise: "Fee Simple / As Improved",
     rec.titleType = $v("ls-titletype"); rec.titleNo = $v("ls-title-no"); rec.taxDecNo = $v("ls-taxdec"); rec.zoning = $v("ls-zoning");
     rec.turnoverDate = $v("ls-turnover"); rec.developer = $v("ls-developer"); rec.licenseToSell = $v("ls-lts");
     rec.hoaDues = $n("ls-hoa"); rec.condoDues = $n("ls-condo");
+    rec.balcony = $v("ls-balcony"); rec.facing = $v("ls-facing");
+    rec.furnishing = $v("ls-furnishing"); rec.petFriendly = $v("ls-pet");
+    rec.accessNote = $v("ls-access");
     rec.financing = fin;
     rec.description = $v("ls-desc");
     rec.photos = $v("ls-photos").split(/\r?\n/).map(s => s.trim()).filter(Boolean);
@@ -8026,6 +8079,8 @@ premise: "Fee Simple / As Improved",
         if (carDot) { lsCarIndex = parseInt(carDot.getAttribute("data-ls-car-dot"), 10) || 0; lsCarGo(); return; }
         const nw = e.target.closest("[data-ls-new]");
         if (nw) { openListingEditor(); return; }
+        const ex = e.target.closest("[data-ls-export]");
+        if (ex) { lsExportCsv(); return; }
         const ed = e.target.closest("[data-ls-edit]");
         if (ed) { openListingEditor(ed.getAttribute("data-ls-edit")); return; }
         const del = e.target.closest("[data-ls-del]");
@@ -8088,11 +8143,50 @@ premise: "Fee Simple / As Improved",
     bind("ls-type", "type"); bind("ls-status", "status"); bind("ls-city", "city"); bind("ls-fin", "financing");
     bind("ls-minp", "minPrice", "input"); bind("ls-maxp", "maxPrice", "input"); bind("ls-minb", "minBeds", "input"); bind("ls-mina", "minArea", "input");
     bind("ls-rfo", "rfo"); bind("ls-sort", "sort");
+    const updAttrs = () => { const f = state.listingFilters = state.listingFilters || {}; ["furnishing", "pet", "balcony"].forEach(k => { const el = document.getElementById("ls-" + k); if (el) f[k] = el.value; }); const dp = document.getElementById("ls-drop"); if (dp) f.dropOnly = dp.checked; save(); const res2 = $("#ls-results"); if (res2) res2.innerHTML = lsResultsHTML(); };
+    ["ls-furnishing", "ls-pet", "ls-balcony"].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener("change", updAttrs); });
+    const dropChk = document.getElementById("ls-drop"); if (dropChk) dropChk.addEventListener("change", updAttrs);
     const fav = document.getElementById("ls-fav");
     if (fav) fav.addEventListener("change", () => { state.listingFilters.favOnly = fav.checked; save(); const res = $("#ls-results"); if (res) res.innerHTML = lsResultsHTML(); });
   }
+  function lsExportCsv() {
+    const rows = lsFiltered();
+    if (!rows.length) { toast("No listings match the current filters", "err"); return; }
+    const q = v => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+    const head = ["Ref", "Title", "Type", "Deal", "Status", "Price", "Rent", "City", "Barangay", "Province", "Beds", "Baths", "Parking", "Lot sqm", "Floor sqm", "₱/sqm", "Furnishing", "Pet-friendly", "Balcony", "Facing", "Access/RROW", "Financing", "Developer", "LTS No.", "Turnover", "Featured", "Published", "Created"];
+    const finLabel = f => ({ pagibig: "Pag-IBIG", bank: "Bank", inhouse: "In-house", cash: "Cash" }[f] || f || "");
+    const lines = [head.map(q).join(",")];
+    rows.forEach(l => {
+      lines.push([l.ref, l.title, listTypeLabel(l.propertyType), l.dealType === "rent" ? "For Rent" : "For Sale",
+        (LISTING_STATUSES.find(s => s[0] === l.status) || [, l.status])[1],
+        l.price || 0, l.rent || 0, l.city, l.barangay, l.province,
+        l.bedrooms || 0, l.bathrooms || 0, l.parking || 0, l.lotArea || 0, l.floorArea || 0,
+        listingPriceSqm(l) || 0,
+        ({ bare: "Bare", semi: "Semi-Furnished", full: "Fully Furnished" })[l.furnishing] || "",
+        l.petFriendly === "yes" ? "Yes" : (l.petFriendly === "no" ? "No" : ""),
+        l.balcony === "yes" ? "Yes" : (l.balcony === "no" ? "No" : ""),
+        l.facing ? l.facing.charAt(0).toUpperCase() + l.facing.slice(1) : "",
+        l.accessNote || "", (l.financing || []).map(finLabel).join(" / "),
+        l.developer || "", l.licenseToSell || "", l.turnoverDate || "",
+        l.featured ? "Yes" : "No", l.isPublished === false ? "Draft" : "Published",
+        new Date(l.createdAt).toISOString().slice(0, 10)].map(q).join(","));
+    });
+    const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "esrealty_listings_" + new Date().toISOString().slice(0, 10) + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    toast("Exported <b>" + rows.length + "</b> listings (CSV)", "ok");
+  }
   function ensureListings() {
     if (!state.listings) state.listings = [];
+    // Auto-draft: published listings untouched for 90 days move to draft (storefront freshness).
+    const _cut = Date.now() - 90 * 86400000;
+    (state.listings || []).forEach(l => {
+      if (l.isPublished !== false && ["available", "rfo"].indexOf(l.status) >= 0 && new Date(l.updatedAt || l.createdAt || 0).getTime() < _cut) {
+        l.isPublished = false; l.autoUnpublishedAt = new Date().toISOString();
+      }
+    });
     if (!state.favorites) state.favorites = [];
     if (!state.listingFilters) state.listingFilters = {};
   }
