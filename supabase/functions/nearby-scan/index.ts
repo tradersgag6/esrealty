@@ -1,4 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// ES Realty — Nearby scan proxy (Overpass mirrors)
+// Same runtime pattern as notify-dispatch (Deno.serve, no imports).
 
 const MIRRORS = [
   "https://overpass-api.de/api/interpreter",
@@ -19,6 +20,16 @@ const CATEGORIES = [
   ["Transit",      'nwr["railway"~"^(station|stop)$"](around:1000,{LAT},{LNG});nwr["public_transport"="station"](around:1000,{LAT},{LNG});nwr["highway"="bus_stop"](around:1000,{LAT},{LNG});']
 ];
 
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey"
+};
+
+function json(body, status) {
+  return new Response(JSON.stringify(body), { status: status || 200, headers: { ...CORS, "Content-Type": "application/json" } });
+}
+
 function buildQuery(lat, lng) {
   const parts = CATEGORIES.map(c => c[1].replace("{LAT}", lat).replace("{LNG}", lng) + "\nout count;\n");
   return "[out:json][timeout:25];\n" + parts.join("");
@@ -38,10 +49,9 @@ function parseResults(j) {
   return res;
 }
 
-async function tryMirror(url, query, signal) {
+async function tryMirror(url, query) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 30000);
-  const combined = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
   try {
     const resp = await fetch(url, {
       method: "POST",
@@ -50,57 +60,41 @@ async function tryMirror(url, query, signal) {
         "User-Agent": "ESRealty-LocationScan/1.0"
       },
       body: "data=" + encodeURIComponent(query),
-      signal: combined
+      signal: controller.signal
     });
-    clearTimeout(timer);
     if (!resp.ok) throw new Error("HTTP " + resp.status);
     const j = await resp.json();
     return parseResults(j);
-  } catch (e) {
+  } finally {
     clearTimeout(timer);
-    throw e;
   }
 }
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey"
-      }
-    });
-  }
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
 
+  let lat, lng;
   try {
-    const { lat, lng } = await req.json();
-    if (typeof lat !== "number" || typeof lng !== "number" || !isFinite(lat) || !isFinite(lng)) {
-      return new Response(JSON.stringify({ error: "Invalid coordinates" }), { status: 400, headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" } });
-    }
-
-    const query = buildQuery(lat, lng);
-    let lastErr = null;
-
-    for (const mirror of MIRRORS) {
-      try {
-        const result = await tryMirror(mirror, query);
-        return new Response(JSON.stringify({ ok: true, source: mirror, counts: result }), {
-          headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" }
-        });
-      } catch (e) {
-        lastErr = e;
-      }
-    }
-
-    return new Response(JSON.stringify({ ok: false, error: "All mirrors failed", lastError: String(lastErr) }), {
-      status: 502,
-      headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" }
-    });
+    const body = await req.json();
+    lat = body.lat; lng = body.lng;
   } catch (e) {
-    return new Response(JSON.stringify({ ok: false, error: String(e) }), {
-      status: 500,
-      headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" }
-    });
+    return json({ ok: false, error: "Invalid JSON body" }, 400);
   }
+  if (typeof lat !== "number" || typeof lng !== "number" || !isFinite(lat) || !isFinite(lng)) {
+    return json({ ok: false, error: "Invalid coordinates" }, 400);
+  }
+
+  const query = buildQuery(lat, lng);
+  let lastErr = null;
+
+  for (const mirror of MIRRORS) {
+    try {
+      const result = await tryMirror(mirror, query);
+      return json({ ok: true, source: mirror, counts: result });
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+
+  return json({ ok: false, error: "All mirrors failed", lastError: String(lastErr) }, 502);
 });
