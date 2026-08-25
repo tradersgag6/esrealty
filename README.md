@@ -78,3 +78,30 @@ Run the core scripts in `supabase/` in this order: `schema.sql`, `patch_registra
 Local demo mode stores test state in browser storage. Authenticated production modules use Supabase with row-level security; Sales Playbooks use the dedicated `sales_playbooks` table and are restricted to approved Super Admin profiles. Never use demo accounts or browser storage for production credentials.
 **Map view & geocoding:** the storefront Properties page has a **Map** mode (price pins, popups). Admins: Brokerage > Inventory > **Auto-locate** batch-geocodes listings missing coordinates via OpenStreetMap Nominatim (max 8 per click; 1.1s between requests).
 
+## Modules & recent additions
+
+- **Appraisal (PVS/BSP-aligned)** — TRAIN tax pack (CGT/DST/transfer on governing base, ±10% zonal band), collateral/forced value + LTV, 14 adjustment elements with AI suggestions, 2026 RCN table w/ soft costs & entrepreneurial incentive, EA/EL depreciation suggester, GRM + DCF income approaches, approach-applicability matrix, ₱10k rounding + range-spread guard, comp QC (verification / distance / duplicates), RESA-format report with bank cover page and photo appendix.
+- **CRM / Leads** — pipeline board (7 stages), calendar mode, buyer qualification fields, PH lead sources (portals/Pag-IBIG/LEANS), overdue follow-up badges + stat tile, quick Mark Lost, +63 phone normalization with Call/WhatsApp/Viber links, won→Transaction conversion, duplicate warnings, CSV export, printable call sheet, Weekly Broker Digest (print/email).
+- **Market Scan** — live listings from DotProperty/MyProperty (+3-page pagination), web-search fallback, per-source health chips; local Node engine (market-scan/start_market_scan.cmd) auto-falls back to the hosted Vercel deployment.
+- **Market Price Index** — nightly GitHub Action snapshots median ₱/sqm per city into \data/market-index.json\; City Price Index card charts trends; appraisal Time adjustments cite the index when available.
+- **Buyer Portal** — reservations, saved properties, inquiries KPIs.
+
+## Tests
+
+Headless-Chrome regression suite lives in \	ests/\ (requires Chrome + the local server on :8931):
+
+`powershell
+powershell -File tests\run_all.ps1                 # all tests, desktop
+powershell -File tests\run_all.ps1 -Mobile         # mobile viewport pass
+powershell -File tests\run_all.ps1 -Test crm_core_e2e
+`
+
+## Cloud runbook
+
+1. SQL migrations: run files in \supabase/\ in README order inside the Supabase SQL Editor.
+2. Edge functions: deploy \listing-api\, \seo\, \
+earby-scan\, \
+otify-dispatch\ (sources under \supabase/functions/\). Secrets: \RESEND_API_KEY\ (Resend), optional \MAIL_FROM\, \SEMAPHORE_API_KEY\, \NOTIFY_DISPATCH_SECRET\.
+   - notify-dispatch supports a **self-send mode**: POST {to, subject, html} with a user JWT emails that same account (Resend sandbox: only your Resend signup address until a domain is verified).
+3. Market Price Index job: enable GitHub Actions; workflow \.github/workflows/market-index.yml\ runs daily 02:30 PHT and commits \data/market-index.json\. Local one-off: \
+ode market-scan/build-index.js\.
