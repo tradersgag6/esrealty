@@ -179,9 +179,10 @@ async function invokeDotProperty(query) {
   const mode = query.mode === "rent" ? "rent" : "sale";
   const pages = getDotPropertyPages(query.type, mode);
   const all = [];
+  const seenUrls = new Set();
   let lastErr = "";
   let lastCount = 0;
-  const MAX_PAGES = 3;
+  const MAX_PAGES = 8;
   for (const slug of pages) {
     let emptyStreak = 0;
     for (let page = 1; page <= MAX_PAGES && emptyStreak === 0; page++) {
@@ -191,8 +192,16 @@ async function invokeDotProperty(query) {
         const cards = html.match(/<article\s+class="listing-snippet.*?<\/article>/gs) || [];
         if (cards.length === 0) { emptyStreak++; break; }
         const typeFallback = query.type || String(slug.split("-for-")[0]);
-        for (const c of cards) all.push(parseDotPropertyCard(c, typeFallback, mode));
-        lastCount += cards.length;
+        let fresh = 0;
+        for (const c of cards) {
+          const parsed = parseDotPropertyCard(c, typeFallback, mode);
+          const key = parsed.url ? seenUrls.has(parsed.url) : false;
+          if (parsed.url && key) continue;
+          if (parsed.url) seenUrls.add(parsed.url);
+          all.push(parsed); fresh++;
+        }
+        lastCount += fresh;
+        if (fresh === 0) { emptyStreak++; }
       } catch (err) {
         lastErr = String(err && err.message || err);
         break;
@@ -367,6 +376,25 @@ function safeDecode(u) {
   try { return decodeURIComponent(u); } catch (e) { return u; }
 }
 
+// Bing wraps results in /ck/a redirects carrying the real URL as u=a1<base64url>.
+function unwrapBingUrl(raw) {
+  let u = htmlDecode(String(raw || ""));
+  if (!/bing\.com\/ck\/a/i.test(u)) return safeDecode(u);
+  try {
+    const q = u.slice(u.indexOf("?") + 1);
+    for (const part of q.split("&")) {
+      const kv = part.split("=");
+      if (kv[0] === "u" && kv[1]) {
+        let b64 = kv[1];
+        if (b64.startsWith("a1")) b64 = b64.slice(2);
+        const decoded = Buffer.from(b64.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
+        if (/^https?:\/\//i.test(decoded)) return decoded;
+      }
+    }
+  } catch (e) { /* fall through */ }
+  return htmlDecode(safeDecode(u));
+}
+
 function parseSearchHtml(html, engine, query) {
   const list = [];
   const seen = new Set();
@@ -380,6 +408,17 @@ function parseSearchHtml(html, engine, query) {
         seen.add(u);
         list.push(newSearchListing(t, u, "", query));
       }
+    }
+  } else if (engine === "bing") {
+    const re = /<li class="b_algo"[\s\S]*?<h2[^>]*>\s*<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?(?:<p[^>]*>([\s\S]*?)<\/p>)?/gi;
+    let m;
+    while ((m = re.exec(html)) !== null) {
+      const u = unwrapBingUrl(m[1]);
+      if (!/^https?:\/\//.test(u)) continue;
+      const t = stripTags(m[2]);
+      if (!t || seen.has(u)) continue;
+      seen.add(u);
+      list.push(newSearchListing(t, u, stripTags(m[3] || ""), query));
     }
   } else {
     const blocks = html.split(/(?=<div class="result[^"]* web-result)/);
@@ -408,7 +447,7 @@ async function invokeWebSearch(query) {
   let err = "";
 
   try {
-    html = await fetchHtml("https://www.google.com/search?num=20&hl=en&q=" + enc, 6);
+    html = await fetchHtml("https://www.google.com/search?num=30&hl=en&q=" + enc, 6);
     const blocked = !html || html.length < 2000 ||
       /unusual traffic|enablejs|\/sorry\/|captcha|not a robot/i.test(html);
     if (blocked) {
@@ -430,22 +469,33 @@ async function invokeWebSearch(query) {
     html = await fetchHtml("https://html.duckduckgo.com/html/?q=" + enc, 10);
     const list = parseSearchHtml(html, "duckduckgo", query);
     if (list.length > 0) return { status: "ok", engine: "duckduckgo", count: list.length, error: err, listings: list };
-    return { status: "blocked", engine: "duckduckgo", count: 0, error: "DuckDuckGo returned no results", listings: [] };
+    err = (err ? err + "; " : "") + "DuckDuckGo returned no results; fell back to Bing";
+    html = "";
   } catch (e) {
-    return { status: "blocked", engine: "duckduckgo", count: 0, error: "DuckDuckGo failed: " + String(e && e.message || e), listings: [] };
+    err = (err ? err + "; " : "") + "DuckDuckGo failed (" + String(e && e.message || e) + "); fell back to Bing";
+    html = "";
+  }
+
+  try {
+    html = await fetchHtml("https://www.bing.com/search?count=30&q=" + enc, 10);
+    const list = parseSearchHtml(html, "bing", query);
+    if (list.length > 0) return { status: "ok", engine: "bing", count: list.length, error: err, listings: list };
+    return { status: "blocked", engine: "bing", count: 0, error: "Bing returned no parseable results", listings: [] };
+  } catch (e) {
+    return { status: "blocked", engine: "bing", count: 0, error: "Bing failed: " + String(e && e.message || e), listings: [] };
   }
 }
 
 async function bingSiteSearch(qtext) {
   const enc = encodeURIComponent(qtext);
-  const html = await fetchHtml("https://www.bing.com/search?count=20&q=" + enc, 10);
+  const html = await fetchHtml("https://www.bing.com/search?count=30&q=" + enc, 10);
   const list = [];
   const seen = new Set();
-  const re = /<li class="b_algo"[\s\S]*?<h2[^>]*><a href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?(?:<p[^>]*>([\s\S]*?)<\/p>)?/gi;
+  const re = /<li class="b_algo"[\s\S]*?<h2[^>]*>\s*<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?(?:<p[^>]*>([\s\S]*?)<\/p>)?/gi;
   let m;
   while ((m = re.exec(html)) !== null) {
-    const url = htmlDecode(m[1]);
-    if (seen.has(url)) continue;
+    const url = unwrapBingUrl(m[1]);
+    if (!/^https?:\/\//.test(url) || seen.has(url)) continue;
     const title = stripTags(m[2]);
     if (!title) continue;
     const snippet = stripTags(m[3] || "");
@@ -634,39 +684,56 @@ async function runMarketScan(query) {
 
   if (q.live) {
     if (!running(dot) && !running(mp)) {
-      const ws = await invokeWebSearch(q);
-      const wsEngine = ws.engine === "google" ? "Google" : "DuckDuckGo";
+      // Fire every secondary source in parallel — wall time ≈ slowest single probe.
+      const jobs = {
+        websearch: invokeWebSearch(q),
+        facebookpublic: invokeFacebookPublicSearch(q),
+        onepropertee: invokeIndexedListingSite(q, "onepropertee.com", "OnePropertee"),
+        carousell: invokeIndexedListingSite(q, "carousell.ph", "Carousell Philippines"),
+        lamudi: invokeLamudi(),
+        zipmatch: invokeZipMatch(),
+        facebook: invokeFacebook(),
+        instagram: invokeInstagram(),
+        tiktok: invokeTikTok()
+      };
+      const settled = {};
+      await Promise.all(Object.keys(jobs).map(async k => {
+        settled[k] = await jobs[k].catch(e => ({ status: "error", count: 0, error: String(e && e.message || e), engine: "", listings: [] }));
+      }));
+
+      const ws = settled.websearch;
+      const wsEngine = ws.engine === "google" ? "Google" : (ws.engine === "bing" ? "Bing" : "DuckDuckGo");
       sources.push({ name: "websearch", label: "Web Search (" + wsEngine + ")", status: ws.status, count: ws.count, error: ws.error });
       for (const l of ws.listings) { l.source = "websearch"; l.sourceLabel = "Web Search · " + wsEngine; listings.push(l); }
 
-      const fbPublic = await invokeFacebookPublicSearch(q);
+      const fbPublic = settled.facebookpublic;
       const fbEngine = fbPublic.engine || "Bing";
       sources.push({ name: "facebookpublic", label: "Facebook Public Posts (" + fbEngine + ")", status: fbPublic.status, count: fbPublic.count, error: fbPublic.error });
       for (const l of fbPublic.listings) { l.source = "facebookpublic"; l.sourceLabel = "Facebook Public Post · " + fbEngine; listings.push(l); }
 
       for (const site of [
-        { name: "onepropertee", domain: "onepropertee.com", label: "OnePropertee" },
-        { name: "carousell", domain: "carousell.ph", label: "Carousell Philippines" }
+        { key: "onepropertee", label: "OnePropertee" },
+        { key: "carousell", label: "Carousell Philippines" }
       ]) {
-        const siteResult = await invokeIndexedListingSite(q, site.domain, site.label);
+        const siteResult = settled[site.key];
         const eng = siteResult.engine || "Bing";
-        sources.push({ name: site.name, label: site.label + " (" + eng + ")", status: siteResult.status, count: siteResult.count, error: siteResult.error });
-        for (const l of siteResult.listings) { l.source = site.name; l.sourceLabel = site.label + " · " + eng; listings.push(l); }
+        sources.push({ name: site.key, label: site.label + " (" + eng + ")", status: siteResult.status, count: siteResult.count, error: siteResult.error });
+        for (const l of siteResult.listings) { l.source = site.key; l.sourceLabel = site.label + " · " + eng; listings.push(l); }
       }
 
-      const lam = await invokeLamudi();
+      const lam = settled.lamudi;
       sources.push({ name: "lamudi", label: "Lamudi", status: lam.status, count: lam.count, error: lam.error });
 
-      const zip = await invokeZipMatch();
+      const zip = settled.zipmatch;
       sources.push({ name: "zipmatch", label: "ZipMatch", status: zip.status, count: zip.count, error: zip.error });
 
-      const fb = await invokeFacebook();
+      const fb = settled.facebook;
       sources.push({ name: "facebook", label: "Facebook Marketplace", status: fb.status, count: fb.count, error: fb.error });
 
-      const ig = await invokeInstagram();
+      const ig = settled.instagram;
       sources.push({ name: "instagram", label: "Instagram (#property)", status: ig.status, count: ig.count, error: ig.error });
 
-      const tt = await invokeTikTok();
+      const tt = settled.tiktok;
       sources.push({ name: "tiktok", label: "TikTok (#property)", status: tt.status, count: tt.count, error: tt.error });
     }
   }
@@ -675,7 +742,18 @@ async function runMarketScan(query) {
   sources.push({ name: "localbenchmark", label: "Local Benchmark (offline)", status: lb.status, count: lb.count, error: lb.error });
   for (const l of lb.listings) { l.source = "localbenchmark"; l.sourceLabel = "Local Benchmark"; listings.push(l); }
 
-  const filtered = listings.filter((l) => testListingMatch(l, q));
+  // Cross-source dedupe: same URL (or same title+city when urlless) counted once.
+  const seenKey = new Set();
+  const uniq = [];
+  for (const l of listings) {
+    let k = String(l.url || "").replace(/[?#].*$/, "");
+    if (!k) k = "t|" + (l.title || "").toLowerCase().slice(0, 90) + "|" + (l.city || "").toLowerCase();
+    if (seenKey.has(k)) continue;
+    seenKey.add(k);
+    uniq.push(l);
+  }
+
+  const filtered = uniq.filter((l) => testListingMatch(l, q));
   return {
     ok: true,
     query: {

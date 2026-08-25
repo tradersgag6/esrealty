@@ -7120,7 +7120,7 @@ premise: "Fee Simple / As Improved",
        '<div class="field col-2"><label>Max Price (₱)</label><input class="input input-num" id="ms-maxp" value="' + esc(q.maxPrice || "") + '"></div>' +
        '<div class="field col-2"><label>Min Area (sqm)</label><input class="input input-num" id="ms-mina" value="' + esc(q.minArea || "") + '"></div>' +
        '<div class="field col-2"><label>Min Bedrooms</label><input class="input input-num" id="ms-minb" value="' + esc(q.minBeds || "") + '"></div>' +
-       '<div class="field col-2"><label>Max Results</label><input class="input input-num" id="ms-max" value="' + (q.maxResults || 40) + '"></div>' +
+       '<div class="field col-2"><label>Max Results <span class="dim tiny">(≤500)</span></label><input class="input input-num" id="ms-max" min="5" max="500" value="' + (q.maxResults || 60) + '"></div>' +
        '<div class="field col-2"><label class="ms-chk"><input type="checkbox" id="ms-live"' + (q.live === false ? "" : " checked") + '> Include live web sources</label></div>' +
       '</div></div>';
     html += '<div id="market-status" class="mt-16"></div>';
