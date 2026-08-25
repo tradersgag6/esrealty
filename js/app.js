@@ -7113,6 +7113,7 @@ premise: "Fee Simple / As Improved",
       '<div class="field col-2"><label>Property Type</label><select class="input" id="ms-type">' + MS_TYPES.map(t => '<option value="' + esc(t) + '"' + (t === (q.type || "") ? " selected" : "") + '>' + (t || "All types") + '</option>').join("") + '</select></div>' +
       '<div class="field col-2"><label>Mode</label><select class="input" id="ms-mode">' + '<option value="sale"' + ((q.mode || "sale") === "sale" ? " selected" : "") + '>For Sale</option><option value="rent"' + ((q.mode || "sale") === "rent" ? " selected" : "") + '>For Rent</option></select></div>' +
       '<div class="field col-2"><button class="btn btn-primary" id="ms-run" style="width:100%">' + icon("search", 15) + ' Run Search</button></div>' +
+      '<div class="field col-2"><button type="button" class="btn btn-ghost" id="ms-clear" style="width:100%" title="Reset filters and clear results">' + icon("trash", 15) + ' Clear</button></div>' +
       '<div class="field col-12"><a class="btn btn-ghost btn-sm" id="ms-facebook-search" href="' + facebookMarketplaceUrl({ type: q.type || "", mode: q.mode || "sale", city: q.city || "" }) + '" target="_blank" rel="noopener">' + icon("share", 14) + ' Open Facebook Marketplace</a><span class="field-hint" style="margin-left:8px">Opens Facebook’s own search in a new tab. Sign in to Facebook to see Marketplace and private/group posts.</span></div>' +
       '</div><div class="row mt-16" style="gap:12px;align-items:end">' +
       '<div class="field col-2"><label>Min Price (₱)</label><input class="input input-num" id="ms-minp" value="' + esc(q.minPrice || "") + '"></div>' +
@@ -7361,6 +7362,12 @@ premise: "Fee Simple / As Improved",
 
   function bindMarketScan() {
     $$("#content [data-run-market], #content #ms-run").forEach(b => b.addEventListener("click", marketRun));
+    const clearBtn = $("#ms-clear");
+    if (clearBtn) clearBtn.addEventListener("click", () => {
+      state.market = { query: { live: true }, results: [], sources: [] };
+      save(); render();
+      toast("Market Scan cleared");
+    });
     $$("#content #ms-city, #content #ms-max, #content #ms-minp, #content #ms-maxp, #content #ms-mina, #content #ms-minb").forEach(inp => inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); marketRun(); } }));
     const updateFacebookSearch = () => {
       const link = $("#ms-facebook-search");
