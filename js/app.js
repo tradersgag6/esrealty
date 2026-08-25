@@ -7196,6 +7196,19 @@ premise: "Fee Simple / As Improved",
   }
 
   /* ---- Market Price Index ---- */
+  function htmlUnescape(s) {
+    return String(s || "").replace(/&(#[xX]?[0-9a-fA-F]+|[a-zA-Z]+);/g, function (m, g) {
+      try {
+        if (g.charAt(0) === "#") {
+          const num = g.charAt(1) === "x" || g.charAt(1) === "X" ? parseInt(g.slice(2), 16) : parseInt(g.slice(1), 10);
+          return num > 0 ? String.fromCodePoint(num) : m;
+        }
+        const named = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", ntilde: "ñ" };
+        const d = named[g.toLowerCase()];
+        return d != null ? d : m;
+      } catch (e) { return m; }
+    });
+  }
   var _cityCanonMap = null;
   function canonCity(raw) {
     if (!_cityCanonMap) {
@@ -7206,7 +7219,7 @@ premise: "Fee Simple / As Improved",
         });
       });
     }
-    let s = String(raw || "").replace(/\s+/g, " ").trim();
+    let s = htmlUnescape(String(raw || "")).replace(/\s+/g, " ").trim();
     if (!s) return "";
     // Try each comma segment ("Ermita, Manila" -> Manila; "BGC, Taguig" -> Taguig)
     const parts = s.split(",").map(p => p.replace(/^city of\s+/i, "").trim()).filter(Boolean);
