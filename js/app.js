@@ -9018,9 +9018,19 @@ premise: "Fee Simple / As Improved",
       if (!res.ok || out.ok === false) throw new Error(out.error || ("HTTP " + res.status));
       toast("Digest emailed to <b>" + esc(to) + "</b>", "ok");
     } catch (e) {
-      const msg = String(e && e.message || e);
-      const hint = /RESEND_API_KEY/.test(msg) ? "Add the Resend key in Edge Functions → Secrets, then retry." : (/Unauthorized|JWT/i.test(msg) ? "Your session expired — sign in again." : "Deploy/update the notify-dispatch function with the latest code.");
-      toast("Email failed: " + esc(msg) + ". " + hint, "err");
+      // Fallback: pre-filled mailto so the digest always goes out, no infra needed.
+      const d2 = leadDigestData();
+      const txt =
+        "Weekly Broker Digest — week of " + d2.weekStart.toLocaleDateString() + "\n\n" +
+        "New leads: " + d2.newThisWeek.length + " · Stage moves: " + d2.movements +
+        " · Won: " + d2.closedThisWeek.length + " (" + C.money(d2.wonValue) + ")" +
+        " · Lost: " + d2.lostThisWeek + " · Win rate: " + d2.conv + "\n\n" +
+        "Overdue follow-ups (" + d2.overdue.length + "):\n" +
+        (d2.overdue.map(x => " • " + x.l.ref + " " + (x.l.name || "") + " — " + x.s.label).join("\n") || " • None") + "\n\n" +
+        "(Sent via mailto fallback — edge dispatch unavailable: " + String(e && e.message || e) + ")";
+      const mailto = "mailto:" + encodeURIComponent(to) + "?subject=" + encodeURIComponent("ES Realty weekly broker digest") + "&body=" + encodeURIComponent(txt);
+      toast("Edge email failed (" + esc(String(e && e.message || e)) + ") — opening your mail app instead", "info");
+      setTimeout(() => { window.location.href = mailto; }, 600);
     }
   }
   function leadExportCsv() {
