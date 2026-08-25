@@ -1295,47 +1295,70 @@
   }
   function resolveAdminFromAddress(ad) {
     if (!ad) return null;
-    var cityNames = [ad.city, ad.town, ad.municipality, ad.county].filter(Boolean).map(s => String(s).toLowerCase());
+    var names = [ad.city, ad.town, ad.municipality].filter(Boolean).map(s => String(s).toLowerCase().trim()).filter(Boolean);
+    var nz = s => String(s || "").toLowerCase().replace(/[()]/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
+    var stateN = nz(ad.state || ad.province), regionN = nz(ad.region || ad.state_district);
     var regions = D.regionNames();
-    var norm = s => String(s || "").toLowerCase().replace(/\(.*?\)/g, " ").replace(/\b(region|province|city of)\b/g, " ").replace(/[^a-z0-9]/g, "");
-    // City-first: authoritative chain from PH data
-    for (var ri = 0; ri < regions.length; ri++) {
-      var r = regions[ri], provs = D.provincesFor(r);
-      for (var pi = 0; pi < provs.length; pi++) {
-        var cities = D.citiesFor(r, provs[pi]);
-        for (var ci = 0; ci < cities.length; ci++) {
-          var cl = String(cities[ci]).toLowerCase();
-          for (var ni = 0; ni < cityNames.length; ni++) {
-            var cn = cityNames[ni];
-            if (cn && cn.length >= 4 && (cl === cn || cl.indexOf(cn) !== -1 || cn.indexOf(cl) !== -1)) {
-              return { region: r, province: provs[pi], city: cities[ci] };
-            }
+    // Strict city scoring: exact=100; prefix with tiny length diff allowed (Cebu/Cebu City); loose containment only for long names
+    function cityScore(c) {
+      var cl = String(c).toLowerCase().trim(), s = 0;
+      for (var i = 0; i < names.length; i++) {
+        var n = names[i];
+        if (!n) continue;
+        if (cl === n) { s = Math.max(s, 100); continue; }
+        if (cl.indexOf(n) === 0 || n.indexOf(cl) === 0) { var d = Math.abs(cl.length - n.length); if (d <= 4 && Math.min(cl.length, n.length) >= 4) s = Math.max(s, 80 - d * 5); }
+        else if (n.length >= 6 && cl.indexOf(n) !== -1) s = Math.max(s, 55);
+      }
+      return s;
+    }
+    function bestInProvince(R, P) {
+      var best = null, bs = 0, cs = D.citiesFor(R, P);
+      for (var i = 0; i < cs.length; i++) { var sc = cityScore(cs[i]); if (sc > bs) { bs = sc; best = cs[i]; } }
+      return bs ? { region: R, province: P, city: best, score: bs } : null;
+    }
+    function bestInRegion(R) {
+      var best = null, pl = D.provincesFor(R);
+      for (var i = 0; i < pl.length; i++) { var r = bestInProvince(R, pl[i]); if (r && (!best || r.score > best.score)) best = r; }
+      return best;
+    }
+    // PASS 1: province anchor (state text matches a known province) → strict city inside it
+    var provAnchor = null;
+    if (stateN) {
+      for (var i1 = 0; i1 < regions.length; i1++) {
+        var pl1 = D.provincesFor(regions[i1]);
+        for (var j1 = 0; j1 < pl1.length; j1++) {
+          var pn1 = nz(pl1[j1]);
+          if (pn1 && (pn1 === stateN || pn1.indexOf(stateN) === 0 || stateN.indexOf(pn1) === 0)) {
+            var h1 = bestInProvince(regions[i1], pl1[j1]);
+            if (h1 && h1.score >= 80) return { region: regions[i1], province: pl1[j1], city: h1.city };
+            if (!provAnchor) provAnchor = { region: regions[i1], province: pl1[j1], city: h1 && h1.score >= 50 ? h1.city : null };
           }
         }
       }
+      if (provAnchor) return provAnchor;
     }
-    // Region/province text fallback with alias normalization
-    var nr = norm(ad.region || ad.state_district), ns = norm(ad.state || ad.county);
-    for (var rj = 0; rj < regions.length; rj++) {
-      var rg = regions[rj], core = norm(rg);
-      var regionHit = (nr && core && (core.indexOf(nr) !== -1 || nr.indexOf(core) !== -1));
-      var provHit = null;
-      var pl = D.provincesFor(rg);
-      for (var pj = 0; pj < pl.length; pj++) {
-        var np = norm(pl[pj]);
-        if (ns && np && (np.indexOf(ns) !== -1 || ns.indexOf(np) !== -1)) { provHit = pl[pj]; break; }
+    // PASS 2: region anchor via alias-aware text (keeps parentheticals: "region iv a calabarzon")
+    if (regionN) {
+      for (var k = 0; k < regions.length; k++) {
+        var rg = regions[k], core = nz(rg);
+        var hit = core && (core.indexOf(regionN) !== -1 || regionN.indexOf(core) !== -1);
+        if (!hit && core) hit = core.split(" ").some(w => w.length >= 4 && regionN.indexOf(w) !== -1);
+        if (!hit && rg === "NCR" && /metro manila|national capital|manila/.test(regionN)) hit = true;
+        if (hit) { var b2 = bestInRegion(rg); if (b2) return { region: rg, province: b2.province, city: b2.city }; }
       }
-      if (regionHit || provHit) {
-        var cityHit = null;
-        var provFinal = provHit;
-        var cands = provFinal ? D.citiesFor(rg, provFinal) : [];
-        if (!provFinal && regionHit) { for (var q = 0; q < pl.length; q++) { if (D.citiesFor(rg, pl[q]).length) { cands = cands.concat(D.citiesFor(rg, pl[q])); } } }
-        for (var cj2 = 0; cj2 < cands.length; cj2++) {
-          var cl2 = String(cands[cj2]).toLowerCase();
-          for (var nj = 0; nj < cityNames.length; nj++) { var cn2 = cityNames[nj]; if (cn2 && cl2.indexOf(cn2) !== -1) { cityHit = cands[cj2]; break; } }
-          if (cityHit) break;
+    }
+    // PASS 3: global best-scoring city anywhere (exact beats fuzzy)
+    var gb = null;
+    for (var m = 0; m < regions.length; m++) { var bb = bestInRegion(regions[m]); if (bb && (!gb || bb.score > gb.score)) gb = bb; }
+    if (gb && gb.score >= 80) return { region: gb.region, province: gb.province, city: gb.city };
+    // PASS 4: province-only match (no city found)
+    if (stateN) {
+      for (var i4 = 0; i4 < regions.length; i4++) {
+        var pl4 = D.provincesFor(regions[i4]);
+        for (var j4 = 0; j4 < pl4.length; j4++) {
+          var pn4 = nz(pl4[j4]);
+          if (pn4 && (pn4 === stateN || pn4.indexOf(stateN) === 0 || stateN.indexOf(pn4) === 0)) return { region: regions[i4], province: pl4[j4], city: null };
         }
-        return { region: rg, province: provFinal, city: cityHit };
       }
     }
     return null;
@@ -2247,7 +2270,8 @@ function bindPerView() {
       provs.map(p => '<option value="' + esc(p) + '"' + (p === cur ? " selected" : "") + '>' + esc(p) + '</option>').join("") + '</select>';
   }
   function citySel(region, province, cur) {
-    const cities = (region && province) ? D.citiesFor(region, province) : [];
+    let cities = (region && province) ? D.citiesFor(region, province).slice() : [];
+    if (cur && cities.indexOf(cur) === -1) cities = [cur].concat(cities);
     return '<select class="input" id="wz-city" data-g="property.city"><option value="">Select city / municipality…</option>' +
       cities.map(c => '<option value="' + esc(c) + '"' + (c === cur ? " selected" : "") + '>' + esc(c) + '</option>').join("") + '</select>';
   }
