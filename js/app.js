@@ -3710,7 +3710,9 @@ function bindPerView() {
       comparables: [],
       adjustments: [],
       cost: { landValuePerSqm: 0, rcnPerSqm: (D.CONSTRUCTION_COST[bldgType] || 15000), bldgArea: 0, depPhysical: 0, depFunctional: 0, depEconomic: 0, depNote: "" },
-      income: { useIncome: false, gpi: 0, vacancyPct: 5, opexPct: 25, capRate: 0, capRateNote: "", useDcf: false },
+      income: { useIncome: false, gpi: 0, vacancyPct: 5, opexPct: 25, capRate: 0, capRateNote: "",       useDcf: false },
+      tax: { sellingPrice: 0, zonalPsm: 0, smvPsm: 0, assessLevel: 20 },
+      collateral: { haircutPct: 40 },
       approachResults: {
         sales: { finalValue: null, at: null },
         cost: { finalValue: null, at: null },
@@ -3745,6 +3747,8 @@ function bindPerView() {
     a.cert = Object.assign({ appraiserName: "", prcNo: "", ptrNo: "", date: "", eSignature: false }, a.cert || {});
     a.income = Object.assign({ useIncome: false, gpi: 0, vacancyPct: 5, opexPct: 25, capRate: 0, capRateNote: "", useDcf: false }, a.income || {});
     a.cost = Object.assign({ landValuePerSqm: 0, rcnPerSqm: 15000, bldgArea: 0, depPhysical: 0, depFunctional: 0, depEconomic: 0, depNote: "" }, a.cost || {});
+    a.tax = Object.assign({ sellingPrice: 0, zonalPsm: 0, smvPsm: 0, assessLevel: 20 }, a.tax || {});
+    a.collateral = Object.assign({ haircutPct: 40 }, a.collateral || {});
     a.approachResults = a.approachResults || { sales: { finalValue: null, at: null }, cost: { finalValue: null, at: null }, income: { finalValue: null, at: null } };
     ["sales", "cost", "income"].forEach(k => {
       if (!a.approachResults[k] || typeof a.approachResults[k].finalValue === "undefined") a.approachResults[k] = { finalValue: null, at: null };
@@ -3947,6 +3951,14 @@ function bindPerView() {
     html += '<div class="field col-12"><label>Extraordinary Assumptions / Hypothetical Conditions (required)</label><textarea class="input" id="ap-assump" rows="2" placeholder="State any extraordinary assumptions affecting value, or ' + "'None'" + '">' + esc(a.extraordinaryAssumptions) + '</textarea></div>';
     html += '<div class="field col-12"><label>Scope of Work</label><textarea class="input" id="ap-scope" rows="3" placeholder="What was/wasn' + "'t inspected, data sources relied on." + '">' + esc(a.scopeOfWork) + '</textarea></div>';
     html += '</div></div>';
+    html += '<div class="card card-pad mt-16"><h3 class="mb-16">' + icon("scale", 15) + ' PH Tax &amp; Collateral Parameters <span class="badge blue">TRAIN / RA 10964</span></h3>' +
+      '<p class="dim tiny">Feeds the CGT/DST computation (Taxation purpose) and Forced/Mortgage Value (Mortgage purpose). BIR zonal value is per sqm from your RDO; SMV and assessment level come from the LGU Assessor.</p><div class="form-grid">' +
+      '<div class="field col-3"><label>Gross Selling Price ₱</label><input class="input input-num" id="ap-sp" data-num value="' + esc(a.tax.sellingPrice || "") + '" placeholder="e.g. 6500000"></div>' +
+      '<div class="field col-3"><label>BIR Zonal ₱/sqm</label><input class="input input-num" id="ap-zonal" data-num value="' + esc(a.tax.zonalPsm || "") + '" placeholder="e.g. 3500"></div>' +
+      '<div class="field col-3"><label>LGU SMV ₱/sqm</label><input class="input input-num" id="ap-smv" data-num value="' + esc(a.tax.smvPsm || "") + '" placeholder="e.g. 2800"></div>' +
+      '<div class="field col-3"><label>Assessment Level %</label><input class="input input-num" id="ap-al" data-num value="' + esc(a.tax.assessLevel != null ? a.tax.assessLevel : 20) + '" placeholder="20"></div>' +
+      '<div class="field col-3"><label>Collateral Haircut %</label><input class="input input-num" id="ap-haircut" data-num value="' + esc(a.collateral.haircutPct != null ? a.collateral.haircutPct : 40) + '" placeholder="40"><div class="field-hint">Forced/Mortgage Value = MV × (1 − haircut). PH banks commonly lend on 60–70% of MV.</div></div>' +
+      '</div></div>';
     html += '<div class="card card-pad mt-16"><h3 class="mb-16">' + icon("camera", 15) + ' Subject Photos <span class="badge blue">' + (a.photos || []).length + '</span></h3>' +
       '<p class="dim tiny">Attach photos of the property. They are stored locally with the appraisal and embedded in the report Addenda. Use one as the cover.</p>' +
       apprPhotosHtml(a) + '</div>';
@@ -4190,6 +4202,27 @@ function bindPerView() {
     }
     html += '</div>';
     html += '</div>';
+    // PH Tax Computation (TRAIN / NIRC Sec. 24(D), 6(E), 196; RA 7160 transfer tax)
+    const tx = C.phTaxes({ lotArea: appraisalSubjectRaw(a).property.lotArea, sellingPrice: a.tax.sellingPrice, zonalPsm: a.tax.zonalPsm, smvPsm: a.tax.smvPsm, marketValue: res ? res.sales.indicated : 0 });
+    html += '<div class="card card-pad mt-16"><h3 class="mb-8">' + icon("scale", 15) + ' PH Transfer Tax Computation <span class="badge blue">TRAIN</span></h3>';
+    if (tx.cgtBase == null) {
+      html += '<p class="dim tiny">Enter Gross Selling Price, BIR Zonal ₱/sqm and/or LGU SMV ₱/sqm in Engagement Setup to compute CGT/DST/transfer tax on the governing (highest) base.</p>';
+    } else {
+      html += '<div class="table-wrap"><table class="data"><tr><th>Item</th><th class="num">Amount</th></tr>' +
+        '<tr><td>Gross Selling Price</td><td class="num">' + (tx.sellingPrice ? C.money(tx.sellingPrice) : "—") + '</td></tr>' +
+        '<tr><td>BIR Zonal FMV' + (appraisalSubjectRaw(a).property.lotArea ? " (" + C.numFmt(appraisalSubjectRaw(a).property.lotArea) + " sqm × " + C.money(a.tax.zonalPsm) + ")" : "") + '</td><td class="num">' + (tx.zonalFMV ? C.money(tx.zonalFMV) : "—") + '</td></tr>' +
+        '<tr><td>Assessed FMV (SMV × area)</td><td class="num">' + (tx.assessedFMV ? C.money(tx.assessedFMV) : "—") + '</td></tr>' +
+        '<tr><td><b>Governing Base — ' + esc(tx.governing) + '</b></td><td class="num"><b>' + C.money(tx.cgtBase) + '</b></td></tr>' +
+        '<tr><td>Capital Gains Tax (6%)</td><td class="num">' + C.money(tx.cgt) + '</td></tr>' +
+        '<tr><td>Documentary Stamp Tax (1.5%)</td><td class="num">' + C.money(tx.dst) + '</td></tr>' +
+        '<tr><td>Local Transfer Tax (0.5%)</td><td class="num">' + C.money(tx.transferTax) + '</td></tr>' +
+        '<tr><td><b>Total Tax &amp; Charges</b></td><td class="num"><b>' + C.money(tx.total) + '</b></td></tr></table></div>';
+      if (tx.zonalDeltaPct != null && Math.abs(tx.zonalDeltaPct) > 10) {
+        html += '<div class="notice-banner warn mt-12"><span>' + icon("zap", 13) + ' Concluded Sales-Comparison MV is <b>' + Math.abs(tx.zonalDeltaPct).toFixed(1) + '% ' + (tx.zonalDeltaPct > 0 ? "above" : "below") + '</b> BIR zonal FMV — beyond the ±10% reasonableness band. Document market evidence supporting the divergence or reconcile before submission to the RDO.</span></div>';
+      }
+      html += '<p class="dim tiny mt-8">Rates: CGT 6% (NIRC §24(D)); DST 1.5% (§196); transfer tax 0.5% ceiling (RA 7160 §135 — some LGUs levy 0.75%). CARP/estate/expropriation dispositions follow different regimes.</p>';
+    }
+    html += '</div>';
     return html;
   }
 
@@ -4225,6 +4258,23 @@ function bindPerView() {
         html += '<div class="notice-banner mt-16">' + icon("check", 14) + ' <span>Final value opinion is within ' + C.pct(diff) + ' of the Phase 3 investment max price (' + C.money(expected) + ').</span></div>';
       }
     }
+    // Collateral / Forced Sale Value (BSP-practice lending basis)
+    const mvBase = a.finalValue != null ? a.finalValue : (res ? res.sales.indicated : 0);
+    const col = C.collateralValue(mvBase, (a.collateral || {}).haircutPct);
+    const sp = C.num((a.tax || {}).sellingPrice, 0);
+    html += '<div class="card card-pad mt-16"><h3 class="mb-8">' + icon("shield", 15) + ' Collateral / Forced Sale Value <span class="badge blue">Mortgage Purpose</span></h3>';
+    if (!(mvBase > 0)) {
+      html += '<p class="dim tiny">Confirm a Final Value Opinion (or complete Sales Comparison) to compute the mortgage value.</p>';
+    } else {
+      html += '<div class="table-wrap"><table class="data"><tr><th>Item</th><th class="num">Amount</th></tr>' +
+        '<tr><td>Market Value' + (a.finalValue == null ? ' <span class="dim tiny">(live — sales indicated)</span>' : '') + '</td><td class="num">' + C.money(mvBase) + '</td></tr>' +
+        '<tr><td>Collateral haircut</td><td class="num">' + C.numFmt(col.haircutPct, 0) + '%</td></tr>' +
+        '<tr><td><b>Mortgage / Forced Sale Value</b></td><td class="num"><b>' + C.money(col.mortgageValue) + '</b></td></tr>' +
+        (sp > 0 ? '<tr><td>LTV vs Gross Selling Price (' + C.money(sp) + ')</td><td class="num"><b>' + (sp > 0 ? C.pct(col.mortgageValue / sp) : "—") + '</b></td></tr>' : "") +
+        '</table></div>';
+      html += '<p class="dim tiny mt-8">PH bank practice typically lends on 60–70% of MV (haircut 30–40%); BSP requires collateral valuations at least annually for material exposures. Adjust the haircut in Engagement Setup to match your credit policy.</p>';
+    }
+    html += '</div>';
     return html;
   }
 
@@ -4516,6 +4566,12 @@ function bindPerView() {
     set("ap-assump", e => { a.extraordinaryAssumptions = e.target.value; a.updatedAt = Date.now(); });
     set("ap-scope", e => { a.scopeOfWork = e.target.value; a.updatedAt = Date.now(); });
     set("ap-recnote", e => { a.reconciliationNotes = e.target.value; a.updatedAt = Date.now(); });
+    const numSet = (id, fn) => { const el = $("#" + id); if (el) el.addEventListener("input", e => { fn(C.num(e.target.value, 0)); a.updatedAt = Date.now(); }); };
+    numSet("ap-sp", v => { a.tax.sellingPrice = v; });
+    numSet("ap-zonal", v => { a.tax.zonalPsm = v; });
+    numSet("ap-smv", v => { a.tax.smvPsm = v; });
+    numSet("ap-al", v => { a.tax.assessLevel = v; });
+    numSet("ap-haircut", v => { a.collateral.haircutPct = v; });
 
     $$("#content [data-c]").forEach(el => {
       const id = el.getAttribute("data-id"), key = el.getAttribute("data-c");
@@ -4600,7 +4656,8 @@ function bindPerView() {
     }));
     const resetEng = $("#ap-reset");
     if (resetEng) resetEng.addEventListener("click", () => {
-      if (!confirm("Start a new appraisal? Current working data will be reset.")) return;
+      const hasWork = (a.name && a.name.trim()) || (a.comparables || []).length > 0 || (a.adjustments || []).length > 0 || a.finalValue != null || (a.photos || []).length > 0;
+      if (hasWork && !confirm("Start a new appraisal? Current working data will be reset.")) return;
       state.appraisal = freshAppraisal();
       state.appraisal.comparables = sampleComparables(state.appraisal);
       save(); render(); toast("New appraisal started — name it to autosave");

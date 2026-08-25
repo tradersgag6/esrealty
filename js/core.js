@@ -537,7 +537,9 @@
   const APPRAISAL_ELEMENTS = [
     "Property Rights Conveyed", "Financing Terms", "Conditions of Sale",
     "Market Conditions (Time)", "Location", "Size",
-    "Shape / Frontage", "Improvements", "Condition"
+    "Shape / Frontage", "Improvements", "Condition",
+    "Zoning / Land Use", "Corner / Lot Type", "Road Right-of-Way & Access",
+    "Topography / Elevation", "Flood / Geohazard"
   ];
 
   const _monthsBetween = (a, b) => {
@@ -584,6 +586,41 @@
     s["Shape / Frontage"] = { value: 0, basis: "Assuming comparable utility/frontage; adjust if subject is irregular or landlocked." };
     s["Improvements"] = { value: 0, basis: "No adjustment default — verify improvements against subject." };
     s["Condition"] = { value: 0, basis: "Condition parity assumed pending inspection." };
+
+    const sZone = String(p.zoning || p.landUse || "").toLowerCase();
+    const cZone = String(comp.zoning || comp.landUse || "").toLowerCase();
+    if (sZone && cZone) {
+      const zoneAdj = sZone === cZone ? 0 : (sZone.indexOf("commercial") !== -1 && cZone.indexOf("residential") !== -1 ? 8 : (cZone.indexOf("commercial") !== -1 && sZone.indexOf("residential") !== -1 ? -8 : 0));
+      s["Zoning / Land Use"] = { value: zoneAdj, basis: zoneAdj === 0
+        ? "Zoning parity assumed (" + (sZone || "unspecified") + ")."
+        : "Subject '" + sZone + "' vs comparable '" + cZone + "' — commercial-zoned land commands a premium over residential in PH practice; ±8% applied pending appraiser review." };
+    } else {
+      s["Zoning / Land Use"] = { value: 0, basis: "Verify zoning class of both parcels against the CLUP / LGU zoning certificate before concluding." };
+    }
+
+    let cornerAdj = 0, cornerBasis = "Lot-type parity assumed (interior vs corner).";
+    if (p.lotType === "Corner" || p.isCorner === true) { cornerAdj = 6; cornerBasis = "Subject is a corner lot — commercial visibility/dual-access premium of ~6% applied (typical PH range 5–10%)."; }
+    else if (p.lotType === "Through" || p.throughLot === true) { cornerAdj = 4; cornerBasis = "Through lot — dual frontage premium ~4% applied."; }
+    else if (comp.lotType === "Corner" || comp.isCorner === true) { cornerAdj = -6; cornerBasis = "Comparable is a corner lot while subject is interior — downward adjustment applied."; }
+    s["Corner / Lot Type"] = { value: cornerAdj, basis: cornerBasis };
+
+    const rt = String(p.roadType || "").toLowerCase(), rw = num(p.roadWidth, 0);
+    if (rt.indexOf("no road") !== -1 || rt.indexOf("landlocked") !== -1 || rw === 0) {
+      s["Road Right-of-Way & Access"] = { value: -25, basis: "Landlocked or no registered RROW — major negative adjustment (-25%; PH practice range −20% to −40%) per Sec. 26 RA 7160 practical access test." };
+    } else if (rw > 0 && rw < 5) {
+      s["Road Right-of-Way & Access"] = { value: -6, basis: "Narrow ROW (" + numFmt(rw) + " m, below the 5 m minimum for standard vehicular access) — modest negative adjustment." };
+    } else {
+      s["Road Right-of-Way & Access"] = { value: 0, basis: "Adequate registered access via " + (rt || "public road") + (rw > 0 ? " (" + numFmt(rw) + " m wide)." : ".") };
+    }
+
+    s["Topography / Elevation"] = { value: 0, basis: "Assumed similar rolling-to-level terrain; adjust for steep slope, fill requirement, or retention/flood-mitigation cost." };
+
+    const fr = String(p.floodRisk || "").toLowerCase();
+    const floodMap = { high: -8, medium: -4, moderate: -4, low: 0 };
+    const fVal = floodMap[fr] != null ? floodMap[fr] : 0;
+    s["Flood / Geohazard"] = { value: fVal, basis: fVal < 0
+      ? "Subject flagged '" + p.floodRisk + "' flood susceptibility — market-documented discount applied; cross-check MGB geohazard map and confirm with insurer."
+      : "Low/no flood exposure recorded; verify against MGB geohazard and Project NOAH maps during inspection." };
     return s;
   }
 
@@ -656,6 +693,37 @@
     return out;
   }
 
+  // PH TRAIN-era transfer taxes: CGT 6% on the HIGHEST of gross selling price / BIR zonal FMV / assessed FMV (Sec. 24(D), 6(E) NIRC);
+  // DST 1.5% (Sec. 196); local transfer tax 0.5% (RA 7160 ceiling); broker's fee shown for cash-out planning.
+  function phTaxes(o) {
+    const o2 = o || {};
+    const area = num(o2.lotArea, 0);
+    const zonalPsm = num(o2.zonalPsm, 0), smvPsm = num(o2.smvPsm, 0);
+    const sellingPrice = num(o2.sellingPrice, 0);
+    const zonalFMV = zonalPsm > 0 ? zonalPsm * area : null;
+    const assessedFMV = smvPsm > 0 ? smvPsm * area : null;
+    const cands = [sellingPrice, zonalFMV, assessedFMV].filter(v => v != null && v > 0);
+    const base = cands.length ? Math.max.apply(null, cands) : null;
+    const governing = cands.length
+      ? (base === sellingPrice ? "Gross Selling Price" : (base === zonalFMV ? "BIR Zonal FMV" : "Assessed FMV (SMV × area)"))
+      : "";
+    return {
+      zonalFMV: zonalFMV, assessedFMV: assessedFMV, sellingPrice: sellingPrice || null,
+      cgtBase: base, governing: governing,
+      cgt: base != null ? base * 0.06 : null,
+      dst: base != null ? base * 0.015 : null,
+      transferTax: base != null ? base * 0.005 : null,
+      total: base != null ? base * 0.08 : null,
+      zonalDeltaPct: (zonalFMV > 0 && num(o2.marketValue, 0) > 0) ? _r1((o2.marketValue - zonalFMV) / zonalFMV * 100) : null
+    };
+  }
+  function collateralValue(marketValue, haircutPct) {
+    const mv = num(marketValue, 0), hc = num(haircutPct, 40);
+    if (!(mv > 0)) return { mortgageValue: null, haircutPct: hc };
+    const pct = clamp(hc, 0, 90);
+    return { mortgageValue: Math.round(mv * (1 - pct / 100) * 100) / 100, haircutPct: pct };
+  }
+
   function appraisalNarrative(raw) {
     const p = raw.property || {};
     const loc = locationAnalysis(raw);
@@ -673,6 +741,6 @@
     model, SCENARIOS, buildScenario, buildAllScenarios,
     locationAnalysis, riskAnalysis, highestBestUse, recommend, assistantAnswer,
     APPRAISAL_ELEMENTS, appraisalSuggestAdjustments, appraisalCompute,
-    appraisalReconcileDraft, appraisalNarrative
+    appraisalReconcileDraft, appraisalNarrative, phTaxes, collateralValue
   };
 })();
