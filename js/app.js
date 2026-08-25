@@ -7196,11 +7196,45 @@ premise: "Fee Simple / As Improved",
   }
 
   /* ---- Market Price Index ---- */
+  var _cityCanonMap = null;
+  function canonCity(raw) {
+    if (!_cityCanonMap) {
+      _cityCanonMap = {};
+      D.regionNames().forEach(function (rg) {
+        D.provincesFor(rg).forEach(function (pv) {
+          D.citiesFor(rg, pv).forEach(function (ct) { _cityCanonMap[ct.toLowerCase()] = ct; });
+        });
+      });
+    }
+    let s = String(raw || "").replace(/\s+/g, " ").trim();
+    if (!s) return "";
+    // Try each comma segment ("Ermita, Manila" -> Manila; "BGC, Taguig" -> Taguig)
+    const parts = s.split(",").map(p => p.replace(/^city of\s+/i, "").trim()).filter(Boolean);
+    for (let i = 0; i < parts.length; i++) {
+      const hit = _cityCanonMap[parts[i].toLowerCase()];
+      if (hit) return hit;
+    }
+    s = parts[0] || "";
+    if (s.toLowerCase() === s || s.toUpperCase() === s) {
+      s = s.split(" ").map(w => w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w).join(" ");
+    }
+    return s;
+  }
   function indexRows() {
-    const local = (state.mktIdxLocal || []).map(r => ({ d: r.d, c: r.c, p: r.p, n: r.n }));
-    const cloud = (window.ESREALTY_IDX || []);
-    const seen = new Set(local.map(r => r.d + "|" + r.c));
-    return local.concat(cloud.filter(r => !seen.has(r.d + "|" + r.c)));
+    const merged = {};
+    const put = r => {
+      if (!r || !r.d || !r.c || !(r.p > 0)) return;
+      const key = r.d + "|" + canonCity(r.c);
+      const cur = merged[key];
+      if (!cur || (r.n || 0) > (cur.n || 0)) merged[key] = { d: r.d, c: canonCity(r.c), p: r.p, n: r.n };
+    };
+    (state.mktIdxLocal || []).forEach(put);
+    (window.ESREALTY_IDX || []).forEach(function (day) {
+      // support both flattened rows and the raw cloud shape {d, cities:[{c,p,n}]}
+      if (day && Array.isArray(day.cities)) day.cities.forEach(ct => put({ d: day.d, c: ct.c, p: ct.p, n: ct.n }));
+      else put(day);
+    });
+    return Object.keys(merged).map(k => merged[k]).sort((a, b) => a.d.localeCompare(b.d) || a.c.localeCompare(b.c));
   }
   function captureMarketIndex(listings) {
     try {
@@ -7211,7 +7245,7 @@ premise: "Fee Simple / As Improved",
         if (!area || area < 10 || !(l.price > 0)) return;
         const psm = Math.round(l.price / area);
         if (psm < 5000 || psm > 2000000) return;
-        const c = String(l.city || "").split(",")[0].trim();
+        const c = canonCity(l.city);
         if (!c) return;
         (byCity[c] = byCity[c] || []).push(psm);
       });
@@ -7249,7 +7283,7 @@ premise: "Fee Simple / As Improved",
       html += '<p class="dim tiny">No index snapshots yet — the daily job records portal medians per city. Run a live scan to capture the first data point.</p></div>';
       return html;
     }
-    const sel = (state.msIdxCity || "").match(cities) ? state.msIdxCity : cities[cities.length - 1];
+    const sel = cities.indexOf(canonCity(state.msIdxCity || "")) >= 0 ? canonCity(state.msIdxCity) : cities[cities.length - 1];
     html += '<div class="row" style="gap:10px;align-items:end;flex-wrap:wrap"><div class="field" style="min-width:220px"><label>City</label><select class="input" id="ms-idx-city">' +
       cities.map(c => '<option value="' + esc(c) + '"' + (c === sel ? " selected" : "") + ">" + esc(c) + "</option>").join("") + "</select></div>" +
       '<div class="dim tiny">' + rows.length + " snapshots · updated " + esc(rows[rows.length - 1].d) + "</div></div>";
