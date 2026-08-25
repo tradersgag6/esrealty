@@ -2798,7 +2798,7 @@ function bindPerView() {
     const d0 = state.current;
     const wantSearch = _forceMapSearch || !(d0 && d0.property.lat && d0.property.lng);
     const searchText = wantSearch ? ((d0 && d0.property.city) || (d0 && d0.property.province) || "") : "";
-    var _geoTimer = null;
+    var _geoTimer = null, _geoSeq = 0, _geoLast = 0;
     initMapPicker("wz-map", d0 && d0.property.lat, d0 && d0.property.lng, (lat, lng) => {
       const d = state.current || freshDeal();
       d.property.lat = lat;
@@ -2812,10 +2812,19 @@ function bindPerView() {
           if (next && next.classList && next.classList.contains("map-coords")) coordEl = next;
         }
       }
+      if (coordEl) coordEl.innerHTML = "Pin: Latitude <b>" + esc(String(lat).substring(0, 8)) + "</b> &middot; Longitude <b>" + esc(String(lng).substring(0, 8)) + "</b> — <span style='color:var(--primary)'>Resolving address…</span>";
       clearTimeout(_geoTimer);
+      var seq = ++_geoSeq;
       _geoTimer = setTimeout(() => {
-        reverseGeocodePin(lat, lng, rev => {
-          if (!rev || !rev.address) return;
+        var gap = Date.now() - _geoLast;
+        var fire = function () {
+          if (seq !== _geoSeq) return;
+          _geoLast = Date.now();
+          reverseGeocodePin(lat, lng, rev => {
+            if (seq !== _geoSeq || !rev || !rev.address) {
+              if (coordEl && seq === _geoSeq && (!rev || !rev.address)) coordEl.innerHTML += " <span class='dim'>(address unavailable — try again)</span>";
+              return;
+            }
           var dd = state.current || freshDeal();
           var ad = rev.address;
           var chain = resolveAdminFromAddress(ad);
@@ -2852,10 +2861,11 @@ function bindPerView() {
           if (brgyEl) brgyEl.value = dd.property.barangay || "";
           var addrEl = document.querySelector('[data-g="property.address"]');
           if (addrEl) addrEl.value = dd.property.address || "";
-          var coordText = coordEl;
-          if (coordText) coordText.innerHTML = "Pin: Latitude <b>" + esc(String(lat).substring(0, 8)) + "</b> &middot; Longitude <b>" + esc(String(lng).substring(0, 8)) + "</b> — " + esc(dd.property.city || "") + (dd.property.barangay ? ", " + esc(dd.property.barangay) : "");
-        });
-      }, 600);
+          if (coordEl) coordEl.innerHTML = "Pin: Latitude <b>" + esc(String(lat).substring(0, 8)) + "</b> &middot; Longitude <b>" + esc(String(lng).substring(0, 8)) + "</b> — " + esc([dd.property.barangay, dd.property.city].filter(Boolean).join(", ") || "address resolved");
+          });
+        };
+        if (gap < 1100) setTimeout(fire, 1100 - gap); else fire();
+      }, 700);
     }, searchText);
     var _mapEntry = _mapRegistry["wz-map"];
     if (_mapEntry) {
