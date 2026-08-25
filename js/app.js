@@ -7067,7 +7067,15 @@ premise: "Fee Simple / As Improved",
   }
 
   /* ================= MARKET SCAN ================= */
-  const MS_API = (location.hostname === "localhost" || location.hostname === "127.0.0.1") ? "http://localhost:8932" : "https://esrealty-market-scan.vercel.app";
+  const MS_CLOUD = "https://esrealty-market-scan.vercel.app";
+  const MS_API = (location.hostname === "localhost" || location.hostname === "127.0.0.1") ? "http://localhost:8932" : MS_CLOUD;
+  function msFetch(qs) {
+    const bases = MS_API === MS_CLOUD ? [MS_CLOUD] : [MS_API, MS_CLOUD];
+    return bases.reduce(
+      (chain, base) => chain.catch(() => fetch(base + "/api/market-scan?" + qs).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })),
+      Promise.reject(new Error("no base"))
+    );
+  }
   const MS_TYPES = ["", "Vacant Lot", "House & Lot", "Townhouse", "Condominium Unit", "Apartment", "Shophouse", "Commercial", "Warehouse", "Office"];
   function marketLocationForCity(city) {
     for (const r of D.PH_REGIONS) {
@@ -7096,7 +7104,7 @@ premise: "Fee Simple / As Improved",
     let html = '<div class="hero"><div><h1>Market Scan</h1><p>Search for-sale / for-rent listings across property portals and social sources.</p></div></div>';
     html += '<div class="notice-banner">' + icon("search", 14) + ' <span>Live sources (DotProperty.com.ph, MyProperty.ph, OnePropertee, Carousell Philippines, Web Search, and publicly indexed Facebook posts) are fetched on demand by the hosted <b>Market Scan</b> service. Login-gated or private content is reported separately. Always verify a listing before transacting.</span></div>';
     if (st.error) {
-      html += '<div class="notice-banner err">' + icon("pin", 14) + ' <span>Market Scan backend not reachable. Please try again in a moment — the first cloud scan can take up to a minute.</span></div>';
+      html += '<div class="notice-banner err">' + icon("pin", 14) + ' <span>Market Scan backend not reachable' + ((location.hostname === "localhost" || location.hostname === "127.0.0.1") ? " — run <b>market-scan\\start_market_scan.cmd</b> for the local scraper, or scans fall back to the hosted service" : "") + '. Please try again in a moment.</span></div>';
     }
     html += '<div class="card card-pad mt-16"><div class="row" style="gap:12px;align-items:end">' +
       '<div class="field col-2"><label>Region</label><select class="input" id="ms-region"><option value="">All regions</option>' + D.regionNames().map(x => '<option value="' + esc(x) + '"' + (x === region ? " selected" : "") + '>' + esc(x) + '</option>').join("") + '</select></div>' +
@@ -7173,8 +7181,7 @@ premise: "Fee Simple / As Improved",
     if (el) el.innerHTML = '<div class="notice-banner">' + icon("refresh", 14) + ' Scanning sources… first live run can take 15–40s.</div>';
     const qs = new URLSearchParams();
     Object.keys(q).forEach(k => qs.append(k, q[k]));
-    fetch(MS_API + "/api/market-scan?" + qs.toString())
-      .then(r => r.json())
+    msFetch(qs.toString())
       .then(d => {
         if (!d || !d.ok) throw new Error((d && d.error) || "Backend error");
         state.market = { query: q, results: d.listings || [], sources: d.sources || [], total: d.total || 0, elapsedMs: d.elapsedMs, ranAt: Date.now() };
