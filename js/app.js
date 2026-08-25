@@ -3444,8 +3444,8 @@ function bindPerView() {
   }
 
   function reportHTML(title, meta, sections, accent) {
-    const rows = meta.map(m => "<tr><td><b>" + esc(m[0]) + "</b></td><td>" + esc(m[1]) + "</td></tr>").join("");
-    const secs = sections.map(s => "<h2>" + esc(s.title) + "</h2>" + (s.html || "")).join("");
+    const rows = meta.map(m => "<tr><td><b>" + esc(m[0]) + "</b></td><td>" + m[1] + "</td></tr>").join("");
+    const secs = sections.map(s => (s.cover ? "" : "<h2>" + esc(s.title) + "</h2>") + (s.html || "")).join("");
     return '<div class="rpt" style="font-family:Georgia,serif;color:#16202E;line-height:1.6;max-width:820px;margin:0 auto;padding:32px">' +
       '<h1 style="color:' + (/^#[0-9A-Fa-f]{6}$/.test(accent || "") ? accent : "#EA580C") + ';font-size:26px">' + esc(title) + '</h1>' +
       '<p style="font-size:11px;color:#98A5B8">ES Realty Investment Intelligence · ' + new Date().toLocaleString() + '</p>' +
@@ -3715,7 +3715,9 @@ function bindPerView() {
       collateral: { haircutPct: 40 },
       inspection: { date: "", inspectedBy: "" },
       exposurePeriod: "",
-      premise: "Fee Simple / As Improved",
+premise: "Fee Simple / As Improved",
+      benchOverride: { psm: null, source: "" },
+      fvLevel: "",
       approachResults: {
         sales: { finalValue: null, at: null },
         cost: { finalValue: null, at: null },
@@ -3755,6 +3757,8 @@ function bindPerView() {
     a.inspection = Object.assign({ date: "", inspectedBy: "" }, a.inspection || {});
     if (typeof a.exposurePeriod !== "string") a.exposurePeriod = "";
     if (typeof a.premise !== "string" || !a.premise) a.premise = "Fee Simple / As Improved";
+    a.benchOverride = Object.assign({ psm: null, source: "" }, a.benchOverride || {});
+    if (!a.fvLevel) a.fvLevel = "";
     a.approachResults = a.approachResults || { sales: { finalValue: null, at: null }, cost: { finalValue: null, at: null }, income: { finalValue: null, at: null } };
     ["sales", "cost", "income"].forEach(k => {
       if (!a.approachResults[k] || typeof a.approachResults[k].finalValue === "undefined") a.approachResults[k] = { finalValue: null, at: null };
@@ -3880,7 +3884,7 @@ function bindPerView() {
     const raw = appraisalSubjectRaw(a);
     a.adjustments = [];
     (a.comparables || []).forEach(c => {
-      const sug = C.appraisalSuggestAdjustments(raw, c, a.effectiveDate);
+      const sug = C.appraisalSuggestAdjustments(raw, c, a.effectiveDate, a.benchOverride && a.benchOverride.psm);
       C.APPRAISAL_ELEMENTS.forEach(el => {
         const s = sug[el] || { value: 0, basis: "" };
         a.adjustments.push({ comparableId: c.id, element: el, value: s.value, isAiSuggested: true, basis: s.basis });
@@ -3972,6 +3976,10 @@ function bindPerView() {
       '<div class="field col-2"><label>Date of Inspection</label><input class="input" type="date" id="ap-inspdate" value="' + esc((a.inspection || {}).date || "") + '"></div>' +
       '<div class="field col-3"><label>Inspected By</label><input class="input" id="ap-inspby" value="' + esc((a.inspection || {}).inspectedBy || "") + '" placeholder="Name / role"></div>' +
       '<div class="field col-3"><label>Exposure / Marketing Period</label><input class="input" id="ap-exposure" value="' + esc(a.exposurePeriod || "") + '" placeholder="e.g. 90–120 days at market terms"></div>' +
+      '<div class="field col-3"><label>Benchmark Override ₱/sqm (opt)</label><input class="input input-num" id="ap-bench" data-num value="' + esc(a.benchOverride.psm || "") + '"><div class="field-hint">Overrides the city benchmark used for Location adjustments.</div></div>' +
+      '<div class="field col-3"><label>Benchmark Source / Citation</label><input class="input" id="ap-benchsrc" value="' + esc(a.benchOverride.source || "") + '" placeholder="e.g. Colliers Q2 2026, RD sales"></div>' +
+      '<div class="field col-3"><label>FV Hierarchy (PFRS 13)</label><select class="input" id="ap-fvlevel">' +
+      ["", "Level 1", "Level 2", "Level 3"].map(x => '<option value="' + x + '"' + ((a.fvLevel || "") === x ? " selected" : "") + '>' + (x || "— n/a —") + '</option>').join("") + '</select><div class="field-hint">For Financial Reporting engagements.</div></div>' +
       '</div></div>';
     html += '<div class="card card-pad mt-16"><h3 class="mb-16">' + icon("camera", 15) + ' Subject Photos <span class="badge blue">' + (a.photos || []).length + '</span></h3>' +
       '<p class="dim tiny">Attach photos of the property. They are stored locally with the appraisal and embedded in the report Addenda. Use one as the cover.</p>' +
@@ -4175,6 +4183,7 @@ function bindPerView() {
       '<div class="row spread"><span>Soft costs — permits/design/supervision (' + C.pct((c.softCostsPct != null ? c.softCostsPct : 10) / 100) + ')</span><b>' + C.money(c.softCosts || 0) + '</b></div>' +
       '<div class="row spread"><span>Site improvements</span><b>' + C.money(c.siteImprovements || 0) + '</b></div>' +
       '<div class="row spread"><span>Entrepreneurial incentive (' + C.pct((c.incentivePct || 0) / 100) + ')</span><b>' + C.money(c.incentive || 0) + '</b></div>' +
+      (c.insuranceUplift > 0 ? '<div class="row spread"><span>Insurance uplift — prof. fees + debris removal (' + C.pct((c.insUpliftPct != null ? c.insUpliftPct : 10) / 100) + ', not depreciated)</span><b>' + C.money(c.insuranceUplift) + '</b></div>' : "") +
       '<div class="row spread"><span>Total depreciation on improvements (' + C.pct((c.depP + c.depF + c.depE) / 100) + ' of ' + C.money(c.depBase || c.rcn) + ')</span><b>−' + C.money(c.depAmt) + '</b></div>' +
       '<div class="row spread"><span>Computed value — Cost Approach</span><b class="accent">' + C.money(c.indicated) + '</b></div>';
   }
@@ -4525,15 +4534,38 @@ function bindPerView() {
     const locTxt = (prop.address ? [prop.address, prop.province].filter(Boolean).join(", ") : [prop.barangay, prop.city, prop.province].filter(Boolean).join(", ")) || "—";
     const meta = [
       ["Client / Subject", prop.name || "Untitled Property"], ["Appraisal", a.name && a.name.trim() ? a.name : "(not named)"], ["Property Location", locTxt],
-      ["Purpose of Valuation", a.purpose], ["Basis of Value", a.basisOfValue], ["Premise of Value", esc(a.premise || "Fee Simple / As Improved")],
+      ["Purpose of Valuation", a.purpose], ["Basis of Value", a.basisOfValue], ["Premise of Value", a.premise || "Fee Simple / As Improved"],
       ["Effective Date of Valuation", a.effectiveDate],
-      ["Date of Inspection", (a.inspection && a.inspection.date) ? esc(a.inspection.date) + ((a.inspection.inspectedBy) ? " · by " + esc(a.inspection.inspectedBy) : "") : "Desk review — no site inspection recorded"],
-      ["Exposure / Marketing Period", esc(a.exposurePeriod || "Not stated — appraiser to conclude (PH practice: 90–180 days for typical residential).")],
+      ["Date of Inspection", (a.inspection && a.inspection.date) ? a.inspection.date + ((a.inspection.inspectedBy) ? " · by " + a.inspection.inspectedBy : "") : "Desk review — no site inspection recorded"],
+      ["Exposure / Marketing Period", a.exposurePeriod || "Not stated — appraiser to conclude (PH practice: 90–180 days for typical residential)."],
       ["Report Issue Date", new Date().toLocaleDateString()],
       ["Status", a.status]
     ];
     const r = s => "<tr><td><b>" + s[0] + "</b></td><td>" + s[1] + "</td></tr>";
     const sections = [];
+
+    // Bank-format cover page (own printed page)
+    sections.push({ cover: true, title: "", html:
+      "<div style='text-align:center;padding-top:60px'>" +
+      "<div style='letter-spacing:.3em;font-size:12px;color:#98A5B8'>ES REALTY · VALUATION SERVICES</div>" +
+      "<h1 style='font-size:34px;margin:18px 0 6px'>BANK VALUATION REPORT</h1>" +
+      "<div style='font-size:13px;color:#667;margin-bottom:36px'>Summary of Appraisal &amp; Final Value Opinion — BSP-aligned credit format</div>" +
+      "<table style='max-width:640px;margin:0 auto 28px'>" +
+      r(["Subject Property", prop.name || "Untitled Property"]) +
+      r(["Location", locTxt]) +
+      r(["Purpose", a.purpose || "—"]) +
+      r(["Basis of Value", a.basisOfValue || "—"]) +
+      r(["Effective Date", a.effectiveDate || "—"]) +
+      r(["Final Value Opinion", (a.finalConfirmed && a.finalValue != null) ? C.money(a.finalValue) : "PENDING CONFIRMATION"]) +
+      r(["Appraiser of Record", a.cert.appraiserName || "_______________________"]) +
+      "</table>" +
+      "<p style='font-size:10px;color:#98A5B8;max-width:560px;margin:0 auto'>This report follows the outline required for loan-security appraisals by Philippine banks under BSP credit guidelines and the PVS; the detailed narrative follows on subsequent pages.</p>" +
+      "<div style='page-break-after:always'></div></div>" });
+
+    // PFRS 13 disclosure when purpose is Financial Reporting
+    if (/financial reporting/i.test(a.purpose || "") && a.fvLevel) {
+      meta.splice(4, 0, ["PFRS 13 FV Hierarchy", a.fvLevel]);
+    }
 
     sections.push({ title: "1. Executive Summary", html: "<table>" + meta.map(r).join("") + "</table>" +
       "<p style='margin-top:10px'><b>Final Value Opinion:</b> " + (a.finalConfirmed && a.finalValue != null ? C.money(a.finalValue) : "PENDING APPRAISER CONFIRMATION") +
@@ -4582,6 +4614,7 @@ function bindPerView() {
       r(["Soft Costs (permits, design, supervision)", C.money(res.cost.softCosts || 0) + " (" + C.pct(((res.cost.softCostsPct != null ? res.cost.softCostsPct : 10)) / 100) + ")"]) +
       r(["Site Improvements", C.money(res.cost.siteImprovements || 0)]) +
       r(["Entrepreneurial Incentive", C.money(res.cost.incentive || 0) + " (" + C.pct((res.cost.incentivePct || 0) / 100) + ")"]) +
+      (res.cost.insuranceUplift > 0 ? r(["Insurance Uplift (PF + debris)", C.money(res.cost.insuranceUplift)]) : "") +
       r(["Less: Total Depreciation on Improvements", "−" + C.money(res.cost.depAmt) + " (" + C.pct((res.cost.depP + res.cost.depF + res.cost.depE) / 100) + " of " + C.money(res.cost.depBase || res.cost.rcn) + ((a.cost.bldgAge > 0) ? "; EA/EL method: " + C.numFmt(a.cost.bldgAge) + "/" + C.numFmt(a.cost.econLife) + " yrs, " + esc(a.cost.condRating || "Average") : "") + ")"]) +
       r(["Computed Value — Cost", C.money(res.cost.indicated)]) + r(["Final Value — Cost Approach", apprFVLabel(a, "cost", res.cost.indicated)]) + "</table>" + chartDep(res) : "<p>Cost approach could not be computed.</p>") +
       "<h3>Income Capitalization Approach</h3>" + (res && res.income ? "<table>" + r(["Gross Potential Income", C.money(res.income.gpi)]) + r(["Effective Gross Income", C.money(res.income.egi)]) + r(["Net Operating Income", C.money(res.income.noi)]) + r(["Capitalization Rate", C.pct(res.income.capRate / 100) + " (" + esc((a.income && a.income.capRateNote) || "note not provided") + ")"]) + r(["Computed Value — Income", res.income.indicated != null ? C.money(res.income.indicated) : "—"]) + r(["Final Value — Income Capitalization Approach", apprFVLabel(a, "income", res.income.indicated)]) + "</table>" : "<p>Not applied — property not flagged as income-producing.</p>") });
@@ -4590,6 +4623,7 @@ function bindPerView() {
       "<div class='fv-opinion'><div class='fv-opinion-label'>Final Value Opinion</div><div class='fv-opinion-value'>" + (a.finalConfirmed && a.finalValue != null ? C.money(a.finalValue) : "Pending Appraiser Confirmation") + "</div><div class='fv-opinion-sub'>Effective date of valuation: " + esc(a.effectiveDate || "\u2014") + " \u00b7 " + esc(a.purpose || "") + "</div></div>" +
       "<p style='font-size:10px;color:#98A5B8'>Each approach above carries its own labeled, saved Final Value concluded on the Approaches tab; the Final Value Opinion is the appraiser's reconciliation of those three outputs.</p>" +
       "<p><b>Reconciliation Notes:</b> " + esc(a.reconciliationNotes || "Not provided — appraiser to complete.") + "</p>" +
+      (/financial reporting/i.test(a.purpose || "") && a.fvLevel ? "<h3>PFRS 13 Disclosure</h3><p style='font-size:11px'>Fair value concluded under PFRS 13 using the market and income approaches described above. The subject is classified within <b>Level " + esc(String(a.fvLevel).slice(-1)) + "</b> of the fair value hierarchy" + (a.fvLevel.indexOf("3") !== -1 ? " — significant unobservable inputs; disclose valuation technique, inputs, and transfers between levels in the notes." : " — observable or corroborable market inputs dominate; disclose valuation technique and key inputs.") + " Recurring measurement basis applies for investment property measured at fair value.</p>" : "") +
       "<p style='font-size:10px;color:#98A5B8'>AI-drafted reconciliation is advisory only and is not a substitute for the appraiser's professional judgment.</p>" });
 
     sections.push({ title: "8. Assumptions & Limiting Conditions", html: "<ul><li>This report is a computer-assisted draft valuation prepared for professional review.</li><li>It is not a certified appraisal until reviewed and signed by a PRC-licensed Real Estate Appraiser under RA 9646.</li><li>Extraordinary assumptions: " + esc(a.extraordinaryAssumptions || "None") + "</li><li>Information relied upon is assumed accurate but not warranted; appraiser to verify.</li><li>Market data reflects the effective date of valuation.</li></ul>" });
@@ -4599,6 +4633,14 @@ function bindPerView() {
       (a.finalConfirmed ? "<p style='font-size:10px;color:#98A5B8'>Final value opinion confirmed by " + esc(a.confirmedBy) + " on " + new Date(a.confirmedAt).toLocaleString() + ".</p>" : "") });
 
     const photos = a.photos || [];
+    if (photos.length) {
+      sections.push({ title: "11. Photo Appendix", html:
+        "<p class='dim' style='font-size:11px'>Each photograph follows on its own page with caption for bank submission.</p>" +
+        photos.map((p, i) => "<div style='page-break-after:" + (i === photos.length - 1 ? "auto" : "always") + ";margin-bottom:12px'>" +
+          "<div style='font-size:10px;letter-spacing:.08em;color:#98A5B8;margin-bottom:4px'>PLATE " + (i + 1) + (p.cover ? " · COVER" : "") + "</div>" +
+          "<img src='" + p.dataUrl + "' style='max-width:100%;border:1px solid #CBD4DF' alt='photo'>" +
+          "<div style='font-size:11px;margin-top:4px'><b>" + esc(p.caption || p.name || "Subject photo") + "</b></div></div>").join("") });
+    }
     const polyPts = prop.landPolygon && prop.landPolygon.length ? prop.landPolygon : [];
     sections.push({ title: "10. Addenda", html: (comps.length ? "<h3>Comparable Data Sheets</h3><table><tr><th>#</th><th>Address</th><th>City</th><th>Price</th><th>Lot</th><th>Price/sqm</th><th>Type</th><th>Source</th></tr>" + comps.map((x, i) => "<tr><td>" + (i + 1) + "</td><td>" + esc(x.address) + "</td><td>" + esc(x.city) + "</td><td>" + C.money(x.price) + "</td><td>" + C.numFmt(x.lotArea) + "</td><td>" + C.money(x.rawPsm) + "</td><td>" + esc(x.transactionType) + "</td><td>" + esc(x.source) + "</td></tr>").join("") + "</table>" : "<p>None.</p>") +
       (polyPts.length >= 3 ? "<h3>Plotted Land Boundary</h3>" + apprPlotSketch(polyPts, prop.plotArea) + "<p class='dim' style='font-size:11px'>Sketch normalized from the plotted boundary — approximate shape, not to survey scale.</p>" : "") +
@@ -4674,6 +4716,10 @@ function bindPerView() {
     set("ap-inspdate", e => { a.inspection.date = e.target.value; a.updatedAt = Date.now(); });
     set("ap-inspby", e => { a.inspection.inspectedBy = e.target.value; a.updatedAt = Date.now(); });
     set("ap-exposure", e => { a.exposurePeriod = e.target.value; a.updatedAt = Date.now(); });
+    numSet("ap-bench", v => { a.benchOverride.psm = v || null; });
+    set("ap-benchsrc", e => { a.benchOverride.source = e.target.value; a.updatedAt = Date.now(); });
+    const fvlEl = $("#ap-fvlevel");
+    if (fvlEl) fvlEl.addEventListener("change", e => { a.fvLevel = e.target.value; a.updatedAt = Date.now(); save(); });
 
     $$("#content [data-c]").forEach(el => {
       const id = el.getAttribute("data-id"), key = el.getAttribute("data-c");

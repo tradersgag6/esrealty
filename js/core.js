@@ -549,9 +549,10 @@
   };
   const _r1 = v => Math.round(num(v, 0) * 10) / 10;
 
-  function appraisalSuggestAdjustments(raw, comp, effectiveDate) {
+  function appraisalSuggestAdjustments(raw, comp, effectiveDate, benchPsm) {
     const p = raw.property || {};
-    const sBench = D.benchmarkFor(p.city);
+    const override = num(benchPsm, 0) > 0;
+    const sBench = override ? num(benchPsm, 0) : D.benchmarkFor(p.city);
     const cBench = D.benchmarkFor(comp.city || comp.address || "");
     const growth = num(p.growthRate, 0.07);
     const months = _monthsBetween(comp.saleDate, effectiveDate);
@@ -570,7 +571,7 @@
 
     if (cBench > 0 && sBench > 0) {
       const locAdj = _r1((sBench - cBench) / cBench * 100);
-      s["Location"] = { value: locAdj, basis: "Subject benchmark " + money(sBench) + "/sqm (" + (p.city || "n/a") + ") vs comparable " + money(cBench) + "/sqm (" + (comp.city || "n/a") + ")." };
+      s["Location"] = { value: locAdj, basis: (override ? "Subject benchmark OVERRIDE " : "Subject benchmark ") + money(sBench) + "/sqm (" + (p.city || "n/a") + ") vs comparable " + money(cBench) + "/sqm (" + (comp.city || "n/a") + ")." };
     } else {
       s["Location"] = { value: 0, basis: "No benchmark differential computed — location adjustment left at 0 for appraiser review." };
     }
@@ -666,7 +667,11 @@
     const depBase = rcn + softCosts;                       // improvements depreciate incl. soft costs
     const depP = num(c.depPhysical, 0), depF = num(c.depFunctional, 0), depE = num(c.depEconomic, 0);
     const depAmt = depBase * (depP + depF + depE) / 100;
-    const costIndicated = landValue + depBase - depAmt + siteImprovements + incentive;
+    // Insurance engagements: add professional fees & demolition/debris removal (~10%, not depreciated)
+    const isInsurance = /insurance/i.test(String(engagement.purpose || ""));
+    const insUpliftPct = isInsurance ? num(c.insuranceUpliftPct != null ? c.insuranceUpliftPct : 10, 10) : 0;
+    const insuranceUplift = rcn * insUpliftPct / 100;
+    const costIndicated = landValue + depBase - depAmt + siteImprovements + incentive + insuranceUplift;
 
     const inc = engagement.income;
     let income = null;
@@ -702,7 +707,7 @@
     return {
       subjectArea,
       sales: { adjusted, weights, wAvgPsm, simpleAvgPsm, indicated: salesIndicated, bestComp },
-      cost: { landValuePerSqm, landValue, bldgArea, rcnPerSqm, rcn, softCostsPct, softCosts, siteImprovements, incentivePct, incentive, depBase, depP, depF, depE, depAmt, indicated: costIndicated },
+      cost: { landValuePerSqm, landValue, bldgArea, rcnPerSqm, rcn, softCostsPct, softCosts, siteImprovements, incentivePct, incentive, depBase, depP, depF, depE, depAmt, insuranceUplift, insUpliftPct, indicated: costIndicated },
       income
     };
   }
