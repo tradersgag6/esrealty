@@ -9000,21 +9000,27 @@ premise: "Fee Simple / As Improved",
     const cfg = window.ESREALTY_SUPABASE || {};
     const to = currentUser && currentUser.email;
     if (!cfg.supabaseUrl || !to) { toast("Email delivery needs Supabase config and a signed-in account with an email", "err"); return; }
+    let token = "";
+    try { const sess = SB && SB.auth ? await SB.auth.getSession() : null; token = (sess && sess.data && sess.data.session && sess.data.session.access_token) || ""; } catch (e) { token = ""; }
+    if (!token) { toast("Sign in first — digest email uses your account session", "err"); return; }
     const d = leadDigestData();
-    const rows = d.overdue.map(x => "<li>" + esc(x.l.ref + " " + (x.l.name || "")) + " — " + esc(x.s.label) + "</li>").join("");
-    const html = "<h2>Weekly Broker Digest — week of " + esc(d.weekStart.toLocaleDateString()) + "</h2>" +
+    const rows = d.overdue.map(x => "<li>" + esc(x.l.ref + " " + (x.l.name || "")) + " (" + esc((leadStatusCfg(x.l.status) || [0, x.l.status])[1]) + ") — " + esc(x.s.label) + "</li>").join("");
+    const html = "<h2>Weekly Broker Digest — week of " + d.weekStart.toLocaleDateString() + "</h2>" +
       "<p>New leads: <b>" + d.newThisWeek.length + "</b> · Stage moves: <b>" + d.movements + "</b> · Won: <b>" + d.closedThisWeek.length + "</b> (" + C.money(d.wonValue) + ") · Lost: <b>" + d.lostThisWeek + "</b> · Win rate: <b>" + d.conv + "</b></p>" +
       "<h3>Overdue follow-ups (" + d.overdue.length + ")</h3><ul>" + (rows || "<li>None</li>") + "</ul>";
     try {
       const res = await fetch(cfg.supabaseUrl + "/functions/v1/notify-dispatch", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: "Bearer " + (cfg.supabaseKey || ""), apikey: cfg.supabaseKey || "" },
-        body: JSON.stringify({ channel: "email", to: to, subject: "ES Realty weekly digest", html: html })
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + token, apikey: cfg.supabaseKey || "" },
+        body: JSON.stringify({ to: to, subject: "ES Realty weekly broker digest", html: html })
       });
-      if (!res.ok) throw new Error("HTTP " + res.status);
+      const out = await res.json().catch(() => ({}));
+      if (!res.ok || out.ok === false) throw new Error(out.error || ("HTTP " + res.status));
       toast("Digest emailed to <b>" + esc(to) + "</b>", "ok");
     } catch (e) {
-      toast("Email dispatch unavailable (" + esc(String(e && e.message || e)) + "). Deploy the notify-dispatch function with Resend/Semaphore keys — meanwhile use Print → Save as PDF.", "err");
+      const msg = String(e && e.message || e);
+      const hint = /RESEND_API_KEY/.test(msg) ? "Add the Resend key in Edge Functions → Secrets, then retry." : (/Unauthorized|JWT/i.test(msg) ? "Your session expired — sign in again." : "Deploy/update the notify-dispatch function with the latest code.");
+      toast("Email failed: " + esc(msg) + ". " + hint, "err");
     }
   }
   function leadExportCsv() {

@@ -37,9 +37,42 @@ function emailHtml(title: string, bodyText: string) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  // Auth: shared dispatch secret OR the service-role key.
-  const secretHeader = req.headers.get("x-dispatch-secret") ?? "";
+  // ---- Self-send mode: an authenticated user may email ONLY themselves.
+  // Body: { to, subject, html } with Authorization: Bearer <user access token>.
   const authHeader = req.headers.get("authorization") ?? "";
+  const secretHeader = req.headers.get("x-dispatch-secret") ?? "";
+  const contentType = req.headers.get("content-type") ?? "";
+  if (req.method === "POST" && contentType.includes("application/json")) {
+    let body: any = {};
+    try { body = await req.json(); } catch { body = {}; }
+    if (body && typeof body === "object" && body.to && body.subject && !Array.isArray(body)) {
+      if (!RESEND_API_KEY) return json({ ok: false, error: "Email not configured — RESEND_API_KEY missing" }, 503);
+      const userClient = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+        { global: { headers: { Authorization: authHeader } } },
+      );
+      const { data: userData } = await userClient.auth.getUser();
+      const email = userData?.user?.email ?? "";
+      if (!email) return json({ ok: false, error: "Unauthorized" }, 401);
+      if (String(body.to).toLowerCase() !== String(email).toLowerCase()) {
+        return json({ ok: false, error: "Self-send only: you may only email your own address" }, 403);
+      }
+      try {
+        const r = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({ from: MAIL_FROM, to: [email], subject: String(body.subject).slice(0, 200), html: String(body.html || "").slice(0, 200000) }),
+        });
+        if (!r.ok) return json({ ok: false, error: "Resend error " + r.status }, 502);
+        return json({ ok: true, sent: true, to: email });
+      } catch (e) {
+        return json({ ok: false, error: String(e) }, 502);
+      }
+    }
+  }
+
+  // Auth: shared dispatch secret OR the service-role key.
   const okSecret = !!DISPATCH_SECRET && secretHeader === DISPATCH_SECRET;
   const okService = !!SERVICE_KEY && authHeader === "Bearer " + SERVICE_KEY;
   if (!okSecret && !okService) return json({ ok: false, error: "Unauthorized" }, 401);
