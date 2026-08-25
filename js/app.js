@@ -1287,11 +1287,58 @@
     ["Transit", 'nwr["railway"~"^(station|stop)$"](around:1000,{LAT},{LNG});nwr["public_transport"="station"](around:1000,{LAT},{LNG});nwr["highway"="bus_stop"](around:1000,{LAT},{LNG});']
   ];
 
-  function reverseGeocodePin(lat, lng, cb) {
+   function reverseGeocodePin(lat, lng, cb) {
     fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=16&addressdetails=1&accept-language=en&lat=" + lat + "&lon=" + lng, { headers: { "Accept": "application/json", "User-Agent": "ESRealty/1.0 (real-estate-map-picker)" } })
       .then(r => { if (!r.ok) throw new Error("Reverse geocoding unavailable"); return r.json(); })
       .then(j => cb(j))
       .catch(() => cb(null));
+  }
+  function resolveAdminFromAddress(ad) {
+    if (!ad) return null;
+    var cityNames = [ad.city, ad.town, ad.municipality, ad.county].filter(Boolean).map(s => String(s).toLowerCase());
+    var regions = D.regionNames();
+    var norm = s => String(s || "").toLowerCase().replace(/\(.*?\)/g, " ").replace(/\b(region|province|city of)\b/g, " ").replace(/[^a-z0-9]/g, "");
+    // City-first: authoritative chain from PH data
+    for (var ri = 0; ri < regions.length; ri++) {
+      var r = regions[ri], provs = D.provincesFor(r);
+      for (var pi = 0; pi < provs.length; pi++) {
+        var cities = D.citiesFor(r, provs[pi]);
+        for (var ci = 0; ci < cities.length; ci++) {
+          var cl = String(cities[ci]).toLowerCase();
+          for (var ni = 0; ni < cityNames.length; ni++) {
+            var cn = cityNames[ni];
+            if (cn && cn.length >= 4 && (cl === cn || cl.indexOf(cn) !== -1 || cn.indexOf(cl) !== -1)) {
+              return { region: r, province: provs[pi], city: cities[ci] };
+            }
+          }
+        }
+      }
+    }
+    // Region/province text fallback with alias normalization
+    var nr = norm(ad.region || ad.state_district), ns = norm(ad.state || ad.county);
+    for (var rj = 0; rj < regions.length; rj++) {
+      var rg = regions[rj], core = norm(rg);
+      var regionHit = (nr && core && (core.indexOf(nr) !== -1 || nr.indexOf(core) !== -1));
+      var provHit = null;
+      var pl = D.provincesFor(rg);
+      for (var pj = 0; pj < pl.length; pj++) {
+        var np = norm(pl[pj]);
+        if (ns && np && (np.indexOf(ns) !== -1 || ns.indexOf(np) !== -1)) { provHit = pl[pj]; break; }
+      }
+      if (regionHit || provHit) {
+        var cityHit = null;
+        var provFinal = provHit;
+        var cands = provFinal ? D.citiesFor(rg, provFinal) : [];
+        if (!provFinal && regionHit) { for (var q = 0; q < pl.length; q++) { if (D.citiesFor(rg, pl[q]).length) { cands = cands.concat(D.citiesFor(rg, pl[q])); } } }
+        for (var cj2 = 0; cj2 < cands.length; cj2++) {
+          var cl2 = String(cands[cj2]).toLowerCase();
+          for (var nj = 0; nj < cityNames.length; nj++) { var cn2 = cityNames[nj]; if (cn2 && cl2.indexOf(cn2) !== -1) { cityHit = cands[cj2]; break; } }
+          if (cityHit) break;
+        }
+        return { region: rg, province: provFinal, city: cityHit };
+      }
+    }
+    return null;
   }
   
   function fetchNearbyCounts(lat, lng, cb, errCb) {
@@ -1369,18 +1416,13 @@
     const p = d.property, loc = d.location;
     if (rev && rev.address) {
       const ad = rev.address;
-      const cityNames = [ad.city, ad.town, ad.municipality, ad.county].filter(Boolean);
-      const region = D.regionNames().find(r => (String(ad.region || ad.state_district || "").toLowerCase().indexOf(r.toLowerCase()) !== -1) || (String(r).toLowerCase().indexOf(String(ad.region || ad.state_district || "").toLowerCase()) !== -1));
-      if (region) {
-        p.region = region;
-        const prov = D.provincesFor(region).find(x => String(ad.state || ad.county || "").toLowerCase().indexOf(String(x).toLowerCase()) !== -1);
-        if (prov) {
-          p.province = prov;
-          const c = D.citiesFor(region, prov).find(x => cityNames.some(n => String(x).toLowerCase().indexOf(String(n).toLowerCase()) !== -1));
-          if (c) p.city = c;
-        }
+      const chain = resolveAdminFromAddress(ad);
+      if (chain) {
+        if (chain.region) p.region = chain.region;
+        if (chain.province) p.province = chain.province;
+        if (chain.city) p.city = chain.city;
       }
-      const brgy = ad.barangay || ad.village || ad.city_district || ad.neighbourhood;
+      const brgy = ad.barangay || ad.village || ad.suburb || ad.city_district || ad.neighbourhood;
       if (brgy) p.barangay = brgy;
       if (rev.display_name) p.address = rev.display_name;
     }
@@ -2340,8 +2382,11 @@ function bindPerView() {
         wfield("Barangay", txtInp("property.barangay", p.barangay), "") +
         '<div class="field col-12"><label>Complete Address</label>' + txtInp("property.address", p.address, "Street, Barangay, City, Province") + '</div>';
       html += mapPickerHtml("wz-map", p.lat, p.lng);
+      var anaStatus = d.location.analysis && d.location.analysis.analyzedAt
+        ? 'Last scan: ' + C.num(d.location.analysis.typesFound, 0) + ' nearby type(s) found · ' + esc(new Date(d.location.analysis.analyzedAt).toLocaleTimeString())
+        : 'Drop a pin, then analyze to validate the address and scan nearby establishments (OpenStreetMap).';
       html += '<div class="field col-12"><div class="map-tools"><button type="button" class="btn" id="wz-ai-loc">' + icon("spark", 14) + ' Analyze Location from Map</button>' +
-        '<span class="dim tiny" id="wz-ai-loc-status">Drop a pin, then analyze to validate the address and scan nearby establishments (OpenStreetMap).</span></div></div>' +
+        '<span class="dim tiny" id="wz-ai-loc-status">' + anaStatus + '</span></div></div>' +
         (d.location.analysis ? '<div class="field col-12"><div class="notice-banner"><span>' + icon("check", 14) + ' <b>Last analysis:</b> ' + esc(d.location.analysis.address || "Address resolved") + ' · ' + C.num(d.location.analysis.typesFound, 0) + ' type(s) found · ' + esc(new Date(d.location.analysis.analyzedAt).toLocaleString()) + '</span></div></div>' : "");
       var scoreBar = function (val, max) { var pct = Math.min(100, Math.round((val / max) * 100)); var color = pct >= 60 ? "var(--green)" : pct >= 30 ? "var(--amber)" : "var(--text-faint)"; return '<div style="background:var(--surface-2);border-radius:4px;height:6px;width:100%"><div style="background:' + color + ';height:6px;border-radius:4px;width:' + pct + '%"></div></div>'; };
       var nc = d.location.nearbyCounts || {};
@@ -2773,18 +2818,13 @@ function bindPerView() {
           if (!rev || !rev.address) return;
           var dd = state.current || freshDeal();
           var ad = rev.address;
-          var cityNames = [ad.city, ad.town, ad.municipality, ad.county].filter(Boolean);
-          var region = D.regionNames().find(r => (String(ad.region || ad.state_district || "").toLowerCase().indexOf(r.toLowerCase()) !== -1) || (String(r).toLowerCase().indexOf(String(ad.region || ad.state_district || "").toLowerCase()) !== -1));
-          if (region) {
-            dd.property.region = region;
-            var prov = D.provincesFor(region).find(x => String(ad.state || ad.county || "").toLowerCase().indexOf(String(x).toLowerCase()) !== -1);
-            if (prov) {
-              dd.property.province = prov;
-              var c = D.citiesFor(region, prov).find(x => cityNames.some(n => String(x).toLowerCase().indexOf(String(n).toLowerCase()) !== -1));
-              if (c) dd.property.city = c;
-            }
+          var chain = resolveAdminFromAddress(ad);
+          if (chain) {
+            if (chain.region) dd.property.region = chain.region;
+            if (chain.province) dd.property.province = chain.province;
+            if (chain.city) dd.property.city = chain.city;
           }
-          var brgy = ad.barangay || ad.village || ad.city_district || ad.neighbourhood;
+          var brgy = ad.barangay || ad.village || ad.suburb || ad.city_district || ad.neighbourhood;
           if (brgy) dd.property.barangay = brgy;
           if (rev.display_name) dd.property.address = rev.display_name;
           save();
@@ -2793,18 +2833,20 @@ function bindPerView() {
             regionEl.value = dd.property.region;
           }
           var provEl = document.getElementById("wz-province");
-          if (provEl && dd.property.province) {
-            provEl.innerHTML = '<option value="' + esc(dd.property.province) + '" selected>' + esc(dd.property.province) + '</option>';
-          } else if (provEl && dd.property.region) {
+          if (provEl && dd.property.region) {
             provEl.innerHTML = '<option value="">Select province…</option>' + D.provincesFor(dd.property.region).map(p => '<option value="' + esc(p) + '"' + (p === dd.property.province ? ' selected' : '') + '>' + esc(p) + '</option>').join('');
+            if (dd.property.province && !D.provincesFor(dd.property.region).some(p => p === dd.property.province)) provEl.innerHTML += '<option value="' + esc(dd.property.province) + '" selected>' + esc(dd.property.province) + '</option>';
             if (dd.property.province) provEl.value = dd.property.province;
+          } else if (provEl && dd.property.province) {
+            provEl.innerHTML = '<option value="' + esc(dd.property.province) + '" selected>' + esc(dd.property.province) + '</option>';
           }
           var cityEl = document.getElementById("wz-city");
-          if (cityEl && dd.property.city) {
-            cityEl.innerHTML = '<option value="' + esc(dd.property.city) + '" selected>' + esc(dd.property.city) + '</option>';
-          } else if (cityEl && dd.property.province) {
+          if (cityEl && dd.property.region && dd.property.province) {
             cityEl.innerHTML = '<option value="">Select city / municipality…</option>' + D.citiesFor(dd.property.region, dd.property.province).map(c => '<option value="' + esc(c) + '"' + (c === dd.property.city ? ' selected' : '') + '>' + esc(c) + '</option>').join('');
+            if (dd.property.city && !D.citiesFor(dd.property.region, dd.property.province).some(c => c === dd.property.city)) cityEl.innerHTML += '<option value="' + esc(dd.property.city) + '" selected>' + esc(dd.property.city) + '</option>';
             if (dd.property.city) cityEl.value = dd.property.city;
+          } else if (cityEl && dd.property.city) {
+            cityEl.innerHTML = '<option value="' + esc(dd.property.city) + '" selected>' + esc(dd.property.city) + '</option>';
           }
           var brgyEl = document.querySelector('[data-g="property.barangay"]');
           if (brgyEl) brgyEl.value = dd.property.barangay || "";
