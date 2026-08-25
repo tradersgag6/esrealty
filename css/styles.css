@@ -209,6 +209,13 @@ body {
 }
 input, textarea, select { caret-color: transparent; }
 input:focus, textarea:focus, select:focus, .map-search input:focus { caret-color: var(--accent); }
+
+/* Arrow cursor everywhere; text cursor only in editable fields */
+body, div, p, span, h1, h2, h3, h4, h5, h6, li, td, th, label, small, b, strong, em,
+section, article, header, footer, nav, aside, main, form, table, ul, ol, dl, dt, dd, figure, figcaption { cursor: default; }
+input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),
+textarea, [contenteditable="true"], [contenteditable=""] { cursor: text; }
+a, button, .btn, select, summary { cursor: pointer; }
 .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15); }
 .input::placeholder { color: var(--text-faint); }
 .input-num { font-family: var(--font-mono); text-align: right; }
