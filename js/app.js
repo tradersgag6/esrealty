@@ -8583,7 +8583,9 @@ premise: "Fee Simple / As Improved",
     let html = '<div class="hero"><div><h1>CRM / Leads</h1><p>Track buyer and seller inquiries from first contact to closed deal.</p></div><div class="actions">' +
       '<div class="crm-switch"><button data-lead-mode="pipeline" class="' + (mode === "pipeline" ? "on" : "") + '">' + icon("layers", 14) + ' Pipeline</button><button data-lead-mode="calendar" class="' + (mode === "calendar" ? "on" : "") + '">' + icon("calendar", 14) + ' Calendar</button></div>' +
       (can && mode === "calendar" ? '<button class="btn btn-primary" data-cal-new>' + icon("plus", 15) + " Add Event</button>" : "") +
-      (can ? '<button class="btn btn-primary" data-lead-new>' + icon("plus", 15) + " Add Lead</button>" : "") + "</div></div>";
+      (can ? '<button class="btn btn-primary" data-lead-new>' + icon("plus", 15) + " Add Lead</button>" : "") +
+      '<button class="btn btn-ghost" data-lead-sheet>' + icon("doc", 15) + " Call Sheet</button>" +
+      '<button class="btn btn-ghost" data-lead-csv>' + icon("download", 15) + " Export CSV</button></div></div>";
     html += '<div class="lead-stats">' +
       '<div class="ls-stat"><div class="ls-stat-v">' + leads.length + '</div><div class="ls-stat-l dim">Total leads</div></div>' +
       '<div class="ls-stat"><div class="ls-stat-v">' + newCount + '</div><div class="ls-stat-l dim">New</div></div>' +
@@ -8783,6 +8785,12 @@ premise: "Fee Simple / As Improved",
     if (!rec.createdAt) { rec.createdAt = rec.updatedAt; rec.activity = rec.activity || []; rec.activity.unshift({ date: rec.createdAt, text: "Lead created" }); }
     if (!state.leads) state.leads = [];
     const idx = state.leads.findIndex(x => x.id === rec.id);
+    if (!editId && idx < 0) {
+      const dup = (state.leads || []).find(l => l.id !== rec.id && (
+        (rec.phone && l.phone && phNormalizeMobile(l.phone) === rec.phone) ||
+        (rec.email && l.email && String(l.email).trim().toLowerCase() === String(rec.email).trim().toLowerCase())));
+      if (dup) toast("Possible duplicate: <b>" + esc(dup.ref + " " + (dup.name || "")) + "</b> shares this " + (rec.email && dup.email ? "email" : "mobile") + " — review after saving", "err");
+    }
     if (idx >= 0) state.leads[idx] = rec; else state.leads.unshift(rec);
     if (!rec.createdBy) rec.createdBy = currentUser && currentUser.id;
     closeLeadModal();
@@ -8833,6 +8841,52 @@ premise: "Fee Simple / As Improved",
     syncLead(l);
     toast("Activity added");
   }
+  function leadExportCsv() {
+    const rows = leadFiltered();
+    if (!rows.length) { toast("No leads match the current filters", "err"); return; }
+    const q = v => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+    const head = ["Ref", "Name", "Type", "Status", "Source", "Phone", "Email", "Financing", "Interest", "Budget", "Assigned", "Next Follow-up", "Created"];
+    const lines = [head.map(q).join(",")];
+    rows.forEach(l => {
+      lines.push([l.ref, l.name, leadTypeLabel(l.type), (leadStatusCfg(l.status) || [0, l.status])[1], leadSourceLabel(l.source),
+        l.phone, l.email, l.finMode ? ({ pagibig: "Pag-IBIG", bank: "Bank Loan", inhouse: "In-house", cash: "Cash" })[l.finMode] || l.finMode : "",
+        l.propertyInterest, l.budget || l.askingPrice || l.rentBudget || 0, l.assignedTo, l.nextFollowUp,
+        new Date(l.createdAt).toISOString().slice(0, 10)].map(q).join(","));
+    });
+    const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "esrealty_leads_" + new Date().toISOString().slice(0, 10) + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    toast("Exported <b>" + rows.length + "</b> leads (CSV)", "ok");
+  }
+  function leadCallSheet() {
+    const rows = leadFiltered();
+    if (!rows.length) { toast("No leads match the current filters", "err"); return; }
+    const root = $("#print-root");
+    const today = new Date().toLocaleDateString();
+    let body = '<div class="print-brand"><h2 style="margin:0">Call Sheet — ' + today + "</h2><span>ES Realty</span></div>";
+    LEAD_STATUSES.forEach(s => {
+      const grp = rows.filter(l => l.status === s[0]);
+      if (!grp.length) return;
+      body += "<h3>" + esc(s[1]) + " (" + grp.length + ")</h3><table><tr><th>Name</th><th>Phone</th><th>Interest / Budget</th><th>Follow-up</th><th>Last touch</th></tr>";
+      grp.forEach(l => {
+        const fu = leadFollowupState(l);
+        body += "<tr><td><b>" + esc(l.name || "—") + "</b> <span style='color:#98A5B8'>" + esc(l.ref || "") + "</span></td>" +
+          "<td>" + esc(l.phone ? phNormalizeMobile(l.phone) : "—") + "</td>" +
+          "<td>" + esc(l.propertyInterest || leadTypeLabel(l.type)) + (l.budget ? " · ₱" + C.numFmt(l.budget) : "") + "</td>" +
+          "<td>" + (l.nextFollowUp ? esc(l.nextFollowUp) + (fu && fu.due ? " ⚠" : "") : "—") + "</td>" +
+          "<td>" + leadDaysSince(l) + "</td></tr>";
+      });
+      body += "</table>";
+    });
+    body += '<p class="dim" style="font-size:10px">Generated from the filtered pipeline view. ⚠ marks overdue or due-today follow-ups.</p>';
+    root.innerHTML = body;
+    root.style.display = "block";
+    window.print();
+    setTimeout(() => { root.innerHTML = ""; root.style.display = "none"; }, 2500);
+    toast("Call sheet opened — choose 'Save as PDF'");
+  }
   function leadDelete(id) {
     const l = (state.leads || []).find(x => x.id === id);
     if (!l) return;
@@ -8878,6 +8932,10 @@ premise: "Fee Simple / As Improved",
         if (lostB) { leadSetStatus(lostB.getAttribute("data-lead-lost"), "lost"); return; }
         const conv = e.target.closest("[data-tx-convert]");
         if (conv) { leadConvertToTransaction(conv.getAttribute("data-tx-convert")); return; }
+        const csvB = e.target.closest("[data-lead-csv]");
+        if (csvB) { leadExportCsv(); return; }
+        const sheetB = e.target.closest("[data-lead-sheet]");
+        if (sheetB) { leadCallSheet(); return; }
         const del = e.target.closest("[data-lead-del]");
         if (del) { leadDelete(del.getAttribute("data-lead-del")); return; }
         const act = e.target.closest("[data-lead-act]");
