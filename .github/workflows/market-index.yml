@@ -1,0 +1,32 @@
+name: Market Price Index
+
+on:
+  schedule:
+    - cron: "30 18 * * *"   # 02:30 Philippine time (PST/PHT UTC+8)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build daily index snapshot
+        env:
+          MS_API_URL: https://esrealty-market-scan.vercel.app
+        run: node market-scan/build-index.js
+
+      - name: Commit snapshot
+        run: |
+          git config user.name "ES Realty Index Bot"
+          git config user.email "index@esrealty.local"
+          git add data/market-index.json
+          git diff --cached --quiet || git commit -m "Market Price Index snapshot $(date -u +%F)"
+          git push

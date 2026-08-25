@@ -549,7 +549,18 @@
   };
   const _r1 = v => Math.round(num(v, 0) * 10) / 10;
 
-  function appraisalSuggestAdjustments(raw, comp, effectiveDate, benchPsm) {
+  // Market Price Index: derive a defensible monthly % change for a city from
+  // daily snapshot rows [{d:"YYYY-MM-DD", c:"City", p:psm, n:samples}].
+  function marketIndexMonthlyPct(rows, city) {
+    const pts = (rows || []).filter(r => r && r.c === city && r.p > 0).sort((a, b) => a.d.localeCompare(b.d));
+    if (pts.length < 2) return null;
+    const first = pts[0], last = pts[pts.length - 1];
+    const months = Math.max(1, Math.round((new Date(last.d) - new Date(first.d)) / (86400000 * 30.44)));
+    const raw = (Math.pow(last.p / first.p, 1 / months) - 1) * 100;
+    return { pctPerMonth: clamp(raw, -3, 3), months, points: pts.length, from: first.d, to: last.d };
+  }
+
+  function appraisalSuggestAdjustments(raw, comp, effectiveDate, benchPsm, monthlyPct) {
     const p = raw.property || {};
     const override = num(benchPsm, 0) > 0;
     const sBench = override ? num(benchPsm, 0) : D.benchmarkFor(p.city);
@@ -557,6 +568,7 @@
     const growth = num(p.growthRate, 0.07);
     const months = _monthsBetween(comp.saleDate, effectiveDate);
     const s = {};
+    const idxPct = num(monthlyPct, 0);
 
     s["Property Rights Conveyed"] = { value: 0, basis: "Fee simple estate assumed for subject and comparable; no leasehold/bundle-of-rights adjustment required." };
     s["Financing Terms"] = { value: 0, basis: "Cash-equivalent pricing assumed (arm's-length)." };
@@ -566,8 +578,8 @@
     else if (comp.transactionType === "listing") { cond = -1; condBasis = "Listing price, not a closed transaction; small haircut applied for negotiation gap."; }
     s["Conditions of Sale"] = { value: cond, basis: condBasis };
 
-    const timeAdj = _r1((months / 12) * growth * 100);
-    s["Market Conditions (Time)"] = { value: timeAdj, basis: months + " months elapsed at " + pct(growth) + "/yr assumed appreciation in " + (p.city || "the market") + "." };
+    const timeAdj = idxPct !== 0 ? _r1((months / 12) * idxPct * 100) : _r1((months / 12) * growth * 100);
+    s["Market Conditions (Time)"] = { value: timeAdj, basis: months + " months elapsed at " + (idxPct !== 0 ? pct(idxPct / 100) + "/mo from the ES Realty Market Price Index for " + (p.city || "the market") : pct(growth) + "/yr assumed appreciation in " + (p.city || "the market")) + "." };
 
     if (cBench > 0 && sBench > 0) {
       const locAdj = _r1((sBench - cBench) / cBench * 100);
@@ -781,6 +793,6 @@
     model, SCENARIOS, buildScenario, buildAllScenarios,
     locationAnalysis, riskAnalysis, highestBestUse, recommend, assistantAnswer,
     APPRAISAL_ELEMENTS, appraisalSuggestAdjustments, appraisalCompute,
-    appraisalReconcileDraft, appraisalNarrative, phTaxes, collateralValue, depreciationSuggest
+    appraisalReconcileDraft, appraisalNarrative, phTaxes, collateralValue, depreciationSuggest, marketIndexMonthlyPct
   };
 })();

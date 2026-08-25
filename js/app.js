@@ -3884,7 +3884,7 @@ premise: "Fee Simple / As Improved",
     const raw = appraisalSubjectRaw(a);
     a.adjustments = [];
     (a.comparables || []).forEach(c => {
-      const sug = C.appraisalSuggestAdjustments(raw, c, a.effectiveDate, a.benchOverride && a.benchOverride.psm);
+      const sug = C.appraisalSuggestAdjustments(raw, c, a.effectiveDate, a.benchOverride && a.benchOverride.psm, (C.marketIndexMonthlyPct(indexRows(), raw.property.city) || {}).pctPerMonth || 0);
       C.APPRAISAL_ELEMENTS.forEach(el => {
         const s = sug[el] || { value: 0, basis: "" };
         a.adjustments.push({ comparableId: c.id, element: el, value: s.value, isAiSuggested: true, basis: s.basis });
@@ -7123,7 +7123,9 @@ premise: "Fee Simple / As Improved",
        '<div class="field col-2"><label class="ms-chk"><input type="checkbox" id="ms-live"' + (q.live === false ? "" : " checked") + '> Include live web sources</label></div>' +
       '</div></div>';
     html += '<div id="market-status" class="mt-16"></div>';
+    html += marketIndexCardHtml();
     html += '<div id="market-results" class="mt-16">' + (st.results && st.results.length ? marketResultsHtml(st) : marketEmptyHtml()) + '</div>';
+    ensureMarketIndex();
     return html;
   }
 
@@ -7185,12 +7187,102 @@ premise: "Fee Simple / As Improved",
       .then(d => {
         if (!d || !d.ok) throw new Error((d && d.error) || "Backend error");
         state.market = { query: q, results: d.listings || [], sources: d.sources || [], total: d.total || 0, elapsedMs: d.elapsedMs, ranAt: Date.now() };
-        save(); render();
+        save(); captureMarketIndex(d.listings); render();
       })
       .catch(err => {
         state.market = Object.assign({}, state.market, { error: String((err && err.message) || err) });
         save(); render();
       });
+  }
+
+  /* ---- Market Price Index ---- */
+  function indexRows() {
+    const local = (state.mktIdxLocal || []).map(r => ({ d: r.d, c: r.c, p: r.p, n: r.n }));
+    const cloud = (window.ESREALTY_IDX || []);
+    const seen = new Set(local.map(r => r.d + "|" + r.c));
+    return local.concat(cloud.filter(r => !seen.has(r.d + "|" + r.c)));
+  }
+  function captureMarketIndex(listings) {
+    try {
+      const byCity = {};
+      (listings || []).forEach(l => {
+        if (l.source !== "dotproperty" && l.source !== "myproperty") return;
+        const area = l.lotArea > 0 ? l.lotArea : (l.floorArea > 0 ? l.floorArea : 0);
+        if (!area || area < 10 || !(l.price > 0)) return;
+        const psm = Math.round(l.price / area);
+        if (psm < 5000 || psm > 2000000) return;
+        const c = String(l.city || "").split(",")[0].trim();
+        if (!c) return;
+        (byCity[c] = byCity[c] || []).push(psm);
+      });
+      const today = new Date().toISOString().slice(0, 10);
+      let added = 0;
+      Object.keys(byCity).forEach(c => {
+        const arr = byCity[c].slice().sort((a, b) => a - b);
+        if (arr.length < 3) return;
+        const p = arr.length % 2 ? arr[(arr.length - 1) / 2] : Math.round((arr[arr.length / 2 - 1] + arr[arr.length / 2]) / 2);
+        state.mktIdxLocal = state.mktIdxLocal || [];
+        if (!state.mktIdxLocal.some(r => r.d === today && r.c === c)) {
+          state.mktIdxLocal.push({ d: today, c: c, p: p, n: arr.length });
+          added++;
+        }
+      });
+      if (added) save();
+    } catch (e) { /* non-fatal */ }
+  }
+  function ensureMarketIndex() {
+    if (window.ESREALTY_IDX) return;
+    fetch("data/market-index.json").then(r => { if (!r.ok) throw 0; return r.json(); })
+      .then(doc => {
+        const rows = [];
+        (doc.days || []).forEach(day => (day.cities || []).forEach(ct => rows.push({ d: day.d, c: ct.c, p: ct.p, n: ct.n })));
+        window.ESREALTY_IDX = rows;
+        if (state.view === "market") render();
+      })
+      .catch(() => { window.ESREALTY_IDX = []; });
+  }
+  function marketIndexCardHtml() {
+    const rows = indexRows().sort((a, b) => a.d.localeCompare(b.d));
+    const cities = Array.from(new Set(rows.map(r => r.c))).sort();
+    let html = '<div class="card card-pad mt-16"><h3 class="mb-8">' + icon("trending-up", 15) + ' City Price Index <span class="badge blue">₱/sqm medians</span></h3>';
+    if (!cities.length) {
+      html += '<p class="dim tiny">No index snapshots yet — the daily job records portal medians per city. Run a live scan to capture the first data point.</p></div>';
+      return html;
+    }
+    const sel = (state.msIdxCity || "").match(cities) ? state.msIdxCity : cities[cities.length - 1];
+    html += '<div class="row" style="gap:10px;align-items:end;flex-wrap:wrap"><div class="field" style="min-width:220px"><label>City</label><select class="input" id="ms-idx-city">' +
+      cities.map(c => '<option value="' + esc(c) + '"' + (c === sel ? " selected" : "") + ">" + esc(c) + "</option>").join("") + "</select></div>" +
+      '<div class="dim tiny">' + rows.length + " snapshots · updated " + esc(rows[rows.length - 1].d) + "</div></div>";
+    const pts = rows.filter(r => r.c === sel);
+    const last = pts[pts.length - 1];
+    html += '<div class="row mt-12" style="gap:24px;flex-wrap:wrap">' +
+      '<div><div class="dim tiny">Latest median</div><div style="font-size:20px;font-weight:700">' + C.money(last.p) + '/sqm</div></div>' +
+      '<div><div class="dim tiny">Samples</div><div style="font-size:16px;font-weight:600">' + last.n + "</div></div>";
+    if (pts.length >= 2) {
+      const prev = pts[pts.length - 2];
+      const mom = ((last.p - prev.p) / prev.p * 100);
+      html += '<div><div class="dim tiny">vs previous</div><div style="font-size:16px;font-weight:600;color:' + (mom >= 0 ? "var(--green,#2e7d32)" : "var(--red,#e05252)") + '">' + (mom >= 0 ? "+" : "") + mom.toFixed(1) + "%</div></div>";
+    }
+    html += "</div>";
+    // SVG trend
+    if (pts.length >= 2) {
+      const W = 640, H = 150, pad = 28;
+      const ps = pts.map(p => p.p);
+      const min = Math.min.apply(null, ps), max = Math.max.apply(null, ps);
+      const span = (max - min) || 1;
+      const X = i => pad + i * ((W - pad * 2) / Math.max(1, pts.length - 1));
+      const Y = v => H - pad - ((v - min) / span) * (H - pad * 2);
+      const line = pts.map((p, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(p.p).toFixed(1)).join(" ");
+      html += '<svg viewBox="0 0 ' + W + " " + H + '" style="width:100%;max-width:640px;height:auto;margin-top:8px">' +
+        '<text x="' + pad + '" y="14" font-size="10" fill="#98A5B8">₱' + C.numFmt(max) + '</text>' +
+        '<text x="' + pad + '" y="' + (H - 4) + '" font-size="10" fill="#98A5B8">₱' + C.numFmt(min) + '</text>' +
+        '<path d="' + line + '" fill="none" stroke="#EA580C" stroke-width="2.5"/>' +
+        pts.map((p, i) => '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(p.p).toFixed(1) + '" r="3" fill="#EA580C"/><title>' + esc(p.d) + ": ₱" + C.numFmt(p.p) + "</title>").join("") +
+        "</svg>";
+    }
+    html += '<p class="dim tiny mt-8">Medians come from real DotProperty/MyProperty listings captured by the nightly index job and your own live scans. Feeds Market Conditions (Time) adjustments in appraisals.</p>';
+    html += "</div>";
+    return html;
   }
 
   function marketUseAsComp(l) {
@@ -7234,6 +7326,8 @@ premise: "Fee Simple / As Improved",
       save();
       updateFacebookSearch();
     });
+    const idxCity = $("#ms-idx-city");
+    if (idxCity) idxCity.addEventListener("change", () => { state.msIdxCity = idxCity.value; save(); render(); });
     $$("#ms-type, #ms-mode").forEach(el => el.addEventListener("change", updateFacebookSearch));
     $$("#content [data-ms-comp]").forEach(b => b.addEventListener("click", () => {
       const st = state.market || {};

@@ -181,15 +181,22 @@ async function invokeDotProperty(query) {
   const all = [];
   let lastErr = "";
   let lastCount = 0;
+  const MAX_PAGES = 3;
   for (const slug of pages) {
-    try {
-      const html = await fetchHtml("https://www.dotproperty.com.ph/" + slug, 14);
-      const cards = html.match(/<article\s+class="listing-snippet.*?<\/article>/gs) || [];
-      const typeFallback = query.type || String(slug.split("-for-")[0]);
-      for (const c of cards) all.push(parseDotPropertyCard(c, typeFallback, mode));
-      lastCount += cards.length;
-    } catch (err) {
-      lastErr = String(err && err.message || err);
+    let emptyStreak = 0;
+    for (let page = 1; page <= MAX_PAGES && emptyStreak === 0; page++) {
+      try {
+        const url = "https://www.dotproperty.com.ph/" + slug + (page > 1 ? ("?page=" + page) : "");
+        const html = await fetchHtml(url, 14);
+        const cards = html.match(/<article\s+class="listing-snippet.*?<\/article>/gs) || [];
+        if (cards.length === 0) { emptyStreak++; break; }
+        const typeFallback = query.type || String(slug.split("-for-")[0]);
+        for (const c of cards) all.push(parseDotPropertyCard(c, typeFallback, mode));
+        lastCount += cards.length;
+      } catch (err) {
+        lastErr = String(err && err.message || err);
+        break;
+      }
     }
   }
   let status = "ok";
