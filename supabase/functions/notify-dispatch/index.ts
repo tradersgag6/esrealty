@@ -46,15 +46,21 @@ Deno.serve(async (req) => {
     let body: any = {};
     try { body = await req.json(); } catch { body = {}; }
     if (body && typeof body === "object" && body.to && body.subject && !Array.isArray(body)) {
-      if (!RESEND_API_KEY) return json({ ok: false, error: "Email not configured — RESEND_API_KEY missing" }, 503);
-      const userClient = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-        { global: { headers: { Authorization: authHeader } } },
+    if (!RESEND_API_KEY) return json({ ok: false, error: "Email not configured — RESEND_API_KEY missing" }, 503);
+    // Verify the caller's JWT against GoTrue using the always-injected service key,
+    // so this works regardless of legacy/new anon-key injection.
+    let email = "";
+    try {
+      const gotrue = await fetch(
+        (Deno.env.get("SUPABASE_URL") ?? "").replace(/\/$/, "") + "/auth/v1/user",
+        { headers: { Authorization: authHeader, apikey: SERVICE_KEY } },
       );
-      const { data: userData } = await userClient.auth.getUser();
-      const email = userData?.user?.email ?? "";
-      if (!email) return json({ ok: false, error: "Unauthorized" }, 401);
+      if (gootrue.ok) {
+        const ud = await gotrue.json();
+        email = String(ud?.email ?? "");
+      }
+    } catch (_) { /* fallthrough */ }
+    if (!email) return json({ ok: false, error: "Unauthorized (token verify failed)" }, 401);
       if (String(body.to).toLowerCase() !== String(email).toLowerCase()) {
         return json({ ok: false, error: "Self-send only: you may only email your own address" }, 403);
       }
