@@ -8679,6 +8679,7 @@ premise: "Fee Simple / As Improved",
       (can && mode === "calendar" ? '<button class="btn btn-primary" data-cal-new>' + icon("plus", 15) + " Add Event</button>" : "") +
       (can ? '<button class="btn btn-primary" data-lead-new>' + icon("plus", 15) + " Add Lead</button>" : "") +
       '<button class="btn btn-ghost" data-lead-sheet>' + icon("doc", 15) + " Call Sheet</button>" +
+      '<button class="btn btn-ghost" data-lead-digest>' + icon("trending-up", 15) + " Weekly Digest</button>" +
       '<button class="btn btn-ghost" data-lead-csv>' + icon("download", 15) + " Export CSV</button></div></div>";
     html += '<div class="lead-stats">' +
       '<div class="ls-stat"><div class="ls-stat-v">' + leads.length + '</div><div class="ls-stat-l dim">Total leads</div></div>' +
@@ -8935,6 +8936,87 @@ premise: "Fee Simple / As Improved",
     syncLead(l);
     toast("Activity added");
   }
+  function leadDigestData() {
+    const leads = leadScope();
+    const now = new Date();
+    const weekStart = new Date(now); weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7)); weekStart.setHours(0, 0, 0, 0);
+    const inWeek = iso => { if (!iso) return false; const d = new Date(iso); return d >= weekStart && d <= now; };
+    const newThisWeek = leads.filter(l => inWeek(l.createdAt));
+    let movements = 0, closedThisWeek = [], lostThisWeek = 0;
+    leads.forEach(l => {
+      (l.activity || []).forEach(a => {
+        if (!inWeek(a.date) || !/Status changed/i.test(a.text || "")) return;
+        movements++;
+        if (/→\s*Closed \/ Won|→ Lost/.test(a.text)) {
+          if (/Closed \/ Won/.test(a.text)) closedThisWeek.push({ l, at: a.date });
+          else lostThisWeek++;
+        }
+      });
+      if (l.status === "closed" && !closedThisWeek.some(x => x.l.id === l.id)) closedThisWeek.push({ l, at: l.updatedAt || l.createdAt });
+    });
+    const overdue = leads.map(l => ({ l, s: leadFollowupState(l) })).filter(x => x.s && x.s.due);
+    const horizon = now.getTime() + 7 * 86400000;
+    const upcoming = [];
+    leads.forEach(l => (l.calendarEvents || []).forEach(ev => {
+      const d = ev.date ? new Date(ev.date) : null;
+      if (d && d.getTime() >= now.getTime() && d.getTime() <= horizon) upcoming.push({ when: d, what: ev.title || ev.type || "Event", who: l.name, ref: l.ref, id: l.id });
+    }));
+    upcoming.sort((a, b) => a.when - b.when);
+    const wonValue = closedThisWeek.reduce((s, x) => s + (x.l.budget || x.l.askingPrice || 0), 0);
+    const conv = (closedThisWeek.length + lostThisWeek) > 0 ? Math.round(closedThisWeek.length / (closedThisWeek.length + lostThisWeek) * 100) + "%" : "—";
+    return { weekStart, newThisWeek, movements, closedThisWeek, lostThisWeek, overdue, upcoming: upcoming.slice(0, 12), wonValue, conv };
+  }
+  function openLeadDigest() {
+    closeLeadDigest();
+    const d = leadDigestData();
+    const ov = document.createElement("div");
+    ov.className = "modal-overlay"; ov.id = "digest-modal";
+    ov.innerHTML = '<div class="modal-card modal-card-wide"><div class="modal-head"><h3>' + icon("trending-up", 16) + " Weekly Broker Digest</h3>" +
+      '<button class="icon-btn btn-sm" data-digest-close>' + icon("trash", 14) + "</button></div><div class='digest-body'>" +
+      '<p class="dim tiny">Week of ' + esc(d.weekStart.toLocaleDateString()) + " — auto-compiled from your pipeline. Print it or email it to yourself every Monday.</p>" +
+      '<div class="lead-stats">' +
+      "<div class='ls-stat'><div class='ls-stat-v'>" + d.newThisWeek.length + '</div><div class="ls-stat-l dim">New leads</div></div>' +
+      "<div class='ls-stat'><div class='ls-stat-v'>" + d.movements + '</div><div class="ls-stat-l dim">Stage moves</div></div>' +
+      "<div class='ls-stat'><div class='ls-stat-v'>" + d.closedThisWeek.length + '</div><div class="ls-stat-l dim">Won</div></div>' +
+      "<div class='ls-stat'><div class='ls-stat-v'>" + d.lostThisWeek + '</div><div class="ls-stat-l dim">Lost</div></div>' +
+      "<div class='ls-stat'><div class='ls-stat-v'>" + d.conv + '</div><div class="ls-stat-l dim">Win rate</div></div>' +
+      "<div class='ls-stat'><div class='ls-stat-v'>" + C.money(d.wonValue) + '</div><div class="ls-stat-l dim">Won value</div></div>' +
+      "</div>" +
+      "<h3 class='mt-16'>Overdue follow-ups (" + d.overdue.length + ")</h3>" +
+      (d.overdue.length ? "<table class='data'><tr><th>Lead</th><th>Status</th><th>Phone</th><th>Flag</th></tr>" +
+        d.overdue.slice(0, 15).map(x => "<tr><td><b>" + esc(x.l.name || x.l.ref) + "</b> <span class='dim tiny'>" + esc(x.l.ref || "") + "</span></td><td>" + esc((leadStatusCfg(x.l.status) || [0, x.l.status])[1]) + "</td><td>" + esc(phNormalizeMobile(x.l.phone) || "—") + "</td><td><span class='badge red'>" + esc(x.s.label) + "</span></td></tr>").join("") + "</table>"
+        : "<p class='dim tiny'>None — you're on top of your follow-ups.</p>") +
+      "<h3 class='mt-16'>Next 7 days</h3>" +
+      (d.upcoming.length ? "<table class='data'><tr><th>When</th><th>Event</th><th>Lead</th></tr>" +
+        d.upcoming.map(u => "<tr><td>" + esc(u.when.toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })) + "</td><td>" + esc(u.what) + "</td><td>" + esc(u.who || "—") + "</td></tr>").join("") + "</table>"
+        : "<p class='dim tiny'>No scheduled events this week.</p>") +
+      '<div class="actions mt-16"><button class="btn btn-primary" data-digest-print>' + icon("doc", 14) + " Print / Save PDF</button>" +
+      '<button class="btn btn-ghost" data-digest-email>' + icon("check", 14) + " Email me this</button></div>" +
+      "</div></div>";
+    document.body.appendChild(ov);
+  }
+  function closeLeadDigest() { const m = $("#digest-modal"); if (m) m.remove(); }
+  async function emailLeadDigest() {
+    const cfg = window.ESREALTY_SUPABASE || {};
+    const to = currentUser && currentUser.email;
+    if (!cfg.supabaseUrl || !to) { toast("Email delivery needs Supabase config and a signed-in account with an email", "err"); return; }
+    const d = leadDigestData();
+    const rows = d.overdue.map(x => "<li>" + esc(x.l.ref + " " + (x.l.name || "")) + " — " + esc(x.s.label) + "</li>").join("");
+    const html = "<h2>Weekly Broker Digest — week of " + esc(d.weekStart.toLocaleDateString()) + "</h2>" +
+      "<p>New leads: <b>" + d.newThisWeek.length + "</b> · Stage moves: <b>" + d.movements + "</b> · Won: <b>" + d.closedThisWeek.length + "</b> (" + C.money(d.wonValue) + ") · Lost: <b>" + d.lostThisWeek + "</b> · Win rate: <b>" + d.conv + "</b></p>" +
+      "<h3>Overdue follow-ups (" + d.overdue.length + ")</h3><ul>" + (rows || "<li>None</li>") + "</ul>";
+    try {
+      const res = await fetch(cfg.supabaseUrl + "/functions/v1/notify-dispatch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + (cfg.supabaseKey || ""), apikey: cfg.supabaseKey || "" },
+        body: JSON.stringify({ channel: "email", to: to, subject: "ES Realty weekly digest", html: html })
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      toast("Digest emailed to <b>" + esc(to) + "</b>", "ok");
+    } catch (e) {
+      toast("Email dispatch unavailable (" + esc(String(e && e.message || e)) + "). Deploy the notify-dispatch function with Resend/Semaphore keys — meanwhile use Print → Save as PDF.", "err");
+    }
+  }
   function leadExportCsv() {
     const rows = leadFiltered();
     if (!rows.length) { toast("No leads match the current filters", "err"); return; }
@@ -9030,6 +9112,22 @@ premise: "Fee Simple / As Improved",
         if (csvB) { leadExportCsv(); return; }
         const sheetB = e.target.closest("[data-lead-sheet]");
         if (sheetB) { leadCallSheet(); return; }
+        const digB = e.target.closest("[data-lead-digest]");
+        if (digB) { openLeadDigest(); return; }
+        const digClose = e.target.closest("[data-digest-close]");
+        if (digClose) { closeLeadDigest(); return; }
+        const digPrint = e.target.closest("[data-digest-print]");
+        if (digPrint) {
+          const body = (document.querySelector("#digest-modal .digest-body") || {}).innerHTML || "";
+          const root = $("#print-root");
+          root.innerHTML = '<div class="rpt" style="font-family:Georgia,serif;color:#16202E;line-height:1.6;padding:28px"><h1 style="font-size:22px">ES Realty — Weekly Broker Digest</h1>' + body + "</div>";
+          root.style.display = "block";
+          window.print();
+          setTimeout(() => { root.innerHTML = ""; root.style.display = "none"; }, 2500);
+          return;
+        }
+        const digEmail = e.target.closest("[data-digest-email]");
+        if (digEmail) { emailLeadDigest(); return; }
         const del = e.target.closest("[data-lead-del]");
         if (del) { leadDelete(del.getAttribute("data-lead-del")); return; }
         const act = e.target.closest("[data-lead-act]");
