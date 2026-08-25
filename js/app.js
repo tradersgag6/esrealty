@@ -7187,13 +7187,57 @@ premise: "Fee Simple / As Improved",
     msFetch(qs.toString())
       .then(d => {
         if (!d || !d.ok) throw new Error((d && d.error) || "Backend error");
-        state.market = { query: q, results: d.listings || [], sources: d.sources || [], total: d.total || 0, elapsedMs: d.elapsedMs, ranAt: Date.now() };
-        save(); captureMarketIndex(d.listings); render();
+        const filtered = marketPostFilter(d.listings || [], q);
+        state.market = { query: q, results: filtered, sources: d.sources || [], total: filtered.length, elapsedMs: d.elapsedMs, ranAt: Date.now() };
+        save(); captureMarketIndex(filtered); render();
       })
       .catch(err => {
         state.market = Object.assign({}, state.market, { error: String((err && err.message) || err) });
         save(); render();
       });
+  }
+
+  /* Client-side geographic + type narrowing (server only honors city text). */
+  var _phGeo = null;
+  function phGeoMap() {
+    if (_phGeo) return _phGeo;
+    _phGeo = { city: {}, prov: {} };
+    D.regionNames().forEach(rg => {
+      D.provincesFor(rg).forEach(pv => {
+        _phGeo.prov[pv.toLowerCase()] = rg;
+        D.citiesFor(rg, pv).forEach(ct => { _phGeo.city[canonCity(ct).toLowerCase()] = { prov: pv, region: rg }; });
+      });
+    });
+    return _phGeo;
+  }
+  function marketPostFilter(listings, q) {
+    const geo = phGeoMap();
+    const wantProv = String(q.province || "").trim().toLowerCase();
+    const wantRegion = String(q.region || "").trim().toLowerCase();
+    const wantType = String(q.type || "").trim();
+    const normType = s => String(s || "").toLowerCase().replace(/[^a-z]/g, "");
+    const wt = normType(wantType);
+    return (listings || []).filter(l => {
+      // Region / province narrowing using canonical city mapping
+      if (wantProv || wantRegion) {
+        const cc = canonCity(l.city).toLowerCase();
+        const g = geo.city[cc];
+        let ok = false;
+        if (g) ok = wantProv ? (g.prov.toLowerCase() === wantProv && (!wantRegion || g.region.toLowerCase() === wantRegion)) : (g.region.toLowerCase() === wantRegion);
+        else {
+          // Unmapped city: fall back to text hints in location/title
+          const hay = ((l.city || "") + " " + (l.title || "")).toLowerCase();
+          ok = wantProv ? hay.indexOf(wantProv) !== -1 : hay.indexOf(wantRegion) !== -1;
+        }
+        if (!ok) return false;
+      }
+      // Loose type guard: exclude obvious mismatches from portal label bleed
+      if (wt && l.propertyType) {
+        const lt = normType(l.propertyType);
+        if (lt && lt !== wt && lt.indexOf(wt) === -1 && wt.indexOf(lt) === -1) return false;
+      }
+      return true;
+    });
   }
 
   /* ---- Market Price Index ---- */
