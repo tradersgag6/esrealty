@@ -4689,7 +4689,7 @@ premise: "Fee Simple / As Improved",
     }
     root.innerHTML = html;
     window.print();
-    setTimeout(() => { root.innerHTML = ""; }, 800);
+    setTimeout(() => { root.innerHTML = ""; }, 2500);
     toast("Print dialog opened — choose 'Save as PDF' as the destination");
   }
 
