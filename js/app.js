@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    ES Realty — Application layer
    Auth (demo), navigation, wizard, analysis, portfolio, reports,
    assistant. Vanilla JS SPA, localStorage persistence.
@@ -7266,7 +7266,7 @@ premise: "Fee Simple / As Improved",
   }
   function ensureMarketIndex() {
     if (window.ESREALTY_IDX) return;
-    fetch("data/market-index.json").then(r => { if (!r.ok) throw 0; return r.json(); })
+    fetch("data/market-index.json?t=" + Date.now()).then(r => { if (!r.ok) throw 0; return r.json(); })
       .then(doc => {
         const rows = [];
         (doc.days || []).forEach(day => (day.cities || []).forEach(ct => rows.push({ d: day.d, c: ct.c, p: ct.p, n: ct.n })));
