@@ -676,7 +676,27 @@
       const opex = egi * num(inc.opexPct, 0) / 100;
       const noi = egi - opex;
       const cap = num(inc.capRate, 0);
-      income = { gpi, egi, opex, noi, capRate: cap, indicated: cap > 0 ? noi / cap : null };
+      const directIndicated = cap > 0 ? noi / (cap / 100) : null;
+      // Gross Rent Multiplier applied to annual gross scheduled income
+      const grm = num(inc.grm, 0);
+      const grmIndicated = (grm > 0 && gpi > 0) ? gpi * grm : null;
+      // Compact N-year discounted cash flow with terminal (going-out cap) value
+      let dcf = null;
+      if (inc.useDcf) {
+        const yrs = Math.max(2, Math.min(10, Math.round(num(inc.dcfYears, 5))));
+        const g = num(inc.noiGrowthPct, 0) / 100;
+        const r = num(inc.discountRate, 0) / 100;
+        const exitCapRaw = num(inc.exitCapPct, 0);
+        const exitCap = exitCapRaw > 0 ? exitCapRaw / 100 : (cap > 0 ? cap / 100 : null);
+        if (r > 0 && noi > 0 && exitCap) {
+          let pvFlows = 0, noiT = noi;
+          for (let t = 1; t <= yrs; t++) { noiT *= (1 + g); pvFlows += noiT / Math.pow(1 + r, t); }
+          const terminal = noiT * (1 + g) / exitCap;
+          const pvTerminal = terminal / Math.pow(1 + r, yrs);
+          dcf = { years: yrs, growthPct: num(inc.noiGrowthPct, 0), discountPct: num(inc.discountRate, 0), exitCapPct: exitCapRaw || num(inc.capRate, 0), pvFlows, pvTerminal, indicated: pvFlows + pvTerminal };
+        }
+      }
+      income = { gpi, egi, opex, noi, capRate: cap, indicated: directIndicated, grm, grmIndicated, dcf };
     }
 
     return {

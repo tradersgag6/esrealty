@@ -3844,6 +3844,7 @@ function bindPerView() {
     const mk = (i, off, months, tx) => ({
       id: "c" + Date.now() + "-" + i, address: "Sample comparable " + i, city: near[(near.indexOf(city) + i) % near.length],
       lat: "", lng: "", price: Math.round((base * (1 + off)) * lot), saleDate: "202" + (i) + "-0" + (i + 1) + "-15",
+      verify: i === 0 ? "Registry/Deed verified" : "Broker-confirmed",
       lotArea: Math.round(lot * (1 - i * 0.08)), floorArea: 0, propertyType: p.propertyType || "Vacant Lot",
       transactionType: tx || "Arm\u2019s-length Sale", source: "Sample data (replace)", sample: true
     });
@@ -4079,9 +4080,34 @@ function bindPerView() {
     let html = '<div class="row spread mb-16" style="flex-wrap:wrap;gap:10px"><div><h3 style="margin:0">Comparable Sales</h3><p class="dim tiny">Minimum 3, recommended up to 6. Data source is required for auditability.</p></div><div class="row" style="gap:10px"><button class="btn btn-ghost btn-sm" id="ap-add-comp">' + icon("plus", 14) + ' Add Comparable</button><button class="btn btn-ghost btn-sm" id="ap-sample-comp">' + icon("spark", 14) + ' Load Sample Comparables</button></div></div>';
     const comps = a.comparables || [];
     if (!comps.length) html += '<div class="card card-pad empty"><h3>No comparables yet</h3><p>Add comparables or load sample data to run the Sales Comparison Approach.</p></div>';
+    // QC panel: duplicates + verification coverage + distances
+    const raw0 = appraisalSubjectRaw(a);
+    const subjLL = [C.num(raw0.property.lat, null), C.num(raw0.property.lng, null)];
+    function haversineKm(la1, lo1, la2, lo2) {
+      if (![la1, lo1, la2, lo2].every(v => isFinite(v))) return null;
+      const R = 6371, toR = Math.PI / 180;
+      const dLa = (la2 - la1) * toR, dLo = (lo2 - lo1) * toR;
+      const h = Math.sin(dLa / 2) ** 2 + Math.cos(la1 * toR) * Math.cos(la2 * toR) * Math.sin(dLo / 2) ** 2;
+      return 2 * R * Math.asin(Math.sqrt(h));
+    }
+    const normAddr = s => String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const seen = {};
+    const dups = [];
+    comps.forEach(c => {
+      const key = normAddr(c.address) + "|" + normAddr(c.city);
+      if (seen[key] != null && normAddr(c.address)) dups.push([seen[key], c.address]);
+      else if (normAddr(c.address)) seen[key] = c.address;
+    });
+    const verifiedCount = comps.filter(c => /registry|deed/i.test(c.verify || "")).length;
+    const unverified = comps.filter(c => !c.verify || c.verify === "Unverified").length;
+    if (dups.length) html += '<div class="notice-banner warn mb-16">' + icon("zap", 14) + ' <span><b>Possible duplicate comparables:</b> ' + esc(dups.map(d => "#" + d[0] + " / " + d[1]).join(", ")) + " — verify against title or remove before weighting.</span></div>";
+    if (comps.length >= 1 && verifiedCount < 2) html += '<div class="notice-banner warn mb-16">' + icon("shield", 14) + ' <span>Fewer than two comparables are <b>Registry/Deed verified</b>. PH bank submissions expect primary-source verification for at least two comps.</span></div>';
     comps.forEach((c, i) => {
       const flagged = c.transactionType !== "Arm\u2019s-length Sale";
-      html += '<div class="card card-pad mb-16 comp-card"><div class="row spread mb-8"><b>Comparable ' + (i + 1) + '</b>' +
+      const km = haversineKm(subjLL[0], subjLL[1], C.num(c.lat, NaN), C.num(c.lng, NaN));
+      const kmBadge = km == null ? "" : ' <span class="badge ' + (km <= 5 ? "green" : km <= 15 ? "gold" : "red") + '">' + km.toFixed(1) + ' km</span>';
+      const vBadge = c.verify ? ' <span class="badge ' + (/registry|deed/i.test(c.verify) ? "green" : /broker/i.test(c.verify) ? "blue" : "gold") + '">' + esc(c.verify) + '</span>' : "";
+      html += '<div class="card card-pad mb-16 comp-card"><div class="row spread mb-8"><b>Comparable ' + (i + 1) + '</b>' + kmBadge + vBadge +
         (c.sample ? '<span class="badge blue">sample — replace</span>' : "") +
         (flagged ? '<span class="badge gold">non-arm\u2019s-length: ' + esc(c.transactionType) + '</span>' : "") +
         '<button class="btn btn-danger btn-sm" data-rm-comp="' + esc(c.id) + '">' + icon("trash", 13) + '</button></div><div class="form-grid">';
@@ -4091,6 +4117,11 @@ function bindPerView() {
       html += '<div class="field col-3"><label>Sale Price (₱)</label><input class="input input-num" inputmode="decimal" autocomplete="off" data-c="price" data-id="' + esc(c.id) + '" value="' + C.fmtNum(c.price) + '"></div>';
       html += '<div class="field col-3"><label>Lot Area (sqm)</label><input class="input input-num" inputmode="decimal" autocomplete="off" data-c="lotArea" data-id="' + esc(c.id) + '" value="' + C.fmtNum(c.lotArea) + '"></div>';
       html += '<div class="field col-3"><label>Floor Area (sqm)</label><input class="input input-num" inputmode="decimal" autocomplete="off" data-c="floorArea" data-id="' + esc(c.id) + '" value="' + C.fmtNum(c.floorArea) + '"></div>';
+      html += '<div class="field col-6"><label>Verification</label><select class="input" data-c="verify" data-id="' + esc(c.id) + '">' +
+        ["Unverified", "Broker-confirmed", "Portal estimate", "Registry/Deed verified"].map(v => '<option' + ((c.verify || "Unverified") === v ? " selected" : "") + '>' + v + '</option>').join("") + '</select></div>';
+      html += '<div class="field col-3"><label>Comp Lat (opt)</label><input class="input input-num" inputmode="decimal" data-c="lat" data-id="' + esc(c.id) + '" value="' + esc(c.lat || "") + '"></div>';
+      html += '<div class="field col-3"><label>Comp Lng (opt)</label><input class="input input-num" inputmode="decimal" data-c="lng" data-id="' + esc(c.id) + '" value="' + esc(c.lng || "") + '"></div>';
+      html += '<div class="field col-12"><label>Source URL / Reference (optional)</label><input class="input" data-c="srcUrl" data-id="' + esc(c.id) + '" value="' + esc(c.srcUrl || "") + '" placeholder="e.g. listing link, RD document no., broker thread"></div>';
       html += '<div class="field col-3"><label>Property Type</label><select class="input" data-c="propertyType" data-id="' + esc(c.id) + '">' + D.PROPERTY_TYPES.map(t => '<option' + (t === c.propertyType ? " selected" : "") + '>' + esc(t) + '</option>').join("") + '</select></div>';
       html += '<div class="field col-3"><label>Transaction Type</label><select class="input" data-c="transactionType" data-id="' + esc(c.id) + '">' + TRANSACTION_TYPES.map(t => '<option' + (t === c.transactionType ? " selected" : "") + '>' + esc(t) + '</option>').join("") + '</select></div>';
       html += '<div class="field col-3"><label>Data Source (required)</label><select class="input" data-c="source" data-id="' + esc(c.id) + '">' + DATA_SOURCES.map(t => '<option' + (t === c.source ? " selected" : "") + '>' + esc(t) + '</option>').join("") + '</select></div>';
@@ -4149,10 +4180,21 @@ function bindPerView() {
   }
   function incomeOutHtml(res, a) {
     if (!res.income) return '<p class="dim">Enter a cap rate to compute the value.</p>';
-    return '<div class="row spread"><span>Gross potential income</span><b>' + C.money(res.income.gpi) + '</b></div>' +
-      '<div class="row spread"><span>Effective gross income (−' + C.pct(res.income.vacancyPct / 100) + ')</span><b>' + C.money(res.income.egi) + '</b></div>' +
-      '<div class="row spread"><span>Net operating income</span><b>' + C.money(res.income.noi) + '</b></div>' +
-      '<div class="row spread"><span>Computed value (NOI ÷ ' + C.pct(res.income.capRate / 100) + ')</span><b class="accent">' + (res.income.indicated != null ? C.money(res.income.indicated) : "enter cap rate") + '</b></div>';
+    const inc = res.income;
+    let h = '<div class="row spread"><span>Gross potential income</span><b>' + C.money(inc.gpi) + '</b></div>' +
+      '<div class="row spread"><span>Effective gross income (−' + C.pct(inc.vacancyPct / 100) + ')</span><b>' + C.money(inc.egi) + '</b></div>' +
+      '<div class="row spread"><span>Net operating income</span><b>' + C.money(inc.noi) + '</b></div>' +
+      '<div class="row spread"><span>Direct capitalization (NOI ÷ ' + C.pct(inc.capRate / 100) + ')</span><b class="accent">' + (inc.indicated != null ? C.money(inc.indicated) : "enter cap rate") + '</b></div>';
+    if (inc.grmIndicated != null) h += '<div class="row spread"><span>Gross Rent Multiplier (' + C.numFmt(inc.grm) + '× annual GPI)</span><b>' + C.money(inc.grmIndicated) + '</b></div>';
+    if (inc.dcf && inc.dcf.indicated != null) {
+      const d = inc.dcf;
+      h += '<div class="row spread"><span>DCF — PV of ' + d.years + 'y NOI flows (' + C.numFmt(d.growthPct) + '% growth, ' + C.numFmt(d.discountPct) + '% discount)</span><b>' + C.money(d.pvFlows) + '</b></div>' +
+        '<div class="row spread"><span>DCF — terminal value @ ' + C.numFmt(d.exitCapPct) + '% exit cap, discounted</span><b>' + C.money(d.pvTerminal) + '</b></div>' +
+        '<div class="row spread"><span>DCF indicated value</span><b class="accent">' + C.money(d.indicated) + '</b></div>';
+    } else if ((a.income || {}).useDcf) {
+      h += '<p class="dim tiny">DCF enabled — provide discount rate &gt; 0 and NOI &gt; 0 to compute.</p>';
+    }
+    return h;
   }
 
   function apprFVBlock(a, key, liveValue) {
@@ -4215,7 +4257,15 @@ function bindPerView() {
       html += '<div class="field col-3"><label>Vacancy Loss (%)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="api-vac" value="' + C.fmtNum(inc.vacancyPct) + '"></div>';
       html += '<div class="field col-3"><label>Operating Exp. (%)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="api-opex" value="' + C.fmtNum(inc.opexPct) + '"></div>';
       html += '<div class="field col-6"><label>Capitalization Rate (%)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="api-cap" value="' + C.fmtNum(inc.capRate) + '"></div>';
+      html += '<div class="field col-6"><label>GRM — × annual gross income (optional)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="api-grm" value="' + C.fmtNum(inc.grm || 0) + '"><div class="field-hint">Gross Rent Multiplier from comparable rentals; common secondary check for small PH leases.</div></div>';
       html += '<div class="field col-12"><label>Cap Rate Derivation Note (required)</label><input class="input" id="api-capNote" placeholder="e.g. extracted from comparable sales, band-of-investment, or market surveys" value="' + esc(inc.capRateNote || "") + '"></div>';
+      html += '<div class="field col-12"><div class="row spread" style="flex-wrap:wrap;gap:10px"><label class="dim tiny">Discounted Cash Flow (multi-year)</label><label class="switch"><input type="checkbox" id="api-dcfuse"' + (inc.useDcf ? " checked" : "") + '><span>Use DCF</span></label></div></div>';
+      if (inc.useDcf) {
+        html += '<div class="field col-3"><label>Years</label><input class="input input-num" inputmode="decimal" id="api-dcfyrs" value="' + C.fmtNum(inc.dcfYears != null ? inc.dcfYears : 5) + '"></div>';
+        html += '<div class="field col-3"><label>NOI Growth %/yr</label><input class="input input-num" inputmode="decimal" id="api-g" value="' + C.fmtNum(inc.noiGrowthPct || 0) + '"></div>';
+        html += '<div class="field col-3"><label>Discount Rate %</label><input class="input input-num" inputmode="decimal" id="api-dr" value="' + C.fmtNum(inc.discountRate || 0) + '"></div>';
+        html += '<div class="field col-3"><label>Exit Cap % (blank = cap rate)</label><input class="input input-num" inputmode="decimal" id="api-exit" value="' + C.fmtNum(inc.exitCapPct || 0) + '"></div>';
+      }
       html += '</div>';
       if (res && res.income) {
         html += '<div class="mt-12" id="api-out">' + incomeOutHtml(res, a) + '</div>' + apprFVBlock(a, "income", res.income.indicated);
@@ -4253,6 +4303,17 @@ function bindPerView() {
     const res = appraisalRes();
     const rec = C.recommend(appraisalSubjectRaw(a));
     let html = '<div class="card card-pad"><h3 class="mb-16">' + icon("scale", 15) + ' Reconciliation & Final Value Opinion</h3>';
+    // Approach applicability guidance (PVS practice by property type)
+    const subjType = (appraisalSubjectRaw(a).property || {}).propertyType || "";
+    let roles;
+    if (/vacant lot|agri/i.test(subjType)) roles = { sales: "Primary", cost: "Supporting — land-only cross-check", income: "N/A unless leased" };
+    else if (/condo|house/i.test(subjType)) roles = { sales: "Primary", cost: "Secondary", income: "Optional — if rented" };
+    else if (/commercial|industrial|shop|apartment|warehouse|mixed/i.test(subjType)) roles = { sales: "Primary", cost: "Supporting", income: "Primary — if tenanted" };
+    else roles = { sales: "Primary", cost: "Supporting", income: "Supporting" };
+    html += '<div class="table-wrap mb-16"><table class="data"><tr><th>Approach Applicability <span class="dim tiny">(' + esc(subjType || "type not set") + ')</span></th><th>Role</th><th>Suggested weight</th></tr>' +
+      '<tr><td>Sales Comparison</td><td>' + roles.sales + '</td><td class="num">' + (/income-producing|tenanted/i.test(roles.income) ? "50–60%" : "60–80%") + '</td></tr>' +
+      '<tr><td>Cost Approach</td><td>' + roles.cost + '</td><td class="num">' + (/Vacant Lot/i.test(subjType) ? "0% (land only via sales)" : "20–30%") + '</td></tr>' +
+      '<tr><td>Income Capitalization</td><td>' + roles.income + '</td><td class="num">' + (/Primary/.test(roles.income) ? "40–50%" : /Optional|N\/A/.test(roles.income) ? "0–10%" : "10–20%") + '</td></tr></table></div>';
     html += '<div class="table-wrap"><table class="data"><tr><th>Approach</th><th class="num">Saved Final Value</th><th>Saved</th><th>Notes</th></tr>';
     html += '<tr><td>Sales Comparison</td><td class="num">' + (res ? (apprFV(a, "sales") != null ? C.money(apprFV(a, "sales")) : C.money(res.sales.indicated) + ' <span class="dim tiny">(live)</span>') : "—") + '</td><td class="dim tiny">' + (apprFVAt(a, "sales") ? new Date(apprFVAt(a, "sales")).toLocaleDateString() : "not saved") + '</td><td class="dim">Weighted average of adjusted comparables — save in Approaches tab</td></tr>';
     html += '<tr><td>Cost Approach</td><td class="num">' + (res ? (apprFV(a, "cost") != null ? C.money(apprFV(a, "cost")) : C.money(res.cost.indicated) + ' <span class="dim tiny">(live)</span>') : "—") + '</td><td class="dim tiny">' + (apprFVAt(a, "cost") ? new Date(apprFVAt(a, "cost")).toLocaleDateString() : "not saved") + '</td><td class="dim">Land + Replacement Cost New − Depreciation — save in Approaches tab</td></tr>';
@@ -4264,6 +4325,11 @@ function bindPerView() {
     html += '<div class="form-grid mt-16"><div class="field col-4"><label>Final Value Opinion — single (₱)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="ap-final" value="' + C.fmtNum(a.finalValue) + '"></div>';
     html += '<div class="field col-4"><label>Or range — low (₱)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="ap-final-min" value="' + C.fmtNum(a.finalMin) + '"></div>';
     html += '<div class="field col-4"><label>Range — high (₱)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="ap-final-max" value="' + C.fmtNum(a.finalMax) + '"></div></div>';
+    html += '<div class="row mt-8" style="gap:10px;flex-wrap:wrap;align-items:center"><button type="button" class="btn btn-ghost btn-sm" id="ap-round10k">' + icon("scale", 13) + ' Round values to nearest ₱10k</button><span class="dim tiny">PH report convention — final opinions are stated in rounded figures.</span></div>';
+    if (a.finalMin != null && a.finalMax != null && a.finalMin > 0 && a.finalMax > a.finalMin) {
+      const mid = (a.finalMin + a.finalMax) / 2, spread = (a.finalMax - a.finalMin) / mid;
+      if (spread > 0.25) html += '<div class="notice-banner warn mt-8">' + icon("zap", 13) + ' <span>Range spread is ' + C.pct(spread) + ' of midpoint (>25%). Re-examine weights or drop the weakest comparable before confirming.</span></div>';
+    }
     html += '<div class="row mt-16" style="gap:10px">' +
       (a.finalConfirmed
         ? '<button class="btn btn-ghost btn-sm" id="ap-unconfirm">' + icon("edit", 14) + ' Revise (unlock)</button>'
@@ -4816,6 +4882,21 @@ function bindPerView() {
     if (condEl) condEl.addEventListener("change", () => { a.cost.condRating = condEl.value; a.updatedAt = Date.now(); save(); });
     const useInc = $("#api-use");
     if (useInc) useInc.addEventListener("change", () => { a.income.useIncome = useInc.checked; save(); render(); });
+    const dcfUse = $("#api-dcfuse");
+    if (dcfUse) dcfUse.addEventListener("change", () => { a.income.useDcf = dcfUse.checked; save(); render(); });
+    const recalcIncome = () => {
+      a.income.grm = C.num(($("#api-grm") || {}).value);
+      a.income.dcfYears = C.num(($("#api-dcfyrs") || {}).value);
+      a.income.noiGrowthPct = C.num(($("#api-g") || {}).value);
+      a.income.discountRate = C.num(($("#api-dr") || {}).value);
+      a.income.exitCapPct = C.num(($("#api-exit") || {}).value);
+      a.updatedAt = Date.now();
+      save();
+      const res2 = appraisalRes();
+      const oi2 = $("#api-out");
+      if (oi2 && res2) oi2.innerHTML = incomeOutHtml(res2, a);
+    };
+    ["api-grm", "api-dcfyrs", "api-g", "api-dr", "api-exit"].forEach(id => set(id, recalcIncome));
 
     // Per-approach labeled Final Values (Approaches tab)
     ["sales", "cost", "income"].forEach(key => {
@@ -4872,6 +4953,13 @@ function bindPerView() {
     set("ap-final", e => { a.finalValue = C.num(e.target.value) || null; a.updatedAt = Date.now(); });
     set("ap-final-min", e => { a.finalMin = C.num(e.target.value) || null; a.updatedAt = Date.now(); });
     set("ap-final-max", e => { a.finalMax = C.num(e.target.value) || null; a.updatedAt = Date.now(); });
+    const roundBtn = $("#ap-round10k");
+    if (roundBtn) roundBtn.addEventListener("click", () => {
+      const r10 = v => v == null ? null : Math.round(v / 10000) * 10000;
+      a.finalValue = r10(a.finalValue); a.finalMin = r10(a.finalMin); a.finalMax = r10(a.finalMax);
+      appraisalAudit("Final value figures rounded to nearest ₱10,000.");
+      save(); render(); toast("Rounded to nearest ₱10k");
+    });
 
     // Report / certification
     const certEls = { name: "apc-name", prc: "apc-prc", ptr: "apc-ptr", date: "apc-date", valid: "apc-valid" };
