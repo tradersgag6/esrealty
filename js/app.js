@@ -8305,8 +8305,19 @@ premise: "Fee Simple / As Improved",
     arr.sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
     return arr;
   }
+  function leadFollowupState(l) {
+    if (!l.nextFollowUp || l.status === "closed" || l.status === "lost") return null;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const d = new Date(l.nextFollowUp + "T00:00:00");
+    if (isNaN(d)) return null;
+    const diff = Math.round((d - today) / 86400000);
+    if (diff < 0) return { cls: "red", label: "Overdue " + Math.abs(diff) + "d", due: true };
+    if (diff === 0) return { cls: "gold", label: "Due today", due: true };
+    return null;
+  }
   function leadCard(l) {
     const can = leadCanEdit(l);
+    const fu = leadFollowupState(l);
     return '<div class="lead-card" data-lead-open="' + esc(l.id) + '">' +
       '<div class="lead-card-top">' + leadAvatar(l.name) +
         '<div class="grow"><div class="lead-card-name">' + esc(l.name || "Unnamed") + "</div>" +
@@ -8314,6 +8325,7 @@ premise: "Fee Simple / As Improved",
         (can ? '<button class="icon-btn btn-sm" data-lead-edit="' + esc(l.id) + '" title="Edit">' + icon("edit", 13) + "</button>" : "") +
       "</div>" +
       '<div class="lead-card-meta">' +
+        (fu ? '<div style="margin-bottom:4px"><span class="badge ' + fu.cls + '">' + icon("calendar", 11) + " " + fu.label + "</span></div>" : "") +
         (l.budget || l.askingPrice || l.rentBudget ? '<div class="lead-card-budget">' + leadBudget(l) + "</div>" : "") +
         '<div class="dim tiny">' + icon("pin", 11) + " " + esc(l.source ? leadSourceLabel(l.source) : "—") + "</div>" +
       "</div>" +
@@ -8534,6 +8546,7 @@ premise: "Fee Simple / As Improved",
     const activeCount = leads.filter(l => ["contacted", "site-visit", "offer", "negotiation"].indexOf(l.status) >= 0).length;
     const wonCount = leads.filter(l => l.status === "closed").length;
     const lostCount = leads.filter(l => l.status === "lost").length;
+    const followupDue = leads.filter(l => { const s = leadFollowupState(l); return s && s.due; }).length;
     const conv = (wonCount + lostCount) > 0 ? Math.round(wonCount / (wonCount + lostCount) * 100) + "%" : "—";
     const mode = state.leadMode === "calendar" ? "calendar" : "pipeline";
     let html = '<div class="hero"><div><h1>CRM / Leads</h1><p>Track buyer and seller inquiries from first contact to closed deal.</p></div><div class="actions">' +
@@ -8546,6 +8559,7 @@ premise: "Fee Simple / As Improved",
       '<div class="ls-stat"><div class="ls-stat-v">' + activeCount + '</div><div class="ls-stat-l dim">In pipeline</div></div>' +
       '<div class="ls-stat"><div class="ls-stat-v">' + wonCount + '</div><div class="ls-stat-l dim">Closed / won</div></div>' +
       '<div class="ls-stat"><div class="ls-stat-v">' + lostCount + '</div><div class="ls-stat-l dim">Lost</div></div>' +
+      '<div class="ls-stat"><div class="ls-stat-v"' + (followupDue > 0 ? ' style="color:var(--red,#e05252)"' : "") + '>' + followupDue + '</div><div class="ls-stat-l dim">Follow-ups due</div></div>' +
       '<div class="ls-stat"><div class="ls-stat-v">' + conv + '</div><div class="ls-stat-l dim">Conversion</div></div>' +
       "</div>";
     html += leadBrokerPanel();
@@ -8578,7 +8592,8 @@ premise: "Fee Simple / As Improved",
        '<div class="actions">' +
        (can ? '<button class="btn btn-ghost btn-sm" data-lead-edit="' + esc(l.id) + '">' + icon("edit", 14) + " Edit</button>" : "") +
        (can ? '<button class="btn btn-ghost btn-sm" data-lead-visit="' + esc(l.id) + '">' + icon("calendar", 14) + " Schedule Viewing</button>" : "") +
-       (can && l.status !== "closed" && l.status !== "lost" ? '<button class="btn btn-ghost btn-sm" data-lead-advance="' + esc(l.id) + '">' + icon("arrow", 14) + " Advance</button>" : "") +
+      (can && l.status !== "closed" && l.status !== "lost" ? '<button class="btn btn-ghost btn-sm" data-lead-advance="' + esc(l.id) + '">' + icon("arrow", 14) + " Advance</button>" : "") +
+      (can && l.status !== "closed" && l.status !== "lost" ? '<button class="btn btn-ghost btn-sm" data-lead-lost="' + esc(l.id) + '">' + icon("trash", 14) + " Mark Lost</button>" : "") +
       (can ? '<button class="btn btn-ghost btn-sm" data-lead-del="' + esc(l.id) + '">' + icon("trash", 14) + " Delete</button>" : "") +
       "</div></div>";
     html += '<div class="grid grid-3 mb-24">';
@@ -8791,6 +8806,8 @@ premise: "Fee Simple / As Improved",
         if (nw) { openLeadEditor(); return; }
         const adv = e.target.closest("[data-lead-advance]");
         if (adv) { leadAdvance(adv.getAttribute("data-lead-advance")); return; }
+        const lostB = e.target.closest("[data-lead-lost]");
+        if (lostB) { leadSetStatus(lostB.getAttribute("data-lead-lost"), "lost"); return; }
         const del = e.target.closest("[data-lead-del]");
         if (del) { leadDelete(del.getAttribute("data-lead-del")); return; }
         const act = e.target.closest("[data-lead-act]");
