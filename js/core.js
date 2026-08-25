@@ -652,15 +652,21 @@
 
     const c = engagement.cost || {};
     const constType = (raw.building || {}).constructionType || "CHB / Masonry";
-    const defaultRcn = D.CONSTRUCTION_COST[constType] || 15000;
+    const defaultRcn = D.CONSTRUCTION_COST[constType] || 25000;
     const landValuePerSqm = num(c.landValuePerSqm, 0) || (subjectArea > 0 ? salesIndicated / subjectArea : 0);
     const landValue = landValuePerSqm * subjectArea;
     const bldgArea = num(c.bldgArea, subjectArea);
     const rcnPerSqm = num(c.rcnPerSqm, defaultRcn);
     const rcn = rcnPerSqm * bldgArea;
+    const softCostsPct = num(c.softCostsPct, 10);
+    const softCosts = rcn * softCostsPct / 100;           // permits, design, supervision
+    const siteImprovements = num(c.siteImprovements, 0);  // fence, gate, septic, paving
+    const incentivePct = num(c.incentivePct, 0);          // entrepreneurial incentive
+    const incentive = (rcn + softCosts + siteImprovements) * incentivePct / 100;
+    const depBase = rcn + softCosts;                       // improvements depreciate incl. soft costs
     const depP = num(c.depPhysical, 0), depF = num(c.depFunctional, 0), depE = num(c.depEconomic, 0);
-    const depAmt = rcn * (depP + depF + depE) / 100;
-    const costIndicated = landValue + (rcn - depAmt);
+    const depAmt = depBase * (depP + depF + depE) / 100;
+    const costIndicated = landValue + depBase - depAmt + siteImprovements + incentive;
 
     const inc = engagement.income;
     let income = null;
@@ -676,9 +682,18 @@
     return {
       subjectArea,
       sales: { adjusted, weights, wAvgPsm, simpleAvgPsm, indicated: salesIndicated, bestComp },
-      cost: { landValuePerSqm, landValue, bldgArea, rcnPerSqm, rcn, depP, depF, depE, depAmt, indicated: costIndicated },
+      cost: { landValuePerSqm, landValue, bldgArea, rcnPerSqm, rcn, softCostsPct, softCosts, siteImprovements, incentivePct, incentive, depBase, depP, depF, depE, depAmt, indicated: costIndicated },
       income
     };
+  }
+
+  // Straight-line (assessor-style) physical depreciation % from effective age / economic life,
+  // scaled by observed condition and capped at 90%.
+  function depreciationSuggest(effectiveAge, econLife, condRating) {
+    const EA = num(effectiveAge, 0), EL = Math.max(1, num(econLife, 50));
+    const factors = { "Excellent": 0.6, "Good": 0.85, "Average": 1.0, "Fair": 1.2, "Poor": 1.4, "Dilapidated": 1.6 };
+    const f = factors[condRating] != null ? factors[condRating] : 1.0;
+    return clamp((EA / EL) * 100 * f, 0, 90);
   }
 
   function appraisalReconcileDraft(res, engagement) {
@@ -741,6 +756,6 @@
     model, SCENARIOS, buildScenario, buildAllScenarios,
     locationAnalysis, riskAnalysis, highestBestUse, recommend, assistantAnswer,
     APPRAISAL_ELEMENTS, appraisalSuggestAdjustments, appraisalCompute,
-    appraisalReconcileDraft, appraisalNarrative, phTaxes, collateralValue
+    appraisalReconcileDraft, appraisalNarrative, phTaxes, collateralValue, depreciationSuggest
   };
 })();

@@ -172,10 +172,16 @@
   // BIR zonal multiplier relative to market benchmark (approximate)
   const BIR_ZONAL_RATIO = 0.42;
 
-  // Construction cost per sqm by construction type (₱)
+  // Construction cost per sqm by construction type (₱, 2026 PH mid-range)
+  const CONSTRUCTION_BASE_YEAR = 2026;
   const CONSTRUCTION_COST = {
-    "Wood": 8000, "Mixed": 12000, "CHB / Masonry": 15000, "Reinforced Concrete": 18000,
-    "Steel": 22000, "Prefabricated": 14000
+    "Wood": 16000, "Mixed": 20000, "CHB / Masonry": 25000, "Reinforced Concrete": 32000,
+    "Steel": 26000, "Prefabricated": 22000
+  };
+  // Typical economic life in years used by PH assessors / PVS practice for straight-line depreciation
+  const CONSTRUCTION_ECON_LIFE = {
+    "Wood": 30, "Mixed": 45, "CHB / Masonry": 50, "Reinforced Concrete": 70,
+    "Steel": 55, "Prefabricated": 35
   };
 
   // Development types
@@ -235,7 +241,7 @@
   window.ESREALTY = window.ESREALTY || {};
   window.ESREALTY.data = {
     PH_REGIONS, CITY_BENCHMARKS, DEFAULT_BENCHMARK, BIR_ZONAL_RATIO,
-    CONSTRUCTION_COST, DEV_TYPES, PROPERTY_TYPES, AMENITIES, UTILITIES,
+    CONSTRUCTION_COST, CONSTRUCTION_ECON_LIFE, CONSTRUCTION_BASE_YEAR, DEV_TYPES, PROPERTY_TYPES, AMENITIES, UTILITIES,
     NEARBY_TYPES, IRR_TOL, benchmarkFor, coordsFor, regionNames, provincesFor, citiesFor
   };
 })();

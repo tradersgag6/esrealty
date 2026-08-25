@@ -3709,10 +3709,13 @@ function bindPerView() {
       scopeOfWork: "",
       comparables: [],
       adjustments: [],
-      cost: { landValuePerSqm: 0, rcnPerSqm: (D.CONSTRUCTION_COST[bldgType] || 15000), bldgArea: 0, depPhysical: 0, depFunctional: 0, depEconomic: 0, depNote: "" },
-      income: { useIncome: false, gpi: 0, vacancyPct: 5, opexPct: 25, capRate: 0, capRateNote: "",       useDcf: false },
+      cost: { landValuePerSqm: 0, rcnPerSqm: (D.CONSTRUCTION_COST[bldgType] || 25000), bldgArea: 0, depPhysical: 0, depFunctional: 0, depEconomic: 0, depNote: "", softCostsPct: 10, siteImprovements: 0, incentivePct: 0, bldgAge: 0, econLife: (D.CONSTRUCTION_ECON_LIFE[bldgType] || 50), condRating: "Average" },
+      income: { useIncome: false, gpi: 0, vacancyPct: 5, opexPct: 25, capRate: 0, capRateNote: "", useDcf: false },
       tax: { sellingPrice: 0, zonalPsm: 0, smvPsm: 0, assessLevel: 20 },
       collateral: { haircutPct: 40 },
+      inspection: { date: "", inspectedBy: "" },
+      exposurePeriod: "",
+      premise: "Fee Simple / As Improved",
       approachResults: {
         sales: { finalValue: null, at: null },
         cost: { finalValue: null, at: null },
@@ -3722,7 +3725,7 @@ function bindPerView() {
       reconciliationNotes: "",
       finalValue: null, finalMin: null, finalMax: null,
       finalConfirmed: false, confirmedBy: null, confirmedAt: null,
-      cert: { appraiserName: "", prcNo: "", ptrNo: "", date: "", eSignature: false },
+      cert: { appraiserName: "", prcNo: "", ptrNo: "", date: "", eSignature: false, prcValidity: "" },
       auditLog: [],
       createdAt: Date.now(), updatedAt: Date.now()
     };
@@ -3744,11 +3747,14 @@ function bindPerView() {
     a.finalConfirmed = a.finalConfirmed || false;
     a.confirmedBy = a.confirmedBy || null;
     a.confirmedAt = a.confirmedAt || null;
-    a.cert = Object.assign({ appraiserName: "", prcNo: "", ptrNo: "", date: "", eSignature: false }, a.cert || {});
+    a.cert = Object.assign({ appraiserName: "", prcNo: "", ptrNo: "", date: "", eSignature: false, prcValidity: "" }, a.cert || {});
     a.income = Object.assign({ useIncome: false, gpi: 0, vacancyPct: 5, opexPct: 25, capRate: 0, capRateNote: "", useDcf: false }, a.income || {});
-    a.cost = Object.assign({ landValuePerSqm: 0, rcnPerSqm: 15000, bldgArea: 0, depPhysical: 0, depFunctional: 0, depEconomic: 0, depNote: "" }, a.cost || {});
+    a.cost = Object.assign({ landValuePerSqm: 0, rcnPerSqm: 25000, bldgArea: 0, depPhysical: 0, depFunctional: 0, depEconomic: 0, depNote: "", softCostsPct: 10, siteImprovements: 0, incentivePct: 0, bldgAge: 0, econLife: 50, condRating: "Average" }, a.cost || {});
     a.tax = Object.assign({ sellingPrice: 0, zonalPsm: 0, smvPsm: 0, assessLevel: 20 }, a.tax || {});
     a.collateral = Object.assign({ haircutPct: 40 }, a.collateral || {});
+    a.inspection = Object.assign({ date: "", inspectedBy: "" }, a.inspection || {});
+    if (typeof a.exposurePeriod !== "string") a.exposurePeriod = "";
+    if (typeof a.premise !== "string" || !a.premise) a.premise = "Fee Simple / As Improved";
     a.approachResults = a.approachResults || { sales: { finalValue: null, at: null }, cost: { finalValue: null, at: null }, income: { finalValue: null, at: null } };
     ["sales", "cost", "income"].forEach(k => {
       if (!a.approachResults[k] || typeof a.approachResults[k].finalValue === "undefined") a.approachResults[k] = { finalValue: null, at: null };
@@ -3959,6 +3965,13 @@ function bindPerView() {
       '<div class="field col-3"><label>Assessment Level %</label><input class="input input-num" id="ap-al" data-num value="' + esc(a.tax.assessLevel != null ? a.tax.assessLevel : 20) + '" placeholder="20"></div>' +
       '<div class="field col-3"><label>Collateral Haircut %</label><input class="input input-num" id="ap-haircut" data-num value="' + esc(a.collateral.haircutPct != null ? a.collateral.haircutPct : 40) + '" placeholder="40"><div class="field-hint">Forced/Mortgage Value = MV × (1 − haircut). PH banks commonly lend on 60–70% of MV.</div></div>' +
       '</div></div>';
+    html += '<div class="card card-pad mt-16"><h3 class="mb-16">' + icon("shield", 15) + ' Inspection, Premise &amp; Exposure <span class="badge blue">RESA / PVS</span></h3><div class="form-grid">' +
+      '<div class="field col-4"><label>Premise of Value</label><select class="input" id="ap-premise">' +
+      ["Fee Simple / As Improved", "Fee Simple / As Vacant", "Leasehold Interest", "Subject to Existing Tenancy", "As-Is", "Prospective — Upon Completion", "Hypothetical Condition"].map(x => '<option' + ((a.premise || "Fee Simple / As Improved") === x ? " selected" : "") + '>' + esc(x) + '</option>').join("") + '</select></div>' +
+      '<div class="field col-2"><label>Date of Inspection</label><input class="input" type="date" id="ap-inspdate" value="' + esc((a.inspection || {}).date || "") + '"></div>' +
+      '<div class="field col-3"><label>Inspected By</label><input class="input" id="ap-inspby" value="' + esc((a.inspection || {}).inspectedBy || "") + '" placeholder="Name / role"></div>' +
+      '<div class="field col-3"><label>Exposure / Marketing Period</label><input class="input" id="ap-exposure" value="' + esc(a.exposurePeriod || "") + '" placeholder="e.g. 90–120 days at market terms"></div>' +
+      '</div></div>';
     html += '<div class="card card-pad mt-16"><h3 class="mb-16">' + icon("camera", 15) + ' Subject Photos <span class="badge blue">' + (a.photos || []).length + '</span></h3>' +
       '<p class="dim tiny">Attach photos of the property. They are stored locally with the appraisal and embedded in the report Addenda. Use one as the cover.</p>' +
       apprPhotosHtml(a) + '</div>';
@@ -4125,10 +4138,14 @@ function bindPerView() {
   }
 
   function costOutHtml(res) {
-    return '<div class="row spread"><span>Land value (' + C.money(res.cost.landValuePerSqm) + '/sqm × ' + C.numFmt(res.subjectArea) + ')</span><b>' + C.money(res.cost.landValue) + '</b></div>' +
-      '<div class="row spread"><span>Replacement cost new (' + C.money(res.cost.rcnPerSqm) + '/sqm × ' + C.numFmt(res.cost.bldgArea) + ')</span><b>' + C.money(res.cost.rcn) + '</b></div>' +
-      '<div class="row spread"><span>Total depreciation (' + C.pct((res.cost.depP + res.cost.depF + res.cost.depE) / 100) + ')</span><b>−' + C.money(res.cost.depAmt) + '</b></div>' +
-      '<div class="row spread"><span>Computed value</span><b class="accent">' + C.money(res.cost.indicated) + '</b></div>';
+    const c = res.cost;
+    return '<div class="row spread"><span>Land value (' + C.money(c.landValuePerSqm) + '/sqm × ' + C.numFmt(res.subjectArea) + ')</span><b>' + C.money(c.landValue) + '</b></div>' +
+      '<div class="row spread"><span>Replacement cost new (' + C.money(c.rcnPerSqm) + '/sqm × ' + C.numFmt(c.bldgArea) + ')</span><b>' + C.money(c.rcn) + '</b></div>' +
+      '<div class="row spread"><span>Soft costs — permits/design/supervision (' + C.pct((c.softCostsPct != null ? c.softCostsPct : 10) / 100) + ')</span><b>' + C.money(c.softCosts || 0) + '</b></div>' +
+      '<div class="row spread"><span>Site improvements</span><b>' + C.money(c.siteImprovements || 0) + '</b></div>' +
+      '<div class="row spread"><span>Entrepreneurial incentive (' + C.pct((c.incentivePct || 0) / 100) + ')</span><b>' + C.money(c.incentive || 0) + '</b></div>' +
+      '<div class="row spread"><span>Total depreciation on improvements (' + C.pct((c.depP + c.depF + c.depE) / 100) + ' of ' + C.money(c.depBase || c.rcn) + ')</span><b>−' + C.money(c.depAmt) + '</b></div>' +
+      '<div class="row spread"><span>Computed value — Cost Approach</span><b class="accent">' + C.money(c.indicated) + '</b></div>';
   }
   function incomeOutHtml(res, a) {
     if (!res.income) return '<p class="dim">Enter a cap rate to compute the value.</p>';
@@ -4174,11 +4191,17 @@ function bindPerView() {
     html += '</div>';
     html += '<div class="card card-pad"><h3 class="mb-8">' + icon("layers", 15) + ' Cost Approach</h3><div class="form-grid">';
     html += '<div class="field col-6"><label>Land Value (₱/sqm)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="apc-land" value="' + C.fmtNum(c.landValuePerSqm) + '"></div>';
-    html += '<div class="field col-6"><label>Replacement Cost New (₱/sqm)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="apc-rcn" value="' + C.fmtNum(c.rcnPerSqm) + '"><div class="field-hint">Default: ' + C.money(D.CONSTRUCTION_COST[bldgType] || 15000) + '/sqm (' + esc(bldgType) + ')</div></div>';
+    html += '<div class="field col-6"><label>Replacement Cost New (₱/sqm)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="apc-rcn" value="' + C.fmtNum(c.rcnPerSqm) + '"><div class="field-hint">Default: ' + C.money(D.CONSTRUCTION_COST[bldgType] || 25000) + '/sqm (' + esc(bldgType) + ', ' + (D.CONSTRUCTION_BASE_YEAR || 2026) + ' PH mid-range). Adjust to your QS estimate.</div></div>';
     html += '<div class="field col-6"><label>Building Area (sqm)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="apc-bldg" value="' + C.fmtNum(c.bldgArea) + '"></div>';
     html += '<div class="field col-3"><label>Phys. Dep. (%)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="apc-depP" value="' + C.fmtNum(c.depPhysical) + '"></div>';
     html += '<div class="field col-3"><label>Func. Dep. (%)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="apc-depF" value="' + C.fmtNum(c.depFunctional) + '"></div>';
     html += '<div class="field col-3"><label>Econ. Dep. (%)</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="apc-depE" value="' + C.fmtNum(c.depEconomic) + '"></div>';
+    html += '<div class="field col-3"><label>Soft Costs %</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="apc-soft" value="' + C.fmtNum(c.softCostsPct != null ? c.softCostsPct : 10) + '"><div class="field-hint">Permits, design, supervision (PH typical 8–12%).</div></div>';
+    html += '<div class="field col-3"><label>Site Improvements ₱</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="apc-site" value="' + C.fmtNum(c.siteImprovements || 0) + '"><div class="field-hint">Fence, gate, septic, paving.</div></div>';
+    html += '<div class="field col-3"><label>Entrep. Incentive %</label><input class="input input-num" inputmode="decimal" autocomplete="off" id="apc-inc" value="' + C.fmtNum(c.incentivePct != null ? c.incentivePct : 0) + '"></div>';
+    html += '<div class="field col-3"><label>Effective Age / Econ. Life (yrs)</label><div class="row" style="gap:6px"><input class="input input-num" inputmode="decimal" id="apc-age" value="' + C.fmtNum(c.bldgAge || 0) + '"><span class="dim">/</span><input class="input input-num" inputmode="decimal" id="apc-el" value="' + C.fmtNum(c.econLife != null ? c.econLife : 50) + '"></div></div>';
+    html += '<div class="field col-3"><label>Observed Condition</label><select class="input" id="apc-cond">' + ["Excellent", "Good", "Average", "Fair", "Poor", "Dilapidated"].map(x => '<option' + ((c.condRating || "Average") === x ? " selected" : "") + '>' + x + '</option>').join("") + '</select></div>';
+    html += '<div class="field col-6"><button type="button" class="btn btn-ghost btn-sm" id="apc-depsuggest">' + icon("spark", 13) + ' Suggest Physical Dep. % (EA/EL × condition)</button></div>';
     html += '<div class="field col-12"><label>Depreciation Note</label><input class="input" id="apc-depNote" value="' + esc(c.depNote || "") + '"></div>';
     html += '</div>';
     if (res) {
@@ -4298,6 +4321,7 @@ function bindPerView() {
     html += '<div class="form-grid mt-16"><div class="field col-3"><label>Appraiser Name</label><input class="input" id="apc-name" value="' + esc(a.cert.appraiserName || "") + '" placeholder="PRC-licensed appraiser"></div>';
     html += '<div class="field col-3"><label>PRC License No.</label><input class="input" id="apc-prc" value="' + esc(a.cert.prcNo || "") + '"></div>';
     html += '<div class="field col-3"><label>PTR No.</label><input class="input" id="apc-ptr" value="' + esc(a.cert.ptrNo || "") + '"></div>';
+    html += '<div class="field col-3"><label>PRC Validity Until</label><input class="input" type="date" id="apc-valid" value="' + esc(a.cert.prcValidity || "") + '"></div>';
     html += '<div class="field col-3"><label>Sign-off Date</label><input class="input" type="date" id="apc-date" value="' + esc(a.cert.date || "") + '"></div></div>';
     html += '<p class="dim tiny mt-8">These fields are left blank for manual sign-off — never auto-filled. Certification requires the appraisal name, a confirmed final value opinion, and the certification fields above.</p>';
     html += '<div class="row mt-16" style="gap:10px;flex-wrap:wrap">' +
@@ -4435,8 +4459,11 @@ function bindPerView() {
     const locTxt = (prop.address ? [prop.address, prop.province].filter(Boolean).join(", ") : [prop.barangay, prop.city, prop.province].filter(Boolean).join(", ")) || "—";
     const meta = [
       ["Client / Subject", prop.name || "Untitled Property"], ["Appraisal", a.name && a.name.trim() ? a.name : "(not named)"], ["Property Location", locTxt],
-      ["Purpose of Valuation", a.purpose], ["Basis of Value", a.basisOfValue],
-      ["Effective Date of Valuation", a.effectiveDate], ["Report Issue Date", new Date().toLocaleDateString()],
+      ["Purpose of Valuation", a.purpose], ["Basis of Value", a.basisOfValue], ["Premise of Value", esc(a.premise || "Fee Simple / As Improved")],
+      ["Effective Date of Valuation", a.effectiveDate],
+      ["Date of Inspection", (a.inspection && a.inspection.date) ? esc(a.inspection.date) + ((a.inspection.inspectedBy) ? " · by " + esc(a.inspection.inspectedBy) : "") : "Desk review — no site inspection recorded"],
+      ["Exposure / Marketing Period", esc(a.exposurePeriod || "Not stated — appraiser to conclude (PH practice: 90–180 days for typical residential).")],
+      ["Report Issue Date", new Date().toLocaleDateString()],
       ["Status", a.status]
     ];
     const r = s => "<tr><td><b>" + s[0] + "</b></td><td>" + s[1] + "</td></tr>";
@@ -4485,7 +4512,11 @@ function bindPerView() {
       "<p><b>Final Value — Sales Comparison Approach:</b> " + (comps.length ? apprFVLabel(a, "sales", res.sales.indicated) : "—") + "</p>" +
       (res ? chartCompPsm(res, raw) : "") +
       "<h3>Cost Approach</h3>" + (res ? "<table>" + r(["Land Value", C.money(res.cost.landValue) + " (" + C.money(res.cost.landValuePerSqm) + "/sqm)"]) +
-      r(["Replacement Cost New", C.money(res.cost.rcn)]) + r(["Less: Total Depreciation", "−" + C.money(res.cost.depAmt) + " (" + C.pct((res.cost.depP + res.cost.depF + res.cost.depE) / 100) + ")"]) +
+      r(["Replacement Cost New", C.money(res.cost.rcn) + " (" + C.money(res.cost.rcnPerSqm) + "/sqm × " + C.numFmt(res.cost.bldgArea) + ")"]) +
+      r(["Soft Costs (permits, design, supervision)", C.money(res.cost.softCosts || 0) + " (" + C.pct(((res.cost.softCostsPct != null ? res.cost.softCostsPct : 10)) / 100) + ")"]) +
+      r(["Site Improvements", C.money(res.cost.siteImprovements || 0)]) +
+      r(["Entrepreneurial Incentive", C.money(res.cost.incentive || 0) + " (" + C.pct((res.cost.incentivePct || 0) / 100) + ")"]) +
+      r(["Less: Total Depreciation on Improvements", "−" + C.money(res.cost.depAmt) + " (" + C.pct((res.cost.depP + res.cost.depF + res.cost.depE) / 100) + " of " + C.money(res.cost.depBase || res.cost.rcn) + ((a.cost.bldgAge > 0) ? "; EA/EL method: " + C.numFmt(a.cost.bldgAge) + "/" + C.numFmt(a.cost.econLife) + " yrs, " + esc(a.cost.condRating || "Average") : "") + ")"]) +
       r(["Computed Value — Cost", C.money(res.cost.indicated)]) + r(["Final Value — Cost Approach", apprFVLabel(a, "cost", res.cost.indicated)]) + "</table>" + chartDep(res) : "<p>Cost approach could not be computed.</p>") +
       "<h3>Income Capitalization Approach</h3>" + (res && res.income ? "<table>" + r(["Gross Potential Income", C.money(res.income.gpi)]) + r(["Effective Gross Income", C.money(res.income.egi)]) + r(["Net Operating Income", C.money(res.income.noi)]) + r(["Capitalization Rate", C.pct(res.income.capRate / 100) + " (" + esc((a.income && a.income.capRateNote) || "note not provided") + ")"]) + r(["Computed Value — Income", res.income.indicated != null ? C.money(res.income.indicated) : "—"]) + r(["Final Value — Income Capitalization Approach", apprFVLabel(a, "income", res.income.indicated)]) + "</table>" : "<p>Not applied — property not flagged as income-producing.</p>") });
 
@@ -4498,7 +4529,7 @@ function bindPerView() {
     sections.push({ title: "8. Assumptions & Limiting Conditions", html: "<ul><li>This report is a computer-assisted draft valuation prepared for professional review.</li><li>It is not a certified appraisal until reviewed and signed by a PRC-licensed Real Estate Appraiser under RA 9646.</li><li>Extraordinary assumptions: " + esc(a.extraordinaryAssumptions || "None") + "</li><li>Information relied upon is assumed accurate but not warranted; appraiser to verify.</li><li>Market data reflects the effective date of valuation.</li></ul>" });
 
     sections.push({ title: "9. Certification", html: "I certify that, to the best of my knowledge and belief: the statements of fact are true and correct; the reported analyses, opinions, and conclusions are limited only by the reported assumptions and limiting conditions; and I have no present or prospective interest in the subject property, except as disclosed. I am competent to prepare this appraisal and hold the professional credentials below." +
-      "<div class='sig-block' style='margin-top:18px'><div style='width:45%'><div style='height:54px'></div><div style='border-top:1px solid #16202E;padding-top:4px'>Signature (manual / e-signature)</div></div><div style='width:50%'><div style='margin-bottom:6px'><b>Appraiser:</b> " + esc(a.cert.appraiserName || "_______________________") + "</div><div style='margin-bottom:6px'><b>PRC License No.:</b> " + esc(a.cert.prcNo || "_______________________") + "</div><div style='margin-bottom:6px'><b>PTR No.:</b> " + esc(a.cert.ptrNo || "_______________________") + "</div><div><b>Date:</b> " + esc(a.cert.date || "_______________________") + "</div></div></div>" +
+      "<div class='sig-block' style='margin-top:18px'><div style='width:45%'><div style='height:54px'></div><div style='border-top:1px solid #16202E;padding-top:4px'>Signature (manual / e-signature)</div></div><div style='width:50%'><div style='margin-bottom:6px'><b>Appraiser:</b> " + esc(a.cert.appraiserName || "_______________________") + "</div><div style='margin-bottom:6px'><b>PRC License No.:</b> " + esc(a.cert.prcNo || "_______________________") + "</div><div style='margin-bottom:6px'><b>PRC Validity Until:</b> " + esc(a.cert.prcValidity || "_______________________") + "</div><div style='margin-bottom:6px'><b>PTR No.:</b> " + esc(a.cert.ptrNo || "_______________________") + "</div><div><b>Date:</b> " + esc(a.cert.date || "_______________________") + "</div></div></div>" +
       (a.finalConfirmed ? "<p style='font-size:10px;color:#98A5B8'>Final value opinion confirmed by " + esc(a.confirmedBy) + " on " + new Date(a.confirmedAt).toLocaleString() + ".</p>" : "") });
 
     const photos = a.photos || [];
@@ -4572,6 +4603,11 @@ function bindPerView() {
     numSet("ap-smv", v => { a.tax.smvPsm = v; });
     numSet("ap-al", v => { a.tax.assessLevel = v; });
     numSet("ap-haircut", v => { a.collateral.haircutPct = v; });
+    const premEl = $("#ap-premise");
+    if (premEl) premEl.addEventListener("change", e => { a.premise = e.target.value; a.updatedAt = Date.now(); save(); });
+    set("ap-inspdate", e => { a.inspection.date = e.target.value; a.updatedAt = Date.now(); });
+    set("ap-inspby", e => { a.inspection.inspectedBy = e.target.value; a.updatedAt = Date.now(); });
+    set("ap-exposure", e => { a.exposurePeriod = e.target.value; a.updatedAt = Date.now(); });
 
     $$("#content [data-c]").forEach(el => {
       const id = el.getAttribute("data-id"), key = el.getAttribute("data-c");
@@ -4745,6 +4781,12 @@ function bindPerView() {
       a.cost.depPhysical = C.num(($("#apc-depP") || {}).value);
       a.cost.depFunctional = C.num(($("#apc-depF") || {}).value);
       a.cost.depEconomic = C.num(($("#apc-depE") || {}).value);
+      a.cost.softCostsPct = C.num(($("#apc-soft") || {}).value);
+      a.cost.siteImprovements = C.num(($("#apc-site") || {}).value);
+      a.cost.incentivePct = C.num(($("#apc-inc") || {}).value);
+      a.cost.bldgAge = C.num(($("#apc-age") || {}).value);
+      a.cost.econLife = C.num(($("#apc-el") || {}).value) || 50;
+      a.cost.condRating = (($("#apc-cond") || {}).value) || "Average";
       a.cost.depNote = ($("#apc-depNote") || {}).value || "";
       a.income.gpi = C.num(($("#api-gpi") || {}).value);
       a.income.vacancyPct = C.num(($("#api-vac") || {}).value);
@@ -4759,7 +4801,19 @@ function bindPerView() {
       const oi = $("#api-out");
       if (oi && res) oi.innerHTML = incomeOutHtml(res, a);
     };
-    ["apc-land", "apc-rcn", "apc-bldg", "apc-depP", "apc-depF", "apc-depE", "apc-depNote", "api-gpi", "api-vac", "api-opex", "api-cap", "api-capNote"].forEach(id => set(id, recalcApproaches));
+    ["apc-land", "apc-rcn", "apc-bldg", "apc-depP", "apc-depF", "apc-depE", "apc-depNote", "apc-soft", "apc-site", "apc-inc", "apc-age", "apc-el", "api-gpi", "api-vac", "api-opex", "api-cap", "api-capNote"].forEach(id => set(id, recalcApproaches));
+    const depSug = $("#apc-depsuggest");
+    if (depSug) depSug.addEventListener("click", () => {
+      const pct = C.depreciationSuggest(a.cost.bldgAge, a.cost.econLife, a.cost.condRating);
+      const inp = $("#apc-depP");
+      a.cost.depPhysical = Math.round(pct * 10) / 10;
+      if (inp) inp.value = a.cost.depPhysical;
+      appraisalAudit("Physical depreciation suggested: EA " + a.cost.bldgAge + " / EL " + a.cost.econLife + " (" + a.cost.condRating + ") → " + a.cost.depPhysical + "%.");
+      save(); recalcApproaches();
+      toast("Suggested physical depreciation: <b>" + a.cost.depPhysical + "%</b>");
+    });
+    const condEl = $("#apc-cond");
+    if (condEl) condEl.addEventListener("change", () => { a.cost.condRating = condEl.value; a.updatedAt = Date.now(); save(); });
     const useInc = $("#api-use");
     if (useInc) useInc.addEventListener("change", () => { a.income.useIncome = useInc.checked; save(); render(); });
 
@@ -4820,8 +4874,8 @@ function bindPerView() {
     set("ap-final-max", e => { a.finalMax = C.num(e.target.value) || null; a.updatedAt = Date.now(); });
 
     // Report / certification
-    const certEls = { name: "apc-name", prc: "apc-prc", ptr: "apc-ptr", date: "apc-date" };
-    Object.keys(certEls).forEach(k => set(certEls[k], e => { a.cert[k === "name" ? "appraiserName" : k === "prc" ? "prcNo" : k === "ptr" ? "ptrNo" : "date"] = e.target.value; a.updatedAt = Date.now(); }));
+    const certEls = { name: "apc-name", prc: "apc-prc", ptr: "apc-ptr", date: "apc-date", valid: "apc-valid" };
+    Object.keys(certEls).forEach(k => set(certEls[k], e => { a.cert[k === "name" ? "appraiserName" : k === "prc" ? "prcNo" : k === "ptr" ? "ptrNo" : k === "valid" ? "prcValidity" : "date"] = e.target.value; a.updatedAt = Date.now(); }));
     const preview = $("#ap-preview");
     if (preview) preview.addEventListener("click", printReportPDF);
     const xlsGrid = $("#ap-xls-grid");
