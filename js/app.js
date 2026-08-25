@@ -7278,7 +7278,7 @@ premise: "Fee Simple / As Improved",
     } catch (e) { /* non-fatal */ }
   }
   function ensureMarketIndex() {
-    if (window.ESREALTY_IDX) return;
+    if (window.ESREALTY_IDX !== undefined && window.ESREALTY_IDX !== null) return;
     fetch("data/market-index.json?t=" + Date.now()).then(r => { if (!r.ok) throw 0; return r.json(); })
       .then(doc => {
         const rows = [];
@@ -7293,7 +7293,10 @@ premise: "Fee Simple / As Improved",
     const cities = Array.from(new Set(rows.map(r => r.c))).sort();
     let html = '<div class="card card-pad mt-16"><h3 class="mb-8">' + icon("trending-up", 15) + ' City Price Index <span class="badge blue">₱/sqm medians</span></h3>';
     if (!cities.length) {
-      html += '<p class="dim tiny">No index snapshots yet — the daily job records portal medians per city. Run a live scan to capture the first data point.</p></div>';
+      const loading = !Array.isArray(window.ESREALTY_IDX);
+      html += '<p class="dim tiny">' + (loading
+        ? '<span class="spin"></span> Loading city index…'
+        : "No index snapshots yet — the daily job records portal medians per city. Run a live scan to capture the first data point.") + "</p></div>";
       return html;
     }
     const sel = cities.indexOf(canonCity(state.msIdxCity || "")) >= 0 ? canonCity(state.msIdxCity) : cities[cities.length - 1];
