@@ -7906,7 +7906,7 @@ premise: "Fee Simple / As Improved",
   const LEAD_TYPES = [["buyer", "Buyer"], ["seller", "Seller"], ["renter", "Renter"], ["investor", "Investor"]];
   const LEAD_STATUSES = [["new", "New", "blue"], ["contacted", "Contacted", "gold"], ["site-visit", "Site Visit", "cyan"], ["offer", "Offer Submitted", "purple"], ["negotiation", "Negotiating", "gold"], ["closed", "Closed / Won", "green"], ["lost", "Lost", "red"]];
   const CAL_EVENT_TYPES = [["showing", "Property showing", "cyan"], ["follow-up", "Lead follow-up", "blue"], ["meeting", "Client meeting", "purple"], ["offer", "Offer deadline", "gold"], ["closing", "Closing / turnover", "green"], ["documents", "Document deadline", "red"]];
-  const LEAD_SOURCES = [["listing", "Listing Inquiry"], ["referral", "Referral"], ["walk-in", "Walk-in"], ["facebook", "Facebook"], ["website", "Website"], ["market", "Market Scan"], ["other", "Other"]];
+  const LEAD_SOURCES = [["listing", "Listing Inquiry"], ["referral", "Referral"], ["walk-in", "Walk-in"], ["facebook", "Facebook"], ["website", "Website"], ["market", "Market Scan"], ["other", "Other"], ["lamudi", "Lamudi"], ["dotproperty", "DotProperty"], ["property24", "Property24"], ["carousell", "Carousell"], ["fb-marketplace", "FB Marketplace / Groups"], ["tiktok", "TikTok / YouTube Tour"], ["pagibig", "Pag-IBIG Project"], ["bank-leans", "Bank Foreclosed (LEANS)"]];
   const LEAD_PIPELINE = ["new", "contacted", "site-visit", "offer", "negotiation", "closed"];
   function leadStatusCfg(v) { return LEAD_STATUSES.find(x => x[0] === v); }
   function leadTypeLabel(v) { const f = LEAD_TYPES.find(x => x[0] === v); return f ? f[1] : (v || "—"); }
@@ -8305,8 +8305,39 @@ premise: "Fee Simple / As Improved",
     arr.sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
     return arr;
   }
-  function leadFollowupState(l) {
-    if (!l.nextFollowUp || l.status === "closed" || l.status === "lost") return null;
+  function leadConvertToTransaction(id) {
+    if (!txCanManage()) { toast("You don't have permission to create transactions", "err"); return; }
+    const l = (state.leads || []).find(x => x.id === id);
+    if (!l || l.convertedTxId) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const tx = {
+      id: "tx-" + Date.now() + "-" + Math.floor(Math.random() * 999),
+      ref: txRef(),
+      title: l.name + " — " + (l.listingTitle || l.propertyInterest || (l.type === "renter" ? "lease" : "purchase")),
+      stage: "reservation",
+      price: l.budget || l.askingPrice || 0,
+      buyerName: l.type === "seller" ? "" : l.name,
+      sellerName: l.type === "seller" ? l.name : "",
+      agentName: l.assignedTo || "",
+      reservationFee: 0, reservationDate: today,
+      dpPct: 20, dpMonths: 12, rate: 7.5, years: 15,
+      ctsDate: "", doasDate: "", transferPct: 0.5, notarialFee: 5000,
+      listingId: l.listingId || "",
+      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      createdBy: currentUser && currentUser.id
+    };
+    if (!state.transactions) state.transactions = [];
+    state.transactions.unshift(tx);
+    l.convertedTxId = tx.ref;
+    l.activity = l.activity || [];
+    l.activity.push({ date: new Date().toISOString(), text: "Converted to transaction " + tx.ref });
+    save();
+    persistTransactionToCloud(tx);
+    syncLead(l);
+    navigate("transactions");
+    toast("Transaction <b>" + esc(tx.ref) + "</b> created from lead", "ok");
+  }
+  function leadFollowupState(l) {    if (!l.nextFollowUp || l.status === "closed" || l.status === "lost") return null;
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const d = new Date(l.nextFollowUp + "T00:00:00");
     if (isNaN(d)) return null;
@@ -8579,6 +8610,26 @@ premise: "Fee Simple / As Improved",
     return html;
   }
   function leadDetailRow(k, v) { return "<tr><td>" + esc(k) + "</td><td>" + (v ? esc(String(v)) : "—") + "</td></tr>"; }
+  function leadDetailRowRaw(k, vHtml) { return "<tr><td>" + esc(k) + "</td><td>" + (vHtml || "—") + "</td></tr>"; }
+  function phNormalizeMobile(v) {
+    const d = String(v || "").replace(/[^\d+]/g, "");
+    if (/^09\d{9}$/.test(d)) return "+63" + d.slice(1);
+    if (/^\+639\d{9}$/.test(d)) return d;
+    if (/^639\d{9}$/.test(d)) return "+" + d;
+    return String(v || "").trim();
+  }
+  function phoneChatLinks(phone) {
+    const p = String(phone || "").trim();
+    if (!p) return "";
+    const digits = p.replace(/[^\d]/g, "");
+    if (!/^\d{10,15}$/.test(digits)) return esc(p);
+    const wa = "https://wa.me/" + digits;
+    const vb = "viber://chat?number=%2B" + digits;
+    return esc(p) + ' <span style="display:inline-flex;gap:6px;margin-left:6px;vertical-align:middle">' +
+      '<a class="badge blue" href="tel:+' + digits + '">Call</a>' +
+      '<a class="badge green" href="' + wa + '" target="_blank" rel="noopener">WhatsApp</a>' +
+      '<a class="badge purple" href="' + vb + '">Viber</a></span>';
+  }
   function leadActLine(a) { return '<div class="lead-act"><div class="lead-act-dot"></div><div class="grow"><div class="lead-act-text">' + esc(a.text || "") + '</div><div class="lead-act-date dim tiny">' + esc(new Date(a.date).toLocaleString()) + "</div></div></div>"; }
   function renderLeadDetail(l) {
     const can = leadCanEdit(l);
@@ -8594,6 +8645,8 @@ premise: "Fee Simple / As Improved",
        (can ? '<button class="btn btn-ghost btn-sm" data-lead-visit="' + esc(l.id) + '">' + icon("calendar", 14) + " Schedule Viewing</button>" : "") +
       (can && l.status !== "closed" && l.status !== "lost" ? '<button class="btn btn-ghost btn-sm" data-lead-advance="' + esc(l.id) + '">' + icon("arrow", 14) + " Advance</button>" : "") +
       (can && l.status !== "closed" && l.status !== "lost" ? '<button class="btn btn-ghost btn-sm" data-lead-lost="' + esc(l.id) + '">' + icon("trash", 14) + " Mark Lost</button>" : "") +
+      (can && l.status === "closed" && !l.convertedTxId ? '<button class="btn btn-primary btn-sm" data-tx-convert="' + esc(l.id) + '">' + icon("plus", 14) + " Convert to Transaction</button>" : "") +
+      (l.convertedTxId ? '<span class="badge green">Converted → ' + esc(l.convertedTxId) + "</span>" : "") +
       (can ? '<button class="btn btn-ghost btn-sm" data-lead-del="' + esc(l.id) + '">' + icon("trash", 14) + " Delete</button>" : "") +
       "</div></div>";
     html += '<div class="grid grid-3 mb-24">';
@@ -8603,11 +8656,16 @@ premise: "Fee Simple / As Improved",
       leadDetailRow("Lead Type", leadTypeLabel(l.type)) +
       leadDetailRow("Status", leadStatusCfg(l.status) ? leadStatusCfg(l.status)[1] : "—") +
       leadDetailRow("Email", l.email) +
-      leadDetailRow("Phone", l.phone) +
+      leadDetailRowRaw("Phone", phoneChatLinks(l.phone)) +
       leadDetailRow("Source", leadSourceLabel(l.source)) +
       leadDetailRow("Assigned Agent", l.assignedTo) +
       (l.type === "seller" ? leadDetailRow("Asking Price", l.askingPrice ? C.money(l.askingPrice) : "—") : (l.type === "renter" ? leadDetailRow("Rent Budget", l.rentBudget ? C.money(l.rentBudget) + "/mo" : "—") : leadDetailRow("Budget", l.budget ? C.money(l.budget) : "—"))) +
       leadDetailRow("Interested In", l.propertyInterest) +
+      leadDetailRow("Financing Mode", l.finMode ? ({ pagibig: "Pag-IBIG", bank: "Bank Loan", inhouse: "In-house", cash: "Cash" })[l.finMode] || l.finMode : "—") +
+      leadDetailRow("Income Band", l.incomeBand ? l.incomeBand.replace("<", "Below ").replace(">=", "₱").replace("-", "–") : "—") +
+      leadDetailRow("Civil Status", l.civilStatus ? l.civilStatus.charAt(0).toUpperCase() + l.civilStatus.slice(1) : "—") +
+      leadDetailRow("SPA Ready", l.spaReady ? (l.spaReady.charAt(0).toUpperCase() + l.spaReady.slice(1)) : "—") +
+      leadDetailRow("Reservation Fee", l.resFeeWilling ? (l.resFeeWilling === "maybe" ? "Maybe" : l.resFeeWilling.charAt(0).toUpperCase() + l.resFeeWilling.slice(1)) : "—") +
       leadDetailRow("Next Follow-up", l.nextFollowUp) +
       leadDetailRow("Created", new Date(l.createdAt).toLocaleDateString()) +
       "</tbody></table></div>" +
@@ -8663,6 +8721,11 @@ premise: "Fee Simple / As Improved",
         leadFld("Source", '<select class="input" id="ld-source">' + leadSelOpt(LEAD_SOURCES, l.source || "listing") + "</select>") +
         leadFld("Assigned agent", '<select class="input" id="ld-agent">' + agentOpts + "</select>") +
         leadFld("Interested in", leadTxt("ld-interest", l.propertyInterest, "e.g. 3BR house & lot, Cavite")) +
+        leadFld("Financing mode", '<select class="input" id="ld-finmode">' + leadSelOpt([["", "— Select —"], ["pagibig", "Pag-IBIG"], ["bank", "Bank Loan"], ["inhouse", "In-house"], ["cash", "Cash"]], l.finMode || "") + "</select>") +
+        leadFld("Monthly income band", '<select class="input" id="ld-income">' + leadSelOpt([["", "— Select —"], ["<30k", "Below ₱30k"], ["30-60k", "₱30–60k"], ["60-100k", "₱60–100k"], ["100-200k", "₱100–200k"], [">200k", "Above ₱200k"]], l.incomeBand || "") + "</select>") +
+        leadFld("Civil status", '<select class="input" id="ld-civil">' + leadSelOpt([["", "— Select —"], ["single", "Single"], ["married", "Married"], ["separated", "Separated"], ["annulled", "Annulled"], ["widowed", "Widowed"]], l.civilStatus || "") + "</select>") +
+        leadFld("SPA ready (if abroad)", '<select class="input" id="ld-spa">' + leadSelOpt([["", "— Select —"], ["yes", "Yes"], ["no", "No"], ["unsure", "Unsure"]], l.spaReady || "") + "</select>") +
+        leadFld("Reservation fee willing?", '<select class="input" id="ld-resfee">' + leadSelOpt([["", "— Select —"], ["yes", "Yes"], ["no", "No"], ["maybe", "Maybe"]], l.resFeeWilling || "") + "</select>") +
         leadFld("Purchase budget (₱)", leadNum("ld-budget", l.budget)) +
         leadFld("Asking price if selling (₱)", leadNum("ld-asking", l.askingPrice)) +
         leadFld("Rent budget (₱/mo)", leadNum("ld-rent", l.rentBudget)) +
@@ -8694,7 +8757,7 @@ premise: "Fee Simple / As Improved",
     rec.name = name;
     rec.type = $v("ld-type") || "buyer";
     rec.email = $v("ld-email");
-    rec.phone = $v("ld-phone");
+    rec.phone = phNormalizeMobile($v("ld-phone"));
     rec.status = $v("ld-status") || "new";
     rec.source = $v("ld-source") || "listing";
     const agentField = document.getElementById("ld-agent");
@@ -8702,6 +8765,11 @@ premise: "Fee Simple / As Improved",
     rec.assignedTo = roleIs("agent") ? ((currentUser && currentUser.name) || "").trim() : $v("ld-agent");
     rec.assignedToId = roleIs("agent") ? (currentUser && currentUser.id || "") : (agentOption && agentOption.getAttribute("data-agent-id") || "");
     rec.propertyInterest = $v("ld-interest");
+    rec.finMode = $v("ld-finmode");
+    rec.incomeBand = $v("ld-income");
+    rec.civilStatus = $v("ld-civil");
+    rec.spaReady = $v("ld-spa");
+    rec.resFeeWilling = $v("ld-resfee");
     rec.budget = $n("ld-budget");
     rec.askingPrice = $n("ld-asking");
     rec.rentBudget = $n("ld-rent");
@@ -8808,6 +8876,8 @@ premise: "Fee Simple / As Improved",
         if (adv) { leadAdvance(adv.getAttribute("data-lead-advance")); return; }
         const lostB = e.target.closest("[data-lead-lost]");
         if (lostB) { leadSetStatus(lostB.getAttribute("data-lead-lost"), "lost"); return; }
+        const conv = e.target.closest("[data-tx-convert]");
+        if (conv) { leadConvertToTransaction(conv.getAttribute("data-tx-convert")); return; }
         const del = e.target.closest("[data-lead-del]");
         if (del) { leadDelete(del.getAttribute("data-lead-del")); return; }
         const act = e.target.closest("[data-lead-act]");
