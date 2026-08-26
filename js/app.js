@@ -697,7 +697,7 @@
     if (q) units = units.filter(u => ((u.unit_no || "") + " " + (u.tower || "") + " " + (u.unit_type || "") + " " + (u.reserved_for || "")).toLowerCase().indexOf(q) !== -1);
     const c = psUnitCounts(proj.id);
     let html = '<div class="hero"><div><button class="btn btn-ghost btn-sm mb-8" data-ps-back>&larr; All Projects</button><h1>' + esc(proj.name) + "</h1><p>" + esc(proj.developer || "") + (proj.lts_no ? " · LTS " + esc(proj.lts_no) : "") + (proj.turnover_date ? " · Turnover " + esc(String(proj.turnover_date).slice(0, 10)) : "") + "</p></div>" +
-      (manage ? '<div class="actions"><button class="btn btn-primary" data-ps-add-unit="' + esc(proj.id) + '">' + icon("plus", 15) + " Add Unit</button></div>" : "") + "</div>";
+      (manage ? '<div class="actions"><button class="btn btn-primary" data-ps-add-unit="' + esc(proj.id) + '">Add Unit</button><button class="btn btn-ghost" data-ps-export="' + esc(proj.id) + '">' + icon("download", 15) + " Export CSV</button></div>" : "") + "</div>";
     html += '<div class="grid grid-4 mb-24">' +
       kpi("Total Units", c.total, "in this project", "blue", "layers") +
       kpi("Available", c.available, "open for reservation", "green", "check") +
@@ -741,6 +741,35 @@
       html += "</tr>";
     });
     html += "</table></div></div>";
+    html += psAvailabilityGridHtml(proj.id);
+    // Doc checklist + auto-sold suggestion for reserved/sold units
+    const managed = units.filter(u => u.status === "reserved" || u.status === "sold");
+    if (managed.length && manage) {
+      html += '<div class="card card-pad mt-16"><h3 class="mb-8">' + icon("doc", 15) + ' Document Checklist & Pipeline</h3>';
+      managed.forEach(u => {
+        const docs = psUnitDocChecklist(u.id);
+        const doneCount = docs.filter(d => d.done).length;
+        const allPaid = psAllPaymentsPaid(u.id);
+        const canConvert = !u.tx_ref;
+        html += '<div class="row spread mt-8" style="flex-wrap:wrap;align-items:center;gap:8px"><b>' + esc(u.unit_no || "") + '</b><span class="dim tiny">' + esc(u.reserved_for || "") + '</span>';
+        if (allPaid && u.status === "reserved") {
+          html += '<span class="badge green">All payments paid — suggest marking Sold</span>';
+          html += '<button class="btn btn-primary btn-sm" data-ps-mark="' + esc(u.id) + ':sold">Mark Sold</button>';
+        }
+        if (canConvert && txCanManage()) {
+          html += '<button class="btn btn-ghost btn-sm" data-ps-to-tx="' + esc(u.id) + '">Create Transaction</button>';
+        } else if (u.tx_ref) {
+          html += '<span class="badge blue">TX: ' + esc(u.tx_ref) + '</span>';
+        }
+        html += "</div>";
+        html += '<div class="row mt-4" style="gap:6px;flex-wrap:wrap">';
+        docs.forEach((d, i) => {
+          html += '<label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;cursor:pointer"><input type="checkbox" data-doc-check="' + esc(u.id) + '" data-doc-idx="' + i + '"' + (d.done ? " checked" : "") + '> ' + esc(d.name) + '</label>';
+        });
+        html += '<span class="dim tiny">' + doneCount + "/" + docs.length + ' documents</span></div>';
+      });
+      html += "</div>";
+    }
     return html;
   }
   async function psSaveProject(editId) {
@@ -800,7 +829,95 @@
     save(); render();
     if (psCloud()) { const r = await SB.from("presell_units").update(patch).eq("id", unitId); if (r.error) toast("Cloud update failed: " + esc(friendlyErr(r.error.message)), "err"); }
   }
+  function psAvailabilityGridHtml(projId) {
+    const units = (state.presellUnits || []).filter(u => u.project_id === projId);
+    if (!units.length) return "";
+    const colors = { available: "#22c55e", reserved: "#f59e0b", sold: "#ef4444", blocked: "#6b7280" };
+    const towers = Array.from(new Set(units.map(u => u.tower || "Main")));
+    let html = '<div class="card card-pad mt-16"><h3 class="mb-8">' + icon("layers", 15) + ' Availability Grid</h3>';
+    html += '<div class="row mb-8" style="gap:12px;flex-wrap:wrap">' +
+      Object.keys(colors).map(k => '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px"><span style="width:10px;height:10px;border-radius:2px;background:' + colors[k] + ';display:inline-block"></span> ' + k.charAt(0).toUpperCase() + k.slice(1) + '</span>').join("") + "</div>";
+    towers.forEach(tw => {
+      const towerUnits = units.filter(u => (u.tower || "Main") === tw);
+      const floors = Array.from(new Set(towerUnits.map(u => u.floor != null ? String(u.floor) : "?"))).sort((a, b) => (parseInt(b) || 0) - (parseInt(a) || 0));
+      html += '<div class="mb-12"><b class="tiny">' + esc(tw) + "</b>";
+      floors.forEach(fl => {
+        html += '<div class="row mt-4" style="gap:4px;flex-wrap:wrap;align-items:center"><span class="dim tiny" style="min-width:28px">F' + fl + '</span>';
+        towerUnits.filter(u => String(u.floor ?? "?") === fl).forEach(u => {
+          const col = colors[u.status] || colors.available;
+          html += '<a href="#" data-ps-open-unit="' + esc(u.id) + '" style="display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:28px;border-radius:5px;background:' + col + ';color:#fff;font-size:10px;font-weight:700;text-decoration:none;padding:0 4px" title="' + esc(u.unit_no || "") + ' · ' + esc(u.status || "") + '">' + esc(u.unit_no || "?") + '</a>';
+        });
+        html += "</div>";
+      });
+      html += "</div>";
+    });
+    return html + "</div>";
+  }
+  function psUnitDocChecklist(unitId) {
+    const u = (state.presellUnits || []).find(x => x.id === unitId);
+    if (!u) return [];
+    if (!Array.isArray(u.doc_checklist)) {
+      u.doc_checklist = ["Reservation Agreement", "Contract to Sell", "Deed of Absolute Sale", "Title Transfer"].map(n => ({ name: n, done: false }));
+    }
+    return u.doc_checklist;
+  }
+  function psAllPaymentsPaid(unitId) {
+    const rows = psScheduleRows(unitId);
+    return rows.length > 0 && rows.every(r => r.status === "paid" || r.status === "waived");
+  }
+  function psConvertToTransaction(unitId) {
+    if (!txCanManage()) { toast("You don't have permission to create transactions", "err"); return; }
+    const u = (state.presellUnits || []).find(x => x.id === unitId);
+    if (!u || u.tx_ref) return;
+    const proj = psProject(u.project_id) || {};
+    const today = new Date().toISOString().slice(0, 10);
+    const tx = {
+      id: "tx-" + Date.now() + "-" + Math.floor(Math.random() * 999),
+      ref: txRef(),
+      title: (u.reserved_for || u.unit_no) + " — " + (proj.name || "") + " Unit " + (u.unit_no || ""),
+      stage: u.status === "sold" ? "cts" : "reservation",
+      price: Number(u.price || u.total_contract_price || 0),
+      buyerName: u.reserved_for || "",
+      sellerName: proj.developer || "",
+      reservationFee: Number(u.reservation_fee || 0),
+      reservationDate: today,
+      dpPct: 20, dpMonths: Number(u.downpayment_months || 24),
+      rate: Number(u.loan_rate_annual || 7.5), years: Number(u.loan_term_years || 15),
+      listingId: "", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      createdBy: currentUser && currentUser.id
+    };
+    if (!state.transactions) state.transactions = [];
+    state.transactions.unshift(tx);
+    u.tx_ref = tx.ref;
+    save();
+    persistTransactionToCloud(tx);
+    toast("Transaction <b>" + esc(tx.ref) + "</b> created for Unit " + esc(u.unit_no || ""), "ok");
+  }
+  function psExportCsv(projId) {
+    const proj = psProject(projId) || {};
+    const units = (state.presellUnits || []).filter(u2 => u2.project_id === projId);
+    if (!units.length) { toast("No units to export", "err"); return; }
+    const q = v => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+    const head = ["Unit No", "Tower", "Floor", "Type", "Price", "Status", "Client", "Email", "TCP", "Paid", "Outstanding", "Next Due", "TX Ref"];
+    const lines = [head.map(q).join(",")];
+    units.forEach(u3 => {
+      const sched = psScheduleRows(u3.id);
+      const paid = sched.filter(r2 => r2.status === "paid").reduce((s2, r2) => s2 + Number(r2.amount || 0), 0);
+      const outstanding = Number(u3.total_contract_price || u3.price || 0) - paid;
+      const next = sched.find(r2 => r2.status === "pending");
+      lines.push([u3.unit_no, u3.tower || "", u3.floor ?? "", u3.unit_type || "", u3.price || 0, u3.status || "available",
+        u3.reserved_for || "", u3.reserved_by || "", u3.total_contract_price || u3.price || 0, paid, outstanding,
+        next ? next.due_date : "", u3.tx_ref || ""].map(q).join(","));
+    });
+    const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "ps_inventory_" + (proj.name || "").replace(/\s+/g, "_") + ".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+    toast("Exported <b>" + units.length + "</b> units", "ok");
+  }
   function bindPresellOnce() {
+    if (psBound) return;
+    psBound = true;
     if (psBound) return;
     psBound = true;
     document.addEventListener("click", async e => {
@@ -873,6 +990,30 @@
         } else {
           await psSetUnitStatus(parts[0], parts[1]);
         }
+        return;
+      }
+      const docChk = q("[data-doc-check]");
+      if (docChk) {
+        const uid2 = docChk.getAttribute("data-doc-check");
+        const idx = parseInt(docChk.getAttribute("data-doc-idx"), 10);
+        const u4 = (state.presellUnits || []).find(x => x.id === uid2);
+        if (u4 && Array.isArray(u4.doc_checklist) && u4.doc_checklist[idx]) u4.doc_checklist[idx].done = docChk.checked;
+        save();
+        return;
+      }
+      const toTx = q("[data-ps-to-tx]");
+      if (toTx) {
+        psConvertToTransaction(toTx.getAttribute("data-ps-to-tx"));
+        return;
+      }
+      const expB2 = q("[data-ps-export]");
+      if (expB2) { psExportCsv(expB2.getAttribute("data-ps-export")); return; }
+      const docChk2 = q("[data-doc-check]");
+      if (docChk2) {
+        var uid5 = docChk2.getAttribute("data-doc-check");
+        var idx5 = parseInt(docChk2.getAttribute("data-doc-idx"), 10);
+        var u6 = (state.presellUnits || []).find(function(x){return x.id === uid5;});
+        if (u6 && Array.isArray(u6.doc_checklist) && u6.doc_checklist[idx5]) { u6.doc_checklist[idx5].done = docChk2.checked; save(); }
         return;
       }
     });
