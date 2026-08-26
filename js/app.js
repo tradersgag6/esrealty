@@ -2132,6 +2132,38 @@
   function bindGlobal() {
     fillIcons();
     bindNumFormatting();
+    // Listings bulk selection: capture-phase so card-open click never fires
+    document.addEventListener("click", function (e) {
+      const blk = e.target.closest("[data-ls-bulk]");
+      if (blk) {
+        e.preventDefault(); e.stopPropagation();
+        const id = blk.getAttribute("data-ls-bulk");
+        window._lsBulkSel = window._lsBulkSel || [];
+        const at = window._lsBulkSel.indexOf(id);
+        if (blk.checked && at === -1) window._lsBulkSel.push(id);
+        if (!blk.checked && at >= 0) window._lsBulkSel.splice(at, 1);
+        const res2 = document.getElementById("ls-results");
+        if (res2) res2.innerHTML = lsResultsHTML();
+        return;
+      }
+      const act = e.target.closest("[data-bulk-act]");
+      if (act && (window._lsBulkSel || []).length) {
+        e.preventDefault(); e.stopPropagation();
+        const a = act.getAttribute("data-bulk-act");
+        if (a === "clear") { window._lsBulkSel = []; }
+        else {
+          let n = 0;
+          (state.listings || []).forEach(l => {
+            if (window._lsBulkSel.indexOf(l.id) === -1 || !listingCanManage()) return;
+            if (a === "sold" || a === "reserved") { l.status = a; l.updatedAt = new Date().toISOString(); n++; }
+            else if (a === "publish") { l.isPublished = true; delete l.autoUnpublishedAt; l.updatedAt = new Date().toISOString(); n++; }
+            else if (a === "draft") { l.isPublished = false; l.updatedAt = new Date().toISOString(); n++; }
+          });
+          toast((a === "publish" ? "Published " : a === "draft" ? "Unpublished " : "Marked ") + n + " listing(s)", "ok");
+        }
+        save(); render(); return;
+      }
+    }, true);
     document.addEventListener("mousedown", function (e) {
       var t = e.target;
       if (!t.closest("input, textarea, select, [contenteditable], .leaflet-container, .map-search")) {
@@ -7612,6 +7644,7 @@ premise: "Fee Simple / As Improved",
   }
   function listingCard(l) {
     const img = listingMainPhoto(l);
+    const canBulk = listingCanManage();
     const ppsm = listingPriceSqm(l);
     const dropAmt = (C.num(l.previousPrice, 0) > 0 && C.num(l.price, 0) > 0 && C.num(l.price, 0) < C.num(l.previousPrice, 0)) ? (C.num(l.previousPrice, 0) - C.num(l.price, 0)) : 0;
     const ageDays = Math.floor((Date.now() - new Date(l.createdAt || Date.now()).getTime()) / 86400000);
@@ -7621,7 +7654,7 @@ premise: "Fee Simple / As Improved",
       '<div class="ls-photo">' +
         '<div class="ls-photo-ph">' + icon("home", 30) + "<span>" + esc(listTypeLabel(l.propertyType)) + "</span></div>" +
         (img ? '<img class="ls-photo-img" src="' + esc(img) + '" alt="" loading="lazy" onerror="this.remove()">' : "") +
-        '<div class="ls-photo-top">' + listStatusBadge(l.status) + (l.isPublished === false ? '<span class="badge gold">Draft</span>' : "") + (dropAmt > 0 ? '<span class="badge green" title="Price reduced">▼ ' + esc(C.money(dropAmt)) + '</span>' : "") + (isStale ? '<span class="badge red" title="' + (l.autoUnpublishedAt ? "Auto-drafted after 90 days — refresh to republish" : "Listing is getting stale — refresh or adjust price") + '">' + ageDays + 'd' + (l.autoUnpublishedAt ? " auto-drafted" : " stale") + '</span>' : (ageDays >= 30 ? '<span class="badge gold">' + ageDays + 'd listed</span>' : "")) + (l.furnishing ? '<span class="badge blue" title="Furnishing">' + esc(({ bare: "Bare", semi: "Semi-Furn", full: "Fully Furn." })[l.furnishing] || l.furnishing) + '</span>' : "") + (l.petFriendly === "yes" ? '<span class="badge purple" title="Pet-friendly">Pets OK</span>' : "") + (l.balcony === "yes" ? '<span class="badge cyan">Balcony</span>' : "") + "</div>" +
+        '<div class="ls-photo-top">' + (canBulk ? '<label style="margin-right:6px;background:#fff;border:1px solid #cbd4df;border-radius:5px;padding:2px 5px;cursor:pointer" title="Select for bulk actions"><input type="checkbox" data-ls-bulk="' + esc(l.id) + '"' + ((window._lsBulkSel || []).indexOf(l.id) >= 0 ? " checked" : "") + '></label>' : "") + listStatusBadge(l.status) + (l.isPublished === false ? '<span class="badge gold">Draft</span>' : "") + (dropAmt > 0 ? '<span class="badge green" title="Price reduced">▼ ' + esc(C.money(dropAmt)) + '</span>' : "") + (isStale ? '<span class="badge red" title="' + (l.autoUnpublishedAt ? "Auto-drafted after 90 days — refresh to republish" : "Listing is getting stale — refresh or adjust price") + '">' + ageDays + 'd' + (l.autoUnpublishedAt ? " auto-drafted" : " stale") + '</span>' : (ageDays >= 30 ? '<span class="badge gold">' + ageDays + 'd listed</span>' : "")) + (l.furnishing ? '<span class="badge blue" title="Furnishing">' + esc(({ bare: "Bare", semi: "Semi-Furn", full: "Fully Furn." })[l.furnishing] || l.furnishing) + '</span>' : "") + (l.petFriendly === "yes" ? '<span class="badge purple" title="Pet-friendly">Pets OK</span>' : "") + (l.balcony === "yes" ? '<span class="badge cyan">Balcony</span>' : "") + "</div>" +
         (l.featured ? '<div class="ls-feat">' + icon("star", 12) + " Featured</div>" : "") +
         '<button class="ls-fav' + (lsFav(l.id) ? " on" : "") + '" data-ls-fav="' + esc(l.id) + '" title="Save to favorites">' + icon("star", 17) + "</button>" +
       "</div>" +
@@ -7642,7 +7675,14 @@ premise: "Fee Simple / As Improved",
   function lsResultsHTML() {
     const arr = lsFiltered();
     if (!arr.length) return '<div class="card card-pad empty">' + icon("search", 40) + "<h3>No listings found</h3><p>Try adjusting your filters, or add a new listing.</p></div>";
-    return '<div class="ls-count dim tiny mb-8">' + arr.length + " listing" + (arr.length > 1 ? "s" : "") + "</div><div class='ls-grid'>" + arr.map(listingCard).join("") + "</div>";
+    return '<div class="ls-count dim tiny mb-8">' + arr.length + " listing" + (arr.length > 1 ? "s" : "") + "</div>" +
+      ((window._lsBulkSel || []).length && listingCanManage() ? '<div class="card card-pad mb-16" id="ls-bulkbar"><b>' + window._lsBulkSel.length + ' selected</b> &nbsp; ' +
+        '<button class="btn btn-ghost btn-sm" data-bulk-act="sold">Mark Sold</button>' +
+        '<button class="btn btn-ghost btn-sm" data-bulk-act="reserved">Mark Reserved</button>' +
+        '<button class="btn btn-ghost btn-sm" data-bulk-act="publish">Publish</button>' +
+        '<button class="btn btn-ghost btn-sm" data-bulk-act="draft">Unpublish</button>' +
+        '<button class="btn btn-danger btn-sm" data-bulk-act="clear">Clear selection</button></div>' : "") +
+      "<div class='ls-grid'>" + arr.map(listingCard).join("") + "</div>";
   }
   function renderListings() {
     if (state.listingDetail) {
@@ -7655,7 +7695,7 @@ premise: "Fee Simple / As Improved",
     const opt = (opts, val, allLabel) => '<option value="">' + esc(allLabel || "All") + "</option>" + opts.map(o => '<option value="' + o[0] + '"' + (val === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>").join("");
     const cityOpts = '<option value="">All cities</option>' + lsCityList().map(c => '<option value="' + esc(c) + '"' + (f.city === c ? " selected" : "") + ">" + esc(c) + "</option>").join("");
     let html = '<div class="hero"><div><h1>Listings</h1><p>Browse the brokerage portfolio — filter, save favorites, and manage property listings.</p></div><div class="actions">' +
-      (can ? '<button class="btn btn-primary" data-ls-new>' + icon("plus", 15) + " Add Listing</button>" : "") + '<button class="btn btn-ghost" data-ls-export>' + icon("download", 15) + " Export CSV</button></div></div>";
+      (can ? '<button class="btn btn-primary" data-ls-new>' + icon("plus", 15) + " Add Listing</button>" : "") + '<button class="btn btn-ghost" data-ls-inquiries>' + icon("chat", 15) + ' Inquiries' + ((state.portalInquiries || []).filter(x => (x.status || "new") !== "converted").length ? ' <span class="badge gold">' + (state.portalInquiries || []).filter(x => (x.status || "new") !== "converted").length + "</span>" : "") + '</button><button class="btn btn-ghost" data-ls-export>' + icon("download", 15) + " Export CSV</button></div></div>";
     html += '<div class="card card-pad mb-24" id="ls-filters"><div class="grid grid-4">' +
       '<div class="field"><label>Search</label><input class="input" id="ls-q" type="text" value="' + esc(f.q || "") + '" placeholder="Title, city, developer…"></div>' +
       '<div class="field"><label>Property type</label><select class="input" id="ls-type">' + opt(LISTING_TYPES, f.type) + "</select></div>" +
@@ -7972,7 +8012,7 @@ premise: "Fee Simple / As Improved",
         '<textarea class="input mt-8" id="ls-photos" rows="3" placeholder="https://… or use the upload button">' + esc((l.photos || []).join("\n")) + "</textarea>" +
         '<div class="field-hint">JPG, PNG or WebP · up to 4 MB each · uploads are public.</div></div>' +
       '<div class="field col-full mt-8"><label>Virtual tour / video URL</label>' + lsTxt("ls-video", l.videoUrl) + "</div>" +
-      '<div class="field col-full mt-8"><label>Featured listing</label><label class="ms-chk"><input type="checkbox" id="ls-feat"' + (l.featured ? " checked" : "") + "> Show as featured</label></div>" +
+      '<div class="field col-full mt-8"><label>Featured listing</label><label class="ms-chk"><input type="checkbox" id="ls-feat"' + (l.featured ? " checked" : "") + "> Show as featured</label><div class='field-hint'>Featured slots require at least one photo.</div></div>" +
       '<div class="field col-full mt-8"><label>Publication</label><label class="ms-chk"><input type="checkbox" id="ls-published"' + (l.isPublished ? " checked" : "") + '> Publish on the public property website</label><div class="field-hint">Leave unchecked to keep this listing as a private draft.</div></div>' +
       '<div class="field col-full mt-8"><label>Pin on map</label>' +
         '<div class="row" style="align-items:center;gap:8px"><input class="input" id="ls-map-q" type="text" placeholder="Search address / place" style="flex:1"><button class="btn btn-ghost btn-sm" id="ls-map-btn" type="button">' + icon("search", 14) + " Find</button></div>" +
@@ -8035,6 +8075,10 @@ premise: "Fee Simple / As Improved",
     rec.videoUrl = $v("ls-video");
     rec.featured = $("#ls-feat") ? $("#ls-feat").checked : false;
     rec.isPublished = $("#ls-published") ? $("#ls-published").checked : false;
+    if (rec.featured && !(rec.photos && rec.photos.length)) {
+      toast("Featured listings need at least one photo — attach a photo or untick Featured", "err");
+      return;
+    }
     rec.lat = $v("ls-lat"); rec.lng = $v("ls-lng");
     rec.updatedAt = new Date().toISOString();
     if (!rec.createdAt) rec.createdAt = rec.updatedAt;
@@ -8047,8 +8091,14 @@ premise: "Fee Simple / As Improved",
         if (saved) { rec.id = saved.id || rec.id; rec.ref = saved.ref || rec.ref; rec.createdBy = saved.owner_id || rec.createdBy; }
       }
       delete rec._isNew;
-      if (!state.listings) state.listings = [];
-      const idx = state.listings.findIndex(x => x.id === (editId || rec.id));
+    if (!state.listings) state.listings = [];
+    if (!editId) {
+      const dupL = (state.listings || []).find(x => x.id !== rec.id && (
+        (rec.title && x.title && String(x.title).toLowerCase() === String(rec.title).toLowerCase() && String(x.city || "") === String(rec.city || "")) ||
+        (rec.titleNo && x.titleNo && String(x.titleNo) === String(rec.titleNo))));
+      if (dupL) toast("Possible duplicate of <b>" + esc((dupL.ref || "") + " " + (dupL.title || "")) + "</b> — saved anyway; review after", "err");
+    }
+    const idx = state.listings.findIndex(x => x.id === (editId || rec.id));
       if (idx >= 0) state.listings[idx] = rec; else state.listings.unshift(rec);
       cloudMyListings = cloudMyListings.filter(x => x.id !== rec.id);
       cloudMyListings.unshift(rec);
@@ -8081,6 +8131,12 @@ premise: "Fee Simple / As Improved",
         if (nw) { openListingEditor(); return; }
         const ex = e.target.closest("[data-ls-export]");
         if (ex) { lsExportCsv(); return; }
+        const inqB = e.target.closest("[data-ls-inquiries]");
+        if (inqB) { loadListingInquiries().then(openListingInquiries); return; }
+        const inqC = e.target.closest("[data-inq-close]");
+        if (inqC) { closeListingInquiries(); return; }
+        const inqConv = e.target.closest("[data-inq-convert]");
+        if (inqConv) { convertInquiryToLead(inqConv.getAttribute("data-inq-convert")); return; }
         const ed = e.target.closest("[data-ls-edit]");
         if (ed) { openListingEditor(ed.getAttribute("data-ls-edit")); return; }
         const del = e.target.closest("[data-ls-del]");
@@ -8148,6 +8204,87 @@ premise: "Fee Simple / As Improved",
     const dropChk = document.getElementById("ls-drop"); if (dropChk) dropChk.addEventListener("change", updAttrs);
     const fav = document.getElementById("ls-fav");
     if (fav) fav.addEventListener("change", () => { state.listingFilters.favOnly = fav.checked; save(); const res = $("#ls-results"); if (res) res.innerHTML = lsResultsHTML(); });
+  }
+  async function loadListingInquiries() {
+    // Merge cloud rows for MY listings with local demo seeds; never throws.
+    try {
+      if (!SB || !currentUser || !currentUser.id) return;
+      const mine = {};
+      (state.listings || []).forEach(l => { mine[l.id] = l; });
+      const res = await SB.from("listing_inquiries").select("id,listing_id,full_name,phone,email,message,status,created_at").order("created_at", { ascending: false }).limit(50);
+      if (res.error) return;
+      const rows = (res.data || []).filter(r => mine[r.listing_id]).map(r => ({
+        id: r.id, listingId: r.listing_id,
+        title: (mine[r.listing_id] || {}).title || r.listing_id,
+        full_name: r.full_name || "", phone: r.phone || "", email: r.email || "",
+        message: r.message || "", status: r.status || "new", created_at: r.created_at
+      }));
+      const have = new Set(rows.map(r => r.id));
+      state.portalInquiries = rows.concat((state.portalInquiries || []).filter(x => !have.has(x.id) && String(x.id).indexOf("inq-seed") === 0));
+    } catch (e) { /* keep whatever we have */ }
+  }
+  function inquiryMeta(id) {
+    state.inquiryMeta = state.inquiryMeta || {};
+    return state.inquiryMeta[id] || {};
+  }
+  function openListingInquiries() {
+    closeListingInquiries();
+    const ov = document.createElement("div");
+    ov.className = "modal-overlay"; ov.id = "inq-modal";
+    const inqs = (state.portalInquiries || []).slice().sort((a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")));
+    let body;
+    if (!inqs.length) {
+      body = '<p class="dim tiny">No inquiries yet. Buyer questions from your published listings land here.</p>';
+    } else {
+      body = "<table class='data'><tr><th>When</th><th>Listing</th><th>Inquirer</th><th>Contact</th><th>Status</th><th></th></tr>";
+      inqs.forEach(x => {
+        const meta = inquiryMeta(x.id);
+        const st = meta.status || x.status || "new";
+        const conv = st === "converted" || meta.leadRef;
+        const l = (state.listings || []).find(y => y.id === x.listingId);
+        body += "<tr>" +
+          "<td class='dim tiny'>" + esc(new Date(x.created_at || Date.now()).toLocaleDateString()) + "</td>" +
+          "<td><b>" + esc(x.title || (l ? l.title : "—")) + "</b>" + (x.message ? "<div class='dim tiny'>" + esc(String(x.message).slice(0, 60)) + "</div>" : "") + "</td>" +
+          "<td>" + esc(x.full_name || "—") + "</td>" +
+          "<td>" + (x.phone ? "<a href='tel:" + esc(phNormalizeMobile(x.phone)) + "'>" + esc(phNormalizeMobile(x.phone)) + "</a>" : "—") + (x.email ? "<div class='dim tiny'>" + esc(x.email) + "</div>" : "") + "</td>" +
+          "<td>" + (conv ? '<span class="badge green">Converted ' + esc(meta.leadRef || "") + '</span>' : '<span class="badge blue">' + esc(st) + '</span>') + "</td>" +
+          "<td>" + (conv ? "" : '<button class="btn btn-primary btn-sm" data-inq-convert="' + esc(x.id) + '">Convert to Lead</button>') + "</td>" +
+          "</tr>";
+      });
+      body += "</table>";
+    }
+    ov.innerHTML = '<div class="modal-card modal-card-wide"><div class="modal-head"><h3>' + icon("chat", 16) + ' Listing Inquiries</h3>' +
+      '<button class="icon-btn btn-sm" data-inq-close>' + icon("trash", 14) + "</button></div>" + body + "</div>";
+    document.body.appendChild(ov);
+  }
+  function closeListingInquiries() { const m = $("#inq-modal"); if (m) m.remove(); }
+  function convertInquiryToLead(id) {
+    const x = (state.portalInquiries || []).find(y => y.id === id);
+    if (!x || inquiryMeta(id).leadRef) return;
+    const l = (state.listings || []).find(y => y.id === x.listingId);
+    const name = x.full_name || "Portal Inquirer";
+    const lead = {
+      id: "lead-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+      ref: "LD-" + String((state.leads || []).length + 1).padStart(4, "0"),
+      name: name, type: "buyer", status: "new", source: "listing",
+      email: x.email || "", phone: phNormalizeMobile(x.phone),
+      propertyInterest: x.title || (l ? l.title : ""),
+      listingId: x.listingId || "", listingTitle: x.title || "",
+      budget: C.num(l ? l.price : 0, 0), note: "Converted from listing inquiry.",
+      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      activity: [{ date: new Date().toISOString(), text: "Lead created from listing inquiry" }]
+    };
+    if (l && l.createdBy) {
+      const owner = (state.users || []).find(u => u.id === l.createdBy);
+      lead.assignedTo = owner ? (owner.name || owner.email || "") : "";
+    }
+    if (!state.leads) state.leads = [];
+    state.leads.unshift(lead);
+    state.inquiryMeta = state.inquiryMeta || {};
+    state.inquiryMeta[id] = { status: "converted", leadRef: lead.ref };
+    save(); syncLead(lead);
+    toast("Lead <b>" + esc(lead.ref + " " + name) + "</b> created", "ok");
+    closeListingInquiries(); render();
   }
   function lsExportCsv() {
     const rows = lsFiltered();
