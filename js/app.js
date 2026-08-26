@@ -401,6 +401,27 @@
       body += '<tr><td colspan="2"><b>Totals</b></td><td colspan="3"></td></tr>';
       body += "</table></div>";
       body += '<div class="row mt-8" style="gap:16px"><span>Paid: <b>' + C.money(paid) + "</b></span><span>Outstanding: <b>" + C.money(outstanding) + "</b></span>" + (managePresell() ? '<button class="btn btn-ghost btn-sm ml-auto" data-ps-regen="' + esc(unitId) + '">Regenerate Schedule</button>' : "") + "</div>";
+      // Financing quick-calc summary
+      const u2 = (state.presellUnits || []).find(x => x.id === unitId) || {};
+      const tcp = Number(u2.total_contract_price || u2.price || 0);
+      const dpMonths = Number(u2.downpayment_months || 24);
+      const loanPct = Number(u2.loan_percent || 90);
+      const rate = Number(u2.loan_rate_annual || 7.5) / 100 / 12;
+      const yrs = Number(u2.loan_term_years || 15);
+      if (tcp > 0) {
+        const resFee = Number(u2.reservation_fee || 0);
+        const netTcp = tcp - resFee;
+        const dpTotal = netTcp * (1 - loanPct / 100);
+        const dpMonthly = dpMonths > 0 ? dpTotal / dpMonths : 0;
+        const loanAmt = netTcp - dpTotal;
+        const nPayments = yrs * 12;
+        const amort = rate > 0 && nPayments > 0 ? loanAmt * rate * Math.pow(1 + rate, nPayments) / (Math.pow(1 + rate, nPayments) - 1) : 0;
+        body += '<div class="card card-pad mt-12" style="background:var(--surface-2)"><h4 class="mb-8">Financing Quick-Calc</h4><div class="grid grid-3">' +
+          '<div><div class="dim tiny">TCP (−res. fee ₱' + C.numFmt(resFee) + ')</div><div style="font-weight:700">' + C.money(netTcp) + '</div></div>' +
+          '<div><div class="dim tiny">Downpayment (' + dpMonths + ' mo)</div><div style="font-weight:700">' + C.money(dpTotal) + '</div><div class="dim tiny">≈ ₱' + C.numFmt(Math.round(dpMonthly)) + '/mo</div></div>' +
+          '<div><div class="dim tiny">Loan (' + loanPct + '%, ' + yrs + ' yr @ ' + C.pct(Number(u2.loan_rate_annual || 7.5) / 100) + ')</div><div style="font-weight:700">' + C.money(loanAmt) + '</div><div class="dim tiny">≈ ₱' + C.numFmt(Math.round(amort)) + '/mo</div></div>' +
+          "</div></div>";
+      }
     }
     if (managePresell()) {
       body = '<div class="grid grid-2 mb-16">' +
@@ -689,7 +710,19 @@
     }
     html += '<div class="card card-pad"><div class="table-wrap"><table class="data"><tr><th>Unit</th><th>Tower</th><th>Floor</th><th>Type</th><th class="num">Price</th><th>Status</th>' + "<th>Actions</th>" + (manage ? "<th>Client</th>" : "") + "</tr>";
     units.slice().sort((a, b) => String(a.unit_no).localeCompare(String(b.unit_no))).forEach(u => {
-      html += '<tr><td><b>' + esc(u.unit_no) + "</b></td><td>" + esc(u.tower || "-") + "</td><td>" + esc(u.floor == null ? "-" : u.floor) + "</td><td>" + esc(u.unit_type || "-") + "</td><td class=\"num\">" + (Number(u.price) > 0 ? C.money(Number(u.price)) : "-") + "</td><td>" + psStatusBadge(u.status) + "</td>";
+      html += '<tr><td><b>' + esc(u.unit_no) + "</b>" + (u.reserved_by ? '<div class="badge green mt-4" style="font-size:9px">Portal-linked</div>' : "") + "</td><td>" + esc(u.tower || "-") + "</td><td>" + esc(u.floor == null ? "-" : u.floor) + "</td><td>" + esc(u.unit_type || "-") + "</td><td class=\"num\">" + (Number(u.price) > 0 ? C.money(Number(u.price)) : "-") + "</td><td>" + psStatusBadge(u.status);
+      // Inline payment summary for reserved/sold units
+      if ((u.status === "reserved" || u.status === "sold")) {
+        const rows = psScheduleRows(u.id);
+        const paid = rows.filter(r => r.status === "paid").reduce((s, r) => s + Number(r.amount || 0), 0);
+        const total = Number(u.total_contract_price || u.price || 0);
+        const next = rows.find(r => r.status === "pending");
+        html += '<div class="dim tiny mt-4">' +
+          '₱' + C.numFmt(paid).replace("₱","") + ' / ₱' + C.numFmt(total).replace("₱","") +
+          (next ? ' · next <b>' + esc(String(next.due_date || "").slice(0, 10)) + '</b> ₱' + C.numFmt(next.amount || 0) : '') +
+          '</div>';
+      }
+      html += "</td>";
       if (manage) {
         html += "<td>" + esc(u.reserved_for || "-") + "</td>";
       }
