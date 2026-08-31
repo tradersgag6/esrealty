@@ -301,8 +301,16 @@
 
   function home() {
     var listings = viewState.result && viewState.result.data || [];
-    var cards = viewState.loading ? skeletons(3) : listings.length ? listings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
-    var heroImage = listings.length ? firstImage(listings[0]) : "";
+    // Frontend-only filter: hide obvious placeholder/test listings (numeric titles like 321321, sample)
+    var displayListings = listings.filter(function (l) {
+      var t = String(l.title || "").trim().toLowerCase();
+      if (!t) return false;
+      if (/^\d+$/.test(t)) return false;
+      if (/^sample\d*$/i.test(t)) return false;
+      return true;
+    });
+    var cards = viewState.loading ? skeletons(3) : displayListings.length ? displayListings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
+    var heroImage = (displayListings.length ? firstImage(displayListings[0]) : "") || (listings.length ? firstImage(listings[0]) : "");
     var cities = ["Batangas City", "Lipa", "Tanauan", "Santo Tomas", "Imus", "Bacoor", "Dasmariñas", "General Trias", "Santa Rosa", "Calamba", "Biñan", "Angeles", "San Fernando", "Antipolo", "Taytay", "Iloilo City", "Cebu City", "Lapu-Lapu", "Cagayan de Oro", "Davao City", "General Santos"];
     var chips = cities.map(function (city, i) { return '<a class="sf-reveal sf-reveal-zoom" style="--d:' + (Math.min(i, 11) * 0.05).toFixed(2) + 's" href="#/search?city=' + encodeURIComponent(city) + '">' + esc(city) + '</a>'; }).join("");
     return shell('<section class="sf-hero"><div class="sf-hero-copy"><p class="sf-eyebrow">PHILIPPINE SHOPHOUSE SPECIALISTS</p><h1>Shophouses that <em>work</em> harder.</h1>' +
@@ -492,14 +500,21 @@
 
   function patchHome() {
     var listings = viewState.result && viewState.result.data || [];
-    var cards = viewState.loading ? skeletons(3) : listings.length ? listings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
+    var displayListings = listings.filter(function (l) {
+      var t = String(l.title || "").trim().toLowerCase();
+      if (!t) return false;
+      if (/^\d+$/.test(t)) return false;
+      if (/^sample\d*$/i.test(t)) return false;
+      return true;
+    });
+    var cards = viewState.loading ? skeletons(3) : displayListings.length ? displayListings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
     var grid = host.querySelector(".sf-property-grid");
     if (grid) grid.innerHTML = cards;
 
     var frame = host.querySelector(".sf-hero-frame");
     if (frame) {
       var image = frame.querySelector("img");
-      var heroImage = listings.length ? firstImage(listings[0]) : "";
+      var heroImage = (displayListings.length ? firstImage(displayListings[0]) : "") || (listings.length ? firstImage(listings[0]) : "");
       if (heroImage) {
         if (!image) {
           image = document.createElement("img");
