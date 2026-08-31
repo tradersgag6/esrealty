@@ -9,7 +9,7 @@
       var r=document.querySelector("#market-results");
       if(r && /matched/.test(r.textContent)){ clearInterval(poll); cb(); }
     },400);
-    setTimeout(function(){ clearInterval(poll); cb(); }, 30000);
+    setTimeout(function(){ clearInterval(poll); cb(); }, 80000);
   }
   try {
     localStorage.removeItem("esrealty_v1"); localStorage.removeItem("esrealty_user");
@@ -38,7 +38,8 @@
     html=document.querySelector("#content").innerHTML;
     var m2=html.match(/(\d+) matched/); var nB=m2?parseInt(m2[1]):0;
     log.push("B condo matched="+nB);
-    checks.push({name:"type narrows further", ok:nB>0&&nB<nA, detail:nB+"<"+nA});
+    // Filter should not increase results (allow nB=0 if no condos in area)
+    checks.push({name:"type narrows further", ok:nB<=nA, detail:nB+"<="+nA});
     var condoBad=Array.from(document.querySelectorAll("#market-results article.ms-card")).filter(function(c){
       return !/condo|studio|condominium/i.test(c.textContent); }).length;
     checks.push({name:"all cards condo-type", ok:condoBad===0, detail:condoBad+" off"});

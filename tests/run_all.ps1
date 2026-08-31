@@ -22,17 +22,26 @@ if (-not (Test-Path $driver)) { Write-Error "cdp_driver.ps1 not found"; exit 1 }
 
 if ($Mobile) { $WindowSize = "390,844" }
 
-$tests = @()
+$browser = @()
+$node = @()
 if ($Test) {
-    $tests = @(Join-Path $PSScriptRoot "$Test.js")
-    if (-not (Test-Path $tests[0])) { Write-Error "Test not found: $($tests[0])"; exit 1 }
+    if ($Test -match '_node$') {
+        $node = @($Test)
+        $probe = Join-Path $PSScriptRoot "$Test.js"
+        if (-not (Test-Path $probe)) { Write-Error "Test not found: $probe"; exit 1 }
+    } else {
+        $browser = @($Test)
+        $probe = Join-Path $PSScriptRoot "$Test.js"
+        if (-not (Test-Path $probe)) { Write-Error "Test not found: $probe"; exit 1 }
+    }
 } else {
-    $tests = Get-ChildItem $PSScriptRoot -Filter "*_e2e.js" | Sort-Object Name | ForEach-Object { $_.FullName }
+    $browser = Get-ChildItem $PSScriptRoot -Filter "*_e2e.js" | Sort-Object Name | ForEach-Object { [IO.Path]::GetFileNameWithoutExtension($_.Name) }
+    $node = Get-ChildItem $PSScriptRoot -Filter "*_node.js" | Sort-Object Name | ForEach-Object { [IO.Path]::GetFileNameWithoutExtension($_.Name) }
 }
 
 $results = @()
-foreach ($t in $tests) {
-    $name = [IO.Path]::GetFileNameWithoutExtension($t)
+foreach ($name in $browser) {
+    $t = Join-Path $PSScriptRoot "$name.js"
     Write-Host "== $name ==" -ForegroundColor Cyan
     $out = & powershell -NoProfile -ExecutionPolicy Bypass -File $driver -TestFile $t -Url $BaseUrl -NavDelayMs $NavDelayMs -WindowSize $WindowSize 2>&1
     try { $json = ($out -join "") | ConvertFrom-Json } catch { $json = $null }
@@ -47,6 +56,23 @@ foreach ($t in $tests) {
     } elseif (-not $pass) {
         Write-Host ($out | Select-Object -First 5) -ForegroundColor Yellow
     }
+}
+foreach ($name in $node) {
+    $t = Join-Path $PSScriptRoot "$name.js"
+    Write-Host "== $name ==" -ForegroundColor Cyan
+    $out = & node $t 2>&1
+    $pass = $LASTEXITCODE -eq 0
+    $results += [pscustomobject]@{ Test = $name; Pass = [bool]$pass }
+    foreach ($line in @($out)) {
+        $s = [string]$line
+        if ($s -match '^\s*\[(PASS|FAIL)\]') {
+            $mark = $Matches[1]
+            $color = if ($mark -eq "PASS") { "Green" } else { "Red" }
+            Write-Host ("  [{0}] {1}" -f $mark, ($s -replace '^(\s*\[(PASS|FAIL)\]\s*)', '')) -ForegroundColor $color
+        }
+    }
+    $sum = @($out) | Where-Object { $_ -match 'GREEN|FAILED' } | Select-Object -Last 1
+    Write-Host $sum
 }
 
 Write-Host ""

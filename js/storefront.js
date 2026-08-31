@@ -894,6 +894,23 @@
     });
   }
 
+  // auto aria-label + tiny text bump for public (readability)
+  setInterval(function(){
+    document.querySelectorAll("input,select,textarea").forEach(function(el){
+      if(el.type==="hidden"||el.type==="submit"||el.type==="button") return;
+      if(el.id && document.querySelector('label[for="'+el.id+'"]')) return;
+      if(el.closest("label")||el.getAttribute("aria-label")||el.getAttribute("aria-labelledby")) return;
+      var ph=el.getAttribute("placeholder")||el.getAttribute("name")||el.id||"input";
+      el.setAttribute("aria-label", ph.replace(/[-_]/g," "));
+    });
+    document.querySelectorAll("body *").forEach(function(el){
+      if(el.children.length>0 || !el.textContent.trim()) return;
+      var s=getComputedStyle(el);
+      if(s.display==="none"||s.visibility==="hidden"||Number(s.opacity)===0) return;
+      if(parseFloat(s.fontSize)<12){ el.style.fontSize="12px"; }
+    });
+  },800);
+
   window.ESREALTY_STOREFRONT = {
     mount: function (options) {
       host = options.host; openAuth = options.openAuth || openAuth; active = true;

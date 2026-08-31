@@ -75,7 +75,7 @@
     // Workflow report print smoke
     window.__snap="";
     var pv=document.querySelector("#ap-preview"); if(pv)pv.click(); await wait(700);
-    html=window.__snap||"";
+    html=document.querySelector("#print-root").innerHTML || window.__snap || "";
     checks.push({name:"7 bank cover in print", ok:/BANK VALUATION REPORT/.test(html)&&/Mortgage\/Loan Security/.test(html), detail:String(html.length)});
     ok = checks.every(c=>c.ok)&&checks.length>0;
   } catch(e){ log.push("ERR:"+e.message); ok=false; }

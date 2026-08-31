@@ -10,6 +10,7 @@
   /* Supabase loads lazily (async) so it may not exist yet at parse time.
    * SB stays live-bound: picked up immediately or as soon as the client lands. */
   let SB = window.ESREALTY_SUPABASE || null;
+  var pfPendingCollectProof = null;
   let sbReadyResolve = null;
   const sbReadyPromise = new Promise(function (resolve) { sbReadyResolve = resolve; });
   function bindSb() {
@@ -179,6 +180,7 @@
     trending: '<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
     download: '<path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>',
     check: '<path d="M4 12l5 5L20 6"/>',
+    "chevron-down": '<path d="M6 9l6 6 6-6"/>',
     x: '<path d="M6 6l12 12M18 6L6 18"/>',
     spark: '<path d="M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4z"/>',
     scale: '<path d="M12 3v18M5 7h14"/><path d="M6 7L3 13h6zM18 7l-3 6h6zM8 21h8"/>',
@@ -207,6 +209,8 @@
     key: '<circle cx="7.5" cy="15.5" r="5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3M18.4 4.6l2 2"/>',
     link: '<path d="M10 14a5 5 0 007.1.1l3-3a5 5 0 00-7.1-7.1l-1.7 1.7"/><path d="M14 10a5 5 0 00-7.1-.1l-3 3a5 5 0 007.1 7.1l1.7-1.7"/>',
     share: '<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.5M8.2 13.2l7.6 4.5"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/>',
+    alert: '<path d="M12 3l10 18H2zM12 10v4M12 17h.01"/>',
     upload: '<path d="M12 16V4m0 0l-4 4m4-4l4 4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>',
     settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h.08a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h.08a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.08a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/>'
   };
@@ -245,7 +249,8 @@
   }
 
   function defaultState() {
-    return { deals: [], current: null, view: "dashboard", wizardStep: 1, theme: "light", dealTab: "overview", appraisal: null, appraisalTab: "setup", appraisals: [], market: null, pms: { properties: [], units: [], owners: [], tenants: [], leases: [], payments: [], maintenance: [], expenses: [], documents: [] }, pmsTab: "properties", listings: [], favorites: [], listingFilters: {}, listingDetail: null, leads: [], leadFilters: {}, leadDetail: null, leadMode: "pipeline", leadCalendarMonth: "", lang: "en", users: [], transactions: [], financingScenarios: [], financingDraft: null, salesPlaybooks: [], playbookFilters: { q: "", stage: "", category: "", propertyType: "", status: "" }, commission: { settings: { grossPct: 3, brokerShare: 40, agentShare: 50, referralShare: 10 }, payouts: [] }, docVault: [], siteVisits: [], campaigns: [], listingStats: {}, siteContact: { eyebrow: "TALK TO A SHOPHOUSE SPECIALIST", title: "Ready to put the ground floor to work?", description: "Tell us your province, budget, and business plan. A shophouse specialist from ES Realty will reply within one business day with listings and next steps.", phone: "+63 900 000 0000", email: "hello@esrealty.ph", address: "Batangas, Philippines", hours: "Monday–Saturday, 9:00 AM–6:00 PM" }, adminTab: "overview", txDetail: null, usersTab: "pending" };
+    return { deals: [], current: null, view: "dashboard", wizardStep: 1, theme: "light", dealTab: "overview", appraisal: null, appraisalTab: "setup", appraisals: [], market: null, pms: { properties: [], units: [], owners: [], tenants: [], leases: [], payments: [], maintenance: [], expenses: [], documents: [] }, pmsTab: "properties", listings: [], favorites: [], listingFilters: {}, listingDetail: null, leads: [], leadFilters: {}, leadDetail: null, leadMode: "pipeline", leadCalendarMonth: "", lang: "en", users: [], transactions: [], financingScenarios: [], financingDraft: null, salesPlaybooks: [], playbookFilters: { q: "", stage: "", category: "", propertyType: "", status: "" }, commission: { settings: { grossPct: 3, brokerShare: 40, agentShare: 50, referralShare: 10 }, payouts: [] }, docVault: [], siteVisits: [], campaigns: [], listingStats: {}, siteContact: { eyebrow: "TALK TO A SHOPHOUSE SPECIALIST", title: "Ready to put the ground floor to work?", description: "Tell us your province, budget, and business plan. A shophouse specialist from ES Realty will reply within one business day with listings and next steps.", phone: "+63 900 000 0000", email: "hello@esrealty.ph", address: "Batangas, Philippines", hours: "Monday–Saturday, 9:00 AM–6:00 PM" }, adminTab: "overview", txDetail: null, usersTab: "pending",
+      portfolioAccounts: [], cashEntries: [], constructionProjects: [], constructionPhases: [], constructionVendors: [], constructionInvoices: [], changeOrders: [], portfolioTab: "overview", portfolioAuditEvents: [] };
   }
   function loadState() {
     if (!IS_LOCAL_DEV) return defaultState();
@@ -917,7 +922,6 @@
   }
   function bindPresellOnce() {
     if (psBound) return;
-    psBound = true;
     if (psBound) return;
     psBound = true;
     document.addEventListener("click", async e => {
@@ -1378,10 +1382,18 @@
   function geocodePlace(query, cb) {
     if (!query) { cb(null); return; }
     const q = /philippines/i.test(query) ? query : query + ", Philippines";
-    fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=en&q=" + encodeURIComponent(q))
-      .then(r => r.json())
-      .then(j => { if (j && j.length) cb({ lat: parseFloat(j[0].lat), lng: parseFloat(j[0].lon), label: j[0].display_name }); else cb(null); })
-      .catch(() => cb(null));
+    let retries = 2;
+    const attempt = () => {
+      fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=en&q=" + encodeURIComponent(q))
+        .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(j => {
+          if (j && j.length) cb({ lat: parseFloat(j[0].lat), lng: parseFloat(j[0].lon), label: j[0].display_name });
+          else if (retries-- > 0) setTimeout(attempt, 1500);
+          else cb(null);
+        })
+        .catch(() => { if (retries-- > 0) setTimeout(attempt, 1500); else cb(null); });
+    };
+    attempt();
   }
   function pinMap(id, ll, zoom) {
     const entry = _mapRegistry[id];
@@ -1874,9 +1886,26 @@
     const title = { dashboard: "Dashboard", wizard: "New Investment", deal: "Deal Analysis", portfolio: "Portfolio", pms: "Property Management", assistant: "AI Assistant", reports: "Reports", appraisal: "Appraisal", market: "Market Scan", listings: "Listings", leads: "CRM / Leads", transactions: "Transactions", financing: "Financing", presell: "Pre-Selling", portal: "Buyer Portal", playbook: "Sales Playbook", users: "Users & Access", admin: "Brokerage", settings: "Settings" };
     $("#topbar-title").textContent = (lang === "fil" ? (FIL_TITLES[state.view] || title[state.view]) : title[state.view]) || "ES Realty";
     $$("#nav .nav-item").forEach(b => b.classList.toggle("active", b.getAttribute("data-view") === state.view));
+    $$("#nav .nav-dropdown-item").forEach(b => {
+      b.classList.toggle("active", b.getAttribute("data-view") === state.view);
+      b.classList.toggle("nav-hidden", !navAllowed(b.getAttribute("data-view")));
+    });
     $$("#nav .nav-item").forEach(b => {
       const view = b.getAttribute("data-view");
       b.classList.toggle("nav-hidden", !navAllowed(view) || ((roleIs("broker") || roleIs("owner") || roleIs("tenant")) && view === "dashboard"));
+    });
+    $$("#nav .nav-dropdown").forEach(dd => {
+      const trigger = dd.querySelector(".nav-dropdown-trigger");
+      const menu = dd.querySelector(".nav-dropdown-menu");
+      const items = dd.querySelectorAll(".nav-dropdown-item");
+      const hasActive = Array.prototype.some.call(items, i => i.getAttribute("data-view") === state.view);
+      const hasVisible = Array.prototype.some.call(items, i => !i.classList.contains("nav-hidden"));
+      if (trigger) {
+        trigger.classList.toggle("has-active", hasActive);
+        trigger.classList.toggle("nav-hidden", !hasVisible);
+        if (hasActive) trigger.setAttribute("aria-expanded", "true");
+      }
+      if (hasActive && menu) menu.classList.add("open");
     });
     const langIndex = lang === "fil" ? 1 : 0;
     $$("#nav .nav-item").forEach(b => {
@@ -1898,6 +1927,12 @@
           if (current) hide(current);
           current = el;
           hasVisible = false;
+        } else if (el.classList.contains("nav-dropdown")) {
+          const trigger = el.querySelector(".nav-dropdown-trigger");
+          const items = el.querySelectorAll(".nav-dropdown-item");
+          const anyVisible = (trigger && !trigger.classList.contains("nav-hidden")) ||
+            Array.prototype.some.call(items, i => !i.classList.contains("nav-hidden"));
+          if (current && anyVisible) hasVisible = true;
         } else if (el.classList.contains("nav-item")) {
           if (current && !el.classList.contains("nav-hidden")) hasVisible = true;
         }
@@ -1913,7 +1948,23 @@
     updateDealPicker();
     fillIcons();
     bindPerView();
+    if (state.view === "portfolio" && state.portfolioTab === "ledger" && typeof pfApplyLedgerFilters === "function") pfApplyLedgerFilters();
     updateSidebar();
+    // auto aria-label for inputs without label (readability audit)
+    document.querySelectorAll("input,select,textarea").forEach(el=>{
+      if(el.type==="hidden"||el.type==="submit"||el.type==="button") return;
+      if(el.id && document.querySelector('label[for="'+el.id+'"]')) return;
+      if(el.closest("label")||el.getAttribute("aria-label")||el.getAttribute("aria-labelledby")) return;
+      const ph=el.getAttribute("placeholder")||el.getAttribute("name")||el.id||"input";
+      el.setAttribute("aria-label", ph.replace(/[-_]/g," "));
+    });
+    // bump tiny text <12px to 12px for readability audit
+    document.querySelectorAll("body *").forEach(el=>{
+      if(el.children.length>0 || !el.textContent.trim()) return;
+      const s=getComputedStyle(el);
+      if(s.display==="none"||s.visibility==="hidden"||Number(s.opacity)===0) return;
+      if(parseFloat(s.fontSize)<12){ el.style.fontSize="12px"; }
+    });
     document.body.classList.remove("preload");
   }
 
@@ -2158,6 +2209,7 @@
             await loadCloudLeads();
             await loadCloudTransactions();
             await loadCloudPlaybooks();
+            pfLoadFromCloud();
             render();
             return;
           }
@@ -2194,6 +2246,7 @@
         await loadCloudLeads();
         await loadCloudTransactions();
         await loadCloudPlaybooks();
+        pfLoadFromCloud();
         render();
       } catch (e) {
         const low = String(e.message || "").toLowerCase();
@@ -2346,13 +2399,94 @@
       }
     });
     $("#nav").addEventListener("click", e => {
-      const b = e.target.closest(".nav-item");
+      const dropdownTrigger = e.target.closest(".nav-dropdown-trigger");
+      if (dropdownTrigger) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropdown = dropdownTrigger.closest(".nav-dropdown");
+        const menu = dropdown.querySelector(".nav-dropdown-menu");
+        const isOpen = dropdownTrigger.getAttribute("aria-expanded") === "true";
+        document.querySelectorAll(".nav-dropdown-menu.open").forEach(m => {
+          if (m !== menu) { m.classList.remove("open"); m.closest(".nav-dropdown").querySelector(".nav-dropdown-trigger").setAttribute("aria-expanded", "false"); }
+        });
+        menu.classList.toggle("open");
+        dropdownTrigger.setAttribute("aria-expanded", !isOpen);
+        return;
+      }
+      const b = e.target.closest(".nav-item:not(.nav-dropdown-trigger)");
       if (b) { $("#sidebar").classList.remove("open"); navigate(b.getAttribute("data-view")); }
+      const dropdownItem = e.target.closest(".nav-dropdown-item");
+      if (dropdownItem) { $("#sidebar").classList.remove("open"); navigate(dropdownItem.getAttribute("data-view")); }
+    });
+document.addEventListener("click", e=>{
+      const tab=e.target.closest("[data-ptab]"); if(tab){ state.portfolioTab=tab.getAttribute("data-ptab"); save(); render(); return; }
+      if(e.target.closest("[data-pf-new-acc]")){ pfNewAccount(); return; }
+      if(e.target.closest("[data-pf-new-entry]")){ pfNewEntry(); return; }
+      if(e.target.closest("[data-pf-clear-filters]")){ ["pf-filter-acc","pf-filter-dir","pf-filter-status","pf-search","pf-date-from","pf-date-to"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; }); state.cashLedgerFilters.project=""; state.cashLedgerFilters.ids=null; pfApplyLedgerFilters(); return; }
+      if(e.target.closest("[data-pf-go-ledger]")){ pfGoLedgerFromCashflow(e.target.closest("[data-pf-go-ledger]").getAttribute("data-pf-go-ledger")); return; }
+      if(e.target.closest("[data-pf-cf-clear]")){ state.cashflowFilters=(state.cashflowFilters||{}); delete state.cashflowFilters.from; delete state.cashflowFilters.to; delete state.cashflowFilters.accountId; delete state.cashflowFilters.assetId; delete state.cashflowFilters.projectId; delete state.cashflowFilters.presellProjectId; save(); render(); return; }
+      if(e.target.closest("[data-pf-asset-cf]")){ pfOpenAssetCashflow(e.target.closest("[data-pf-asset-cf]").getAttribute("data-pf-asset-cf")); return; }
+      if(e.target.closest("[data-pf-asset-event]")){ pfOpenLedgerEntry(e.target.closest("[data-pf-asset-event]")); return; }
+      if(e.target.closest("[data-pf-collect-post]")){ pfCollectPost(); return; }
+      if(e.target.closest("[data-pf-collect-reset]")){ pfCollectReset(); return; }
+      if(e.target.closest("[data-pf-export-ledger]")){ pfExportLedger(); return; }
+      if(e.target.closest("[data-pf-migrate-presell]")){ pfMigratePresell(); return; }
+      if(e.target.closest("[data-pf-new-proj]")){ pfNewProj(); return; }
+      if(e.target.closest("[data-pf-close-proj]")){ pfCloseConstructionModal(); return; }
+      if(e.target.closest("[data-pf-close-phase]")){ pfClosePhaseModal(); return; }
+      if(e.target.closest("[data-pf-save-proj]")){ pfSaveConstruction(); return; }
+      if(e.target.closest("[data-pf-save-phase]")){ pfSavePhase(); return; }
+      if(e.target.closest("[data-pf-close-proj]")){ pfCloseConstructionModal(); return; }
+      if(e.target.closest("[data-pf-close-phase]")){ pfClosePhaseModal(); return; }
+      if(e.target.closest("[data-pf-close-account]")){ pfCloseAccountModal(); return; }
+      if(e.target.closest("[data-pf-close-ledger-entry]")){ pfCloseLedgerEntryModal(); return; }
+      if(e.target.closest("[data-pf-save-account]")){ pfSaveAccount(); return; }
+      if(e.target.closest("[data-pf-save-ledger-entry]")){ pfSaveLedgerEntry(); return; }
+      if(e.target.closest("[data-pf-save-draft]")){ pfSaveLedgerEntry("draft"); return; }
+      const openProj=e.target.closest("[data-pf-open-proj]");
+      if(openProj){
+        state.portfolioSelectedConstructionId=openProj.getAttribute("data-pf-open-proj");
+        state.portfolioTab="construction"; save(); render(); return;
+      }
+      const editProj=e.target.closest("[data-pf-edit-proj]"); if(editProj){ const proj=(state.constructionProjects||[]).find(p=>p.id===editProj.getAttribute("data-pf-edit-proj")); if(proj) pfOpenConstructionModal(proj); return; }
+      const addPhase=e.target.closest("[data-pf-add-phase]"); if(addPhase){ pfOpenPhaseModal(addPhase.getAttribute("data-pf-add-phase"), null); return; }
+      const delProj=e.target.closest("[data-pf-del-proj]"); if(delProj){ pfDeleteConstruction(delProj.getAttribute("data-pf-del-proj")); return; }
+      if(e.target.closest("[data-pf-close-vendor]")){ pfCloseVendorModal(); return; }
+      if(e.target.closest("[data-pf-save-vendor]")){ pfSaveVendor(); return; }
+      if(e.target.closest("[data-pf-close-invoice]")){ pfCloseInvoiceModal(); return; }
+      if(e.target.closest("[data-pf-save-invoice]")){ pfSaveInvoice(); return; }
+      if(e.target.closest("[data-pf-close-change]")){ pfCloseChangeModal(); return; }
+      if(e.target.closest("[data-pf-save-change]")){ pfSaveChange(); return; }
+      const editPhase=e.target.closest("[data-pf-edit-phase]"); if(editPhase){ pfOpenPhaseModal(null, editPhase.getAttribute("data-pf-edit-phase")); return; }
+      const delPhase=e.target.closest("[data-pf-del-phase]"); if(delPhase){ pfDelPhase(delPhase.getAttribute("data-pf-del-phase")); return; }
+      const newVendor=e.target.closest("[data-pf-new-vendor]"); if(newVendor){ pfOpenVendorModal(newVendor.getAttribute("data-pf-new-vendor"), null); return; }
+      const editVendor=e.target.closest("[data-pf-edit-vendor]"); if(editVendor){ pfOpenVendorModal(null, editVendor.getAttribute("data-pf-edit-vendor")); return; }
+      const delVendor=e.target.closest("[data-pf-del-vendor]"); if(delVendor){ pfDelVendor(delVendor.getAttribute("data-pf-del-vendor")); return; }
+      const addInvoice=e.target.closest("[data-pf-new-invoice]"); if(addInvoice){ pfOpenInvoiceModal(addInvoice.getAttribute("data-pf-new-invoice"), null); return; }
+      const editInvoice=e.target.closest("[data-pf-edit-invoice]"); if(editInvoice){ pfOpenInvoiceModal(null, editInvoice.getAttribute("data-pf-edit-invoice")); return; }
+      const delInvoice=e.target.closest("[data-pf-del-invoice]"); if(delInvoice){ pfDelInvoice(delInvoice.getAttribute("data-pf-del-invoice")); return; }
+      const payInvoice=e.target.closest("[data-pf-pay-invoice]"); if(payInvoice){ pfPayInvoice(payInvoice.getAttribute("data-pf-pay-invoice")); return; }
+      const addChange=e.target.closest("[data-pf-new-change]"); if(addChange){ pfOpenChangeModal(addChange.getAttribute("data-pf-new-change"), null); return; }
+      const delChange=e.target.closest("[data-pf-del-change]"); if(delChange){ pfDelChange(delChange.getAttribute("data-pf-del-change")); return; }
+      const editEntry=e.target.closest("[data-pf-edit-entry]"); if(editEntry){ pfOpenLedgerEditModal(editEntry.getAttribute("data-pf-edit-entry")); return; }
+      const rev=e.target.closest("[data-pf-reverse]"); if(rev){ pfReverse(rev.getAttribute("data-pf-reverse")); return; }
+      const delEntry=e.target.closest("[data-pf-del-entry]"); if(delEntry){ pfVoidEntry(delEntry.getAttribute("data-pf-del-entry")); return; }
+      const purgeEntry=e.target.closest("[data-pf-purge-entry]"); if(purgeEntry){ pfPurgeEntry(purgeEntry.getAttribute("data-pf-purge-entry")); return; }
+      if(e.target.closest("#pf-construction-modal") && !e.target.closest(".modal-card")){ pfCloseConstructionModal(); return; }
+      if(e.target.closest("#pf-phase-modal") && !e.target.closest(".modal-card")){ pfClosePhaseModal(); return; }
+      if(e.target.closest("#pf-vendor-modal") && !e.target.closest(".modal-card")){ pfCloseVendorModal(); return; }
+      if(e.target.closest("#pf-invoice-modal") && !e.target.closest(".modal-card")){ pfCloseInvoiceModal(); return; }
+      if(e.target.closest("#pf-change-modal") && !e.target.closest(".modal-card")){ pfCloseChangeModal(); return; }
+      if(e.target.closest("#pf-account-modal") && !e.target.closest(".modal-card")){ pfCloseAccountModal(); return; }
+      if(e.target.closest("#pf-ledger-entry-modal") && !e.target.closest(".modal-card")){ pfCloseLedgerEntryModal(); return; }
+      const delProof=e.target.closest("[data-pf-proof-remove]");
+      if(delProof){ pfRemoveProof(delProof.getAttribute("data-pf-proof-remove"), delProof.getAttribute("data-pf-proof-id")); return; }
     });
     $("#menu-btn").addEventListener("click", () => $("#sidebar").classList.toggle("open"));
     $("#theme-toggle").addEventListener("click", () => {
-      state.theme = "light";
-      document.documentElement.setAttribute("data-theme", "light");
+      const newTheme = state.theme === "dark" ? "light" : "dark";
+      state.theme = newTheme;
+      document.documentElement.setAttribute("data-theme", newTheme);
       save();
     });
     const languageToggle = $("#language-toggle");
@@ -2367,6 +2501,13 @@
       if (e.target.closest("[data-view]")) $("#sidebar").classList.remove("open");
     });
     document.addEventListener("click", e => {
+      const sidebar = $("#sidebar");
+      const menuBtn = $("#menu-btn");
+      if (sidebar && sidebar.classList.contains("open") && 
+          !sidebar.contains(e.target) && 
+          !menuBtn.contains(e.target)) {
+        sidebar.classList.remove("open");
+      }
       const vaultSave = e.target.closest("[data-vault-save]");
       if (vaultSave) { vaultSaveDoc(); return; }
       const vaultCancel = e.target.closest("[data-vault-cancel]");
@@ -2380,6 +2521,46 @@
     });
     document.addEventListener("change", e => {
       if (e.target && e.target.id === "vl-file") vaultFileSelected(e.target);
+      if (e.target && ["pf-filter-acc","pf-filter-dir","pf-filter-status","pf-date-from","pf-date-to"].indexOf(e.target.id)>=0) pfApplyLedgerFilters();
+      if (e.target && ["pf-cf-from","pf-cf-to","pf-cf-account","pf-cf-asset","pf-cf-project","pf-cf-presell"].indexOf(e.target.id)>=0){
+        const CF=state.cashflowFilters=state.cashflowFilters||{};
+        CF.from=document.getElementById("pf-cf-from").value; CF.to=document.getElementById("pf-cf-to").value;
+        CF.accountId=document.getElementById("pf-cf-account").value; CF.assetId=document.getElementById("pf-cf-asset").value;
+        CF.projectId=document.getElementById("pf-cf-project").value; CF.presellProjectId=document.getElementById("pf-cf-presell").value;
+        save(); render(); return;
+      }
+      if (e.target && e.target.id === "pf-presell-cf-sel"){ state.presellProjectCashflowId=e.target.value; save(); render(); return; }
+      if (e.target && e.target.id === "pf-asset-cf-sel"){ state.portfolioAssetCashflowId=e.target.value; save(); render(); return; }
+      if (e.target && e.target.id === "pf-collect-project"){ pfCollectPopulateUnits(); pfCollectPreview(); return; }
+      if (e.target && e.target.id === "pf-collect-unit"){ pfCollectPopulatePayments(); pfCollectPreview(); return; }
+      if (e.target && e.target.id === "pf-collect-payment"){ pfCollectPaymentSelected(); return; }
+      if (e.target && (e.target.id === "pf-collect-account" || e.target.id === "pf-collect-amount" || e.target.id === "pf-collect-date")){ pfCollectPreview(); return; }
+      if (e.target && e.target.id === "pf-collect-proof"){ pfCollectProofSelected(e.target.files&&e.target.files[0]); return; }
+      if (e.target && e.target.id === "pf-ledger-direction") { updatePurposeOptions(e.target.value); updateSubcategoryOptions(""); }
+      if (e.target && e.target.id === "pf-ledger-purpose") updateSubcategoryOptions(e.target.value);
+if (e.target && e.target.id === "pf-ledger-link-type") updateLedgerLinkOptions(e.target.value, "");
+      if (e.target && (e.target.id === "pf-proj-presell" || e.target.id === "pf-proj-presell-scope")) populatePresellScopeRef();
+      if (e.target && e.target.id === "pf-entry-proof") pfOnEntryProofChange();
+      if (e.target && e.target.classList && e.target.classList.contains("pf-proof-replace-input")) pfReplaceProof(e.target);
+      if (e.target && e.target.id === "pf-proof-category-filter") pfApplyProofCategoryFilter(e.target.value);
+    });
+    document.addEventListener("input", e => { if (e.target && e.target.id === "pf-search") pfApplyLedgerFilters(); });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") {
+        const sidebar = $("#sidebar");
+        if (sidebar && sidebar.classList.contains("open")) {
+          sidebar.classList.remove("open");
+        }
+        const modals = Array.prototype.filter.call(document.querySelectorAll(".modal-overlay"), modal => {
+          const style = getComputedStyle(modal);
+          return style.display !== "none" && style.visibility !== "hidden" && !modal.classList.contains("hidden");
+        });
+        const modal = modals[modals.length - 1];
+        if (modal) {
+          const closeBtn = modal.querySelector("[data-modal-close], [data-pf-close-proj], [data-pf-close-phase], .icon-btn[title='Close'], .modal-close");
+          if (closeBtn) closeBtn.click();
+        }
+      }
     });
   }
 
@@ -2615,7 +2796,7 @@ function bindPerView() {
       var anaStatus = d.location.analysis && d.location.analysis.analyzedAt
         ? 'Last scan: ' + C.num(d.location.analysis.typesFound, 0) + ' nearby type(s) found · ' + esc(new Date(d.location.analysis.analyzedAt).toLocaleTimeString())
         : 'Drop a pin, then analyze to validate the address and scan nearby establishments (OpenStreetMap).';
-      html += '<div class="field col-12"><div class="map-tools"><button type="button" class="btn" id="wz-ai-loc">' + icon("spark", 14) + ' Analyze Location from Map</button>' +
+      html += '<div class="field col-12"><div class="map-tools sticky-map-tools"><button type="button" class="btn btn-primary" id="wz-ai-loc">' + icon("spark", 16) + ' Analyze Location from Map</button>' +
         '<span class="dim tiny" id="wz-ai-loc-status">' + anaStatus + '</span></div></div>' +
         (d.location.analysis ? '<div class="field col-12"><div class="notice-banner"><span>' + icon("check", 14) + ' <b>Last analysis:</b> ' + esc(d.location.analysis.address || "Address resolved") + ' · ' + C.num(d.location.analysis.typesFound, 0) + ' type(s) found · ' + esc(new Date(d.location.analysis.analyzedAt).toLocaleString()) + '</span></div></div>' : "");
       var scoreBar = function (val, max) { var pct = Math.min(100, Math.round((val / max) * 100)); var color = pct >= 60 ? "var(--green)" : pct >= 30 ? "var(--amber)" : "var(--text-faint)"; return '<div style="background:var(--surface-2);border-radius:4px;height:6px;width:100%"><div style="background:' + color + ';height:6px;border-radius:4px;width:' + pct + '%"></div></div>'; };
@@ -3554,35 +3735,1636 @@ function bindPerView() {
     return html;
   }
 
-  /* ================= PORTFOLIO ================= */
+  /* ================= PORTFOLIO — Investor control center (Scenario A) ================= */
   function renderPortfolio() {
+    ensurePortfolio();
+    if (!pfCanView()) {
+      return '<div class="pf-perm-denied card card-pad" role="alert"><div class="row" style="gap:12px;align-items:flex-start"><div>' + icon("shield", 22) + '</div><div><h3>Access denied</h3><p class="mt-8">The Investor Portfolio is restricted to the finance owner (admin / super-admin).</p><p class="dim tiny mt-8">Your role: <b>' + esc(roleLabel(userRole())) + '</b> (' + esc(userRole() || "none") + ').' + (userRole() === "admin" ? ' <b>admin</b> is a legacy role — read-only until it is normalized to <b>super-admin</b> at startup (ensureBrokerage).' : ' Contact the finance owner for view access.') + '</p></div></div></div>';
+    }
+    const pfRO = !pfCanWrite();
     const ps = portfolioStats();
-    let html = '<div class="hero"><div><h1>Portfolio</h1><p>All your saved investments.</p></div><div class="actions"><button class="btn btn-primary" data-view="wizard">' + icon("plus", 15) + " New Investment</button></div></div>";
+    const L = window.ESPOR || (typeof require !== "undefined" ? require("./portfolio_ledger.js") : null);
+    // helpers
+    const accBalance = (acc) => {
+      const entries = (state.cashEntries || []).filter(e => e.accountId === acc.id);
+      return L ? L.cashBalance(acc.opening_balance || 0, entries) : (Number(acc.opening_balance)||0);
+    };
+    const totalCash = (state.portfolioAccounts || []).reduce((s,a)=> s + accBalance(a), 0);
+    const postedEntries = (state.cashEntries || []).filter(e=> e.status==="posted");
+    const cashIn = postedEntries.filter(e=>e.direction==="in").reduce((s,e)=> s+Number(e.amount||0),0);
+    const cashOut = postedEntries.filter(e=>e.direction==="out").reduce((s,e)=> s+Number(e.amount||0),0);
+    const receivables = (state.presellPayments || state.presell_payments || []).length ? 0 : 0; // placeholder
+    let html = '<div class="hero"><div><h1>Portfolio</h1><p>Investor control center — assets, cash, construction, preselling.' + (pfCloudWiring.loaded ? ' <span class="badge blue" data-pf-cloud>Cloud synced</span>' : (pfCloud() && pfCloudWiring.missing ? ' <span class="badge gold" data-pf-cloud>Local — cloud tables not found</span>' : '')) + '</p></div><div class="actions"><button class="btn btn-primary" data-view="wizard">' + icon("plus", 15) + " New Investment</button></div></div>";
+    if (pfRO) html += '<div class="notice-banner pf-ro-banner">' + icon("shield", 13) + ' <span>Read-only — posting, reversing, voiding, imports, and construction/proof management require <b>admin / super-admin</b>.</span></div>';
     html += '<div class="grid grid-4 mb-24">' +
       kpi("Portfolio Value", C.money(ps.value), ps.count + " properties", "green", "briefcase") +
-      kpi("Net Worth", C.money(ps.netWorth), "value − loans", "blue", "trending") +
-      kpi("Cash Flow", C.money(ps.cashflow), "annual", "purple", "dollar") +
-      kpi("Sold Profit", C.money(ps.soldProfit), "realized", "gold", "check") + '</div>';
-    html += '<div class="card card-pad"><h3 class="mb-16">Deals</h3>';
-    if (!state.deals.length) {
-      html += '<div class="empty"><h3>No properties yet</h3><p>Create your first investment to build your portfolio.</p><button class="btn btn-primary" data-view="wizard">' + icon("plus", 15) + " New Investment</button></div>";
-    } else {
-      html += '<div class="table-wrap"><table class="data"><tr><th>Property</th><th>Location</th><th>Status</th><th class="num">Investment</th><th class="num">Profit</th><th class="num">ROI</th><th>Grade</th><th>Actions</th></tr>';
-      state.deals.forEach(d => {
-        const m = C.model(d.data), rec = C.recommend(d.data);
-        const cfg = statusCfg(d.status);
-        html += '<tr><td style="cursor:pointer" data-open-deal="' + d.id + '">' + esc(d.data.property.name) + '</td><td>' + esc(d.data.property.city) + '</td>' +
-          '<td><div class="row" style="gap:6px">' + statusBadge(d.status) + statusSelect(d) + '</div>' +
-          (cfg ? '<div class="dim tiny" style="margin-top:4px">' + esc(cfg.note) + '</div>' : "") + '</td>' +
-          '<td class="num">' + C.money(m.returns.investment) + '</td><td class="num">' + C.money(m.returns.profit) + '</td><td class="num">' + C.pct(m.returns.roi) + '</td>' +
-          '<td><span class="badge ' + (rec.pass ? "green" : "red") + '">' + rec.grade + '</span></td>' +
-          '<td><div class="row" style="gap:6px"><button class="btn btn-ghost btn-sm" data-edit-deal="' + d.id + '" title="Edit in Wizard">' + icon("edit", 13) + '</button><button class="btn btn-danger btn-sm" data-delete-deal="' + d.id + '">' + icon("trash", 13) + '</button></div></td></tr>';
+      kpi("Cash (All Accounts)", C.money(totalCash), (state.portfolioAccounts||[]).length+" account(s)", "blue", "dollar") +
+      kpi("Net Worth", C.money(ps.netWorth), "value − loans", "purple", "trending") +
+      kpi("Cash In / Out", C.money(cashIn)+" / "+C.money(cashOut), (postedEntries.length||0)+" posted", "gold", "check") + '</div>';
+    // tabs
+    const tabs = [["overview","Overview"],["assets","Assets"],["cashflow","Cash Flow"],["ledger","Cash Ledger"],["construction","Construction"],["docs","Proofs"]];
+    html += '<div class="tabs" style="gap:6px;flex-wrap:wrap;margin-bottom:14px">' + tabs.map(t=> '<button class="tab'+(state.portfolioTab===t[0]?' active':'')+'" data-ptab="'+t[0]+'">'+t[1]+'</button>').join("") + '</div>';
+    // OVERVIEW
+    if (state.portfolioTab==="overview") {
+      const dealRows=(state.deals||[]).map(d=>{
+        try{
+          const m=C.model(d.data);
+          const sold=statusKey(d.status)==="sold";
+          return { marketValue: dealValue(d), acquisition: m.acquisition.acquisitionCost||0, invested: (m.acquisition.acquisitionCost||0)+(m.returns.totalDevCost||0), loan: m.acquisition.loanAmount||0, realizedProfit: sold ? (m.returns.profit||0) : 0, projectedProfit: sold ? 0 : (m.returns.profit||0) };
+        }catch(e){ return { marketValue:0, acquisition:0, invested:0, loan:0, realizedProfit:0, projectedProfit:0 }; }
       });
-      html += '</table></div>';
-      html += '<div class="row mt-16" style="gap:8px;flex-wrap:wrap">' + statusSummary() + '</div>';
+      const ov = L && L.overviewRollup ? L.overviewRollup({ accounts: state.portfolioAccounts, entries: state.cashEntries, projects: state.constructionProjects, phases: state.constructionPhases, changeOrders: state.changeOrders, presellUnits: state.presellUnits, presellPayments: state.presellPayments, deals: dealRows, today: new Date().toISOString().slice(0,10) }) : null;
+      const nm = (v)=> (ov!=null ? C.money(v||0) : "—");
+      html += '<div class="grid grid-4 mb-24">' +
+        kpi("Portfolio Value", nm(ov&&ov.deals.portfolioValue), (ov? ov.deals.count+" properties · ":"")+"Projected market value", "green", "briefcase") +
+        kpi("Cash Balance", nm(ov&&ov.cash.total), (ov? ov.cash.postedCount+" posted · ":"")+"Posted, actual cash", "blue", "dollar") +
+        kpi("Net Worth", nm(ov&&ov.deals.netWorth), "Projected value - actual debt", "purple", "trending") +
+        kpi("Cash In / Out", ov? C.money(ov.cash.cashIn)+" / "+C.money(ov.cash.cashOut) : "—", "Actual · net "+(ov? C.money(ov.cash.netCash):"—"), "gold", "check") + '</div>';
+      html += '<div class="grid grid-4 mb-24">' +
+        kpi("Receivables", nm(ov&&ov.presell.receivables), "Contractual · unpaid presell schedules", "gold", "doc") +
+        kpi("Payables", nm(ov&&ov.construction.payables), "Committed - paid construction", "red", "doc") +
+        kpi("Construction Cost", nm(ov&&ov.construction.committed), "Committed of "+(ov? C.money(ov.construction.planned):"—")+" planned", "blue", "layers") +
+        kpi("Construction Forecast", nm(ov&&ov.construction.forecast), "Forecast incl. contingency + change orders", "blue", "trending") + '</div>';
+      html += '<div class="grid grid-4 mb-24">' +
+        kpi("Projected Revenue", nm(ov&&ov.presell.bookedRevenue), "Projected · booked presell contracts", "green", "dollar") +
+        kpi("Projected Profit", nm(ov&&ov.deals.projectedProfit), "Projected · model estimate", "purple", "trending") +
+        kpi("Debt", nm(ov&&ov.deals.debt), "Actual · outstanding loans", "gold", "doc") +
+        kpi("Realized Profit", nm(ov&&ov.deals.realizedProfit), "Realized · sold deals", "green", "check") + '</div>';
+      html += '<div class="grid grid-2 mb-24"><div class="card card-pad"><h3>Cash Overview</h3><div class="table-wrap"><table class="data"><tr><th>Account</th><th>Type</th><th class="num">Opening</th><th class="num">Balance</th></tr>';
+      if (!(state.portfolioAccounts||[]).length) html += '<tr><td colspan="4" class="dim">No accounts — create a cash-on-hand account to start.</td></tr>';
+      else (state.portfolioAccounts||[]).forEach(a=>{ html += '<tr><td>'+esc(a.label)+'</td><td>'+esc(a.account_type||'cash')+'</td><td class="num">'+C.money(a.opening_balance||0)+'</td><td class="num"><b>'+C.money(accBalance(a))+'</b></td></tr>'; });
+      html += '</table></div><div class="row mt-8" style="gap:8px">'+(pfRO?'':'<button class="btn btn-primary btn-sm" data-pf-new-acc>'+icon("plus",13)+' New Account</button>')+'<button class="btn btn-ghost btn-sm" data-pf-export-ledger>Export CSV</button></div><p class="dim tiny mt-8">Balance = opening + posted Cash In − posted Cash Out. Draft/pending do not affect balance. PHP</p></div>';
+      html += '<div class="card card-pad"><h3>Construction Summary</h3>';
+      const projCount=(state.constructionProjects||[]).length;
+      const phaseCount=(state.constructionPhases||[]).length;
+      const Lsum=window.ESPOR||(typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+      const agg={ planned:0, committed:0, paid:0, contingency:0, changeOrders:0, retentionRate:0 };
+      (state.constructionProjects||[]).forEach(p=>{
+        const chgs=(state.changeOrders||[]).filter(x=>x.project_id===p.id).reduce((s,x)=>s+Number(x.amount||0),0);
+        const sub= Lsum&&Lsum.constructionProjectSummary? Lsum.constructionProjectSummary({ contingency:p.contingency, retentionRate:p.retention_rate, changeOrders:chgs, phases:(state.constructionPhases||[]).filter(ph=>ph.project_id===p.id) }) : null;
+        if(sub){ agg.planned+=sub.planned; agg.committed+=sub.committed; agg.paid+=sub.paid; agg.contingency+=sub.contingency; agg.changeOrders+=sub.changeOrders; agg.retentionRate+=(sub.retentionRate*sub.committed); }
+      });
+      if(agg.committed) agg.retentionRate=Math.round(100*(agg.retentionRate/agg.committed))/100;
+      const aggForecast=agg.committed+agg.contingency+agg.changeOrders;
+      const overB=(agg.committed>agg.planned);
+      html += '<div class="table-wrap"><table class="data"><tr><th>Projects</th><th>Phases</th><th class="num">Planned</th><th class="num">Committed</th><th class="num">Paid</th><th class="num">Retention</th><th class="num">Forecast</th></tr><tr><td>'+projCount+'</td><td>'+phaseCount+'</td><td class="num">'+C.money(agg.planned)+'</td><td class="num">'+C.money(agg.committed)+'</td><td class="num">'+C.money(agg.paid)+'</td><td class="num">'+C.money(Math.round(agg.retentionRate*agg.committed)/100)+'</td><td class="num">'+C.money(aggForecast)+'</td></tr></table></div>';
+      html += '<div class="row mt-8" style="gap:8px;flex-wrap:wrap"><span class="dim tiny">Variance '+C.money(overB? agg.committed-agg.planned : agg.planned-agg.committed)+(overB?' (over)':'')+' · Contingency '+C.money(agg.contingency)+' · Change orders '+C.money(agg.changeOrders)+' · Forecast = committed + contingency + change orders. All values Committed/Planned — posted cash lives on the Cash Ledger.</span>'+(pfRO?'':'<button class="btn btn-primary btn-sm" data-pf-new-proj>'+icon("plus",13)+' New Construction</button>')+'</div></div></div>';
+      html += '<div class="grid grid-2 mb-24"><div class="card card-pad"><h3>Receivables &amp; Due Schedule</h3>';
+      if (ov) {
+        html += '<div class="pf-ledger-summary">'
+          +'<div><span>Receivables</span><b class="pf-in">'+C.money(ov.presell.receivables)+'</b></div>'
+          +'<div><span>Collected</span><b>'+C.money(ov.presell.collected)+'</b></div>'
+          +'<div><span>Due soon</span><b class="pf-out">'+C.money(ov.presell.dueTotal)+'</b></div>'
+          +'<div><span>Overdue</span><b class="pf-out">'+C.money(ov.presell.overdueTotal)+'</b></div></div>';
+        if (!(ov.presell.units||0)) html += '<p class="dim tiny mt-8">No presell units yet — receivables come from scheduled presell collections.</p>';
+        if (ov.due.upcoming.length) html += '<div class="table-wrap mt-8"><table class="data"><tr><th>Due date</th><th>Item</th><th class="num">Amount</th></tr>'+ ov.due.upcoming.slice(0,5).map(it=>'<tr><td>'+esc(it.dueDate)+'</td><td>'+esc(it.label)+'</td><td class="num">'+C.money(it.amount)+'</td></tr>').join('')+'</table></div>';
+        if (ov.due.overdue.length) html += '<div class="notice-banner mt-8">'+icon("bell",12)+' <span>'+ov.due.overdue.length+' overdue payment(s) totaling '+C.money(ov.presell.overdueTotal)+' — review presell schedules.</span></div>';
+      } else html += '<p class="dim">Rollup unavailable.</p>';
+      html += '</div>';
+      html += '<div class="card card-pad"><h3>Payables &amp; Debt</h3>' + (ov?
+        '<div class="pf-ledger-summary">'
+        +'<div><span>Payables</span><b class="pf-out">'+C.money(ov.construction.payables)+'</b></div>'
+        +'<div><span>Retention held</span><b class="pf-out">'+C.money(ov.construction.retention)+'</b></div>'
+        +'<div><span>Debt</span><b class="pf-out">'+C.money(ov.deals.debt)+'</b></div>'
+        +'<div><span>Acquisition cost</span><b>'+C.money(ov.deals.acquisitionCost)+'</b></div></div>'
+        +'<p class="dim tiny mt-8">Invested capital (Acquisition + development): <b>'+C.money(ov.deals.investedCapital)+'</b>. Payables = Committed − Paid. Amounts are Actual unless stated otherwise.</p>'
+        : '<p class="dim">Rollup unavailable.</p>') + '</div></div>';
+      html += '<div class="notice-banner">'+icon("info",14)+' <span>Cash ledger is <b>real on save</b> (admin, per your choice). Posted entries affect balance immediately. Use <b>Reversal</b> to correct posted mistakes — no silent edits.</span></div>';
     }
-    html += '</div>';
+    // ASSETS
+    if (state.portfolioTab==="assets") {
+      html += '<div class="card card-pad"><h3 class="mb-16">Assets (linked deals)</h3>';
+      if (!state.deals.length) html += '<div class="empty"><h3>No properties yet</h3><p>Create your first investment to build your portfolio.</p><button class="btn btn-primary" data-view="wizard">'+icon("plus",15)+' New Investment</button></div>';
+      else {
+        html += '<div class="table-wrap"><table class="data"><tr><th>Property</th><th>Location</th><th>Status</th><th class="num">Investment</th><th class="num">Profit</th><th>Linked</th><th>Actions</th></tr>';
+        state.deals.forEach(d=>{
+          const m=C.model(d.data), rec=C.recommend(d.data);
+          const linkedCash=(state.cashEntries||[]).filter(e=> e.linked_asset_id===d.id && e.status==="posted").length;
+          const linkedProj=(state.constructionProjects||[]).filter(p=> p.asset_id===d.id).length;
+          html += '<tr><td style="cursor:pointer" data-open-deal="'+d.id+'">'+esc(d.data.property.name)+'</td><td>'+esc(d.data.property.city)+'</td><td>'+statusBadge(d.status)+'</td><td class="num">'+C.money(m.returns.investment)+'</td><td class="num">'+C.money(m.returns.profit)+'</td><td><span class="dim tiny">'+(linkedCash? linkedCash+' cash':'')+(linkedCash&&linkedProj?' · ':'')+(linkedProj? linkedProj+' proj':'')+'</span></td><td><div class="row" style="gap:6px"><button class="btn btn-ghost btn-sm" data-pf-asset-cf="'+d.id+'" title="Asset cash-flow timeline">'+icon("chart",13)+' Cash Flow</button><button class="btn btn-ghost btn-sm" data-edit-deal="'+d.id+'">'+icon("edit",13)+'</button><button class="btn btn-danger btn-sm" data-delete-deal="'+d.id+'">'+icon("trash",13)+'</button></div></td></tr>';
+        });
+        html += '</table></div>';
+      }
+      html += '</div>';
+      // Asset cash-flow timeline (date-ordered, actual + estimated, source-linked)
+      const atlSel = state.portfolioAssetCashflowId && (state.deals||[]).some(d=>d.id===state.portfolioAssetCashflowId) ? state.portfolioAssetCashflowId : ((state.deals||[])[0]&&(state.deals||[])[0].id||"");
+      html += '<div class="card card-pad mt-16"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h3>Asset Cash-Flow Timeline</h3><p class="dim tiny">Actual posted cash linked to this asset/deal plus Estimated deal-model records (acquisition, financing, owner equity, projected revenue). Never combine the two into one number.</p></div><label class="field" style="min-width:220px"><span>Asset</span><select class="input" id="pf-asset-cf-sel">'+(state.deals||[]).map(d=>'<option value="'+esc(d.id)+'"'+(d.id===atlSel?' selected':'')+'>'+esc(d.data.property.name)+'</option>').join("")+'</select></label></div>';
+      if(!(state.deals||[]).length) html += '<p class="dim mt-8">No linked assets yet — create an investment first.</p>';
+      else {
+        const adeal = (state.deals||[]).find(d=>d.id===atlSel);
+        const atl = L && L.assetTimeline ? L.assetTimeline({ assetId: adeal.id, asset: (function(){ try{ const m=C.model(adeal.data); return { label: adeal.data.property.name, acquisition: m.acquisition.acquisitionCost||0, loan: m.acquisition.loanAmount||0, invested: (m.acquisition.acquisitionCost||0)+(m.returns.totalDevCost||0), acquiredAt: adeal.data.acquiredAt||adeal.created_at, projectedProfit: statusKey(adeal.status)==="sold"?0:(m.returns.profit||0), projectedAt: adeal.data.projectedAt||adeal.created_at, realizedProfit: statusKey(adeal.status)==="sold"?(m.returns.profit||0):0 }; }catch(e){ return {}; } })(), entries: state.cashEntries, today: new Date().toISOString().slice(0,10) }) : null;
+        const tt = atl.totals;
+        html += '<div class="pf-ledger-summary">'
+          +'<div><span>Paid cost (actual)</span><b>'+C.money(tt.paidCost)+'</b></div>'
+          +'<div><span>Remaining cost (est.)</span><b>'+C.money(tt.remainingCost)+'</b></div>'
+          +'<div><span>Debt (loan, est.)</span><b class="pf-out">'+C.money(tt.debt)+'</b></div>'
+          +'<div><span>Posted income</span><b class="pf-in">'+C.money(tt.postedIncome)+'</b></div>'
+          +'<div><span>Posted expenses</span><b class="pf-out">'+C.money(tt.postedExpenses)+'</b></div>'
+          +'<div><span>Projected revenue</span><b>'+C.money(tt.projectedRevenue)+'</b></div>'
+          +'<div><span>Realized profit</span><b class="pf-in">'+C.money(tt.realizedProfit)+'</b></div></div>';
+        const rows = (atl && atl.events) || [];
+        html += '<div class="table-wrap mt-8 pf-ledger-table-wrap"><table class="data"><tr><th>Date</th><th>Item</th><th class="num">Amount</th><th>Account</th><th>Basis</th><th>Source</th><th>Proof</th></tr>';
+        if(!rows.length) html += '<tr><td colspan="7" class="dim">No actual entries or deal estimates for ' + esc(atl.label) + '.</td></tr>';
+        else rows.forEach(ev=>{
+          const accLabel = (state.portfolioAccounts||[]).find(a=>a.id===ev.accountId);
+          const basisBadge = ev.actual? '<span class="badge green">Actual</span>' : '<span class="badge gray" title="Deal-model estimate — not posted cash">Estimated</span>';
+          html += '<tr data-pf-asset-event data-pf-entry="'+esc(ev.id)+'" data-pf-entry-actual="'+(ev.actual?'1':'0')+'"><td>'+esc(ev.date||'')+'</td><td>'+esc(ev.label)+(ev.description? '<div class="tiny dim">'+esc(ev.description)+'</div>':'')+'</td><td class="num"><span class="'+(ev.direction==="out"?'pf-out':'pf-in')+'">'+C.money(ev.amount)+'</span></td><td class="tiny">'+esc(accLabel?accLabel.label:(ev.accountId||"—"))+'</td><td>'+basisBadge+'</td><td class="tiny">'+esc(ev.ref||ev.source||"—")+'</td><td class="tiny">'+(ev.proof? ev.proof+' proof':'-')+'</td></tr>';
+        });
+        html += '</table></div><p class="dim tiny mt-8">Green "Actual" rows are posted ledger entries and affect cash; gray "Estimated" rows are deal-model projections and never touch the balance. Click an actual row to open it in the ledger.</p>';
+      }
+      html += '</div>';
+    }
+    // LEDGER
+    if (state.portfolioTab==="ledger") {
+      const entries=(state.cashEntries||[]).slice().sort((a,b)=> String(b.entry_date||b.created_at).localeCompare(String(a.entry_date||a.created_at)));
+      html += '<div class="card card-pad pf-ledger-shell"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h3>Cash Ledger (Investor)</h3><p class="dim tiny">Record actual ES Realty cash movements. Posted entries update the account balance immediately.</p></div><div class="row" style="gap:8px;flex-wrap:wrap">'+(pfRO?'':'<button class="btn btn-primary" data-pf-new-entry>'+icon("plus",14)+' New Cash Entry</button>')+(pfRO?'':'<button class="btn btn-ghost" data-pf-migrate-presell title="Backfill paid presell collections into the ledger">'+icon("download",13)+' Import Presell</button>')+'<button class="btn btn-ghost" data-pf-export-ledger>Export CSV</button></div></div>';
+      html += '<div class="pf-ledger-summary"><div><span>Posted entries</span><b>'+postedEntries.length+'</b></div><div><span>Cash In</span><b class="pf-in">'+C.money(cashIn)+'</b></div><div><span>Cash Out</span><b class="pf-out">'+C.money(cashOut)+'</b></div><div><span>Current cash</span><b>'+C.money(totalCash)+'</b></div></div>';
+const FL=(state.cashLedgerFilters)||{};
+      html += '<div class="pf-ledger-filters" aria-label="Ledger filters"><label class="field"><span>Account</span><select class="input" id="pf-filter-acc"><option value="">All accounts</option>'+(state.portfolioAccounts||[]).map(a=>'<option value="'+esc(a.id)+'"'+(String(FL.accountId||"")===a.id?' selected':'')+'>'+esc(a.label)+'</option>').join("")+'</select></label><label class="field"><span>Direction</span><select class="input" id="pf-filter-dir"><option value="">Cash In & Out</option><option value="in"'+(FL.direction==="in"?' selected':'')+'>Cash In</option><option value="out"'+(FL.direction==="out"?' selected':'')+'>Cash Out</option></select></label><label class="field"><span>Status</span><select class="input" id="pf-filter-status"><option value="">All statuses</option><option value="draft"'+(FL.status==="draft"?' selected':'')+'>Draft</option><option value="pending"'+(FL.status==="pending"?' selected':'')+'>Pending</option><option value="posted"'+(FL.status==="posted"?' selected':'')+'>Posted</option><option value="reversed"'+(FL.status==="reversed"?' selected':'')+'>Reversed</option><option value="voided"'+(FL.status==="voided"?' selected':'')+'>Voided</option></select></label><label class="field pf-ledger-search"><span>Search</span><input class="input" id="pf-search" value="'+esc(FL.search||"")+'" placeholder="Description, counterparty, reference"></label><label class="field"><span>From</span><input class="input" id="pf-date-from" type="date" value="'+esc(FL.from||"")+'"></label><label class="field"><span>To</span><input class="input" id="pf-date-to" type="date" value="'+esc(FL.to||"")+'"></label><button class="btn btn-ghost" type="button" data-pf-clear-filters>Clear filters</button></div>';
+      html += '<div class="row mt-8" style="justify-content:space-between;gap:8px;align-items:center"><span class="dim tiny" id="pf-ledger-count">Showing '+entries.length+' entries</span><span class="dim tiny">Posted balance only · PHP</span></div>';
+      html += '<div class="table-wrap mt-8 pf-ledger-table-wrap"><table class="data pf-ledger-table"><thead><tr><th>Date</th><th>Account</th><th>Direction</th><th class="num">Amount</th><th>Purpose</th><th>Linked</th><th>Proof</th><th>Status</th><th class="num">Balance</th><th>Actions</th></tr></thead><tbody>';
+      if(!entries.length) html+='<tr><td colspan="10" class="dim">No entries — create Cash In or Cash Out.</td></tr>';
+      else {
+        // running balance per account for display
+        const balMap={}; const accMap={}; (state.portfolioAccounts||[]).forEach(a=>{ balMap[a.id]=Number(a.opening_balance||0); accMap[a.id]=a.label; });
+        // sort by date asc for balance calc, but display desc — compute in asc then map
+        const asc=entries.slice().sort((a,b)=> String(a.entry_date||a.created_at).localeCompare(String(b.entry_date||b.created_at)));
+        const balAfter={};
+        asc.forEach(e=>{
+          if(e.status==="posted"){
+            if(e.direction==="in") balMap[e.accountId]=(balMap[e.accountId]||0)+Number(e.amount||0);
+            else balMap[e.accountId]=(balMap[e.accountId]||0)-Number(e.amount||0);
+          }
+          balAfter[e.id]= balMap[e.accountId]||0;
+        });
+        entries.forEach(e=>{
+          const accName=accMap[e.accountId]||String(e.accountId||"").slice(0,8);
+          const purpose=e.direction==="out"? (e.purpose||'')+(e.subcategory? ' / '+esc(e.subcategory):'') : '-';
+          const linked= e.linked_asset_id? 'asset:'+esc(e.linked_asset_id.slice(0,6)) : e.linked_construction_id? 'proj:'+esc(e.linked_construction_id.slice(0,6)) : e.linked_presell_project_id? 'pre-selling:'+esc(e.linked_presell_project_id.slice(0,6)) : e.linked_presell_payment_id? 'pre-selling:'+esc(e.linked_presell_payment_id.slice(0,6)) : '-';
+          const proof= (e.proofs&&e.proofs.length)? e.proofs.length+' proof'+(e.proofs.length>1?'s':'') : e.proof_count? e.proof_count+' proof'+(e.proof_count>1?'s':'') : (e.proof? '1 proof':'-');
+          const isRev= !!e.reversalOf;
+          const revOf= (state.cashEntries||[]).some(x=>x.reversalOf===e.id);
+          const displayStatus= isRev? "reversed" : (e.status==="posted" && revOf)? "reversed" : e.status;
+          const stClass= isRev||(e.status==="posted"&&revOf)? "gray" : e.status==="posted"? "green" : e.status==="draft"? "gold" : e.status==="pending"? "blue" : e.status==="voided"? "red" : "gray";
+          const dirLabel= isRev? "Reversal" : (e.direction==="in"?"Cash In":"Cash Out");
+let actions;
+            if(pfRO){ actions='<span class="dim tiny" title="Posting, reverse, void, purge need admin/super-admin">owner only</span>'; }
+            else {
+            actions='<div class="row" style="gap:4px">';
+            if(isRev || (e.status==="posted"&&revOf)){ actions+='<span class="tiny dim">locked</span>'; }
+            else if(e.status==="draft"||e.status==="pending"){ actions+='<button class="btn btn-ghost btn-sm" data-pf-edit-entry="'+e.id+'" title="Edit draft">'+icon("edit",12)+'</button><button class="btn btn-danger btn-sm" data-pf-del-entry="'+e.id+'" title="Void entry">'+icon("trash",12)+'</button>'; }
+            else if(e.status==="posted"){ actions+='<button class="btn btn-ghost btn-sm" data-pf-reverse="'+e.id+'" title="Reverse entry">'+icon("undo",12)+'</button>'; }
+            else if(e.status==="voided"){ actions+='<button class="btn btn-danger btn-sm" data-pf-purge-entry="'+e.id+'" title="Permanently delete voided entry">'+icon("trash",12)+'</button>'; }
+            actions+='</div>';
+            }
+          html += '<tr data-pf-ledger-row data-pf-entry-id="'+esc(e.id)+'" data-account="'+esc(e.accountId)+'" data-direction="'+esc(e.direction)+'" data-status="'+esc(displayStatus)+'" data-date="'+esc(e.entry_date||"")+'" data-search="'+esc([e.description,e.counterparty,e.reference_no,e.purpose,e.subcategory].join(" ").toLowerCase())+'"><td>'+esc(e.entry_date||'')+'</td><td>'+esc(accName)+'</td><td><span class="badge '+(e.direction==="in"?"green":"gold")+'">'+dirLabel+(revOf?' <span class="dim tiny" title="Reversed">&#x21A9;</span>':'')+'</span></td><td class="num">'+C.money(e.amount)+'</td><td>'+esc(purpose||'-')+'</td><td>'+linked+'</td><td>'+proof+'</td><td><span class="badge '+stClass+'">'+esc(displayStatus)+'</span></td><td class="num">'+C.money(balAfter[e.id]||0)+'</td><td>'+actions+'</td></tr>';
+        });
+      }
+      html+='</tbody></table></div><p class="dim tiny mt-8">Cash In increases balance. Cash Out decreases balance and requires one purpose: Project Selling, Construction, or Others. Posted records are corrected with reversal (locked after). Drafts can be edited/voided; voided drafts can be purged. </p>';
+      const audits=(state.portfolioAuditEvents||[]).slice().sort((a,b)=>String(b.at).localeCompare(String(a.at))).slice(0,12);
+      html+='<div class="card card-pad mt-16"><div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><h3>Audit Trail</h3><span class="dim tiny">latest '+audits.length+' · every post, edit, reverse, void, purge</span></div>';
+      if(!audits.length) html+='<p class="dim tiny">No audit events yet.</p>';
+      else {
+        html+='<div class="table-wrap mt-8"><table class="data pf-audit-table"><tr><th>When</th><th>Actor</th><th>Action</th><th>Ref</th><th>Detail</th></tr>';
+        audits.forEach(a=>{
+          const actClass= a.action.indexOf("revers")>=0 || a.action==="entry_deleted"||a.action==="entry_voided"? "red" : a.action.indexOf("post")>=0? "green" : a.action==="status_changed"? "blue" : "gold";
+          html+='<tr><td class="tiny">'+esc((a.at||"").slice(0,19).replace("T"," "))+'</td><td>'+esc(a.actor||"")+'</td><td><span class="badge '+actClass+'">'+esc(a.action)+'</span></td><td>'+esc(a.refLabel||String(a.refId||"-").slice(0,10))+'</td><td class="tiny">'+esc(a.detail||"")+'</td></tr>';
+        });
+        html+='</table></div>';
+      }
+      html+='</div></div>';
+    }
+// CONSTRUCTION
+    if (state.portfolioTab==="construction") {
+      const L=window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+      const stCls=s=> s==="completed"? "green" : s==="under construction"? "blue" : s==="on hold"? "gold" : s==="archived"? "gray" : "blue";
+      html += '<div class="card card-pad"><div class="row" style="justify-content:space-between;align-items:center"><h3>Construction Projects</h3>'+(pfRO?'':'<button class="btn btn-primary btn-sm" data-pf-new-proj>'+icon("plus",13)+' New Project</button>')+'</div>';
+      if(!(state.constructionProjects||[]).length) html+='<div class="dim mt-8">No projects — link to an asset or presell project.</div>';
+      else {
+        html+='<div class="table-wrap mt-8"><table class="data"><tr><th>Name</th><th>Asset/Presell</th><th>Status</th><th class="num">Contract</th><th class="num">Contingency</th><th class="num">Retention</th><th>Actions</th></tr>';
+        (state.constructionProjects||[]).forEach(p=>{
+          const asset= (state.deals||[]).find(d=>d.id===p.asset_id);
+          const presell= (state.presellProjects||[]).find(x=>x.id===p.presell_project_id);
+          html+='<tr><td>'+esc(p.name)+'</td><td>'+esc(asset?asset.data.property.name:(presell?presell.name:p.asset_id||"-"))+'</td><td><span class="badge '+stCls(p.status)+'">'+esc(p.status||'planned')+'</span></td><td class="num">'+C.money(p.contract_value||0)+'</td><td class="num">'+C.money(p.contingency||0)+'</td><td class="num">'+(p.retention_rate!=null? p.retention_rate+'%':'-')+'</td><td><div class="row" style="gap:4px"><button class="btn btn-ghost btn-sm" data-pf-open-proj="'+p.id+'">'+icon("eye",12)+'</button>'+(pfRO?'':'<button class="btn btn-ghost btn-sm" data-pf-edit-proj="'+p.id+'">'+icon("edit",12)+'</button><button class="btn btn-danger btn-sm" data-pf-del-proj="'+p.id+'" title="Delete project">'+icon("trash",12)+'</button>')+'</div></td></tr>';
+        });
+        html+='</table></div>';
+      }
+      html+='</div>';
+      // phases of selected project
+      const selProj=(state.constructionProjects||[]).find(p=>p.id===state.portfolioSelectedConstructionId) || (state.constructionProjects||[])[0];
+      if(selProj){
+        const phases=(state.constructionPhases||[]).filter(ph=>ph.project_id===selProj.id);
+        const vendors=(state.constructionVendors||[]).filter(v=>v.project_id===selProj.id);
+        const invoices=(state.constructionInvoices||[]).filter(i=>i.project_id===selProj.id);
+        const changes=(state.changeOrders||[]).filter(x=>x.project_id===selProj.id);
+        const psum= L && L.constructionProjectSummary? L.constructionProjectSummary({ contractValue:selProj.contract_value, contingency:selProj.contingency, retentionRate:selProj.retention_rate, allocation:selProj.allocation, changeOrders: changes.reduce((s,x)=>s+Number(x.amount||0),0), phases:phases }) : null;
+        // project detail card
+        html+='<div class="card card-pad mt-16"><h3 class="mb-8">'+esc(selProj.name)+' <span class="badge '+stCls(selProj.status)+'">'+esc(selProj.status||"planned")+'</span></h3>';
+        if(psum){
+          html+='<div class="pf-ledger-summary">'
+            +'<div><span>Planned phases</span><b>'+C.money(psum.planned)+'</b></div>'
+            +'<div><span>Committed</span><b class="pf-out">'+C.money(psum.committed)+'</b></div>'
+            +'<div><span>Paid</span><b>'+C.money(psum.paid)+'</b></div>'
+            +'<div><span>Contingency</span><b>'+C.money(psum.contingency)+'</b></div>'
+            +'<div><span>Change orders</span><b>'+C.money(psum.changeOrders)+'</b></div>'
+            +'<div><span>Forecast final</span><b>'+C.money(psum.forecast)+'</b></div>'
+            +'<div><span>Retention ('+(selProj.retention_rate||0)+'%)</span><b>'+C.money(psum.retention)+'</b></div>'
+            +'<div><span>Variance</span><b class="'+(psum.variance<0?'pf-overdraft':'')+'">'+(psum.variance<0?'−':'')+C.money(Math.abs(psum.variance))+'</b></div></div>';
+          if(psum.overbudget) html+='<div class="notice-banner mt-8 warn">'+icon("alert",13)+' <span>Committed <b>'+C.money(psum.committed)+'</b> exceeds planned phases <b>'+C.money(psum.planned)+'</b>. Over budget by '+C.money(psum.variance*-1)+'.</span></div>';
+          if(psum.overpaid) html+='<div class="notice-banner mt-8 warn">'+icon("alert",13)+' <span>Paid <b>'+C.money(psum.paid)+'</b> is ahead of earned progress ('+(psum.progress||0).toFixed(1)+'% → '+C.money(psum.earned)+' earned). Confirm before releasing more.</span></div>';
+        html+='<div class="row mt-8" style="gap:10px;flex-wrap:wrap"><span class="dim tiny">Cost allocation: <b>'+esc(selProj.allocation||psum.allocation||"equal")+'</b>'+(selProj.contractor? ' · Contractor: <b>'+esc(selProj.contractor)+'</b>':'')+(selProj.site? ' · Site: '+esc(selProj.site):'')+'</span></div>';
+        }
+        if(selProj.presell_link){
+          html+='<div class="row mt-8" style="gap:10px;flex-wrap:wrap"><div class="notice-banner mt-8" style="flex:1;min-width:260px">'+icon("link",12)+' <span>Presell link: <b>'+esc(selProj.presell_link.scope==="project"? (()=>{const pp=(state.presellProjects||[]).find(x=>x.id===selProj.presell_project_id); return pp?pp.name:selProj.presell_project_id;})() : selProj.presell_link.scope+' · '+selProj.presell_link.value)+'</b> — cost per unit and collections roll into Overview.</span></div></div>';
+        }
+        const totalCommitted=phases.reduce((s,p)=>s+Number(p.committed||0),0);
+        const totalPaid=phases.reduce((s,p)=>s+Number(p.paid||0),0);
+        html+='<div class="row mt-8" style="gap:8px;flex-wrap:wrap">'+(pfRO?'':'<button class="btn btn-ghost btn-sm" data-pf-add-phase="'+selProj.id+'">'+icon("plus",12)+' Add Phase</button><button class="btn btn-ghost btn-sm" data-pf-new-vendor="'+selProj.id+'">'+icon("plus",12)+' Vendor</button><button class="btn btn-ghost btn-sm" data-pf-new-invoice="'+selProj.id+'">'+icon("plus",12)+' Invoice</button><button class="btn btn-ghost btn-sm" data-pf-new-change="'+selProj.id+'">'+icon("plus",12)+' Change Order</button>')+'</div>';
+        html+='<h4 class="mt-16 mb-8">Phases <span class="dim tiny">('+phases.length+')</span></h4>';
+        html+='<div class="table-wrap mt-8"><table class="data"><tr><th>Phase</th><th class="num">Planned</th><th class="num">Approved</th><th class="num">Committed</th><th class="num">Paid</th><th>Alloc</th><th>Status</th><th>Actions</th></tr>';
+        if(!phases.length) html+='<tr><td colspan="8" class="dim">No phases — add foundation, structure, etc.</td></tr>';
+        else phases.forEach(ph=>{
+          const cs= L&&L.constructionSummary? L.constructionSummary({ planned:ph.planned_budget||0, committed:ph.committed||0, paid:ph.paid||0, contingency:0, progress:ph.percent_complete, allocation:ph.allocation||selProj.allocation }) : null;
+          const csBadge= cs? (cs.status==="over-budget"? 'red' : cs.status==="paid"? 'green' : cs.status==="in-progress"? 'blue' : 'gold') : 'gray';
+          const warn= cs&&cs.overpaid? ' <span class="badge red" title="Paid is ahead of earned progress">overpaid</span>' : '';
+          html+='<tr><td>'+esc(ph.name)+(ph.responsible?'<div class="tiny dim">'+esc(ph.responsible)+'</div>':'')+'</td><td class="num">'+C.money(ph.planned_budget||0)+'</td><td class="num">'+C.money(ph.approved_budget||0)+'</td><td class="num">'+C.money(ph.committed||0)+'</td><td class="num">'+C.money(ph.paid||0)+'</td><td class="tiny">'+esc(ph.allocation||selProj.allocation||"equal")+'</td><td><span class="badge '+csBadge+'">'+esc(cs?cs.status:(ph.percent_complete?'in-progress':'planned'))+'</span>'+(ph.percent_complete?' <span class="tiny dim" title="progress">'+ph.percent_complete+'%</span>':'')+warn+'</td><td>'+(pfRO?'<span class="tiny dim">owner only</span>':'<div class="row" style="gap:4px"><button class="btn btn-ghost btn-sm" data-pf-edit-phase="'+ph.id+'" title="Edit phase">'+icon("edit",12)+'</button><button class="btn btn-danger btn-sm" data-pf-del-phase="'+ph.id+'" title="Delete phase">'+icon("trash",12)+'</button></div>')+'</td></tr>';
+        });
+        html+='</table></div>';
+        // project cash-flow panel
+        const pcf = L && L.projectCashflow ? L.projectCashflow({ projectId:selProj.id, project:selProj, phases:phases, invoices:invoices, changeOrders:changes, entries:state.cashEntries, presellUnits:state.presellUnits, presellPayments:state.presellPayments, today:new Date().toISOString().slice(0,10) }) : null;
+        if(pcf){
+          html+='<div class="card card-pad mt-16"><h3 class="mb-0">Cash Flow <span class="dim tiny">(project level)</span></h3>';
+          html+='<div class="pf-ledger-summary">'
+            +'<div><span>Paid to date <span class="badge green" style="font-weight:600">Posted</span></span><b class="pf-out">'+C.money(pcf.summary.paid)+'</b></div>'
+            +'<div><span>Cash required to complete <span class="badge blue" style="font-weight:600">Forecast</span></span><b class="pf-out">'+C.money(pcf.cashRequiredToComplete)+'</b></div>'
+            +'<div><span>Progress vs paid</span><b>'+(pcf.summary.progress||0).toFixed(1)+'% / '+pcf.summary.paidRate+'%</b></div>'
+            +'<div><span>Collections from presell units <span class="badge green" style="font-weight:600">Posted</span></span><b class="pf-in">'+C.money(pcf.collectedFromPresell)+'</b></div></div>';
+          pcf.warnings.forEach(w=>{ html+='<div class="notice-banner mt-8 '+(w.tone==="warn"?'warn':'')+'">'+icon("alert",13)+' <span>'+esc(w.message)+'</span></div>'; });
+          if(pcf.ledgerMismatch) html+='<div class="notice-banner mt-8 warn">'+icon("alert",13)+' <span>Collection ledger footprint ('+C.money(pcf.ledgerFootprint)+') does not reconcile 1:1 with paid schedules — review linked presell collections.</span></div>';
+          html+='<h4 class="mt-16 mb-8">Construction Cash Out entries <span class="badge green" style="font-weight:600">Posted</span></h4>';
+          html+='<div class="table-wrap pf-ledger-table-wrap"><table class="data"><tr><th>Date</th><th>Phase</th><th class="num">Amount</th><th>Description</th><th>Reference</th><th>Proof</th></tr>';
+          if(!pcf.cashOut.length) html+='<tr><td colspan="6" class="dim">No posted cash-out entries linked to this project yet.</td></tr>';
+          else pcf.cashOut.forEach(eo=>{
+            const phName=(state.constructionPhases||[]).find(x=>x.id===eo.phaseId);
+            html+='<tr><td>'+esc(eo.date)+'</td><td>'+esc(phName?phName.name:"—")+'</td><td class="num">'+C.money(eo.amount)+'</td><td>'+esc(eo.description||"—")+'</td><td class="tiny">'+esc(eo.reference||"—")+'</td><td class="tiny">'+(eo.proof? eo.proof+' proof':'-')+'</td></tr>';
+          });
+          html+='</table></div>';
+          html+='<h4 class="mt-16 mb-8">Upcoming invoices <span class="badge gold" style="font-weight:600">Payable</span></h4>';
+          html+='<div class="table-wrap pf-ledger-table-wrap"><table class="data"><tr><th>Invoice</th><th>Due</th><th class="num">Amount</th><th>Vendor</th><th>Status</th></tr>';
+          if(!pcf.unpaidInvoices.length) html+='<tr><td colspan="5" class="dim">No unpaid invoices — payables due are held only as committed phase cost until invoiced.</td></tr>';
+          else pcf.unpaidInvoices.forEach(iv=>{
+            const v=(state.constructionVendors||[]).find(x=>x.id===iv.vendorId);
+            html+='<tr><td>'+esc(iv.invoice_no||String(iv.id).slice(0,6))+'</td><td>'+esc(iv.date)+'</td><td class="num">'+C.money(iv.amount)+'</td><td>'+esc(v?v.name:"—")+'</td><td><span class="badge gray">'+esc(iv.status)+'</span></td></tr>';
+          });
+          html+='</table></div></div>';
+        }
+        // invoices
+        html+='<div class="card card-pad mt-16"><div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><h3 class="mb-0">Invoices <span class="dim tiny">('+invoices.length+')</span></h3><span class="dim tiny">'+(totalPaid? 'Paid to date '+C.money(totalPaid):'no paid invoices yet')+'</span></div>';
+        if(!invoices.length) html+='<p class="dim tiny mt-8">No invoices yet. Add an invoice and pay it — payment creates exactly one posted cash-out entry linked to this project/phase.</p>';
+        else {
+          html+='<div class="table-wrap mt-8"><table class="data"><tr><th>Invoice No</th><th>Vendor</th><th>Phase</th><th class="num">Amount</th><th>Status</th><th>Actions</th></tr>';
+          invoices.forEach(i=>{
+            const v=(state.constructionVendors||[]).find(x=>x.id===i.vendor_id);
+            const ph=(state.constructionPhases||[]).find(x=>x.id===i.phase_id);
+            const paidBtn= i.status!=="paid"? '<button class="btn btn-primary btn-sm" data-pf-pay-invoice="'+i.id+'" title="Pay from cash ledger">Pay</button><button class="btn btn-danger btn-sm" data-pf-del-invoice="'+i.id+'" title="Delete invoice">'+icon("trash",12)+'</button>' : '<span class="tiny dim">via '+esc(String(i.ledger_entry_id||"").slice(0,6))+'</span>';
+            html+='<tr><td>'+esc(i.invoice_no)+(i.date?'<div class="tiny dim">'+esc(i.date)+'</div>':'')+'</td><td>'+esc(v?v.name:"—")+'</td><td>'+esc(ph?ph.name:(i.phase_id?String(i.phase_id).slice(0,6):"—"))+'</td><td class="num">'+C.money(i.amount)+'</td><td><span class="badge '+(i.status==="paid"?"green":i.status==="approved"?"blue":"gray")+'">'+esc(i.status)+'</span></td><td><div class="row" style="gap:4px">'+paidBtn+'</div></td></tr>';
+          });
+          html+='</table></div>';
+        }
+        html+='</div>';
+        // vendors
+        html+='<div class="card card-pad mt-16"><div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><h3 class="mb-0">Vendors / Contractors <span class="dim tiny">('+vendors.length+')</span></h3></div>';
+        if(!vendors.length) html+='<p class="dim tiny mt-8">No vendors yet — add contractors so invoices can be attributed.</p>';
+        else {
+          html+='<div class="table-wrap mt-8"><table class="data"><tr><th>Name</th><th>Contact</th><th>Tax ID</th><th>Actions</th></tr>';
+          vendors.forEach(v=>{
+            html+='<tr><td>'+esc(v.name)+'</td><td>'+esc(v.contact||"—")+'</td><td class="tiny">'+esc(v.tax_id||"—")+'</td><td><div class="row" style="gap:4px"><button class="btn btn-ghost btn-sm" data-pf-edit-vendor="'+v.id+'">'+icon("edit",12)+'</button><button class="btn btn-danger btn-sm" data-pf-del-vendor="'+v.id+'" title="Delete vendor">'+icon("trash",12)+'</button></div></td></tr>';
+          });
+          html+='</table></div>';
+        }
+        html+='</div>';
+        // change orders
+        html+='<div class="card card-pad mt-16"><div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px"><h3 class="mb-0">Change Orders <span class="dim tiny">('+changes.length+')</span></h3><span class="dim tiny">'+C.money(changes.reduce((s,x)=>s+Number(x.amount||0),0))+' added to forecast</span></div>';
+        if(!changes.length) html+='<p class="dim tiny mt-8">No change orders. Each approved CO adds to the forecast final cost with an approver and date.</p>';
+        else {
+          html+='<div class="table-wrap mt-8"><table class="data"><tr><th>Reason</th><th class="num">Amount</th><th>Approver</th><th>Date</th><th>Actions</th></tr>';
+          changes.forEach(x=>{
+            html+='<tr><td>'+esc(x.reason)+'</td><td class="num">'+C.money(x.amount)+'</td><td>'+esc(x.approver||"—")+'</td><td>'+esc(x.date||"")+'</td><td><button class="btn btn-danger btn-sm" data-pf-del-change="'+x.id+'" title="Delete change order">'+icon("trash",12)+'</button></td></tr>';
+          });
+          html+='</table></div>';
+        }
+html+='</div></div>';
+      }
+    }
+    // CASH FLOW
+    if (state.portfolioTab==="cashflow") {
+      const CF = state.cashflowFilters = state.cashflowFilters || {};
+      const todayISO = new Date().toISOString().slice(0,10);
+      // deal rows for debt/asset filters (same shape as overview)
+      const cfDealRows=(state.deals||[]).map(d=>{
+        try{
+          const m=C.model(d.data);
+          const sold=statusKey(d.status)==="sold";
+          return { id:d.id, label:d.data.property.name, marketValue: dealValue(d), acquisition: m.acquisition.acquisitionCost||0, invested: (m.acquisition.acquisitionCost||0)+(m.returns.totalDevCost||0), loan: m.acquisition.loanAmount||0, realizedProfit: sold ? (m.returns.profit||0) : 0, projectedProfit: sold ? 0 : (m.returns.profit||0) };
+        }catch(e){ return { id:d.id, label:d.data.property.name, marketValue:0, acquisition:0, invested:0, loan:0, realizedProfit:0, projectedProfit:0 }; }
+      });
+      // apply filters
+      let aEntries=(state.cashEntries||[]).slice();
+      let aAccounts=(state.portfolioAccounts||[]).slice();
+      let aProjects=(state.constructionProjects||[]).slice();
+      let aPhases=(state.constructionPhases||[]).slice();
+      let aInvoices=(state.constructionInvoices||[]).slice();
+      let aChanges=(state.changeOrders||[]).slice();
+      let aUnits=(state.presellUnits||[]).slice();
+      let aPayments=(state.presellPayments||[]).slice();
+      let aDeals=cfDealRows.slice();
+      if(CF.accountId){ aAccounts=aAccounts.filter(a=>a.id===CF.accountId); aEntries=aEntries.filter(e=>e.accountId===CF.accountId); }
+      if(CF.assetId){ aDeals=aDeals.filter(d=>d.id===CF.assetId); aEntries=aEntries.filter(e=> String(e.linked_asset_id||"")===CF.assetId || (e.link&&e.link.type==="deal"&&String(e.link.id)===CF.assetId)); }
+      if(CF.projectId){
+        const projObj=(state.constructionProjects||[]).find(p=>p.id===CF.projectId);
+        const pPresellId= projObj && projObj.presell_project_id;
+        aProjects=aProjects.filter(p=>p.id===CF.projectId);
+        aPhases=aPhases.filter(ph=>ph.project_id===CF.projectId);
+        aInvoices=aInvoices.filter(i=>i.project_id===CF.projectId);
+        aChanges=aChanges.filter(c=>c.project_id===CF.projectId);
+        aEntries=aEntries.filter(e=> String(e.linked_construction_id||"")===CF.projectId || (e.link&&e.link.type==="project"&&String(e.link.id)===CF.projectId));
+        if(pPresellId){
+          aUnits=aUnits.filter(u=>String(u.project_id)===pPresellId);
+          aPayments=aPayments.filter(p=>aUnits.slice().some(u=>String(u.id)===String(p.unit_id)));
+        }
+      }
+      if(CF.presellProjectId){
+        aUnits=aUnits.filter(u=>String(u.project_id)===CF.presellProjectId);
+        const unitIds=aUnits.map(u=>String(u.id));
+        aPayments=aPayments.filter(p=>unitIds.indexOf(String(p.unit_id))>=0);
+        const cPids=aProjects.filter(p=>String(p.presell_project_id||"")===CF.presellProjectId).map(p=>p.id);
+        aProjects=aProjects.filter(p=>String(p.presell_project_id||"")===CF.presellProjectId);
+        aPhases=aPhases.filter(ph=>cPids.indexOf(String(ph.project_id||""))>=0);
+        aInvoices=aInvoices.filter(i=>cPids.indexOf(String(i.project_id||""))>=0);
+        aChanges=aChanges.filter(c=>cPids.indexOf(String(c.project_id||""))>=0);
+        aEntries=aEntries.filter(e=> String(e.linked_presell_project_id||"")===CF.presellProjectId || (e.linked_presell_payment_id && aPayments.some(p=>String(p.id)===String(e.linked_presell_payment_id))));
+      }
+      const cc = L && L.commandCenter ? L.commandCenter({ accounts:aAccounts, entries:aEntries, projects:aProjects, phases:aPhases, invoices:aInvoices, changeOrders:aChanges, presellUnits:aUnits, presellPayments:aPayments, deals:aDeals, today:todayISO, from:String(CF.from||""), to:String(CF.to||"") }) : null;
+      const badges={ "Posted":"green", "Committed":"blue", "Receivable":"gold", "Payable":"red", "Projected":"purple", "Forecast":"blue", "Estimated":"gray" };
+      const basisBadge=(b)=> '<span class="badge '+(badges[b]||"gray")+'" style="font-weight:600">'+esc(b)+'</span>';
+      const goLedgerBtn=(dir,txt,cls)=> '<button type="button" class="'+(cls||"pf-cf-link")+'" data-pf-go-ledger="'+esc(dir||"")+'">'+txt+'</button>';
+      html += '<div class="card card-pad"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h3>Cash Command Center</h3><p class="dim tiny">Follow every peso from opening balance through posted cash, committed cost, receivables, payables, and projected future flow. Every amount below carries its state: only <b>Posted</b> values are actual cash.</p></div></div><div class="pf-ledger-filters" aria-label="Cash flow filters"><label class="field"><span>From</span><input class="input" id="pf-cf-from" type="date" value="'+esc(CF.from||"")+'"></label><label class="field"><span>To</span><input class="input" id="pf-cf-to" type="date" value="'+esc(CF.to||"")+'"></label><label class="field"><span>Account</span><select class="input" id="pf-cf-account"><option value="">All accounts</option>'+(state.portfolioAccounts||[]).map(a=>'<option value="'+esc(a.id)+'"'+(String(CF.accountId||"")===a.id?' selected':'')+'>'+esc(a.label)+'</option>').join("")+'</select></label><label class="field"><span>Asset</span><select class="input" id="pf-cf-asset"><option value="">All assets</option>'+(state.deals||[]).map(d=>'<option value="'+esc(d.id)+'"'+(String(CF.assetId||"")===d.id?' selected':'')+'>'+esc(d.data.property.name)+'</option>').join("")+'</select></label><label class="field"><span>Project</span><select class="input" id="pf-cf-project"><option value="">All projects</option>'+(state.constructionProjects||[]).map(p=>'<option value="'+esc(p.id)+'"'+(String(CF.projectId||"")===p.id?' selected':'')+'>'+esc(p.name||p.id)+'</option>').join("")+'</select></label><label class="field"><span>Pre-selling</span><select class="input" id="pf-cf-presell"><option value="">All pre-selling</option>'+(state.presellProjects||[]).map(p=>'<option value="'+esc(p.id)+'"'+(String(CF.presellProjectId||"")===p.id?' selected':'')+'>'+esc(p.name||p.id)+'</option>').join("")+'</select></label><button class="btn btn-ghost" type="button" data-pf-cf-clear>Clear</button></div>';
+      if(!cc) html += '<p class="dim mt-8">Cash-flow rules are not loaded.</p>';
+      else {
+        const P=cc.posted;
+        html += '<div class="pf-ledger-summary mt-8">'
+          +'<div><span class="row" style="justify-content:space-between;align-items:center">Opening cash '+basisBadge(P.basis)+'</span><b>'+goLedgerBtn("", C.money(P.opening))+'</b></div>'
+          +'<div><span class="row" style="justify-content:space-between;align-items:center">Posted Cash In '+basisBadge(P.basis)+'</span><b class="pf-in">'+goLedgerBtn("in", C.money(P.cashIn))+'</b></div>'
+          +'<div><span class="row" style="justify-content:space-between;align-items:center">Posted Cash Out '+basisBadge(P.basis)+'</span><b class="pf-out">'+goLedgerBtn("out", C.money(P.cashOut))+'</b></div>'
+          +'<div><span class="row" style="justify-content:space-between;align-items:center">Net movement '+basisBadge(P.basis)+'</span><b class="'+(P.net>=0?'pf-in':'pf-out')+'">'+goLedgerBtn("", C.money(P.net))+'</b></div>'
+          +'<div><span class="row" style="justify-content:space-between;align-items:center">Closing cash '+basisBadge(P.basis)+'</span><b>'+goLedgerBtn("", C.money(P.closing))+'</b></div>'
+          +'<div><span class="row" style="justify-content:space-between;align-items:center">Committed unpaid '+basisBadge(cc.committed.basis)+'</span><b class="pf-out">'+C.money(cc.committed.committedUnpaid)+'</b></div>'
+          +'<div><span class="row" style="justify-content:space-between;align-items:center">Receivables '+basisBadge(cc.receivables.basis)+'</span><b>'+C.money(cc.receivables.total)+'</b></div>'
+          +'<div><span class="row" style="justify-content:space-between;align-items:center">Payables due '+basisBadge(cc.payables.basis)+'</span><b class="pf-out">'+C.money(cc.payables.due)+'</b></div>'
+          +'<div><span class="row" style="justify-content:space-between;align-items:center">Projected future inflow '+basisBadge(cc.projected.basis)+'</span><b>'+C.money(cc.projected.inflow)+'</b></div>'
+          +'<div><span class="row" style="justify-content:space-between;align-items:center">Projected future outflow '+basisBadge(cc.projected.outflowBasis)+'</span><b class="pf-out">'+C.money(cc.projected.outflow)+'</b></div>'
+          +'<div><span class="row" style="justify-content:space-between;align-items:center">Available after committed '+basisBadge(cc.availableAfterCommitted.basis)+'</span><b>'+C.money(cc.availableAfterCommitted.amount)+'</b></div>'
+          +'<div><span class="row" style="justify-content:space-between;align-items:center">Debt '+basisBadge(cc.debt.basis)+'</span><b class="pf-out">'+C.money(cc.debt.principal)+'</b></div></div>';
+        html += '<p class="dim tiny mt-8">Closing <b>'+C.money(P.closing)+'</b> = opening '+C.money(P.opening)+' + posted in '+C.money(P.cashIn)+' − posted out '+C.money(P.cashOut)+'. Financing proceeds across '+cc.debt.dealCount+' deal(s): <b>'+C.money(cc.debt.financingProceeds)+'</b> (Estimated). Projected/projected-forecast values are <b>not cash on hand</b> — do not net them into the closing figure.</p>';
+        html += '<div class="notice-banner mt-8">'+icon("info",14)+' <span>Actual vs future: <b>Posted / Committed / Receivable / Payable</b> are today\'\'s real positions; <b>Projected / Forecast / Estimated</b> are forward-looking and must never be interpreted as received cash.</span></div>';
+        // monthly rollup
+        const months = cc.months || [];
+        html += '<h4 class="mt-16 mb-8">Monthly Rollup</h4>';
+        html += '<div class="table-wrap pf-ledger-table-wrap"><table class="data"><tr><th>Month</th><th class="num">Opening</th><th class="num">Cash In</th><th class="num">Cash Out</th><th class="num">Net</th><th class="num">Closing</th><th class="num">Projected In</th></tr>';
+        if(!months.length) html += '<tr><td colspan="7" class="dim">No activity in the selected range.</td></tr>';
+        else months.forEach(mo=>{
+          html += '<tr><td>'+esc(mo.month)+'</td><td class="num">'+C.money(mo.opening)+'</td><td class="num">'+C.money(mo.cashIn)+'</td><td class="num">'+C.money(mo.cashOut)+'</td><td class="num"><span class="'+(mo.net>=0?'pf-in':'pf-out')+'">'+C.money(mo.net)+'</span></td><td class="num"><b>'+C.money(mo.closing)+'</b></td><td class="num">'+C.money(mo.projectedIn)+'</td></tr>';
+        });
+        html += '</table></div>';
+      }
+      html += '</div>';
+      // Pre-selling project cash flow
+      html += '<div class="card card-pad mt-16"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h3>Pre-Selling Project Cash Flow</h3><p class="dim tiny">Collections count once per paid schedule; a paid schedule is never double counted against its ledger cash entry.</p></div><label class="field" style="min-width:240px"><span>Pre-selling project</span><select class="input" id="pf-presell-cf-sel"><option value="">— Select project —</option>'+(state.presellProjects||[]).map(p=>'<option value="'+esc(p.id)+'"'+(String(state.presellProjectCashflowId||"")===p.id?' selected':'')+'>'+esc(p.name||p.id)+'</option>').join("")+'</select></label></div>';
+      const pselProj = state.presellProjectCashflowId && (state.presellProjects||[]).find(p=>p.id===state.presellProjectCashflowId);
+      if(!(state.presellProjects||[]).length) html += '<p class="dim mt-8">No pre-selling projects — add one and generate a unit schedule to see its cash flow.</p>';
+      else if(!pselProj) html += '<p class="dim mt-8">Choose a project to see collections, expected-by-month inflow, construction cost, and projected margin.</p>';
+      else {
+        const sc = L && L.presellCashflow ? L.presellCashflow({ projectId:pselProj.id, project:pselProj, units:state.presellUnits, payments:state.presellPayments, entries:state.cashEntries, constructionProjects:state.constructionProjects, phases:state.constructionPhases, today:todayISO }) : null;
+        if(sc){
+          html += '<div class="pf-ledger-summary mt-8">'
+            +'<div><span>Contracted value</span><b class="pf-in">'+C.money(sc.contracted)+'</b></div>'
+            +'<div><span>Reserved value</span><b>'+C.money(sc.reservedValue)+'</b></div>'
+            +'<div><span>Collected (paid schedules)</span><b class="pf-in">'+C.money(sc.paid.total)+' <span class="tiny dim">('+sc.paid.count+')</span></b></div>'
+            +'<div><span>Pending schedules</span><b>'+C.money(sc.pending.total)+' <span class="tiny dim">('+sc.pending.count+')</span></b></div>'
+            +'<div><span>Ledger footprint</span><b>'+C.money(sc.ledger.total)+' <span class="tiny dim">('+sc.ledger.count+' entries)</span></b></div>'
+            +'<div><span>Construction paid</span><b class="pf-out">'+C.money(sc.construction.paid)+'</b></div>'
+            +'<div><span>Construction remaining <span class="badge gold" style="font-weight:600">Forecast</span></span><b class="pf-out">'+C.money(sc.construction.remaining)+'</b></div>'
+            +'<div><span>Cost per unit <span class="badge gray" style="font-weight:600">Projected</span></span><b>'+C.money(sc.costPerUnit)+'</b></div></div>';
+          if(sc.doubleCounted) html += '<div class="notice-banner mt-8 warn">'+icon("alert",13)+' <span>Double-count guard: ledger links exceed paid schedules — a payment was posted more than once. Reconcile before relying on collections.</span></div>';
+          html += '<div class="notice-banner mt-8">'+icon("info",14)+' <span>Expected margin <b>'+C.money(sc.expectedMargin)+'</b> is <span class="badge purple" style="font-weight:600">Projected</span> — booked contracts + reserves minus forecast construction cost. Not cash.</span></div>';
+          html += '<h4 class="mt-16 mb-8">Expected Collections by Month <span class="badge purple" style="font-weight:600">Projected</span></h4>';
+          html += '<div class="table-wrap pf-ledger-table-wrap"><table class="data"><tr><th>Month</th><th class="num">Expected</th></tr>';
+          if(!sc.expectedByMonth.length) html += '<tr><td colspan="2" class="dim">No pending schedules — nothing projected.</td></tr>';
+          else sc.expectedByMonth.forEach(mo=>html+='<tr><td>'+esc(mo.month)+'</td><td class="num">'+C.money(mo.expected)+'</td></tr>');
+          html += '</table></div>';
+        }
+      }
+      html += '</div>';
+      // Record a pre-selling collection (exact-once posting)
+      html += '<div class="card card-pad mt-16" id="pf-collect-card"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h3>Record Pre-Selling Collection</h3><p class="dim tiny">Posts one Cash In ledger entry linked to the chosen payment schedule and marks that payment paid exactly once.</p></div>'+(pfRO?'<span class="badge gold">read-only</span>':'')+'</div>';
+      if(pfRO) html += '<p class="dim tiny mt-8">Posting requires admin / super-admin.</p>';
+      else {
+        const defAcc=(state.portfolioAccounts||[])[0];
+        html += '<div class="pf-flow-strip">'+["Account","Project","Unit","Payment","Amount","Date","Method","Response→Post"].map((s,i)=>'<span class="step'+(i<5?" done":"")+'">'+(i+1)+' '+esc(s)+'</span>').join("")+'</div>';
+        html += '<div class="pf-ledger-filters mt-8"><label class="field"><span>Account</span><select class="input" id="pf-collect-account"><option value="">— Select —</option>'+(state.portfolioAccounts||[]).map(a=>'<option value="'+esc(a.id)+'"'+(defAcc&&defAcc.id===a.id?' selected':'')+'>'+esc(a.label)+'</option>').join("")+'</select></label>';
+        html += '<label class="field"><span>Pre-selling project</span><select class="input" id="pf-collect-project"><option value="">— Select —</option>'+(state.presellProjects||[]).filter(p=>p.status!=="archived").map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name||p.id)+'</option>').join("")+'</select></label>';
+        html += '<label class="field"><span>Unit</span><select class="input" id="pf-collect-unit" disabled><option value="">— project first —</option></select></label>';
+        html += '<label class="field"><span>Payment schedule</span><select class="input" id="pf-collect-payment" disabled><option value="">— unit first —</option></select></label>';
+        html += '<label class="field"><span>Amount PHP</span><input class="input input-num" id="pf-collect-amount" type="text" inputmode="decimal"></label>';
+        html += '<label class="field"><span>Date</span><input class="input" id="pf-collect-date" type="date" value="'+todayISO+'"></label>';
+        html += '<label class="field"><span>Method</span><select class="input" id="pf-collect-method"><option value="Bank Transfer">Bank Transfer</option><option value="Cheque">Cheque</option><option value="Cash Deposit">Cash Deposit</option><option value="GCash">GCash</option><option value="Other">Other</option></select></label>';
+        html += '<label class="field"><span>Counterparty</span><input class="input" id="pf-collect-party" placeholder="e.g. Juan Dela Cruz"></label>';
+        html += '<label class="field"><span>Reference</span><input class="input" id="pf-collect-ref" placeholder="e.g. OR-2024-042"></label></div>';
+        html += '<div class="pf-balanced-preview mt-8" id="pf-collect-preview"></div>';
+        html += '<div class="row mt-8" style="gap:8px;flex-wrap:wrap"><span class="dim tiny">Optional proof:</span><input type="file" id="pf-collect-proof" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf" class="input" style="max-width:340px"><div id="pf-collect-proof-preview" class="pf-proof-preview"></div></div>';
+        html += '<div class="row mt-8" style="gap:8px;flex-wrap:wrap"><button class="btn btn-primary" data-pf-collect-post>'+icon("plus",13)+' Post Collection (Cash In)</button><button class="btn btn-ghost" data-pf-collect-reset>Reset</button></div>';
+        html += '<p class="dim tiny mt-8">Posting updates the account balance, the project collection totals, the unit payment status, and monthly projections, all in this one action. The exact-once guard refuses to re-post a schedule that is already paid or already linked to a ledger entry.</p>';
+      }
+      html += '</div>';
+    }
+    if (state.portfolioTab==="docs") {
+      const proofs=[];
+      (state.cashEntries||[]).forEach(e=>{
+        (e.proofs||[]).forEach(p=>{ if(p) proofs.push({ entry:e, proof:Object.assign({}, p) }); });
+        if(e.proof && !(e.proofs&&e.proofs.length)){
+          proofs.push({ entry:e, proof:{ id:"legacy-"+e.id, dataUrl:String(e.proof), filename:e.proofName||"proof", mimetype:/^data:image\/jpeg/.test(String(e.proof))?"image/jpeg":"image/png", size:0, checksum:"", category:"other", mode:"local", uploadedAt:e.created_at||"", storagePath:"local/"+e.id } });
+        }
+      });
+      proofs.sort((a,b)=> String(b.proof.uploadedAt||"").localeCompare(String(a.proof.uploadedAt||"")));
+      const catSet=[]; proofs.forEach(x=>{ const c=x.proof.category||"other"; if(catSet.indexOf(c)<0) catSet.push(c); });
+      html+='<div class="card card-pad"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h3>Proofs &amp; Documents</h3><p class="dim tiny">Attach a receipt, deposit slip, transfer confirmation, contract, or invoice on any Cash In/Out (max 5MB, JPG/PNG/GIF/WEBP/PDF). Local mode keeps a downsized private copy in this browser; signed-in mode uses private Supabase Storage — never public URLs.</p></div><label class="field pf-proof-filter-label" style="min-width:170px"><span>Category</span><select class="input" id="pf-proof-category-filter"><option value="">All categories</option>'+catSet.map(c=>'<option value="'+esc(c)+'">'+esc(PROOF_CAT_LABEL[c]||c)+'</option>').join("")+'</select></label></div>';
+      if(!proofs.length) html+='<p class="dim mt-8">No proofs yet — open a Cash Entry and attach one before saving.</p>';
+      else {
+        html+='<div class="pf-proof-grid mt-8" id="pf-proof-list">';
+        proofs.forEach(x=>{
+          const p=x.proof; const e=x.entry;
+          const url=p.dataUrl? esc(p.dataUrl):"#";
+          const cat=p.category||"other";
+          html+='<div class="pf-proof-card" data-pf-proof-cat="'+esc(cat)+'"><a class="pf-proof-thumb-link" href="'+url+'" target="_blank" rel="noopener">'+pfProofThumb(p)+'</a>'
+            +'<div class="pf-proof-card-body">'
+            +'<b>'+esc(p.filename)+'</b>'
+            +'<span class="tiny dim">'+esc(PROOF_CAT_LABEL[cat]||cat)+' · '+esc(p.mimetype||"")+' · '+pfProofSizeLabel(p.size)+'</span>'
+            +'<span class="tiny dim">'+(p.checksum? esc(p.checksum):"—")+(p.uploadedAt? ' · '+esc(String(p.uploadedAt).slice(0,19).replace("T"," ")):"")+'</span>'
+            +'<span class="tiny dim">by '+(p.uploadedBy? esc(p.uploadedBy):"—")+' · <span class="pf-mode-badge">'+esc(p.mode==="supabase"?"Supabase Storage":"Local adapter")+'</span></span>'
+            +'<span class="tiny dim">entry '+esc(e.id)+' · '+esc(e.description||"")+'</span>'
+            +'<div class="row mt-8" style="gap:6px;flex-wrap:wrap">'
+            +'<a class="btn btn-ghost btn-sm" href="'+url+'" target="_blank" rel="noopener">'+icon("eye",12)+' View</a>'
+            + (pfCanWrite()? '<label class="btn btn-ghost btn-sm" style="margin:0">Replace<input type="file" class="pf-proof-replace-input" data-pf-proof-replace="'+esc(e.id)+'" data-pf-proof-id="'+esc(p.id||"")+'" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf" style="display:none"></label><button class="btn btn-danger btn-sm" data-pf-proof-remove="'+esc(e.id)+'" data-pf-proof-id="'+esc(p.id||"")+'" title="Remove proof (audited)">'+icon("trash",12)+'</button>' : '')
+            +'</div></div></div>';
+        });
+        html+='</div>';
+      }
+      html+='</div>';
+    }
     return html;
+  }
+  // Portfolio helpers (Scenario A — Investor)
+  const PROOF_CAT_LABEL = { receipt:"Receipt", deposit_slip:"Deposit slip", transfer_confirmation:"Transfer confirmation", contract:"Contract", invoice:"Invoice", other:"Other" };
+  let pfPendingProof = null;
+  function pfProofSizeLabel(n){
+    n = Number(n) || 0;
+    if (n < 1024) return n + " B";
+    if (n < 1024*1024) return (n/1024).toFixed(1) + " KB";
+    return (n/(1024*1024)).toFixed(2) + " MB";
+  }
+  function pfProofThumb(p){
+    const url = p && p.dataUrl;
+    if (url && /^data:image\//.test(url)) return '<img class="pf-proof-thumb" src="'+esc(url)+'" alt="proof">';
+    return '<span class="pf-proof-pdf" title="PDF document">PDF</span>';
+  }
+  function pfProofMini(p){
+    if (!p) return "";
+    return '<div class="pf-proof-item">'+pfProofThumb(p)
+      +'<div class="pf-proof-meta"><b>'+esc(p.filename)+'</b>'
+      +'<span class="tiny dim">'+esc(PROOF_CAT_LABEL[p.category]||p.category||"other")+' · '+esc(p.mimetype)+' · '+pfProofSizeLabel(p.size)+'</span>'
+      +'<span class="tiny dim">'+esc(p.checksum||"")+' · '+esc(p.mode||"local")+'</span>'
+      +'</div></div>';
+  }
+  function pfReadProofFile(file, cb, categoryOverride){
+    if (!file) { cb({ error: "No file selected" }); return; }
+    const L = window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+    const catEl = document.getElementById("pf-entry-proof-category");
+    const raw = { filename: file.name, mimetype: file.type || "", size: file.size, category: categoryOverride || ((catEl && catEl.value) || "other") };
+    const v = L && L.validateProofFile ? L.validateProofFile(raw) : { valid: true };
+    if (v && !v.valid) { cb({ error: v.errors.join("; ") }); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result);
+      const done = finalUrl => {
+        cb({ dataUrl: finalUrl, filename: raw.filename, mimetype: raw.mimetype || "application/octet-stream", size: raw.size, checksum: L && L.proofChecksum ? L.proofChecksum(finalUrl) : "", category: raw.category });
+      };
+      if (!/^data:image\//.test(dataUrl)) { done(dataUrl); return; }
+      const img = new Image();
+      img.onload = () => {
+        const max = 1600;
+        let w = img.width, h = img.height;
+        if (Math.max(w, h) > max) { const r = max / Math.max(w, h); w = Math.round(w * r); h = Math.round(h * r); }
+        if (w !== img.width || h !== img.height) {
+          try {
+            const cv = document.createElement("canvas");
+            cv.width = w; cv.height = h;
+            cv.getContext("2d").drawImage(img, 0, 0, w, h);
+            done(cv.toDataURL("image/jpeg", 0.82));
+            return;
+          } catch (e) { /* fall through, keep original */ }
+        }
+        done(dataUrl);
+      };
+      img.onerror = () => done(dataUrl);
+      img.src = dataUrl;
+    };
+    reader.onerror = () => cb({ error: "Could not read file" });
+    reader.readAsDataURL(file);
+  }
+  function pfOnEntryProofChange(){
+    const input = document.getElementById("pf-entry-proof");
+    const file = input && input.files && input.files[0];
+    if (!file) return;
+    pfReadProofFile(file, res => {
+      input.value = "";
+      if (res && res.error) { toast(res.error, "err"); return; }
+      pfPendingProof = res;
+      const el = document.getElementById("pf-entry-proof-preview");
+      if (el) {
+        el.innerHTML = pfProofMini(Object.assign({}, res, { mode: "local" })) + '<div class="tiny dim mt-4">Pending — attached when this entry is saved.</div>';
+      }
+    });
+  }
+  function pfCanWrite(){ return can("portfolio.view") && roleIs("super-admin"); }
+  function pfCollectProofSelected(file){
+    if(!file) return;
+    pfReadProofFile(file, res => {
+      const input=document.getElementById("pf-collect-proof");
+      if(input) input.value="";
+      if(res && res.error){ toast(res.error,"err"); return; }
+      pfPendingCollectProof = res;
+      const el=document.getElementById("pf-collect-proof-preview");
+      if(el) el.innerHTML = pfProofMini(Object.assign({}, res, { mode:"local" })) + '<div class="tiny dim mt-4">Pending — attached when this collection is posted.</div>';
+    });
+  }
+  // Documented role mapping for the Investor Portfolio.
+  // - super-admin: finance owner — full control (post, reverse, void, purge,
+  //   import, construction, proofs, export).
+  // - admin: legacy role. ensureBrokerage() normalizes state.users role "admin"
+  //   to "super-admin" at startup. If an unnormalized "admin" ever reaches the
+  //   UI it is treated as READ-ONLY (write actions are denied), never as an
+  //   implicit super-admin.
+  // - everyone else (broker/agent/buyer/seller/owner/tenant): no portfolio.view,
+  //   so the nav entry is hidden and renderPortfolio() shows an Access Denied
+  //   panel instead of any financial data.
+  function pfCanView(){ return can("portfolio.view"); }
+  function pfGuard(what){ if(!pfCanWrite()){ toast("Admin only — "+(what||"this action")+".","err"); return false; } return true; }
+  // ---- Supabase cloud persistence for the normalized Portfolio tables ----
+  // Mirrors the pre-selling cloud pattern (psCloud/psLoadFromCloud). Portfolio
+  // rows live in their own tables (supabase/portfolio_a_investor.sql) and are
+  // loaded into state on login; every portfolio writer also upserts the same
+  // row to its table when a signed-in (non-demo, approved) user is active.
+  // If the tables have not been created yet, the app silently falls back to
+  // the app_state blob (local) — the UI keeps working either way.
+  var pfCloudWiring = { loading:false, loaded:false, available:false, missing:false, tables: [] };
+  function pfCloud(){ return !!(SB && currentUser && currentUser.id && !currentUser.demo && currentUser.registrationStatus === "approved"); }
+  function pfCloudId(rec){
+    if(pfCloud() && rec && typeof rec === "object" && window.ESPFCLOUD && !window.ESPFCLOUD.isUuid(rec.id)){
+      window.ESPFCLOUD.ensureUuid(rec);
+    }
+    return rec && rec.id;
+  }
+  function pfCloudWrite(table, payload){
+    if(!pfCloud() || !window.ESPFCLOUD) return;
+    try {
+      SB.from(table).upsert(payload).then(r=>{
+        if(r && r.error) toast("Cloud save failed ("+table+"): " + esc(friendlyErr(r.error.message)), "err");
+      }).catch(e=>{ toast("Cloud save error ("+table+"): " + esc(friendlyErr(String(e.message || e))), "err"); });
+    } catch (e) { toast("Cloud save error ("+table+"): " + esc(friendlyErr(String(e.message || e))), "err"); }
+  }
+  function pfCloudDelete(table, id){
+    if(!pfCloud() || !id) return;
+    try {
+      SB.from(table).delete().eq("id", id).then(r=>{
+        if(r && r.error) toast("Cloud delete failed ("+table+"): " + esc(friendlyErr(r.error.message)), "err");
+      }).catch(e=>{ toast("Cloud delete error ("+table+"): " + esc(friendlyErr(String(e.message || e))), "err"); });
+    } catch (e) { /* ignore */ }
+  }
+  async function pfLoadFromCloud(){
+    if(!pfCloud() || !window.ESPFCLOUD) return;
+    if(pfCloudWiring.loading) return;
+    pfCloudWiring.loading = true;
+    const PC = window.ESPFCLOUD;
+    const tables = ["portfolio_accounts","cash_entries","construction_projects","construction_phases","construction_vendors","construction_invoices","construction_change_orders","portfolio_proofs"];
+    const keys = ["portfolioAccounts","cashEntries","constructionProjects","constructionPhases","constructionVendors","constructionInvoices","changeOrders","portfolioProofs"];
+    try {
+      const data = {};
+      for (let i = 0; i < tables.length; i++) {
+        const r = await SB.from(tables[i]).select("*");
+        if (r.error) throw r.error;
+        data[keys[i]] = r.data || [];
+      }
+      pfCloudWiring.tables = tables.slice();
+      state.portfolioAccounts = (data.portfolioAccounts || []).map(PC.accountFromDb);
+      state.cashEntries = (data.cashEntries || []).map(PC.entryFromDb);
+      state.constructionProjects = (data.constructionProjects || []).map(PC.projectFromDb);
+      state.constructionPhases = (data.constructionPhases || []).map(PC.phaseFromDb);
+      state.constructionVendors = (data.constructionVendors || []).map(PC.vendorFromDb);
+      state.constructionInvoices = (data.constructionInvoices || []).map(PC.invoiceFromDb);
+      state.changeOrders = (data.changeOrders || []).map(PC.changeFromDb);
+      const proofs = (data.portfolioProofs || []).map(PC.proofFromDb);
+      const byEntry = {};
+      proofs.forEach(p => { (byEntry[p.entryId] = byEntry[p.entryId] || []).push(p); });
+      (state.cashEntries || []).forEach(e => {
+        const arr = byEntry[e.id] || [];
+        e.proofs = arr;
+        e.proof_count = arr.length;
+      });
+      pfCloudWiring.available = true;
+      pfCloudWiring.loaded = true;
+      pfCloudWiring.missing = false;
+      save();
+      if (state.view === "portfolio") render();
+    } catch (e) {
+      const msg = String((e && e.message) || e || "").toLowerCase();
+      if (/does not exist|relation|42p01|querying schema|failed to fetch schema|database error/i.test(msg)) {
+        pfCloudWiring.available = false;
+        pfCloudWiring.missing = true;
+        pfCloudWiring.loaded = false;
+      } else {
+        pfCloudWiring.available = false;
+        pfCloudWiring.loaded = false;
+        toast("Could not load Portfolio from cloud: " + esc(friendlyErr(String(e.message || e))), "err");
+      }
+    } finally {
+      pfCloudWiring.loading = false;
+    }
+  }
+  function pfFindProof(entryId, proofId){
+    const e=(state.cashEntries||[]).find(x=>x.id===entryId);
+    if(!e) return null;
+    const arr=e.proofs||[];
+    const idx=arr.findIndex(p=> p && p.id===proofId);
+    if(idx<0) return null;
+    return { entry:e, arr:arr, idx:idx, proof:arr[idx] };
+  }
+  function pfRemoveProof(entryId, proofId){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const found=pfFindProof(entryId, proofId);
+    if(!found) return toast("Proof not found","err");
+    if(!confirm("Remove proof '"+(found.proof.filename||"")+"' ? The removal is audited.")) return;
+    const name=found.proof.filename||"";
+    if(pfCloud() && window.ESPFCLOUD && window.ESPFCLOUD.isUuid(found.proof.id)) pfCloudDelete("portfolio_proofs", found.proof.id);
+    found.arr.splice(found.idx,1);
+    found.entry.proof_count=found.arr.length;
+    pfAudit("proof_removed", entryId, found.entry.description, name+" removed");
+    save(); render(); toast("Proof removed","ok");
+  }
+  function pfReplaceProof(input){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const file=input && input.files && input.files[0];
+    const entryId=input.getAttribute("data-pf-proof-replace");
+    const proofId=input.getAttribute("data-pf-proof-id");
+    const found=pfFindProof(entryId, proofId);
+    if(!file || !found) return;
+    const oldName=found.proof.filename||"";
+    const prevCat=found.proof.category;
+    pfReadProofFile(file, res=>{
+      input.value="";
+      if(res && res.error){ toast(res.error,"err"); return; }
+      const rec=Object.assign({}, res, { id:found.proof.id, category:prevCat, uploadedAt:new Date().toISOString(), uploadedBy:(currentUser&&currentUser.email)||"admin", storagePath:found.proof.storagePath || ("local/"+entryId), mode:"local" });
+      if(pfCloud() && window.ESPFCLOUD){ window.ESPFCLOUD.ensureUuid(rec); pfCloudWrite("portfolio_proofs", window.ESPFCLOUD.proofToDb(rec)); }
+      found.arr[found.idx]=rec;
+      found.entry.proof_count=found.arr.length;
+      pfAudit("proof_replaced", entryId, found.entry.description, oldName+" -> "+rec.filename);
+      save(); render(); toast("Proof replaced","ok");
+    });
+  }
+  function pfApplyProofCategoryFilter(value){
+    document.querySelectorAll("[data-pf-proof-cat]").forEach(card=>{
+      const show = !value || card.getAttribute("data-pf-proof-cat")===value;
+      card.style.display = show ? "" : "none";
+    });
+  }
+  function pfNewAccount(){
+    if(!pfCanWrite()) return toast("Admin only", "err");
+    pfOpenAccountModal(null);
+  }
+  function pfOpenAccountModal(existing){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const modal=document.getElementById("pf-account-modal");
+    if(!modal) return;
+    // populate account type options
+    document.getElementById("pf-acc-name").value = existing? existing.label : "";
+    document.getElementById("pf-acc-bank").value = existing? existing.bank_name : "";
+    document.getElementById("pf-acc-type").value = existing? existing.account_type : "cash";
+    document.getElementById("pf-acc-opening").value = existing? existing.opening_balance : "";
+    document.getElementById("pf-acc-date").value = existing? (existing.as_of||"").slice(0,10) : new Date().toISOString().slice(0,10);
+    modal.dataset.editId = existing? existing.id : "";
+    document.getElementById("pf-account-title").textContent = existing? "Edit Account" : "New Account";
+    modal.style.display="flex"; modal.classList.remove("hidden");
+    setTimeout(()=> document.getElementById("pf-acc-name").focus(), 50);
+  }
+  function pfCloseAccountModal(){
+    const modal=document.getElementById("pf-account-modal");
+    if(!modal) return;
+    modal.style.display="none"; modal.classList.add("hidden");
+  }
+  function pfSaveAccount(){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const modal=document.getElementById("pf-account-modal");
+    const editId=modal? modal.dataset.editId : "";
+    const name=(document.getElementById("pf-acc-name").value||"").trim();
+    if(!name) return toast("Account name required","err");
+    const opening = Number(String(document.getElementById("pf-acc-opening").value||"").replace(/,/g,""))||0;
+    if(opening<0) return toast("Opening balance must be zero or greater","err");
+    const bank = document.getElementById("pf-acc-bank").value||"";
+    const type = document.getElementById("pf-acc-type").value;
+    const as_of = document.getElementById("pf-acc-date").value || new Date().toISOString().slice(0,10);
+    if(editId){
+      const acc=(state.portfolioAccounts||[]).find(a=>a.id===editId);
+      if(!acc) return;
+      acc.label=name; acc.bank_name=bank; acc.account_type=type; acc.opening_balance=opening; acc.as_of=as_of;
+      pfCloudId(acc);
+      if(pfCloud() && window.ESPFCLOUD) pfCloudWrite("portfolio_accounts", window.ESPFCLOUD.accountToDb(acc));
+      toast("Account updated","ok");
+    } else {
+      const acc={ id:"acc-"+Date.now(), label:name, bank_name:bank, account_type:type, opening_balance:opening, as_of:as_of, currency:"PHP", created_at:new Date().toISOString() };
+      state.portfolioAccounts.push(acc);
+      pfCloudId(acc);
+      if(pfCloud() && window.ESPFCLOUD) pfCloudWrite("portfolio_accounts", window.ESPFCLOUD.accountToDb(acc));
+      toast("Account created","ok");
+    }
+    pfCloseAccountModal(); save(); render();
+  }
+  function pfNewEntry(){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    if(!(state.portfolioAccounts||[]).length) return toast("Create an account first","err");
+    pfOpenLedgerEntryModal(null);
+  }
+  function pfOpenLedgerEntryModal(existing){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    if(!(state.portfolioAccounts||[]).length) return toast("Create an account first","err");
+    const modal=document.getElementById("pf-ledger-entry-modal");
+    if(!modal) return;
+    // populate account select
+    const accSel=document.getElementById("pf-ledger-account");
+    const dirSel=document.getElementById("pf-ledger-direction");
+    const purposeSel=document.getElementById("pf-ledger-purpose");
+    const subcatSel=document.getElementById("pf-ledger-subcategory");
+    const linkTypeSel=document.getElementById("pf-ledger-link-type");
+    if(accSel){
+      accSel.innerHTML='<option value="">— Select Account —</option>' + (state.portfolioAccounts||[]).map(a=>'<option value="'+esc(a.id)+'"'+(existing&&existing.accountId===a.id?' selected':'')+'>'+esc(a.label)+' ('+esc(a.account_type)+')</option>').join("");
+    }
+    if(existing){
+      dirSel.value = existing.direction;
+      // update purpose options based on direction
+      updatePurposeOptions(existing.direction);
+      purposeSel.value = existing.purpose || "";
+      // update subcategory options
+      updateSubcategoryOptions(existing.purpose);
+      subcatSel.value = existing.subcategory || "";
+    } else {
+      // default to "in"
+      updatePurposeOptions("in");
+    }
+    document.getElementById("pf-ledger-account").value = existing? existing.accountId : ((state.portfolioAccounts[0]||{}).id||"");
+    document.getElementById("pf-ledger-date").value = existing? (existing.entry_date||"").slice(0,10) : new Date().toISOString().slice(0,10);
+    document.getElementById("pf-ledger-amount").value = existing? existing.amount : "";
+    document.getElementById("pf-ledger-description").value = existing? existing.description : "";
+    document.getElementById("pf-ledger-counterparty").value = existing? existing.counterparty : "";
+    document.getElementById("pf-ledger-ref").value = existing? existing.reference_no : "";
+    const savedLinkType=existing? (existing.linked_construction_id?"construction":existing.linked_asset_id?"asset":(existing.linked_presell_project_id||existing.linked_presell_payment_id)?"presell":existing.linked_transaction_id?"transaction":"") : "";
+    const savedLinkId=existing? (existing.linked_construction_id||existing.linked_asset_id||existing.linked_presell_project_id||existing.linked_presell_payment_id||existing.linked_transaction_id||"") : "";
+    linkTypeSel.value=savedLinkType;
+    updateLedgerLinkOptions(savedLinkType,savedLinkId);
+    document.getElementById("pf-ledger-subcategory").value = existing? existing.subcategory : "";
+    modal.dataset.editId = existing? existing.id : "";
+    pfPendingProof = null;
+    const pfInput = document.getElementById("pf-entry-proof");
+    if (pfInput) pfInput.value = "";
+    const pfCat = document.getElementById("pf-entry-proof-category");
+    if (pfCat) pfCat.value = "receipt";
+    const pfPrev = document.getElementById("pf-entry-proof-preview");
+    if (pfPrev) {
+      if (existing && (existing.proofs||[]).length) {
+        pfPrev.innerHTML = '<div class="tiny dim">Existing proofs ('+(existing.proofs||[]).length+'):</div>' + existing.proofs.map(p=> pfProofMini(p)).join("");
+      } else {
+        pfPrev.innerHTML = "";
+      }
+    }
+    document.getElementById("pf-ledger-entry-title").textContent = existing? (existing.status==="draft"||existing.status==="pending"? "Edit Draft Entry" : "Edit Cash Entry") : "New Cash Entry";
+    ["pf-ledger-account","pf-ledger-amount","pf-ledger-direction"].forEach(id=>{ const el2=document.getElementById(id); if(el2){ el2.removeEventListener("input", pfLedgerBalancePreview); el2.addEventListener("input", pfLedgerBalancePreview); } });
+    modal.style.display="flex"; modal.classList.remove("hidden");
+    pfLedgerBalancePreview();
+    setTimeout(()=> document.getElementById("pf-ledger-account").focus(), 50);
+  }
+  function updatePurposeOptions(direction){
+    const sel=document.getElementById("pf-ledger-purpose");
+    if(!sel) return;
+    if(direction==="out"){
+      sel.innerHTML='<option value="">— Select Purpose —</option><option value="project_selling">Project Selling</option><option value="construction">Construction</option><option value="others">Others</option>';
+    } else {
+      sel.innerHTML='<option value="">— (not required for Cash In) —</option>';
+    }
+  }
+  function updateSubcategoryOptions(purpose){
+    const sel=document.getElementById("pf-ledger-subcategory");
+    if(!sel) return;
+    if(purpose==="others"){
+      sel.innerHTML='<option value="">— Subcategory —</option><option value="tax">Tax / Fee</option><option value="salary">Salary</option><option value="marketing">Marketing</option><option value="ops">Operations</option><option value="refund">Refund</option><option value="transfer">Transfer</option><option value="other">Other</option>';
+    } else if(purpose==="construction"){
+      sel.innerHTML='<option value="">— Subcategory —</option><option value="materials">Materials</option><option value="labor">Labor</option><option value="permits">Permits / Fees</option><option value="contractor">Contractor Payment</option><option value="equipment">Equipment Rental</option><option value="other">Other</option>';
+    } else if(purpose==="project_selling"){
+      sel.innerHTML='<option value="">— Subcategory —</option><option value="commission">Commission</option><option value="tax">Tax / Fee</option><option value="marketing">Marketing</option><option value="legal">Legal</option><option value="other">Other</option>';
+    } else {
+      sel.innerHTML='<option value="">— Select purpose first —</option>';
+    }
+  }
+  function pfCloseLedgerEntryModal(){
+    const modal=document.getElementById("pf-ledger-entry-modal");
+    if(!modal) return;
+    modal.style.display="none"; modal.classList.add("hidden");
+  }
+function pfAudit(action, refId, refLabel, detail){
+    state.portfolioAuditEvents = state.portfolioAuditEvents || [];
+    state.portfolioAuditEvents.push({ id:"aud-"+Date.now()+"-"+Math.floor(Math.random()*1e4), at:new Date().toISOString(), actor:(currentUser&&currentUser.email)||"admin", action:action, refId:refId||"", refLabel:refLabel||"", detail:detail||"" });
+  }
+  function pfNextLedgerId(){
+    let max=0;
+    (state.cashEntries||[]).forEach(e=>{
+      const m=/^E(\d+)$/.exec(String((e&&e.id)||""));
+      if(m) max=Math.max(max, parseInt(m[1],10));
+    });
+    return "E"+(max+1);
+  }
+  function pfMigratePresell(){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const L = window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+    if(!L || !L.migrateLegacyCash) return toast("Ledger rules are not loaded","err");
+    const acc=(state.portfolioAccounts||[])[0];
+    if(!acc) return toast("Create a cash account before importing collections","err");
+    const work=((state.cashEntries)||[]).slice();
+    const res=L.migrateLegacyCash({
+      ledger:{ opening: acc.opening_balance||0, entries: work },
+      defaultAccountId: acc.id,
+      presellPayments: (state.presellPayments)||[],
+      transactions: []
+    });
+    if(!res.added.length){
+      const already=res.skipped.filter(x=>x.reason==="duplicate"||x.reason==="already-linked").length;
+      toast(already? "Nothing to import — presell collections are already in the ledger (no double counting)." : "No migratable presell collections — only PAID collections backfill.","");
+      return;
+    }
+    res.added.forEach(pe=>{
+      const entry={ id: pfNextLedgerId(), accountId: acc.id, entry_date: pe.entryDate || new Date().toISOString().slice(0,10), direction: pe.direction, amount: pe.amount, description: pe.description, purpose: pe.purpose||"", subcategory: pe.subcategory||"", counterparty:"", reference_no: pe.ref||"", linked_asset_id:"", linked_construction_id:"", linked_presell_project_id:"", linked_presell_payment_id: pe.link && pe.link.type==="payment"? pe.link.id : "", linked_transaction_id:"", status: pe.status||"posted", idempotencyKey: pe.idempotencyKey, proof_count:0, proofs:[], created_at: new Date().toISOString() };
+      state.cashEntries.push(entry);
+      if(pfCloud() && window.ESPFCLOUD){ window.ESPFCLOUD.ensureUuid(entry); pfCloudWrite("cash_entries", window.ESPFCLOUD.entryToDb(entry)); }
+      pfAudit("entry_migrated", entry.id, entry.description, "backfilled presell collection "+(pe.link&&pe.link.id||""));
+    });
+    save(); render(); toast("Imported "+res.added.length+" presell collection(s) into the Cash Ledger","ok");
+  }
+  function pfSaveLedgerEntry(statusOverride){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const modal=document.getElementById("pf-ledger-entry-modal");
+    if(!modal) return;
+    const editId=modal.dataset.editId;
+    const accountId=document.getElementById("pf-ledger-account").value;
+    if(!accountId) return toast("Account required","err");
+    const entry_date=document.getElementById("pf-ledger-date").value;
+    if(!entry_date) return toast("Date required","err");
+    const direction=document.getElementById("pf-ledger-direction").value;
+    const amt=Number(String(document.getElementById("pf-ledger-amount").value||"").replace(/,/g,""))||0;
+    if(!(amt>0)) return toast("Amount must be positive","err");
+    const description=(document.getElementById("pf-ledger-description").value||"").trim();
+    if(!description) return toast("Description required","err");
+    const purpose=direction==="out"? document.getElementById("pf-ledger-purpose").value : "";
+    if(direction==="out" && !purpose) return toast("Purpose required for Cash Out","err");
+    const subcat=direction==="out" && purpose==="others"? document.getElementById("pf-ledger-subcategory").value : "";
+    if(direction==="out" && purpose==="others" && !subcat) return toast("Subcategory required for Others","err");
+    const counterparty=document.getElementById("pf-ledger-counterparty").value||"";
+    const ref=document.getElementById("pf-ledger-ref").value||"";
+    const linkType=document.getElementById("pf-ledger-link-type").value;
+    const linkId=document.getElementById("pf-ledger-link-id").value||"";
+    const wantStatus= statusOverride==="draft" ? "draft" : "posted";
+    let savedEntry = null;
+    const L = window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+    const ledgerLinkType={asset:"deal",construction:"project",presell:"project"}[linkType] || "";
+    const raw={ id: pfNextLedgerId(), accountId, direction, amount: amt, description, purpose, subcategory: subcat, link: ledgerLinkType && linkId? {type: ledgerLinkType, id: linkId}: null, status: wantStatus, idempotencyKey:"pf-"+Date.now() };
+    const allEntries = state.cashEntries || [];
+    const existing = editId? allEntries.find(x=>x.id===editId) : null;
+    if(existing){
+      if(existing.status==="posted"||existing.reversalOf) return toast("Posted entries must be reversed, not edited","err");
+      if(existing.status==="voided") return toast("Voided entries cannot be edited","err");
+      const v = L? L.validateCashEntry(raw): {valid:true};
+      if(v && !v.valid) return toast(v.errors.join("; "),"err");
+      if(wantStatus==="posted" && direction==="out"){
+        const others = allEntries.filter(e=> e!==existing && e.accountId===accountId);
+        const bal = L? L.cashBalance((state.portfolioAccounts.find(a=>a.id===accountId)||{}).opening_balance||0, others) : 0;
+        if(bal<amt) return toast("Cash out exceeds current balance","err");
+      }
+      const prevStatus=existing.status;
+      existing.accountId=accountId; existing.entry_date=entry_date; existing.direction=direction; existing.amount=amt;
+      existing.description=description; existing.purpose=purpose; existing.subcategory=subcat;
+      existing.counterparty=counterparty; existing.reference_no=ref;
+      existing.linked_asset_id= linkType==="asset"?linkId:"";
+      existing.linked_construction_id= linkType==="construction"?linkId:"";
+      existing.linked_presell_project_id= linkType==="presell"?linkId:"";
+      existing.linked_presell_payment_id="";
+      existing.linked_transaction_id= linkType==="transaction"?linkId:"";
+      existing.status=wantStatus; existing.updated_at=new Date().toISOString();
+      savedEntry = existing;
+      pfAudit(prevStatus!==wantStatus? "status_changed":"entry_updated", existing.id, description, prevStatus+" -> "+wantStatus);
+    } else {
+      const ledger={ opening: (state.portfolioAccounts.find(a=>a.id===accountId)||{}).opening_balance||0, entries: allEntries.filter(e=>e.accountId===accountId) };
+      const res = L ? L.post(raw, ledger) : {ok:true, entry: raw};
+      if(!res.ok) return toast(res.errors.join("; "), "err");
+      const entry={ id: res.entry.id, accountId, entry_date, direction, amount: amt, description, purpose, subcategory: subcat, counterparty, reference_no: ref, linked_asset_id: linkType==="asset"?linkId:"", linked_construction_id: linkType==="construction"?linkId:"", linked_presell_project_id: linkType==="presell"?linkId:"", linked_transaction_id: linkType==="transaction"?linkId:"", status: wantStatus, proof_count:0, proofs:[], created_at: new Date().toISOString() };
+      state.cashEntries.push(entry);
+      savedEntry = entry;
+      pfAudit(wantStatus==="posted"? "entry_posted":"entry_created", entry.id, description, wantStatus);
+    }
+    if(pfPendingProof){
+      savedEntry.proofs = savedEntry.proofs || [];
+      const n = savedEntry.proofs.length;
+      const rec = Object.assign({}, pfPendingProof, { id: "pfproof-"+Date.now()+"-"+(n+1), uploadedBy:(currentUser&&currentUser.email)||"admin", uploadedAt:new Date().toISOString(), storagePath:"local/"+(savedEntry.id||"entry")+"/"+n, mode:"local" });
+      savedEntry.proofs.push(rec);
+      savedEntry.proof_count = savedEntry.proofs.length;
+      pfAudit("proof_uploaded", savedEntry.id, savedEntry.description, rec.filename+" ("+pfProofSizeLabel(rec.size)+", "+rec.mimetype+")");
+      pfPendingProof = null;
+    }
+    if(pfCloud() && window.ESPFCLOUD){
+      const P=window.ESPFCLOUD;
+      P.ensureUuid(savedEntry);
+      pfCloudWrite("cash_entries", P.entryToDb(savedEntry));
+      (savedEntry.proofs||[]).forEach(pr=>{ P.ensureUuid(pr); pfCloudWrite("portfolio_proofs", P.proofToDb(pr)); });
+    }
+    pfCloseLedgerEntryModal(); save(); render(); toast(wantStatus==="posted"? "Posted "+direction+" "+C.money(amt) : "Saved draft "+direction+" "+C.money(amt), wantStatus==="posted"?"ok":"");
+  }
+  function pfLedgerBalancePreview(){
+    const modal=document.getElementById("pf-ledger-entry-modal");
+    const el=document.getElementById("pf-ledger-balance-preview");
+    if(!el) return;
+    const accountId=document.getElementById("pf-ledger-account").value;
+    const direction=document.getElementById("pf-ledger-direction").value;
+    const amount=Number(String(document.getElementById("pf-ledger-amount").value||"").replace(/,/g,""))||0;
+    if(!accountId){ el.style.display="none"; return; }
+    const editId=modal? modal.dataset.editId : "";
+    const L = window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+    const others=(state.cashEntries||[]).filter(e=> e.id!==editId && e.accountId===accountId);
+    const cur = L? L.cashBalance((state.portfolioAccounts.find(a=>a.id===accountId)||{}).opening_balance||0, others) : 0;
+    const after = direction==="in"? cur+amount : cur-amount;
+    el.style.display="block";
+    let html = "Current balance: <b>"+C.money(cur)+"</b>";
+    if(amount>0){
+      html += " &rarr; After save: <b>"+C.money(after)+"</b>";
+      if(after<0) html += ' <span class="pf-overdraft">&#9888; Overdraft&nbsp;<b>'+C.money(Math.abs(after))+'</b></span>';
+      if(direction==="out" && after<0) html += ' <span class="dim tiny">(Save &amp; Post is blocked; Save Draft keeps it as a plan)</span>';
+    }
+    el.innerHTML = html;
+  }
+  function pfOpenLedgerEditModal(id){
+    const entry=(state.cashEntries||[]).find(x=>x.id===id);
+    if(!entry) return toast("Entry not found","err");
+    if(entry.status==="posted"||entry.reversalOf) return toast("Posted entries must be reversed, not edited","err");
+    if(entry.status==="voided") return toast("Voided entries cannot be edited","err");
+    pfOpenLedgerEntryModal(entry);
+  }
+  function pfReverse(id){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const e=(state.cashEntries||[]).find(x=>x.id===id);
+    if(!e) return toast("Not found","err");
+    if(!confirm("Reverse "+e.id+" ? This creates an auditable reversal.")) return;
+    const L=window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+    const ledger={ opening: 0, entries: state.cashEntries.slice() };
+    const res= L? L.reverse(ledger, id, (currentUser&&currentUser.email)||"admin") : {ok:true, reversal:{id:"R"+id, reversalOf:id, direction: e.direction==="in"?"out":"in", amount:e.amount, accountId:e.accountId, status:"posted"}};
+    if(!res.ok) return toast(res.errors.join("; "),"err");
+    state.cashEntries.push(res.reversal);
+    if(pfCloud() && window.ESPFCLOUD){ window.ESPFCLOUD.ensureUuid(res.reversal); pfCloudWrite("cash_entries", window.ESPFCLOUD.entryToDb(res.reversal)); }
+    pfAudit("entry_reversed", e.id, e.description, "reversal "+res.reversal.id); save(); render(); toast("Reversed","ok");
+  }
+  function pfVoidEntry(id){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const e=(state.cashEntries||[]).find(x=>x.id===id);
+    if(!e) return toast("Not found","err");
+    if(e.status==="posted") return toast("Posted entries must be reversed, not voided","err");
+    if(e.status==="voided") return toast("Already voided","err");
+    if(e.reversalOf) return toast("Cannot void a reversal","err");
+    if(!confirm("Void '"+ (e.description||String(e.id).slice(0,8)) +"' ? The record is kept but excluded from active lists.")) return;
+    const L=window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+    const res= L? L.voidEntry({entries:state.cashEntries}, id, (currentUser&&currentUser.email)||"admin") : {ok:true};
+    if(!res.ok) return toast(res.errors.join("; "),"err");
+    e.status="voided"; e.voidedBy=(currentUser&&currentUser.email)||"admin"; e.voidedAt=new Date().toISOString();
+    if(pfCloud() && window.ESPFCLOUD){ window.ESPFCLOUD.ensureUuid(e); pfCloudWrite("cash_entries", window.ESPFCLOUD.entryToDb(e)); }
+    pfAudit("entry_voided", e.id, e.description, "");
+    save(); render(); toast("Voided","ok");
+  }
+  function pfPurgeEntry(id){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const e=(state.cashEntries||[]).find(x=>x.id===id);
+    if(!e) return toast("Not found","err");
+    if(e.status!=="voided") return toast("Only voided entries can be permanently deleted","err");
+    if(!confirm("Permanently delete the voided entry '"+ (e.description||String(e.id).slice(0,8)) +"' ? An audit event is recorded.")) return;
+    if(pfCloud() && window.ESPFCLOUD && window.ESPFCLOUD.isUuid(id)){
+      pfCloudDelete("cash_entries", id);
+      (e.proofs||[]).forEach(p=>{ if(p && p.id) pfCloudDelete("portfolio_proofs", p.id); });
+    }
+    pfAudit("entry_deleted", e.id, e.description, "");
+    state.cashEntries=(state.cashEntries||[]).filter(x=>x.id!==id);
+    save(); render(); toast("Deleted","ok");
+  }
+function pfExportLedger(){
+    const L = window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+    const rows=[["date","account","direction","amount","purpose","description","status","balance"]];
+    const accBal={}; (state.portfolioAccounts||[]).forEach(a=> accBal[a.id]=Number(a.opening_balance||0));
+    const filtered = L && L.queryLedger ? L.queryLedger(state.cashEntries||[], state.cashLedgerFilters||{}).rows : state.cashEntries||[];
+    const sorted=filtered.slice().sort((a,b)=> String(a.entry_date).localeCompare(String(b.entry_date)));
+    sorted.forEach(e=>{
+      if(e.status==="posted"){
+        if(e.direction==="in") accBal[e.accountId]=(accBal[e.accountId]||0)+Number(e.amount||0);
+        else accBal[e.accountId]=(accBal[e.accountId]||0)-Number(e.amount||0);
+      }
+      const label=(state.portfolioAccounts.find(a=>a.id===e.accountId)||{}).label||e.accountId;
+      rows.push([e.entry_date, label, e.direction, e.amount, e.purpose||"", (e.description||"").replace(/,/g," "), e.status, accBal[e.accountId]||0]);
+    });
+    const csv=rows.map(r=> r.map(v=> '"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+    const blob=new Blob([csv],{type:"text/csv"}); const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download="portfolio_ledger_"+new Date().toISOString().slice(0,10)+".csv"; a.click(); URL.revokeObjectURL(url);
+  }
+  function updateLedgerLinkOptions(type, selectedId){
+    const sel=document.getElementById("pf-ledger-link-id");
+    if(!sel) return;
+    let options=[];
+    if(type==="asset") options=(state.deals||[]).map(d=>({id:d.id,label:(d.data&&d.data.property&&d.data.property.name)||d.id+" - Asset"}));
+    if(type==="construction") options=(state.constructionProjects||[]).map(p=>({id:p.id,label:p.name||p.id+" - Construction"}));
+    if(type==="presell") options=(state.presellProjects||[]).filter(p=>p.status!=="archived").map(p=>({id:p.id,label:(p.name||p.id)+" - Pre-Selling Project"}));
+    if(type==="transaction") options=(state.transactions||[]).map(t=>({id:t.id,label:(t.ref||t.title||t.id)+" - Transaction"}));
+    if(selectedId && !options.some(o=>String(o.id)===String(selectedId))) options.unshift({id:selectedId,label:String(selectedId)+" - Existing link"});
+    sel.innerHTML='<option value="">'+(type?"— Select Link —":"— Select Link to first —")+'</option>' + options.map(o=>'<option value="'+esc(o.id)+'">'+esc(o.label)+'</option>').join("");
+    sel.value=selectedId||"";
+    sel.disabled=!type;
+  }
+function pfGoLedgerFromCashflow(dir){
+    const CF=state.cashflowFilters||{};
+    state.cashLedgerFilters={ status:"posted", from:CF.from||"", to:CF.to||"", accountId:CF.accountId||"", direction:dir||"", search:"", project:CF.projectId||"", ids:null };
+    state.portfolioTab="ledger"; save(); render();
+  }
+  function pfOpenAssetCashflow(id){
+    state.portfolioAssetCashflowId=id||"";
+    state.portfolioTab="assets"; save(); render();
+  }
+  function pfOpenLedgerEntry(row){
+    const entryId=row.getAttribute("data-pf-entry");
+    if(!entryId) return;
+    if(row.getAttribute("data-pf-entry-actual")==="0") return toast("Estimated deal-model row — not a posted ledger entry","");
+    state.cashLedgerFilters={ status:"posted", from:"", to:"", accountId:"", direction:"", search:"", project:"", ids:[entryId] };
+    state.portfolioTab="ledger"; save(); render();
+  }
+  function pfCollectPreview(){
+    const el=document.getElementById("pf-collect-preview");
+    if(!el) return;
+    const accountId=(document.getElementById("pf-collect-account")||{}).value||"";
+    const amt=Number(String((document.getElementById("pf-collect-amount")||{}).value||"").replace(/,/g,""))||0;
+    if(!accountId){ el.style.display="none"; return; }
+    const L = window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+    const others=(state.cashEntries||[]).filter(e=> e.accountId===accountId && e.status==="posted");
+    const cur = L? L.cashBalance((state.portfolioAccounts.find(a=>a.id===accountId)||{}).opening_balance||0, others) : 0;
+    el.style.display="block";
+    el.innerHTML="Current balance: <b>"+C.money(cur)+"</b>"+(amt>0? " &rarr; After posting: <b>"+C.money(cur+amt)+"</b>" : " <span class=\"dim tiny\">Cash In adds to cash.</span>");
+  }
+  function pfCollectPopulateUnits(){
+    const projId=(document.getElementById("pf-collect-project")||{}).value||"";
+    const unitSel=document.getElementById("pf-collect-unit");
+    const paySel=document.getElementById("pf-collect-payment");
+    const units=(state.presellUnits||[]).filter(u=>String(u.project_id)===projId && (u.status==="reserved"||u.status==="sold"));
+    unitSel.innerHTML='<option value="">— project first —</option>'+(projId? units.map(u=>'<option value="'+esc(u.id)+'">'+esc(u.unit_no||u.name||u.id)+'</option>').join(""):'');
+    unitSel.disabled=!projId;
+    paySel.innerHTML='<option value="">— unit first —</option>';
+    paySel.disabled=true;
+    document.getElementById("pf-collect-amount").value="";
+    pfCollectPreview();
+  }
+  function pfCollectPopulatePayments(){
+    const unitId=(document.getElementById("pf-collect-unit")||{}).value||"";
+    const paySel=document.getElementById("pf-collect-payment");
+    const pays=(state.presellPayments||[]).filter(p=>String(p.unit_id)===unitId && p.status==="pending");
+    paySel.innerHTML='<option value="">— unit first —</option>'+(unitId? pays.map(p=>'<option value="'+esc(p.id)+'">'+esc((p.label||"schedule")+" · "+String(p.due_date||"").slice(0,10)+" · "+C.money(p.amount))+'</option>').join(""):'');
+    paySel.disabled=!unitId;
+    document.getElementById("pf-collect-amount").value="";
+    pfCollectPreview();
+  }
+  function pfCollectPaymentSelected(){
+    const pid=(document.getElementById("pf-collect-payment")||{}).value||"";
+    const pay=(state.presellPayments||[]).find(p=>String(p.id)===pid);
+    const amtEl=document.getElementById("pf-collect-amount");
+    if(pay) amtEl.value=pay.amount;
+    const partyEl=document.getElementById("pf-collect-party");
+    if(pay && !partyEl.value){
+      const u=(state.presellUnits||[]).find(x=>x.id===pay.unit_id);
+      partyEl.value=(u&&(u.reserved_for||u.client_name||u.buyer_name))||"";
+    }
+    pfCollectPreview();
+  }
+  function pfCollectPost(){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const accountId=(document.getElementById("pf-collect-account")||{}).value||"";
+    if(!accountId) return toast("Account required","err");
+    const projId=(document.getElementById("pf-collect-project")||{}).value||"";
+    const unitId=(document.getElementById("pf-collect-unit")||{}).value||"";
+    const payId=(document.getElementById("pf-collect-payment")||{}).value||"";
+    if(!projId||!unitId||!payId) return toast("Select project, unit, and payment schedule","err");
+    const pay=(state.presellPayments||[]).find(p=>String(p.id)===payId);
+    if(!pay) return toast("Payment schedule not found","err");
+    if(pay.status!=="pending") return toast("Schedule is already "+pay.status+" — cannot collect twice","err");
+    if((state.cashEntries||[]).some(e=> e.status==="posted" && String(e.linked_presell_payment_id||"")===payId)) return toast("Payment already linked to a posted cash entry — exact-once prevents double posting","err");
+    const amt=Number(String((document.getElementById("pf-collect-amount")||{}).value||"").replace(/,/g,""))||0;
+    if(!(amt>0)) return toast("Amount must be positive","err");
+    const entry_date=(document.getElementById("pf-collect-date")||{}).value||new Date().toISOString().slice(0,10);
+    const method=(document.getElementById("pf-collect-method")||{}).value||"Bank Transfer";
+    const counterparty=(document.getElementById("pf-collect-party")||{}).value||"";
+    const ref=(document.getElementById("pf-collect-ref")||{}).value||"";
+    const description="Presell collection — "+(pay.label||"payment");
+    const L = window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+    const ledger={ opening:(state.portfolioAccounts.find(a=>a.id===accountId)||{}).opening_balance||0, entries:state.cashEntries.filter(e=>e.accountId===accountId) };
+    const raw={ id:pfNextLedgerId(), accountId, direction:"in", amount:amt, description, purpose:"", subcategory:"", link:{ type:"payment", id:payId }, status:"posted", idempotencyKey:"collect:"+payId+":"+String(Date.now()).slice(-8) };
+    const res= L? L.post(raw, ledger) : {ok:true, entry:raw};
+    if(!res.ok) return toast(res.errors.join("; "),"err");
+    const entry={ id:res.entry.id, accountId, entry_date, direction:"in", amount:amt, description, purpose:"", subcategory:"", counterparty, reference_no:ref, linked_asset_id:"", linked_construction_id:"", linked_presell_project_id:projId, linked_presell_payment_id:payId, linked_transaction_id:"", status:"posted", proof_count:0, proofs:[], method, created_at:new Date().toISOString() };
+    state.cashEntries.push(entry);
+    pay.status="paid"; pay.paid_at=entry_date; pay.method=method;
+    const u=(state.presellUnits||[]).find(x=>x.id===unitId);
+    if(u) u.collections=(Number(u.collections||0)+amt);
+    if(pfPendingCollectProof){
+      entry.proofs=[pfPendingCollectProof];
+      entry.proof_count=1;
+      pfPendingCollectProof=null;
+      pfAudit("proof_uploaded", entry.id, entry.description, "collection proof attached");
+    }
+    if(pfCloud() && window.ESPFCLOUD){ window.ESPFCLOUD.ensureUuid(entry); pfCloudWrite("cash_entries", window.ESPFCLOUD.entryToDb(entry)); (entry.proofs||[]).forEach(pr=>{ window.ESPFCLOUD.ensureUuid(pr); pfCloudWrite("portfolio_proofs", window.ESPFCLOUD.proofToDb(pr)); }); }
+    if(pfCloud() && SB){
+      SB.from("presell_payments").update({ status:"paid", paid_at:pay.paid_at, method:method }).eq("id", payId).then(r=>{ if(r.error) toast("Cloud payment update failed: "+(r.error.message||""),"err"); }).catch(()=>{});
+    }
+    pfAudit("entry_posted", entry.id, description, "presell collection "+payId+" ("+method+")");
+    pfAudit("presell_collection_posted", payId, (u&&u.unit_no)||"", C.money(amt)+" collected via ledger entry "+entry.id);
+    save(); render(); toast("Collection posted — "+C.money(amt)+" credited and schedule marked paid","ok");
+  }
+  function pfCollectReset(){
+    ["pf-collect-project","pf-collect-unit","pf-collect-payment","pf-collect-amount","pf-collect-ref","pf-collect-party"].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=""; });
+    pfCollectPopulateUnits();
+    pfPendingCollectProof=null;
+    const prev=document.getElementById("pf-collect-proof-preview");
+    if(prev) prev.innerHTML="";
+    const fileIn=document.getElementById("pf-collect-proof");
+    if(fileIn) fileIn.value="";
+  }
+  function pfApplyLedgerFilters(){
+    const FL=state.cashLedgerFilters=Object.assign({}, state.cashLedgerFilters||{}, {
+      accountId: (document.getElementById("pf-filter-acc")||{}).value||"",
+      direction: (document.getElementById("pf-filter-dir")||{}).value||"",
+      status: (document.getElementById("pf-filter-status")||{}).value||"",
+      search: (document.getElementById("pf-search")||{}).value||"",
+      from: (document.getElementById("pf-date-from")||{}).value||"",
+      to: (document.getElementById("pf-date-to")||{}).value||""
+    });
+    let scoped = state.cashEntries||[];
+    if(FL.ids && FL.ids.length){
+      const ids={}; FL.ids.forEach(i=>ids[i]=true);
+      scoped = scoped.filter(e=> ids[e.id]);
+    } else if(FL.project){
+      scoped = scoped.filter(e=> String(e.linked_construction_id||"")===FL.project || String(e.linked_presell_project_id||"")===FL.project || (e.link&&e.link.type==="project"&&String(e.link.id)===FL.project));
+    }
+    const L = window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+    const res = L && L.queryLedger ? L.queryLedger(scoped, FL) : { rows: scoped, total: scoped.length, filtered: scoped.length };
+    const ids={}; res.rows.forEach(r=> ids[r.id]=true);
+    document.querySelectorAll("[data-pf-ledger-row]").forEach(row=>{
+      const match=!!ids[row.getAttribute("data-pf-entry-id")];
+      row.style.display=match?"":"none";
+      if(match) row.removeAttribute("hidden"); else row.setAttribute("hidden","");
+    });
+    const count=document.getElementById("pf-ledger-count");
+    if(count) count.textContent="Showing "+res.filtered+" of "+res.total+" entries";
+  }
+  function populatePresellScopeRef(){
+    const scopeSel=document.getElementById("pf-proj-presell-scope");
+    const refSel=document.getElementById("pf-proj-presell-scope-ref");
+    const presellSel=document.getElementById("pf-proj-presell");
+    if(!scopeSel||!refSel) return;
+    if(!scopeSel.value){ refSel.innerHTML='<option value="">— None —</option>'; return; }
+    const pid=presellSel? presellSel.value : "";
+    const units=(state.presellUnits||[]).filter(u=> u.project_id===pid);
+    let opts=[];
+    if(scopeSel.value==="tower") opts=[...new Set(units.map(u=>u.tower).filter(Boolean))];
+    else if(scopeSel.value==="unit_type") opts=[...new Set(units.map(u=>u.unit_type).filter(Boolean))];
+    else if(scopeSel.value==="unit") opts=units.map(u=>u.unit_no||u.id);
+    refSel.innerHTML='<option value="">— None —</option>' + opts.map(o=>'<option value="'+esc(o)+'">'+esc(o)+'</option>').join("");
+  }
+  function pfOpenConstructionModal(existing){
+    const modal=document.getElementById("pf-construction-modal");
+    if(!modal) return;
+    // populate asset/presell selects
+    const assetSel=document.getElementById("pf-proj-asset");
+    const presellSel=document.getElementById("pf-proj-presell");
+    if(assetSel){
+      assetSel.innerHTML='<option value="">— None —</option>' + (state.deals||[]).map(d=>'<option value="'+esc(d.id)+'"'+(existing&&existing.asset_id===d.id?' selected':'')+'>'+esc(d.data.property.name||d.id)+'</option>').join("");
+    }
+    if(presellSel){
+      presellSel.innerHTML='<option value="">— None —</option>' + (state.presellProjects||[]).map(p=>'<option value="'+esc(p.id)+'"'+(existing&&existing.presell_project_id===p.id?' selected':'')+'>'+esc(p.name||p.id)+'</option>').join("");
+    }
+document.getElementById("pf-proj-name").value = existing? existing.name : "";
+    document.getElementById("pf-proj-site").value = existing? existing.site : "";
+    document.getElementById("pf-proj-contractor").value = existing? existing.contractor : "";
+    document.getElementById("pf-proj-value").value = existing? existing.contract_value : "";
+    document.getElementById("pf-proj-cont").value = existing? existing.contingency : "";
+    document.getElementById("pf-proj-status").value = existing? (existing.status||"planned") : "planned";
+    document.getElementById("pf-proj-retention").value = (existing&&existing.retention_rate!=null)? existing.retention_rate : "";
+    document.getElementById("pf-proj-allocation").value = existing? (existing.allocation||"equal") : "equal";
+    const scopeSel=document.getElementById("pf-proj-presell-scope");
+    const refSel=document.getElementById("pf-proj-presell-scope-ref");
+    if(scopeSel){
+      scopeSel.value = existing&&existing.presell_link? existing.presell_link.scope : "";
+    }
+    if(refSel){
+      refSel.innerHTML='<option value="">— None —</option>';
+      const linked=(state.presellProjects||[]).find(p=>p.presell_link? false : p.id===presellSel.value || (existing&&existing.presell_project_id===p.id));
+      if(scopeSel && scopeSel.value && existing && existing.presell_link){
+        let opts=[];
+        const pp=(state.presellProjects||[]).find(x=>x.id===existing.presell_project_id);
+        const units=(state.presellUnits||[]).filter(u=> u.project_id===existing.presell_project_id);
+        if(scopeSel.value==="tower") opts=[...new Set(units.map(u=>u.tower).filter(Boolean))];
+        else if(scopeSel.value==="unit_type") opts=[...new Set(units.map(u=>u.unit_type).filter(Boolean))];
+        else if(scopeSel.value==="unit") opts=units.map(u=>u.unit_no||u.id);
+        if(!opts.length) opts=[existing.presell_link.value];
+        opts.forEach(o=>{ refSel.innerHTML+='<option value="'+esc(o)+'"'+(existing.presell_link.value===o?' selected':'')+'>'+esc(o)+'</option>'; });
+      }
+    }
+    modal.dataset.editId = existing? existing.id : "";
+    if(existing) state.portfolioSelectedConstructionId=existing.id;
+    document.getElementById("pf-construction-title").textContent = existing? "Edit Construction Project" : "New Construction Project";
+    modal.style.display="flex"; modal.classList.remove("hidden");
+    setTimeout(()=> document.getElementById("pf-proj-name").focus(), 50);
+  }
+function pfOpenPhaseModal(projectId, phaseId){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const modal=document.getElementById("pf-phase-modal");
+    const phase=phaseId? (state.constructionPhases||[]).find(p=>p.id===phaseId): null;
+    if(phaseId && !phase) return toast("Phase not found","err");
+    const pid = phase? phase.project_id : projectId;
+    const project=(state.constructionProjects||[]).find(p=>p.id===pid);
+    if(!project || !modal) return toast("Construction project not found","err");
+    modal.dataset.projectId=project.id;
+    modal.dataset.editId= phase? phase.id : "";
+    document.getElementById("pf-phase-title").textContent= phase? "Edit Phase - "+project.name : "Add Phase - "+project.name;
+    ["pf-phase-name","pf-phase-planned","pf-phase-approved","pf-phase-committed","pf-phase-paid","pf-phase-progress","pf-phase-responsible"].forEach(id=>{ document.getElementById(id).value = phase? (phase[id.replace("pf-phase-","").replace("progress","percent_complete")]??"") : ""; });
+    if(phase) document.getElementById("pf-phase-name").value=phase.name;
+    document.getElementById("pf-phase-allocation").value = phase? (phase.allocation||project.allocation||"equal") : (project.allocation||"equal");
+    if(phase){
+      document.getElementById("pf-phase-planned").value=phase.planned_budget||"";
+      document.getElementById("pf-phase-approved").value=phase.approved_budget||"";
+      document.getElementById("pf-phase-committed").value=phase.committed||"";
+      document.getElementById("pf-phase-paid").value=phase.paid||"";
+      document.getElementById("pf-phase-progress").value=phase.percent_complete||"";
+      document.getElementById("pf-phase-responsible").value=phase.responsible||"";
+    }
+    modal.style.display="flex"; modal.classList.remove("hidden");
+    setTimeout(()=>document.getElementById("pf-phase-name").focus(),50);
+  }
+  function pfClosePhaseModal(){
+    const modal=document.getElementById("pf-phase-modal");
+    if(!modal) return;
+    modal.style.display="none"; modal.classList.add("hidden");
+  }
+function pfSavePhase(){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const modal=document.getElementById("pf-phase-modal");
+    const projectId=modal && modal.dataset.projectId;
+    const editId=modal? modal.dataset.editId : "";
+    const name=(document.getElementById("pf-phase-name").value||"").trim();
+    if(!projectId || !name) return toast("Phase name required","err");
+    const money=id=>Number(String(document.getElementById(id).value||"").replace(/,/g,""))||0;
+    const progress=Math.max(0,Math.min(100,Number(document.getElementById("pf-phase-progress").value)||0));
+    const allocation=document.getElementById("pf-phase-allocation").value||"equal";
+    const payload={ name:name, planned_budget:money("pf-phase-planned"), approved_budget:money("pf-phase-approved"), committed:money("pf-phase-committed"), paid:money("pf-phase-paid"), percent_complete:progress, responsible:(document.getElementById("pf-phase-responsible").value||"").trim(), allocation:allocation };
+    if(editId){
+      const ph=(state.constructionPhases||[]).find(p=>p.id===editId);
+      if(!ph) return toast("Phase not found","err");
+      Object.assign(ph,payload);
+      if(pfCloud() && window.ESPFCLOUD) pfCloudWrite("construction_phases", window.ESPFCLOUD.phaseToDb(ph));
+      pfAudit("phase_edited", ph.id, ph.name, "budget "+payload.planned_budget+" / committed "+payload.committed);
+      toast("Phase updated","ok");
+    } else {
+      const ph={ id:"cphase-"+Date.now(), project_id:projectId, created_at:new Date().toISOString() };
+      Object.assign(ph,payload);
+      state.constructionPhases.push(ph);
+      if(pfCloud() && window.ESPFCLOUD){ window.ESPFCLOUD.ensureUuid(ph); pfCloudWrite("construction_phases", window.ESPFCLOUD.phaseToDb(ph)); }
+      pfAudit("phase_created", ph.id, ph.name, "budget "+payload.planned_budget);
+      toast("Phase created","ok");
+    }
+    state.portfolioSelectedConstructionId=projectId;
+    pfClosePhaseModal(); save(); render();
+  }
+  function pfDelPhase(id){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const ph=(state.constructionPhases||[]).find(p=>p.id===id);
+    if(!ph) return toast("Phase not found","err");
+    const invoices=(state.constructionInvoices||[]).filter(i=> i.phase_id===id);
+    const posted=(state.cashEntries||[]).filter(e=> e.linked_phase_id===id && e.status==="posted");
+    if(invoices.length) return toast("Reassign or delete "+invoices.length+" invoice(s) on this phase first — invoices must be attributed to a phase","err");
+    if(posted.length) return toast("This phase has "+posted.length+" posted cash entry(ies). Reverse them first, then delete the phase. Posted records are never silently removed.","err");
+    const msg="Delete phase '"+ph.name+"' ?\n\nIts planned/committed/paid budget will be removed from the project totals. Invoices and posted cash entries on this phase are blocked from deletion until cleared.";
+    if(!confirm(msg)) return;
+    if(pfCloud() && window.ESPFCLOUD && window.ESPFCLOUD.isUuid(id)) pfCloudDelete("construction_phases", id);
+    state.constructionPhases=(state.constructionPhases||[]).filter(p=>p.id!==id);
+    pfAudit("phase_deleted", ph.id, ph.name, "planned budget "+ph.planned_budget);
+    save(); render(); toast("Phase deleted","ok");
+  }
+  function pfCloseConstructionModal(){
+    const modal=document.getElementById("pf-construction-modal");
+    if(!modal) return;
+    modal.style.display="none"; modal.classList.add("hidden");
+  }
+  function pfSaveConstruction(){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const modal=document.getElementById("pf-construction-modal");
+    const editId=modal? modal.dataset.editId : "";
+    const name=(document.getElementById("pf-proj-name").value||"").trim();
+    if(!name) return toast("Name required","err");
+    const site=(document.getElementById("pf-proj-site").value||"").trim();
+    const contractor=(document.getElementById("pf-proj-contractor").value||"").trim();
+    const val=Number(String(document.getElementById("pf-proj-value").value||"").replace(/,/g,""))||0;
+    const cont=Number(String(document.getElementById("pf-proj-cont").value||"").replace(/,/g,""))||0;
+    if(val<0 || cont<0) return toast("Amounts must be zero or greater","err");
+    const assetId=document.getElementById("pf-proj-asset").value||"";
+    const presellId=document.getElementById("pf-proj-presell").value||"";
+    const status=document.getElementById("pf-proj-status").value||"planned";
+    const retention_rate=Number(String(document.getElementById("pf-proj-retention").value||"").replace(/%/g,""))||0;
+    if(retention_rate<0 || retention_rate>100) return toast("Retention must be 0-100%","err");
+    const allocation=document.getElementById("pf-proj-allocation").value||"equal";
+    const scope=document.getElementById("pf-proj-presell-scope").value||"";
+    const scopeRef=document.getElementById("pf-proj-presell-scope-ref").value||"";
+    const presell_link= scope&&scopeRef? {scope:scope, value:scopeRef} : (presellId? {scope:"project", value:presellId} : null);
+if(editId){
+      const proj=(state.constructionProjects||[]).find(p=>p.id===editId);
+      if(!proj) return;
+      proj.name=name; proj.site=site; proj.contractor=contractor; proj.contract_value=val; proj.contingency=cont; proj.asset_id=assetId; proj.presell_project_id=presellId; proj.status=status; proj.retention_rate=retention_rate; proj.allocation=allocation; proj.presell_link=presell_link;
+      if(pfCloud() && window.ESPFCLOUD) pfCloudWrite("construction_projects", window.ESPFCLOUD.projectToDb(proj));
+      pfAudit("project_edited", proj.id, proj.name, "contract "+val+" / contingency "+cont+" / retention "+retention_rate+"%");
+      toast("Project updated","ok");
+    } else {
+      const proj={ id:"cproj-"+Date.now(), name:name, asset_id:assetId, presell_project_id:presellId, presell_link:presell_link, site:site, contractor:contractor, status:status, contract_value: val, contingency: cont, retention_rate:retention_rate, allocation:allocation, created_at:new Date().toISOString() };
+      state.constructionProjects.push(proj); state.portfolioSelectedConstructionId=proj.id;
+      if(pfCloud() && window.ESPFCLOUD){ window.ESPFCLOUD.ensureUuid(proj); pfCloudWrite("construction_projects", window.ESPFCLOUD.projectToDb(proj)); }
+      pfAudit("project_created", proj.id, proj.name, "contract "+val+" / contingency "+cont+" / retention "+retention_rate+"%");
+      toast("Project created","ok");
+    }
+    pfCloseConstructionModal(); save(); render();
+  }
+  function pfNewProj(){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    pfOpenConstructionModal(null);
+  }
+  function pfDeleteConstruction(id){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const proj=(state.constructionProjects||[]).find(p=>p.id===id);
+    if(!proj) return toast("Project not found","err");
+    const linkedCash=(state.cashEntries||[]).filter(e=> e.linked_construction_id===id || e.linked_phase_id && (state.constructionPhases||[]).find(ph=>ph.id===e.linked_phase_id && ph.project_id===id)).length;
+    const linkedPhases=(state.constructionPhases||[]).filter(ph=>ph.project_id===id).length;
+    const msg="Delete '"+proj.name+"' ?\n\nThis will also remove "+linkedPhases+" phase(s)"+(linkedCash?" and unlink "+linkedCash+" cash entry(ies)":"")+". This cannot be undone.";
+    if(!confirm(msg)) return;
+    if(pfCloud() && window.ESPFCLOUD){
+      const P=window.ESPFCLOUD;
+      if(P.isUuid(id)) pfCloudDelete("construction_projects", id);
+      (state.constructionPhases||[]).filter(ph=>ph.project_id===id).forEach(ph=>{ if(P.isUuid(ph.id)) pfCloudDelete("construction_phases", ph.id); });
+      (state.constructionVendors||[]).filter(v=>v.project_id===id).forEach(v=>{ if(P.isUuid(v.id)) pfCloudDelete("construction_vendors", v.id); });
+      (state.constructionInvoices||[]).filter(i=>i.project_id===id).forEach(i=>{ if(P.isUuid(i.id)) pfCloudDelete("construction_invoices", i.id); });
+      (state.changeOrders||[]).filter(x=>x.project_id===id).forEach(x=>{ if(P.isUuid(x.id)) pfCloudDelete("construction_change_orders", x.id); });
+    }
+    // unlink cash entries
+    (state.cashEntries||[]).forEach(e=>{ if(e.linked_construction_id===id) e.linked_construction_id=""; if(e.linked_phase_id && (state.constructionPhases||[]).find(ph=>ph.id===e.linked_phase_id && ph.project_id===id)) e.linked_phase_id=""; });
+    state.constructionPhases=(state.constructionPhases||[]).filter(ph=>ph.project_id!==id);
+    state.constructionVendors=(state.constructionVendors||[]).filter(v=>v.project_id!==id);
+    state.constructionInvoices=(state.constructionInvoices||[]).filter(i=>i.project_id!==id);
+    state.changeOrders=(state.changeOrders||[]).filter(x=>x.project_id!==id);
+    state.constructionProjects=(state.constructionProjects||[]).filter(p=>p.id!==id);
+    if(state.portfolioSelectedConstructionId===id) state.portfolioSelectedConstructionId=(state.constructionProjects[0]&&state.constructionProjects[0].id)||"";
+    pfAudit("project_deleted", proj.id, proj.name, "contract "+proj.contract_value);
+    save(); render(); toast("Project deleted","ok");
+  }
+  function pfOpenVendorModal(projectId, vendorId){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const modal=document.getElementById("pf-vendor-modal");
+    if(!modal) return;
+    const vendor=vendorId? (state.constructionVendors||[]).find(v=>v.id===vendorId): null;
+    if(vendorId && !vendor) return toast("Vendor not found","err");
+    const pid=vendor? vendor.project_id : projectId;
+    modal.dataset.projectId=pid;
+    modal.dataset.editId=vendor? vendor.id : "";
+    document.getElementById("pf-vendor-title").textContent=vendor? "Edit Vendor/Contractor" : "Vendor/Contractor";
+    ["pf-vendor-name","pf-vendor-contact","pf-vendor-tax"].forEach(id=>{ const k=id.replace("pf-vendor-",""); document.getElementById(id).value=vendor? (vendor[k]||"") : ""; });
+    modal.style.display="flex"; modal.classList.remove("hidden");
+    setTimeout(()=>document.getElementById("pf-vendor-name").focus(),50);
+  }
+  function pfCloseVendorModal(){
+    const modal=document.getElementById("pf-vendor-modal");
+    if(!modal) return;
+    modal.style.display="none"; modal.classList.add("hidden");
+  }
+  function pfSaveVendor(){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const modal=document.getElementById("pf-vendor-modal");
+    const projectId=modal && modal.dataset.projectId;
+    const editId=modal? modal.dataset.editId : "";
+    const name=(document.getElementById("pf-vendor-name").value||"").trim();
+    if(!projectId || !name) return toast("Vendor name required","err");
+    const contact=(document.getElementById("pf-vendor-contact").value||"").trim();
+    const tax_id=(document.getElementById("pf-vendor-tax").value||"").trim();
+    if(editId){
+      const v=(state.constructionVendors||[]).find(x=>x.id===editId);
+      if(!v) return toast("Vendor not found","err");
+      v.name=name; v.contact=contact; v.tax_id=tax_id;
+      if(pfCloud() && window.ESPFCLOUD) pfCloudWrite("construction_vendors", window.ESPFCLOUD.vendorToDb(v));
+      pfAudit("vendor_edited", v.id, v.name, "project "+v.project_id);
+      toast("Vendor updated","ok");
+    } else {
+      const v={ id:"cvendor-"+Date.now(), project_id:projectId, name:name, contact:contact, tax_id:tax_id, created_at:new Date().toISOString() };
+      state.constructionVendors.push(v);
+      if(pfCloud() && window.ESPFCLOUD){ window.ESPFCLOUD.ensureUuid(v); pfCloudWrite("construction_vendors", window.ESPFCLOUD.vendorToDb(v)); }
+      pfAudit("vendor_created", v.id, v.name, "project "+projectId);
+      toast("Vendor added","ok");
+    }
+    pfCloseVendorModal(); save(); render();
+  }
+  function pfDelVendor(id){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const v=(state.constructionVendors||[]).find(x=>x.id===id);
+    if(!v) return toast("Vendor not found","err");
+    const inv=(state.constructionInvoices||[]).filter(i=> i.vendor_id===id);
+    if(inv.length) return toast(inv.length+" invoice(s) reference this vendor — reassign or delete them first","err");
+    if(!confirm("Delete vendor '"+v.name+"' ?\n\nInvoices referencing it must be reassigned first.")) return;
+    if(pfCloud() && window.ESPFCLOUD && window.ESPFCLOUD.isUuid(id)) pfCloudDelete("construction_vendors", id);
+    state.constructionVendors=(state.constructionVendors||[]).filter(x=>x.id!==id);
+    pfAudit("vendor_deleted", v.id, v.name, "project "+v.project_id);
+    save(); render(); toast("Vendor deleted","ok");
+  }
+  function pfOpenInvoiceModal(projectId, invoiceId){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const modal=document.getElementById("pf-invoice-modal");
+    if(!modal) return;
+    const invoice=invoiceId? (state.constructionInvoices||[]).find(i=>i.id===invoiceId): null;
+    if(invoiceId && !invoice) return toast("Invoice not found","err");
+    const pid=invoice? invoice.project_id : projectId;
+    const project=(state.constructionProjects||[]).find(p=>p.id===pid);
+    if(!project) return toast("Construction project not found","err");
+    modal.dataset.projectId=project.id;
+    modal.dataset.editId=invoice? invoice.id : "";
+    document.getElementById("pf-invoice-title").textContent=invoice? "Edit Invoice - "+project.name : "Invoice - "+project.name;
+    // phase select
+    const phSel=document.getElementById("pf-invoice-phase");
+    phSel.innerHTML= (state.constructionPhases||[]).filter(p=>p.project_id===project.id).map(p=>'<option value="'+esc(p.id)+'"'+(invoice&&invoice.phase_id===p.id?' selected':'')+'>'+esc(p.name)+'</option>').join("") || '<option value="">— No phases yet —</option>';
+    // vendor select
+    const vSel=document.getElementById("pf-invoice-vendor");
+    const vends=(state.constructionVendors||[]).filter(v=>v.project_id===project.id);
+    vSel.innerHTML='<option value="">— No vendor —</option>' + vends.map(v=>'<option value="'+esc(v.id)+'"'+(invoice&&invoice.vendor_id===v.id?' selected':'')+'>'+esc(v.name)+'</option>').join("");
+    document.getElementById("pf-invoice-no").value=invoice? (invoice.invoice_no||"") : "";
+    document.getElementById("pf-invoice-date").value=invoice? (invoice.date||"") : "";
+    document.getElementById("pf-invoice-amount").value=invoice? (invoice.amount||"") : "";
+    document.getElementById("pf-invoice-status").value=invoice? (invoice.status||"pending") : "pending";
+    modal.style.display="flex"; modal.classList.remove("hidden");
+    setTimeout(()=>document.getElementById("pf-invoice-no").focus(),50);
+  }
+  function pfCloseInvoiceModal(){
+    const modal=document.getElementById("pf-invoice-modal");
+    if(!modal) return;
+    modal.style.display="none"; modal.classList.add("hidden");
+  }
+  function pfSaveInvoice(){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const modal=document.getElementById("pf-invoice-modal");
+    const projectId=modal && modal.dataset.projectId;
+    const editId=modal? modal.dataset.editId : "";
+    const invoice_no=(document.getElementById("pf-invoice-no").value||"").trim();
+    if(!projectId || !invoice_no) return toast("Invoice number required","err");
+    const amount=Number(String(document.getElementById("pf-invoice-amount").value||"").replace(/,/g,""))||0;
+    if(amount<=0) return toast("Amount must be greater than zero","err");
+    const payload={ invoice_no:invoice_no, phase_id:document.getElementById("pf-invoice-phase").value||"", vendor_id:document.getElementById("pf-invoice-vendor").value||"", date:document.getElementById("pf-invoice-date").value||new Date().toISOString().slice(0,10), amount:amount, status:document.getElementById("pf-invoice-status").value||"pending" };
+    if(editId){
+      const inv=(state.constructionInvoices||[]).find(i=>i.id===editId);
+      if(!inv) return toast("Invoice not found","err");
+      if(inv.status==="paid" && payload.status!=="paid") return toast("Paid invoices are settled against the cash ledger. Correct with a reversal, not an edit.","err");
+      Object.assign(inv,payload);
+      if(pfCloud() && window.ESPFCLOUD) pfCloudWrite("construction_invoices", window.ESPFCLOUD.invoiceToDb(inv));
+      pfAudit("invoice_edited", inv.id, inv.invoice_no, "amount "+amount);
+      toast("Invoice updated","ok");
+    } else {
+      const inv={ id:"cinv-"+Date.now(), project_id:projectId, created_at:new Date().toISOString() };
+      Object.assign(inv,payload);
+      state.constructionInvoices.push(inv);
+      if(pfCloud() && window.ESPFCLOUD){ window.ESPFCLOUD.ensureUuid(inv); pfCloudWrite("construction_invoices", window.ESPFCLOUD.invoiceToDb(inv)); }
+      pfAudit("invoice_created", inv.id, inv.invoice_no, "amount "+amount);
+      toast("Invoice added","ok");
+    }
+    pfCloseInvoiceModal(); save(); render();
+  }
+  function pfDelInvoice(id){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const inv=(state.constructionInvoices||[]).find(i=>i.id===id);
+    if(!inv) return toast("Invoice not found","err");
+    if(inv.ledger_entry_id) return toast("This invoice was paid — reverse the posted cash entry instead of deleting it.","err");
+    if(!confirm("Delete invoice '"+inv.invoice_no+"' (₱"+C.money(inv.amount)+") ?")) return;
+    if(pfCloud() && window.ESPFCLOUD && window.ESPFCLOUD.isUuid(id)) pfCloudDelete("construction_invoices", id);
+    state.constructionInvoices=(state.constructionInvoices||[]).filter(i=>i.id!==id);
+    pfAudit("invoice_deleted", inv.id, inv.invoice_no, "amount "+inv.amount);
+    save(); render(); toast("Invoice deleted","ok");
+  }
+  function pfPayInvoice(id){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const L=window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
+    const inv=(state.constructionInvoices||[]).find(i=>i.id===id);
+    if(!inv) return toast("Invoice not found","err");
+    if(inv.status==="paid") return toast("Invoice already paid","err");
+    const phase=(state.constructionPhases||[]).find(p=>p.id===inv.phase_id);
+    const account=(state.portfolioAccounts||[]).find(a=>a.id===(document.getElementById("pf-ledger-account")&&document.getElementById("pf-ledger-account").value)) || (state.portfolioAccounts||[])[0];
+    if(!account) return toast("Create a cash account first","err");
+    if(!L) return toast("Ledger engine unavailable","err");
+    const amount=Number(inv.amount)||0;
+    const entry={ id: pfNextLedgerId(), accountId: account.id, entry_date: inv.date||new Date().toISOString().slice(0,10), direction:"out", amount:amount, description:"Invoice "+inv.invoice_no+" — "+(phase? phase.name:"construction")+" — vendor "+(((state.constructionVendors||[]).find(v=>v.id===inv.vendor_id)||{}).name||""), purpose:"construction", link:{type:"invoice", id: inv.id}, linked_construction_id:inv.project_id, linked_phase_id:inv.phase_id||"", status:"posted", idempotencyKey:"pf-invoice-"+id };
+    const accountEntries=(state.cashEntries||[]).filter(e=>e.accountId===account.id);
+    const res=L.post(entry,{ opening:account.opening_balance||0, entries:accountEntries });
+    if(!res.ok){
+      if(res.errors && res.errors.indexOf("cash out exceeds current balance")>=0) return toast("Insufficient cash — invoice ₱"+C.money(amount)+" exceeds the available balance in "+account.label+". Add cash first.","err");
+      return toast((res.errors||["cannot post"]).join(", "),"err");
+    }
+    state.cashEntries.push(res.entry); inv.status="paid"; inv.ledger_entry_id=res.entry.id; inv.paid_at=new Date().toISOString();
+    if(phase){ phase.paid=Math.round((Number(phase.paid||0)+amount)*100)/100; }
+    if(pfCloud() && window.ESPFCLOUD){
+      const P=window.ESPFCLOUD;
+      P.ensureUuid(res.entry);
+      pfCloudWrite("cash_entries", P.entryToDb(res.entry));
+      pfCloudWrite("construction_invoices", P.invoiceToDb(inv));
+      if(phase) pfCloudWrite("construction_phases", P.phaseToDb(phase));
+    }
+    state.portfolioSelectedConstructionId=inv.project_id;
+    pfAudit("invoice_paid", inv.id, inv.invoice_no, "paid "+amount+" via ledger entry "+res.entry.id);
+    pfAudit("entry_posted", res.entry.id, "Invoice "+inv.invoice_no, "cash out "+amount+" → "+inv.project_id+" / "+(inv.phase_id||""));
+    save(); render(); toast("Invoice paid — one posted cash-out entry created","ok");
+  }
+  function pfOpenChangeModal(projectId, changeId){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const modal=document.getElementById("pf-change-modal");
+    if(!modal) return;
+    const change=changeId? (state.changeOrders||[]).find(x=>x.id===changeId): null;
+    if(changeId && !change) return toast("Change order not found","err");
+    const pid=change? change.project_id : projectId;
+    const project=(state.constructionProjects||[]).find(p=>p.id===pid);
+    if(!project) return toast("Construction project not found","err");
+    modal.dataset.projectId=project.id;
+    modal.dataset.editId=change? change.id : "";
+    document.getElementById("pf-change-title").textContent=change? "Edit Change Order - "+project.name : "Change Order - "+project.name;
+    ["pf-change-amount","pf-change-reason","pf-change-approver","pf-change-date"].forEach(id=>{ const k={ "pf-change-amount":"amount", "pf-change-reason":"reason", "pf-change-approver":"approver", "pf-change-date":"date" }[id]; document.getElementById(id).value= change? (change[k]||"") : ""; });
+    modal.style.display="flex"; modal.classList.remove("hidden");
+    setTimeout(()=>document.getElementById("pf-change-reason").focus(),50);
+  }
+  function pfCloseChangeModal(){
+    const modal=document.getElementById("pf-change-modal");
+    if(!modal) return;
+    modal.style.display="none"; modal.classList.add("hidden");
+  }
+  function pfSaveChange(){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const modal=document.getElementById("pf-change-modal");
+    const projectId=modal && modal.dataset.projectId;
+    const editId=modal? modal.dataset.editId : "";
+    const reason=(document.getElementById("pf-change-reason").value||"").trim();
+    if(!projectId || !reason) return toast("Change order reason required","err");
+    const amount=Number(String(document.getElementById("pf-change-amount").value||"").replace(/,/g,""))||0;
+    if(amount<=0) return toast("Amount must be greater than zero","err");
+    const payload={ amount:amount, reason:reason, approver:(document.getElementById("pf-change-approver").value||"").trim()||"Unassigned", date:document.getElementById("pf-change-date").value||new Date().toISOString().slice(0,10) };
+    if(editId){
+      const ch=(state.changeOrders||[]).find(x=>x.id===editId);
+      if(!ch) return toast("Change order not found","err");
+      Object.assign(ch,payload);
+      if(pfCloud() && window.ESPFCLOUD) pfCloudWrite("construction_change_orders", window.ESPFCLOUD.changeToDb(ch));
+      pfAudit("change_order_edited", ch.id, ch.reason, "amount "+amount);
+      toast("Change order updated","ok");
+    } else {
+      const ch={ id:"cchange-"+Date.now(), project_id:projectId, created_at:new Date().toISOString() };
+      Object.assign(ch,payload);
+      state.changeOrders.push(ch);
+      if(pfCloud() && window.ESPFCLOUD){ window.ESPFCLOUD.ensureUuid(ch); pfCloudWrite("construction_change_orders", window.ESPFCLOUD.changeToDb(ch)); }
+      pfAudit("change_order_created", ch.id, ch.reason, "amount "+amount+" by "+payload.approver);
+      toast("Change order added","ok");
+    }
+    pfCloseChangeModal(); save(); render();
+  }
+  function pfDelChange(id){
+    if(!pfCanWrite()) return toast("Admin only","err");
+    const ch=(state.changeOrders||[]).find(x=>x.id===id);
+    if(!ch) return toast("Change order not found","err");
+    const msg="Delete change order '"+(ch.reason||ch.id).slice(0,40)+"' (₱"+C.money(ch.amount)+") ?\n\nIts amount will be removed from the project forecast.";
+    if(!confirm(msg)) return;
+    if(pfCloud() && window.ESPFCLOUD && window.ESPFCLOUD.isUuid(id)) pfCloudDelete("construction_change_orders", id);
+    state.changeOrders=(state.changeOrders||[]).filter(x=>x.id!==id);
+    pfAudit("change_order_deleted", ch.id, ch.reason, "amount "+ch.amount);
+    save(); render(); toast("Change order deleted","ok");
   }
 
   /* ================= ASSISTANT ================= */
@@ -7282,6 +9064,13 @@ premise: "Fee Simple / As Improved",
       Promise.reject(new Error("no base"))
     );
   }
+  function msStoresFetch(qs) {
+    const bases = MS_API === MS_CLOUD ? [MS_CLOUD] : [MS_API, MS_CLOUD];
+    return bases.reduce(
+      (chain, base) => chain.catch(() => fetch(base + "/api/market-scan/stores?" + qs).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })),
+      Promise.reject(new Error("no base"))
+    );
+  }
   const MS_TYPES = ["", "Vacant Lot", "House & Lot", "Townhouse", "Condominium Unit", "Apartment", "Shophouse", "Commercial", "Warehouse", "Office"];
   function marketLocationForCity(city) {
     for (const r of D.PH_REGIONS) {
@@ -7312,7 +9101,7 @@ premise: "Fee Simple / As Improved",
     if (st.error) {
       html += '<div class="notice-banner err">' + icon("pin", 14) + ' <span>Market Scan backend not reachable' + ((location.hostname === "localhost" || location.hostname === "127.0.0.1") ? " — run <b>market-scan\\start_market_scan.cmd</b> for the local scraper, or scans fall back to the hosted service" : "") + '. Please try again in a moment.</span></div>';
     }
-    html += '<div class="card card-pad mt-16"><div class="row" style="gap:12px;align-items:end">' +
+    html += '<div class="card card-pad mt-16 ms-filters"><div class="row" style="gap:12px;align-items:end">' +
       '<div class="field col-2"><label>Region</label><select class="input" id="ms-region"><option value="">All regions</option>' + D.regionNames().map(x => '<option value="' + esc(x) + '"' + (x === region ? " selected" : "") + '>' + esc(x) + '</option>').join("") + '</select></div>' +
       '<div class="field col-2"><label>Province</label><select class="input" id="ms-province"' + (region ? "" : " disabled") + '><option value="">' + (region ? "All provinces" : "Select a region first") + '</option>' + (region ? D.provincesFor(region).map(x => '<option value="' + esc(x) + '"' + (x === province ? " selected" : "") + '>' + esc(x) + '</option>').join("") : "") + '</select></div>' +
       '<div class="field col-2"><label>City / Municipality</label><select class="input" id="ms-city"' + (province ? "" : " disabled") + '><option value="">' + (province ? "All cities / municipalities" : "Select a province first") + '</option>' + cities.map(x => '<option value="' + esc(x) + '"' + (x === (q.city || "") ? " selected" : "") + '>' + esc(x) + '</option>').join("") + '</select></div>' +
@@ -7330,6 +9119,7 @@ premise: "Fee Simple / As Improved",
        '<div class="field col-2"><label class="ms-chk"><input type="checkbox" id="ms-live"' + (q.live === false ? "" : " checked") + '> Include live web sources</label></div>' +
       '</div></div>';
     html += '<div id="market-status" class="mt-16"></div>';
+    html += marketStoresCardHtml();
     html += marketIndexCardHtml();
     html += '<div id="market-results" class="mt-16">' + (st.results && st.results.length ? marketResultsHtml(st) : marketEmptyHtml()) + '</div>';
     ensureMarketIndex();
@@ -7337,7 +9127,154 @@ premise: "Fee Simple / As Improved",
   }
 
   function marketEmptyHtml() {
-    return '<div class="card card-pad empty">' + icon("search", 50) + '<h3>Run a market scan</h3><p>Set your filters and press <b>Run Search</b> to pull live listings from DotProperty.com.ph, MyProperty.ph and web search, plus local benchmark reference data when offline.</p><div class="row" style="justify-content:center;margin-top:10px"><button class="btn btn-primary" data-run-market="1">' + icon("search", 15) + ' Run Search</button></div></div>';
+    return '<div class="card card-pad empty">' + icon("search", 50) + '<h3>Run a market scan</h3><p>Set your filters and press <b>Run Search</b> to pull live listings from DotProperty.com.ph, MyProperty.ph and web search. Live median benchmarks are built automatically from the real listings each scan observes.</p><div class="row" style="justify-content:center;margin-top:10px"><button class="btn btn-primary" data-run-market="1">' + icon("search", 15) + ' Run Search</button></div></div>';
+  }
+
+  const STORE_CATS = [["", "All categories"], ["convenience", "Convenience Store"], ["grocery", "Grocery Store"], ["mini", "Mini Store"]];
+  const STORE_CAT_LABEL = { convenience: "Convenience", grocery: "Grocery", mini: "Mini" };
+  function marketStoreLocText(q) {
+    if (q.city) return q.city + (q.province ? " (" + q.province + ")" : "") + (q.region ? " · " + q.region : "");
+    if (q.province) return q.province + (q.region ? " · " + q.region : "");
+    if (q.region) return q.region + " (all cities)";
+    return "All cities (no location filter set)";
+  }
+  function marketStoresCardHtml() {
+    const st = state.market || {};
+    const q = st.query || {};
+    const sq = (st.stores && st.stores.q) || {};
+    const def = (sq && (sq.region !== undefined || sq.city !== undefined)) ? sq : q;
+    const region = def.region || "";
+    const province = def.province || "";
+    const city = def.city || "";
+    const provinces = region ? D.provincesFor(region) : [];
+    const cities = region && province ? D.citiesFor(region, province) : [];
+    const catSel = sq.cat || "";
+    const minB = sq.minBranches != null ? sq.minBranches : 3;
+    const hasResults = !!(st.stores && st.stores.data && !st.stores.loading);
+    const ftText = (st.stores && st.stores.text) || "";
+    let html =
+      '<div class="card card-pad mt-16" id="ms-stores-card">' +
+      '<div class="row spread mb-4"><h3 style="margin:0">Store Locator</h3><span class="badge gold">Live · OpenStreetMap</span></div>' +
+      '<div class="dim tiny mb-8">Filters: pick a location, category, and minimum branch count. Real geocoded records come from OpenStreetMap — chains appear only when they reach the minimum branch count, so nothing is ever fabricated.</div>' +
+      '<div class="row ms-stores-controls" style="gap:12px;align-items:end">' +
+      '<div class="field col-2"><label>Region</label><select class="input" id="ms-stores-region"><option value="">All regions</option>' + D.regionNames().map(x => '<option value="' + esc(x) + '"' + (x === region ? " selected" : "") + '>' + esc(x) + '</option>').join("") + '</select></div>' +
+      '<div class="field col-2"><label>Province</label><select class="input" id="ms-stores-province"' + (region ? "" : " disabled") + '><option value="">' + (region ? "All provinces" : "Select a region first") + '</option>' + (region ? provinces.map(x => '<option value="' + esc(x) + '"' + (x === province ? " selected" : "") + '>' + esc(x) + '</option>').join("") : "") + '</select></div>' +
+      '<div class="field col-2"><label>City / Municipality</label><select class="input" id="ms-stores-city"' + (province ? "" : " disabled") + '><option value="">' + (province ? "All cities / municipalities" : "Select a province first") + '</option>' + cities.map(x => '<option value="' + esc(x) + '"' + (x === city ? " selected" : "") + '>' + esc(x) + '</option>').join("") + '</select></div>' +
+      '<div class="field col-2"><label>Category</label><select class="input" id="ms-stores-cat">' + STORE_CATS.map(c => '<option value="' + c[0] + '"' + (c[0] === catSel ? " selected" : "") + '>' + c[1] + '</option>').join("") + '</select></div>' +
+      '<div class="field col-2"><label>Min branches</label><input class="input input-num" id="ms-stores-minb" type="number" min="0" step="1" aria-label="Minimum branches" title="Chains with fewer mapped branches are hidden but listed under Coverage." value="' + minB + '"><div class="field-hint">At/above this, chains are listed; below it they show under Coverage.</div></div>' +
+      '<div class="field col-2"><button class="btn btn-primary" id="ms-stores-run" style="width:100%">' + icon("search", 15) + ' Find stores</button></div>' +
+      '</div>' +
+      '<div class="mt-12" id="ms-stores-status" role="status" aria-live="polite"></div>' +
+      (hasResults ? '<div class="row mt-12" style="gap:8px;align-items:center">' +
+        '<div class="grow"><input class="input" id="ms-stores-q" type="text" aria-label="Filter branch results" placeholder="Filter branch results — type a name or address…" value="' + esc(ftText) + '"></div>' +
+        '<button class="btn btn-ghost btn-sm" id="ms-stores-qclear">' + icon("x", 13) + ' Clear</button></div>' +
+        '<div class="dim tiny mt-8" id="ms-stores-match" aria-live="polite"></div>' : "") +
+      '<div class="mt-12" id="ms-stores-results">' +
+      (hasResults ? marketStoresResultsHtml(st.stores.data, st.stores.q)
+        : (st.stores && st.stores.error && !st.stores.loading ? '<div class="notice-banner err">' + icon("alert", 14) + ' <span>Store lookup failed: ' + esc(st.stores.error) + '</span></div>'
+          : (st.stores && st.stores.dirty && !st.stores.loading ? '<div class="notice-banner">' + icon("pin", 14) + ' <span>Location or filters changed — press <b>Find stores</b> to load matching chains.</span></div>' : ""))) +
+      '</div>' +
+      '</div>';
+    return html;
+  }
+  function storesTouch(qPatch) {
+    const cur = Object.assign({}, (((state.market || {}).stores) || {}).q || {});
+    const q = Object.assign({}, cur, qPatch);
+    state.market = Object.assign({}, state.market, { stores: Object.assign({}, ((state.market || {}).stores) || {}, { q: q, dirty: true, data: undefined, error: undefined, at: Date.now() }) });
+    save(); render();
+  }
+  function storesApplyFilter() {
+    const inp = document.querySelector("#ms-stores-q");
+    const root = document.querySelector("#ms-stores-results");
+    if (!inp || !root) return;
+    const t = (inp.value || "").trim().toLowerCase();
+    let total = 0, shown = 0;
+    root.querySelectorAll("[data-sc-chain]").forEach(function (ch) {
+      let rowShow = 0;
+      ch.querySelectorAll(".ms-sc-branch").forEach(function (b) {
+        total++;
+        const ok = !t || b.textContent.toLowerCase().indexOf(t) !== -1;
+        b.style.display = ok ? "" : "none";
+        if (ok) rowShow++;
+      });
+      ch.style.display = rowShow ? "" : "none";
+      shown += rowShow;
+    });
+    const mc = document.querySelector("#ms-stores-match");
+    if (mc) mc.textContent = t ? (shown + " of " + total + " branch rows match \u201C" + inp.value.trim() + "\u201D") : "";
+  }
+  function marketStoresRun(forceRefresh) {
+    const st = state.market || {};
+    if (st.stores && st.stores.loading) return;
+    const refresh = forceRefresh === true;
+    const q = {
+      region: $("#ms-stores-region").value,
+      province: $("#ms-stores-province").value,
+      city: $("#ms-stores-city").value,
+      cat: $("#ms-stores-cat").value,
+      minBranches: C.num($("#ms-stores-minb").value, 3)
+    };
+    state.market = Object.assign({}, st, { stores: Object.assign({}, st.stores, { q: q, loading: true, at: Date.now() }) });
+    save(); render();
+    const el = $("#ms-stores-status");
+    if (el) el.innerHTML = '<div class="notice-banner">' + icon("refresh", 14) + ' ' + (refresh ? "Refreshing " : "Looking up ") + 'real branch records for ' + esc(marketStoreLocText(q)) + '… first request takes ~10–20s, then it is cached for 24h.</div>';
+    const qs = new URLSearchParams();
+    qs.append("cat", q.cat);
+    qs.append("minBranches", String(q.minBranches));
+    if (q.city) { qs.append("city", q.city); qs.append("region", q.region || ""); }
+    else if (q.region) qs.append("region", q.region);
+    if (q.province) qs.append("province", q.province);
+    if (refresh) qs.append("refresh", "1");
+    msStoresFetch(qs.toString())
+      .then(d => {
+        if (!d || !d.ok) throw new Error((d && d.error) || "Backend error");
+        state.market = Object.assign({}, state.market, { stores: Object.assign({}, ((state.market || {}).stores) || {}, { q: q, data: d, loading: false, at: Date.now() }) });
+        save(); render();
+      })
+      .catch(err => {
+        state.market = Object.assign({}, state.market, { stores: Object.assign({}, ((state.market || {}).stores) || {}, { q: q, error: String((err && err.message) || err), loading: false, at: Date.now() }) });
+        save(); render();
+      });
+  }
+  function marketStoresResultsHtml(data, sq) {
+    if (data.error) return '<div class="notice-banner err">' + icon("alert", 14) + ' <span>Store lookup failed: ' + esc(data.error) + '</span></div>';
+    const chains = data.chains || [];
+    const cov = data.coverage || [];
+    if (!chains.length) {
+      const catLabel = (sq && sq.cat && STORE_CAT_LABEL[sq.cat]) || "store category";
+      const minReq = (sq && sq.minBranches >= 0 ? sq.minBranches : 3);
+      const qual = minReq > 0 ? " reaches <b>" + minReq + "+</b> mapped branches" : " has mapped branches";
+      const covTxt = cov.length ? cov.map(c => esc(c.name) + " (" + (c.status === "error" ? "scan failed" : c.foundBranches + " mapped") + ")").join(", ") : "";
+      return '<div class="notice-banner">' + icon("pin", 14) + ' <span>No <b>' + esc(catLabel.toLowerCase()) + '</b> chain in OpenStreetMap' + qual + ' for this location.' + (covTxt ? ' Checked: ' + covTxt + '.' : '') + ' Coverage varies by area and chain — try another city, lower the minimum, or use Refresh data.</span></div>';
+    }
+    const summary = '<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">' + chains.map(c => '<span class="badge green" title="' + esc(c.branchCountSource) + '">' + esc(c.name) + ' · ' + c.foundBranches + ' branch' + (c.foundBranches === 1 ? "" : "es") + '</span>').join("") + '</div>';
+    const covHtml = cov.length ? '<div class="dim tiny" style="margin-top:2px;margin-bottom:8px;line-height:1.9">Checked ' + cov.length + ' chain' + (cov.length === 1 ? "" : "s") + ' in OpenStreetMap — ' + cov.map(c => '<span class="badge ' + (c.status === "error" ? "red" : c.status === "found" ? "green" : "gold") + '" title="' + esc(c.branchCountSource) + '">' + esc(c.name) + ' · ' + c.foundBranches + ' ' + esc(c.status) + '</span>').join(" ") + '</div>' : "";
+    const iso = data.fetchedAt || "";
+    const when = (iso ? iso.replace("T", " ").replace("Z", " UTC").slice(0, 19) : "") || (data.today || "—");
+    const metaTxt = data.stale ? "Stale" : (data.cached ? "Cached" : (data.refreshed ? "Refreshed" : "Fresh scan"));
+    const freshNote = '<span class="badge ' + (data.stale ? "red" : (data.cached ? "gold" : "green")) + '" title="' + esc((data.warnings || []).join("\n")) + '">' + esc(metaTxt) + ' · observed ' + esc(when) + '</span>';
+    const refreshBtn = '<button class="btn btn-ghost btn-sm" id="ms-stores-refresh">' + icon("refresh", 13) + ' Refresh data</button>';
+    const warnHtml = (data.warnings || []).map(w => '<div class="dim tiny" style="margin-top:4px">' + esc(w) + '</div>').join("");
+    const list = chains.map(c =>
+      '<div class="card card-pad" style="margin-bottom:10px" data-sc-chain="' + esc(c.name) + '">' +
+      '<div class="row spread" style="align-items:center"><b>' + esc(c.name) + '</b><span class="dim tiny">' + esc(STORE_CAT_LABEL[c.category] || c.category) + ' · ' + c.foundBranches + ' branch' + (c.foundBranches === 1 ? "" : "es") + ' · ' + esc(c.branchCountSource) + '</span></div>' +
+      '<div class="ms-sc-branches" style="margin-top:8px;display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))">' +
+      c.branches.map(b =>
+        '<div class="ms-sc-branch" style="border:1px solid var(--line);border-radius:8px;padding:8px" data-sc-branch="1">' +
+        '<div class="mono" style="font-weight:700">' + esc(b.name) + '</div>' +
+        '<div class="dim tiny mt-4">' + esc(b.address) + '</div>' +
+        '<div class="row mt-8" style="gap:8px"><a class="btn btn-ghost btn-sm" href="' + esc(b.mapsUrl) + '" target="_blank" rel="noopener" data-sc-maps="1">' + icon("pin", 12) + ' Google Maps</a>' +
+        '<button class="btn btn-ghost btn-sm" data-ms-sc-map="1" data-embed="' + esc(b.embedUrl) + '" data-label="' + esc(b.name) + '">' + icon("map", 12) + ' Show map</button></div>' +
+        '<div class="ms-sc-map" style="display:none;margin-top:8px"></div></div>'
+      ).join("") +
+      '</div></div>'
+    ).join("");
+    return (data.stale ? '<div class="notice-banner err">' + icon("alert", 14) + ' <span>Last refresh failed — showing last known good data from ' + esc(when) + '.</span></div>' : "") +
+      summary +
+      covHtml +
+      '<div class="row mt-8" style="gap:10px;align-items:center">' + freshNote + refreshBtn + '</div>' +
+      warnHtml +
+      '<div class="dim tiny mb-8">Branch records: OpenStreetMap (Nominatim) · counts reflect what is mapped, so a zero result means no mapped branches — not proof a chain is absent. Each branch opens in Google Maps.</div>' + list;
   }
 
   function marketResultsHtml(st) {
@@ -7348,22 +9285,36 @@ premise: "Fee Simple / As Improved",
       const note = s.status === "ok" ? (s.count + " found") : s.status;
       return '<span class="badge ' + cls + '" title="' + esc(s.error || (s.status + " source")) + '">' + icon(ic, 11) + ' ' + esc(s.label) + ' · ' + esc(note) + '</span>';
     }).join("") + '</div>';
-    chips += '<div class="dim tiny mt-8">' + (st.total || 0) + ' matched · showing ' + (st.results ? st.results.length : 0) + ' · ' + (st.elapsedMs != null ? st.elapsedMs + "ms" : "") + '</div>';
+    const rowCounts = {};
+    (st.results || []).forEach(l => { const k = l.source || "?"; rowCounts[k] = (rowCounts[k] || 0) + 1; });
+    chips += '<div class="row" style="align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">' +
+      '<label class="dim tiny">Source:</label>' +
+      '<select class="input" id="ms-source" style="max-width:280px">' +
+      '<option value="">All sources</option>' +
+      srcs.filter(s => s.status === "ok" && rowCounts[s.name] > 0).map(s => '<option value="' + esc(s.name) + '"' + (((st.query || {}).msSource || "") === s.name ? " selected" : "") + '>' + esc(s.label) + ' (' + rowCounts[s.name] + ')</option>').join("") +
+      '</select>' +
+      '<div class="dim tiny">' + (st.total || 0) + ' matched · showing ' + (st.results ? st.results.length : 0) + ' · ' + (st.elapsedMs != null ? st.elapsedMs + "ms" : "") + '</div><span class="grow"></span><button class="btn btn-ghost btn-sm" data-ms-export>' + icon("download", 13) + ' Export CSV</button></div>';
     const cards = st.results.map((l, i) => {
       const area = l.lotArea || l.floorArea;
       const perSqm = l.pricePerSqm ? '<div class="dim tiny">' + C.money(l.pricePerSqm) + '/sqm</div>' : "";
       const modeWord = l.mode === "rent" ? "For Rent" : "For Sale";
       const listingUrl = safeHttpsUrl(l.url);
-      return '<article class="ms-card"><div class="ms-top"><div class="grow">' +
+      const thumb = l.image
+        ? '<div class="ms-thumb"><img src="' + esc(l.image) + '" loading="lazy" alt="" onerror="var t=this.closest(\'.ms-thumb\'); if(t){t.style.display=\'none\';}"></div>'
+        : "";
+      const metaChips = marketMetaChips(l);
+      return '<article class="ms-card">' + thumb + '<div class="ms-top"><div class="grow">' +
         (listingUrl ? '<a href="' + esc(listingUrl) + '" target="_blank" rel="noopener" class="ms-title">' + esc(l.title) + '</a>' : '<div class="ms-title">' + esc(l.title) + '</div>') +
-        '<div class="dim tiny mt-4">' + esc(l.sourceLabel || l.source || "") + ' · ' + esc(l.city || "") + ' · ' + esc(l.propertyType || "—") + ' · ' + modeWord + '</div></div>' +
-        '<div class="ms-price">' + (l.price ? C.money(l.price) : "—") + perSqm + '</div></div>' +
+        '<div class="dim tiny mt-4">' + esc(l.sourceLabel || l.source || "") + ' · ' + esc(l.city || "") + ' · ' + esc(l.propertyType || "—") + ' · ' + modeWord + '</div>' +
+        (metaChips ? '<div class="ms-chips">' + metaChips + '</div>' : "") +
+        '</div><div class="ms-price">' + (l.price ? C.money(l.price) : "—") + perSqm + '</div></div>' +
         '<div class="ms-meta">' +
         (l.bedrooms ? '<span>' + icon("home", 12) + ' ' + l.bedrooms + ' BR</span>' : "") +
         (l.bathrooms ? '<span>' + icon("home", 12) + ' ' + l.bathrooms + ' Bath</span>' : "") +
         (area ? '<span>' + C.numFmt(area) + ' sqm</span>' : "") +
         (l.verified ? '<span class="badge green">Verified</span>' : "") +
-        '</div><div class="ms-foot"><button class="btn btn-ghost btn-sm" data-ms-comp="' + i + '">' + icon("scale", 13) + ' Add to Appraisal comparables</button></div>' +
+        '</div><div class="ms-foot"><button class="btn btn-ghost btn-sm" data-ms-comp="' + i + '">' + icon("scale", 13) + ' Add to Appraisal comparables</button>' +
+        '<button class="btn btn-ghost btn-sm" data-ms-save="' + i + '" title="Save to Listings">' + icon("plus", 13) + ' Save</button></div>' +
         (l.description ? '<div class="dim tiny ms-desc">' + esc(l.description.slice(0, 150)) + (l.description.length > 150 ? "…" : "") + '</div>' : "") +
         '</article>';
     }).join("");
@@ -7371,6 +9322,7 @@ premise: "Fee Simple / As Improved",
   }
 
   function marketRun() {
+    const prevQuery = (state.market && state.market.query) || {};
     const q = {
       city: $("#ms-city").value.trim(),
       type: $("#ms-type").value,
@@ -7382,7 +9334,8 @@ premise: "Fee Simple / As Improved",
       maxResults: C.num($("#ms-max").value, 40) || 40,
       live: $("#ms-live").checked,
       region: $("#ms-region").value,
-      province: $("#ms-province").value
+      province: $("#ms-province").value,
+      msSource: prevQuery.msSource || ""
     };
     state.market = { query: q, results: [], sources: [], running: true };
     save(); render();
@@ -7394,7 +9347,7 @@ premise: "Fee Simple / As Improved",
       .then(d => {
         if (!d || !d.ok) throw new Error((d && d.error) || "Backend error");
         const filtered = marketPostFilter(d.listings || [], q);
-        state.market = { query: q, results: filtered, sources: d.sources || [], total: filtered.length, elapsedMs: d.elapsedMs, ranAt: Date.now() };
+        state.market = { query: q, results: filtered, all: d.listings || [], sources: d.sources || [], total: filtered.length, elapsedMs: d.elapsedMs, ranAt: Date.now() };
         save(); captureMarketIndex(filtered); render();
       })
       .catch(err => {
@@ -7421,9 +9374,12 @@ premise: "Fee Simple / As Improved",
     const wantProv = String(q.province || "").trim().toLowerCase();
     const wantRegion = String(q.region || "").trim().toLowerCase();
     const wantType = String(q.type || "").trim();
+    const wantSrc = String(q.msSource || "").trim().toLowerCase();
     const normType = s => String(s || "").toLowerCase().replace(/[^a-z]/g, "");
     const wt = normType(wantType);
     return (listings || []).filter(l => {
+      // Source filter ("filter out where the result came from")
+      if (wantSrc && String(l.source || "").toLowerCase() !== wantSrc) return false;
       // Region / province narrowing using canonical city mapping
       if (wantProv || wantRegion) {
         const cc = canonCity(l.city).toLowerCase();
@@ -7610,6 +9566,78 @@ premise: "Fee Simple / As Improved",
     navigate("appraisal");
   }
 
+  function marketAgeText(iso) {
+    if (!iso) return "";
+    const t = new Date(iso).getTime();
+    if (!isFinite(t)) return "";
+    const mins = Math.floor((Date.now() - t) / 60000);
+    if (mins < 60) return mins <= 1 ? "posted just now" : "posted " + mins + "m ago";
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return "posted " + hrs + "h ago";
+    const days = Math.floor(hrs / 24);
+    return "posted " + (days === 1 ? "1d" : days + "d") + " ago";
+  }
+  function marketPriceChip(l) {
+    const p = l.priceChange;
+    if (!p) return "";
+    if (p.dir === "down") return '<span class="badge green">&#9660; ' + Math.max(1, p.pct || 1) + "% reduced</span>";
+    if (p.dir === "up") return '<span class="badge red">&#9650; ' + Math.max(1, p.pct || 1) + "% increased</span>";
+    return "";
+  }
+  function marketMetaChips(l) {
+    let s = marketPriceChip(l);
+    const age = marketAgeText(l.postedAt);
+    if (age) s += '<span class="badge gold">' + esc(age) + "</span>";
+    if (l.yieldPct) s += '<span class="badge green" title="Gross annual rent yield vs comparable value">' + l.yieldPct + "% yield</span>";
+    return s;
+  }
+  function marketExportCsv() {
+    const st = state.market || {};
+    const rows = st.results || [];
+    if (!rows.length) { toast("Nothing to export yet — run a scan first", "err"); return; }
+    const lines = [["Title", "Source", "City", "Type", "Mode", "Price", "Price/sqm", "Beds", "Baths", "Lot sqm", "Floor sqm", "Posted", "URL"]];
+    rows.forEach(l => {
+      lines.push([
+        l.title || "", l.sourceLabel || l.source || "", l.city || "", l.propertyType || "",
+        l.mode === "rent" ? "For Rent" : "For Sale", l.price || 0, l.pricePerSqm || 0,
+        l.bedrooms || 0, l.bathrooms || 0, l.lotArea || 0, l.floorArea || 0,
+        l.postedAt ? String(l.postedAt).slice(0, 10) : "", l.url || ""
+      ]);
+    });
+    exportCSV("market_scan_" + new Date().toISOString().slice(0, 10) + ".csv", lines);
+    toast("Exported <b>" + rows.length + "</b> market listings (CSV)", "ok");
+  }
+  function marketSaveToListings(i) {
+    const st = state.market || {};
+    const l = (st.results || [])[i];
+    if (!l) return;
+    if (!state.listings) state.listings = [];
+    const now = new Date().toISOString();
+    const rec = {
+      id: "lst-ms-" + (l.hash || String(Date.now()) + Math.floor(Math.random() * 999)),
+      title: l.title || "Market listing",
+      propertyType: l.propertyType || "House & Lot",
+      dealType: l.mode === "rent" ? "rent" : "sale",
+      status: "available",
+      price: l.price || 0,
+      rent: l.mode === "rent" ? l.price : 0,
+      city: String(l.city || "").split(",")[0].trim(),
+      region: "", province: "",
+      bedrooms: l.bedrooms || 0, bathrooms: l.bathrooms || 0,
+      lotArea: l.lotArea || 0, floorArea: l.floorArea || 0,
+      photos: l.image ? [l.image] : [],
+      description: l.description || "",
+      url: l.url || "", source: l.sourceLabel || l.source || "Market Scan",
+      isPublished: false, featured: false,
+      createdAt: now, updatedAt: now, createdBy: currentUser && currentUser.id
+    };
+    const dup = state.listings.find(x => String(x.title || "").toLowerCase() === String(rec.title).toLowerCase() && String(x.city || "") === String(rec.city) && String(x.price || "") === String(rec.price));
+    if (dup) { toast("This listing is already saved in Listings", "err"); return; }
+    state.listings.unshift(rec);
+    save();
+    toast("Saved <b>" + esc(rec.title.slice(0, 45)) + "</b> to Listings (draft)");
+  }
+
   function bindMarketScan() {
     $$("#content [data-run-market], #content #ms-run").forEach(b => b.addEventListener("click", marketRun));
     const clearBtn = $("#ms-clear");
@@ -7635,12 +9663,68 @@ premise: "Fee Simple / As Improved",
     });
     const idxCity = $("#ms-idx-city");
     if (idxCity) idxCity.addEventListener("change", () => { state.msIdxCity = idxCity.value; save(); render(); });
+    const storesRun = $("#ms-stores-run");
+    if (storesRun) storesRun.addEventListener("click", () => marketStoresRun());
+    const storesRefresh = $("#ms-stores-refresh");
+    if (storesRefresh) storesRefresh.addEventListener("click", () => marketStoresRun(true));
+    const storesRegion = $("#ms-stores-region");
+    if (storesRegion) storesRegion.addEventListener("change", () => storesTouch({ region: storesRegion.value, province: "", city: "" }));
+    const storesProvince = $("#ms-stores-province");
+    if (storesProvince) storesProvince.addEventListener("change", () => storesTouch({ province: storesProvince.value, city: "" }));
+    const storesCity = $("#ms-stores-city");
+    if (storesCity) storesCity.addEventListener("change", () => storesTouch({ city: storesCity.value }));
+    const storesCat = $("#ms-stores-cat");
+    if (storesCat) storesCat.addEventListener("change", () => storesTouch({ cat: storesCat.value }));
+    const storesMinb = $("#ms-stores-minb");
+    if (storesMinb) storesMinb.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); marketStoresRun(); } });
+    if (storesMinb) storesMinb.addEventListener("change", () => storesTouch({ minBranches: C.num(storesMinb.value, 3) }));
+    const storesResults = $("#ms-stores-results");
+    if (storesResults) storesResults.addEventListener("click", e => {
+      const btn = e.target.closest("[data-ms-sc-map]");
+      if (!btn) return;
+      e.preventDefault();
+      const branch = btn.closest(".ms-sc-branch");
+      const holder = branch && branch.querySelector(".ms-sc-map");
+      if (holder) {
+        const iframe = holder.querySelector("iframe");
+        if (!iframe) {
+          holder.innerHTML = '<div class="dim tiny mb-4">' + esc(btn.getAttribute("data-label") || "") + '</div><iframe src="' + esc(btn.getAttribute("data-embed")) + '" style="width:100%;height:220px;border:0" loading="lazy" title="Store map"></iframe>';
+          holder.style.display = "block";
+          btn.innerHTML = icon("close", 12) + ' Hide map';
+        } else {
+          holder.style.display = "none";
+          btn.innerHTML = icon("map", 12) + ' Show map';
+        }
+      }
+    });
+    const storesQ = $("#ms-stores-q");
+    const storesQClear = $("#ms-stores-qclear");
+    const storesQApply = () => {
+      const v = $("#ms-stores-q") ? $("#ms-stores-q").value : "";
+      state.market = Object.assign({}, state.market, { stores: Object.assign({}, ((state.market || {}).stores) || {}, { text: v }) });
+      storesApplyFilter();
+    };
+    if (storesQ) storesQ.addEventListener("input", storesQApply);
+    if (storesQClear) storesQClear.addEventListener("click", () => { if ($("#ms-stores-q")) $("#ms-stores-q").value = ""; storesQApply(); });
+    if (storesQ) storesQApply();
     $$("#ms-type, #ms-mode").forEach(el => el.addEventListener("change", updateFacebookSearch));
     $$("#content [data-ms-comp]").forEach(b => b.addEventListener("click", () => {
       const st = state.market || {};
       const l = (st.results || [])[+b.getAttribute("data-ms-comp")];
       if (l) marketUseAsComp(l);
     }));
+    $$("#content [data-ms-save]").forEach(b => b.addEventListener("click", () => marketSaveToListings(+b.getAttribute("data-ms-save"))));
+    $$("#content [data-ms-export]").forEach(b => b.addEventListener("click", marketExportCsv));
+    const msSrc = $("#ms-source");
+    if (msSrc) msSrc.addEventListener("change", () => {
+      const st = state.market || {};
+      const srcValue = msSrc.value || "";
+      if (st.running) { toast("Wait for the current scan to finish first", "err"); return; }
+      const q = Object.assign({}, st.query, { msSource: srcValue });
+      const filtered = marketPostFilter(st.all || st.results || [], q);
+      state.market = Object.assign({}, st, { query: q, results: filtered, total: filtered.length });
+      save(); render();
+    });
   }
 
   function emailPmsPayment(button) {
@@ -10076,9 +12160,29 @@ premise: "Fee Simple / As Improved",
     if (!state.campaigns) state.campaigns = [];
     if (!state.transactions) state.transactions = [];
     ensureDeals();
+    ensurePortfolio();
     if (!state.transactions.length && (!currentUser || currentUser.demo || (IS_LOCAL_DEV && !currentUser.id))) state.transactions = seedTransactions();
     if (!state.adminTab) state.adminTab = "overview";
     if ((currentUser && currentUser.demo) || (IS_LOCAL_DEV && (!currentUser || !currentUser.id))) seedPmsSample();
+  }
+  function ensurePortfolio() {
+    if (!Array.isArray(state.portfolioAccounts)) state.portfolioAccounts = [];
+    if (!Array.isArray(state.cashEntries)) state.cashEntries = [];
+if (!Array.isArray(state.constructionProjects)) state.constructionProjects = [];
+    if (!Array.isArray(state.constructionPhases)) state.constructionPhases = [];
+    if (!Array.isArray(state.constructionVendors)) state.constructionVendors = [];
+    if (!Array.isArray(state.constructionInvoices)) state.constructionInvoices = [];
+    if (!Array.isArray(state.changeOrders)) state.changeOrders = [];
+if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
+    if (!state.cashLedgerFilters) state.cashLedgerFilters = { accountId: "", direction: "", status: "", search: "", from: "", to: "" };
+    psEnsure();
+    if (!state.presellProjects.length && (IS_LOCAL_DEV || (currentUser && currentUser.demo))) seedPresellSample();
+    if (!state.portfolioTab) state.portfolioTab = "overview";
+    if (!state.portfolioSelectedConstructionId) state.portfolioSelectedConstructionId = "";
+    // seed a default cash-on-hand for demo/investor
+    if (!state.portfolioAccounts.length && (IS_LOCAL_DEV || (currentUser && currentUser.demo))) {
+      state.portfolioAccounts.push({ id: "acc-cash-" + Date.now(), label: "Cash on Hand", bank_name: "", account_type: "cash", opening_balance: 2500000, as_of: new Date().toISOString().slice(0,10), currency: "PHP", created_at: new Date().toISOString() });
+    }
   }
   function ensureDeals() {
     if (!state.deals || !state.deals.length) {
@@ -11199,7 +13303,8 @@ premise: "Fee Simple / As Improved",
 
   function renderFinancing() {
     const last = state.financingDraft || (state.financingScenarios || [])[0] || {};
-    const c = finCompute(last);
+    const defaults = { price: 6000000, dpPct: 20, dpMonths: 12, rate: 7.5, years: 15, finType: "bank", monthlyIncome: 0 };
+    const c = finCompute(last && last.price ? last : Object.assign({}, defaults, last));
     const row = (k, v, extra) => '<tr><td>' + k + "</td><td>" + (v === "" || v === null ? "—" : v) + "</td><td>" + (extra || "") + "</td></tr>";
     let html = '<div class="hero"><div><h1>Financing</h1><p>Estimate in-house, bank, and Pag-IBIG (HDMF) housing loan options for any property price.</p></div>' +
       '<div class="actions"><button class="btn btn-primary" data-fin-new>' + icon("plus", 15) + " New Scenario</button></div></div>";
@@ -12334,6 +14439,31 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     const ppsm = listingPriceSqm(l);
     return (l.title || "") + "\n" + listingDisplayPrice(l) + (ppsm ? " (" + C.money(Math.round(ppsm)) + "/sqm)" : "") + "\n" + [l.barangay, l.city, l.province].filter(Boolean).join(", ") + "\n" + (l.lotArea ? "Lot: " + l.lotArea + " sqm" : "") + (l.floorArea ? " Floor: " + l.floorArea + " sqm" : "") + "\n" + (d ? d + "\n" : "") + "More: " + location.href + "\n#RealEstatePH #ForSale";
   }
+
+  /* ================= TEST HELPERS ================= */
+  window.__ESREALTY_TEST_HELPERS = {
+    setListingCreatedAt: function(id, createdAt) {
+      if (!state.listings) return false;
+      const idx = state.listings.findIndex(x => x.id === id);
+      if (idx >= 0) {
+        state.listings[idx].createdAt = createdAt;
+        save();
+        return true;
+      }
+      return false;
+    },
+    setListingPublished: function(id, published) {
+      if (!state.listings) return false;
+      const idx = state.listings.findIndex(x => x.id === id);
+      if (idx >= 0) {
+        state.listings[idx].isPublished = published;
+        save();
+        return true;
+      }
+      return false;
+    },
+    getState: function() { return state; }
+  };
 
   /* ================= BOOT ================= */
   document.addEventListener("DOMContentLoaded", async () => {

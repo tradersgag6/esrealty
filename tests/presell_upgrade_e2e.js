@@ -14,9 +14,9 @@
     document.querySelector('[data-view="presell"]').click(); await wait(650);
     // Create project
     document.querySelector("[data-ps-new-project]").click(); await wait(350);
-    setv("#psf-name","FinCalc Test"); saveModal(); await wait(550);
+    setv("#psf-name","FinCalc Test"); saveModal(); await wait(800);
     // Open detail
-    var card=document.querySelector("[data-ps-open]"); if(card) card.click(); await wait(500);
+    var card=document.querySelector("[data-ps-open]"); if(card) card.click(); await wait(800);
     checks.push({name:"detail", ok:/Add Unit/.test(document.querySelector("#content").innerHTML), detail:""});
     // Add unit
     document.querySelector("[data-ps-add-unit]").click(); await wait(350);

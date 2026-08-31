@@ -1,3 +1,6 @@
 Thumbs.db
 Desktop.ini
 *.tmp
+node_modules/
+market-scan/worker/store/
+

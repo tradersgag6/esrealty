@@ -21,6 +21,24 @@
 <link rel="preconnect" href="https://mrngaqtbaseewzcsogqi.supabase.co">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"></noscript>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<script>
+  // Bootstrap detection: pin the local Bootstrap build; if it ever fails to
+  // load, mark the document so css/bootstrap-fallback.css supplies the core
+  // layout utilities and the app stays usable.
+  (function () {
+    var doc = document.documentElement;
+    var link = document.querySelector('link[href="css/bootstrap.min.css"]');
+    if (!link) { doc.setAttribute("data-bootstrap", "fallback"); return; }
+    function ok() { doc.removeAttribute("data-bootstrap"); doc.removeAttribute("data-bs-loading"); }
+    function miss() { doc.setAttribute("data-bootstrap", "fallback"); doc.removeAttribute("data-bs-loading"); }
+    doc.setAttribute("data-bs-loading", "");
+    link.addEventListener("load", ok);
+    link.addEventListener("error", miss);
+    setTimeout(function () { if (doc.hasAttribute("data-bs-loading")) miss(); }, 4000);
+  })();
+</script>
+<link rel="stylesheet" href="css/bootstrap-fallback.css">
 <link rel="stylesheet" href="css/styles.css">
 
   <script>window.ESREALTY_LEAFLET = { ensure: function () { if (window.L) return Promise.resolve(); if (!this._p) this._p = new Promise(function (resolve) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "vendor/leaflet/leaflet.css"; document.head.appendChild(l); var s = document.createElement("script"); s.src = "vendor/leaflet/leaflet.js?v=19"; s.onload = s.onerror = function () { resolve(); }; document.head.appendChild(s); }); return this._p; } };</script>
@@ -30,9 +48,10 @@
   <script src="js/data.js" defer></script>
   <script src="js/playbook_seed.js" defer></script>
   <script src="js/core.js" defer></script>
+  <script src="js/portfolio_ledger.js" defer></script>
+  <script src="js/portfolio_cloud.js" defer></script>
   <script src="js/app.js" defer></script>
   <script>window.setTimeout(function () { document.body.classList.remove("preload"); }, 2500);</script>
-</head>
 </head>
 <body class="preload">
   <div class="app-bg"></div>
@@ -126,30 +145,70 @@
       </div>
     </div>
 
-    <nav class="nav" id="nav">
+<nav class="nav" id="nav">
       <button class="nav-item active" data-view="dashboard"><span class="nav-ic" data-ic="dashboard"></span>Dashboard</button>
       <button class="nav-item accent" data-view="wizard"><span class="nav-ic" data-ic="plus"></span>New Investment</button>
+      
       <div class="nav-section" data-section="ANALYSIS">ANALYSIS</div>
-      <button class="nav-item" data-view="deal"><span class="nav-ic" data-ic="chart"></span>Deal Analysis</button>
-      <button class="nav-item" data-view="appraisal"><span class="nav-ic" data-ic="scale"></span>Appraisal</button>
-      <button class="nav-item" data-view="market"><span class="nav-ic" data-ic="search"></span>Market Scan</button>
+      <div class="nav-dropdown">
+        <button class="nav-item nav-dropdown-trigger" data-dropdown="analysis">
+          <span class="nav-ic" data-ic="chart"></span>
+          <span>Analysis</span>
+          <span class="nav-chevron" data-ic="chevron-down"></span>
+        </button>
+        <div class="nav-dropdown-menu" data-dropdown-menu="analysis">
+          <button class="nav-dropdown-item" data-view="deal"><span class="nav-ic" data-ic="chart"></span>Deal Analysis</button>
+          <button class="nav-dropdown-item" data-view="appraisal"><span class="nav-ic" data-ic="scale"></span>Appraisal</button>
+          <button class="nav-dropdown-item" data-view="market"><span class="nav-ic" data-ic="search"></span>Market Scan</button>
+        </div>
+      </div>
+
       <div class="nav-section" data-section="WORKSPACE">WORKSPACE</div>
-      <button class="nav-item" data-view="leads"><span class="nav-ic" data-ic="users"></span>CRM / Leads</button>
-      <button class="nav-item" data-view="listings"><span class="nav-ic" data-ic="home"></span>Listings</button>
-      <button class="nav-item" data-view="presell"><span class="nav-ic" data-ic="layers"></span>Pre-Selling</button>
-      <button class="nav-item" data-view="transactions"><span class="nav-ic" data-ic="file"></span>Transactions</button>
-      <button class="nav-item" data-view="financing"><span class="nav-ic" data-ic="dollar"></span>Financing</button>
-      <button class="nav-item" data-view="portfolio"><span class="nav-ic" data-ic="briefcase"></span>Portfolio</button>
-      <button class="nav-item" data-view="pms"><span class="nav-ic" data-ic="layers"></span>Property Manager</button>
-      <button class="nav-item" data-view="assistant"><span class="nav-ic" data-ic="chat"></span>AI Assistant</button>
-      <button class="nav-item" data-view="reports"><span class="nav-ic" data-ic="file"></span>Reports</button>
+      <div class="nav-dropdown">
+        <button class="nav-item nav-dropdown-trigger" data-dropdown="workspace">
+          <span class="nav-ic" data-ic="layers"></span>
+          <span>Workspace</span>
+          <span class="nav-chevron" data-ic="chevron-down"></span>
+        </button>
+        <div class="nav-dropdown-menu" data-dropdown-menu="workspace">
+          <button class="nav-dropdown-item" data-view="leads"><span class="nav-ic" data-ic="users"></span>CRM / Leads</button>
+          <button class="nav-dropdown-item" data-view="listings"><span class="nav-ic" data-ic="home"></span>Listings</button>
+          <button class="nav-dropdown-item" data-view="presell"><span class="nav-ic" data-ic="layers"></span>Pre-Selling</button>
+          <button class="nav-dropdown-item" data-view="transactions"><span class="nav-ic" data-ic="file"></span>Transactions</button>
+          <button class="nav-dropdown-item" data-view="financing"><span class="nav-ic" data-ic="dollar"></span>Financing</button>
+          <button class="nav-dropdown-item" data-view="portfolio"><span class="nav-ic" data-ic="briefcase"></span>Portfolio</button>
+          <button class="nav-dropdown-item" data-view="pms"><span class="nav-ic" data-ic="layers"></span>Property Manager</button>
+          <button class="nav-dropdown-item" data-view="assistant"><span class="nav-ic" data-ic="chat"></span>AI Assistant</button>
+          <button class="nav-dropdown-item" data-view="reports"><span class="nav-ic" data-ic="file"></span>Reports</button>
+        </div>
+      </div>
+
       <div class="nav-section" data-section="BROKERAGE">BROKERAGE</div>
-      <button class="nav-item" data-view="playbook"><span class="nav-ic" data-ic="target"></span>Sales Playbook</button>
-      <button class="nav-item" data-view="users"><span class="nav-ic" data-ic="users"></span>Users &amp; Access</button>
-      <button class="nav-item" data-view="admin"><span class="nav-ic" data-ic="briefcase"></span>Brokerage Admin</button>
+      <div class="nav-dropdown">
+        <button class="nav-item nav-dropdown-trigger" data-dropdown="brokerage">
+          <span class="nav-ic" data-ic="target"></span>
+          <span>Brokerage</span>
+          <span class="nav-chevron" data-ic="chevron-down"></span>
+        </button>
+        <div class="nav-dropdown-menu" data-dropdown-menu="brokerage">
+          <button class="nav-dropdown-item" data-view="playbook"><span class="nav-ic" data-ic="target"></span>Sales Playbook</button>
+          <button class="nav-dropdown-item" data-view="users"><span class="nav-ic" data-ic="users"></span>Users & Access</button>
+          <button class="nav-dropdown-item" data-view="admin"><span class="nav-ic" data-ic="briefcase"></span>Brokerage Admin</button>
+        </div>
+      </div>
+
       <div class="nav-section" data-section="ACCOUNT">ACCOUNT</div>
-      <button class="nav-item" data-view="portal"><span class="nav-ic" data-ic="star"></span>My Buyer Portal</button>
-      <button class="nav-item" data-view="settings"><span class="nav-ic" data-ic="settings"></span>Settings</button>
+      <div class="nav-dropdown">
+        <button class="nav-item nav-dropdown-trigger" data-dropdown="account">
+          <span class="nav-ic" data-ic="user"></span>
+          <span>Account</span>
+          <span class="nav-chevron" data-ic="chevron-down"></span>
+        </button>
+        <div class="nav-dropdown-menu" data-dropdown-menu="account">
+          <button class="nav-dropdown-item" data-view="portal"><span class="nav-ic" data-ic="star"></span>My Buyer Portal</button>
+          <button class="nav-dropdown-item" data-view="settings"><span class="nav-ic" data-ic="settings"></span>Settings</button>
+        </div>
+      </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -166,7 +225,7 @@
       </div>
       <div class="user-role">
           <div class="role-label" id="user-role-label">Role</div>
-        <select class="input role-select" id="user-role-select">
+        <select class="input role-select" id="user-role-select" aria-label="Test role">
           <option value="super-admin">Super Admin</option>
           <option value="broker">Licensed Broker</option>
           <option value="agent">Agent</option>
@@ -181,10 +240,10 @@
   </aside>
 
   <!-- ===== MAIN ===== -->
-  <main class="main">
+  <main class="main" data-module="app-shell">
     <header class="topbar">
       <button class="icon-btn menu-btn" id="menu-btn" title="Toggle menu"><span data-ic="menu"></span></button>
-      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-title" id="topbar-title" data-testid="topbar-title">Dashboard</div>
       <div class="topbar-actions">
               <div class="notif-wrap hidden" id="notif-wrap">
         <button class="icon-btn" id="notif-bell" title="Notifications"><span data-ic="bell"></span><span class="notif-badge hidden" id="notif-badge"></span></button>
@@ -193,11 +252,11 @@
       <button class="icon-btn" id="language-toggle" title="Switch to Filipino">EN</button>
         <div class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode"><span data-ic="sun"></span></div>
         <div class="deal-picker" id="deal-picker" title="Current deal">No deal loaded</div>
-        <button class="btn btn-primary" id="tb-new-deal"><span class="ic-sm" data-ic="plus"></span>New Investment</button>
+        <button class="btn btn-primary" id="tb-new-deal" data-testid="tb-new-deal"><span class="ic-sm" data-ic="plus"></span>New Investment</button>
       </div>
     </header>
 
-    <div class="content" id="content"></div>
+    <div class="content" id="content" data-module="view" data-testid="content"></div>
   </main>
 
   <!-- ===== PRINT REPORT ===== -->
@@ -212,6 +271,154 @@
     </div>
   </noscript>
 
+  <div id="pf-construction-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pf-construction-title" style="display:none">
+    <div class="modal-card" style="max-width:560px">
+      <div class="modal-head"><h3 id="pf-construction-title">New Construction Project</h3><button class="icon-btn" data-pf-close-proj aria-label="Close">✕</button></div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:12px">
+        <label class="field"><span>Project name *</span><input class="input" id="pf-proj-name" placeholder="e.g. Acacia Villas Phase 1" autocomplete="off"></label>
+        <label class="field"><span>Site / Address</span><input class="input" id="pf-proj-site" placeholder="Barangay, City"></label>
+        <label class="field"><span>Contractor</span><input class="input" id="pf-proj-contractor" placeholder="Contractor name"></label>
+        <label class="field"><span>Contract value PHP</span><input class="input input-num" id="pf-proj-value" type="text" inputmode="decimal" placeholder="e.g. 5000000"></label>
+        <label class="field"><span>Contingency PHP</span><input class="input input-num" id="pf-proj-cont" type="text" inputmode="decimal" placeholder="e.g. 250000"></label>
+        <label class="field"><span>Retention (%)</span><input class="input input-num" id="pf-proj-retention" type="text" inputmode="decimal" placeholder="e.g. 10"></label>
+        <label class="field"><span>Cost allocation method</span><select class="input" id="pf-proj-allocation"><option value="equal">Equal</option><option value="floor_area">Floor area</option><option value="actual">Actual cost</option><option value="manual">Manual</option></select></label>
+        <label class="field"><span>Status</span><select class="input" id="pf-proj-status"><option value="planned">Planned</option><option value="under construction">Under construction</option><option value="on hold">On hold</option><option value="completed">Completed</option><option value="archived">Archived</option></select></label>
+        <label class="field"><span>Linked asset (deal id, optional)</span><select class="input" id="pf-proj-asset"><option value="">— None —</option></select></label>
+        <label class="field"><span>Linked presell project (optional)</span><select class="input" id="pf-proj-presell"><option value="">— None —</option></select></label>
+        <label class="field"><span>Presell link scope (optional)</span><select class="input" id="pf-proj-presell-scope"><option value="">— Whole project —</option><option value="tower">Tower</option><option value="unit_type">Unit type</option><option value="unit">Unit</option></select></label>
+        <label class="field"><span>Presell tower / unit type / unit</span><select class="input" id="pf-proj-presell-scope-ref"><option value="">— None —</option></select></label>
+      </div>
+      <div class="modal-foot" style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-ghost" data-pf-close-proj>Cancel</button><button class="btn btn-primary" data-pf-save-proj>Save Project</button></div>
+    </div>
+  </div>
+  <div id="pf-phase-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pf-phase-title" style="display:none">
+    <div class="modal-card" style="max-width:560px">
+      <div class="modal-head"><h3 id="pf-phase-title">Add Construction Phase</h3><button class="icon-btn" data-pf-close-phase aria-label="Close">X</button></div>
+      <div class="modal-body">
+        <label class="field"><span>Phase name *</span><input class="input" id="pf-phase-name" placeholder="e.g. Foundation" autocomplete="off"></label>
+        <label class="field"><span>Planned budget PHP</span><input class="input input-num" id="pf-phase-planned" type="text" inputmode="decimal" placeholder="e.g. 1000000"></label>
+        <label class="field"><span>Approved budget PHP</span><input class="input input-num" id="pf-phase-approved" type="text" inputmode="decimal" placeholder="e.g. 1000000"></label>
+        <label class="field"><span>Committed PHP</span><input class="input input-num" id="pf-phase-committed" type="text" inputmode="decimal" placeholder="e.g. 500000"></label>
+        <label class="field"><span>Paid PHP</span><input class="input input-num" id="pf-phase-paid" type="text" inputmode="decimal" placeholder="e.g. 250000"></label>
+        <label class="field"><span>Progress (%)</span><input class="input input-num" id="pf-phase-progress" type="number" min="0" max="100" step="0.1" placeholder="0"></label>
+        <label class="field"><span>Responsible party</span><input class="input" id="pf-phase-responsible" placeholder="Contractor / project lead"></label>
+        <label class="field"><span>Cost allocation method</span><select class="input" id="pf-phase-allocation"><option value="equal">Equal</option><option value="floor_area">Floor area</option><option value="actual">Actual cost</option><option value="manual">Manual</option></select></label>
+      </div>
+      <div class="modal-foot"><button class="btn btn-ghost" data-pf-close-phase>Cancel</button><button class="btn btn-primary" data-pf-save-phase>Save Phase</button></div>
+    </div>
+  </div>
+  <div id="pf-vendor-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pf-vendor-title" style="display:none">
+    <div class="modal-card" style="max-width:480px">
+      <div class="modal-head"><h3 id="pf-vendor-title">Vendor / Contractor</h3><button class="icon-btn" data-pf-close-vendor aria-label="Close">X</button></div>
+      <div class="modal-body">
+        <label class="field"><span>Vendor / contractor name *</span><input class="input" id="pf-vendor-name" placeholder="e.g. Megabuild Construction Corp." autocomplete="off"></label>
+        <label class="field"><span>Contact / phone</span><input class="input" id="pf-vendor-contact" placeholder="Contact person / phone"></label>
+        <label class="field"><span>Tax ID</span><input class="input" id="pf-vendor-tax" placeholder="TIN, optional"></label>
+      </div>
+      <div class="modal-foot"><button class="btn btn-ghost" data-pf-close-vendor>Cancel</button><button class="btn btn-primary" data-pf-save-vendor>Save Vendor</button></div>
+    </div>
+  </div>
+  <div id="pf-invoice-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pf-invoice-title" style="display:none">
+    <div class="modal-card" style="max-width:520px">
+      <div class="modal-head"><h3 id="pf-invoice-title">Invoice</h3><button class="icon-btn" data-pf-close-invoice aria-label="Close">X</button></div>
+      <div class="modal-body">
+        <label class="field"><span>Invoice number *</span><input class="input" id="pf-invoice-no" placeholder="e.g. INV-2026-001" autocomplete="off"></label>
+        <label class="field"><span>Phase</span><select class="input" id="pf-invoice-phase"></select></label>
+        <label class="field"><span>Vendor</span><select class="input" id="pf-invoice-vendor"></select></label>
+        <label class="field"><span>Date</span><input class="input" id="pf-invoice-date" type="date"></label>
+        <label class="field"><span>Amount PHP *</span><input class="input input-num" id="pf-invoice-amount" type="text" inputmode="decimal" placeholder="e.g. 250000"></label>
+        <label class="field"><span>Status</span><select class="input" id="pf-invoice-status"><option value="pending">Pending</option><option value="approved">Approved</option><option value="paid">Paid</option></select></label>
+      </div>
+      <div class="modal-foot"><button class="btn btn-ghost" data-pf-close-invoice>Cancel</button><button class="btn btn-primary" data-pf-save-invoice>Save Invoice</button></div>
+    </div>
+  </div>
+  <div id="pf-change-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pf-change-title" style="display:none">
+    <div class="modal-card" style="max-width:480px">
+      <div class="modal-head"><h3 id="pf-change-title">Change Order</h3><button class="icon-btn" data-pf-close-change aria-label="Close">X</button></div>
+      <div class="modal-body">
+        <label class="field"><span>Reason / description *</span><input class="input" id="pf-change-reason" placeholder="e.g. Extra footing depth" autocomplete="off"></label>
+        <label class="field"><span>Amount PHP *</span><input class="input input-num" id="pf-change-amount" type="text" inputmode="decimal" placeholder="e.g. 85000"></label>
+        <label class="field"><span>Approver</span><input class="input" id="pf-change-approver" placeholder="Approved by"></label>
+        <label class="field"><span>Date</span><input class="input" id="pf-change-date" type="date"></label>
+      </div>
+      <div class="modal-foot"><button class="btn btn-ghost" data-pf-close-change>Cancel</button><button class="btn btn-primary" data-pf-save-change>Save Change Order</button></div>
+    </div>
+  </div>
+  <div id="pf-ledger-entry-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pf-ledger-entry-title" style="display:none">
+    <div class="modal-card" style="max-width:560px">
+      <div class="modal-head"><h3 id="pf-ledger-entry-title">New Cash Entry</h3><button class="icon-btn" data-pf-close-ledger-entry aria-label="Close">X</button></div>
+      <div class="modal-body">
+        <label class="field"><span>Account *</span><select class="input" id="pf-ledger-account"></select></label>
+        <label class="field"><span>Date *</span><input class="input" id="pf-ledger-date" type="date"></label>
+        <label class="field"><span>Direction *</span>
+          <select class="input" id="pf-ledger-direction">
+            <option value="in">Cash In</option>
+            <option value="out">Cash Out</option>
+          </select>
+        </label>
+        <label class="field"><span>Amount PHP *</span><input class="input input-num" id="pf-ledger-amount" type="text" inputmode="decimal" placeholder="e.g. 500000"></label>
+        <label class="field"><span>Purpose</span>
+          <select class="input" id="pf-ledger-purpose">
+            <option value="">— Select direction first —</option>
+          </select>
+        </label>
+        <label class="field"><span>Subcategory</span>
+          <select class="input" id="pf-ledger-subcategory">
+            <option value="">— Select purpose first —</option>
+          </select>
+        </label>
+        <label class="field"><span>Description *</span><input class="input" id="pf-ledger-description" placeholder="e.g. Buyer payment for Unit 5B"></label>
+        <label class="field"><span>Counterparty</span><input class="input" id="pf-ledger-counterparty" placeholder="e.g. Juan Dela Cruz"></label>
+        <label class="field"><span>Reference No.</span><input class="input" id="pf-ledger-ref" placeholder="e.g. OR-2024-001"></label>
+        <label class="field"><span>Link to</span>
+          <select class="input" id="pf-ledger-link-type">
+            <option value="">— None —</option>
+            <option value="asset">Asset (Deal)</option>
+            <option value="construction">Construction Project</option>
+            <option value="presell">Pre-Selling Projects</option>
+            <option value="transaction">Transaction</option>
+          </select>
+        </label>
+        <label class="field"><span>Link ID</span><select class="input" id="pf-ledger-link-id"><option value="">— Select Link to first —</option></select></label>
+        <div class="field pf-proof-field">
+          <span>Proof <span class="dim tiny">(image or PDF, max 5MB)</span></span>
+          <input type="file" id="pf-entry-proof" class="input" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf">
+          <select class="input" id="pf-entry-proof-category">
+            <option value="receipt">Receipt</option>
+            <option value="deposit_slip">Deposit slip</option>
+            <option value="transfer_confirmation">Transfer confirmation</option>
+            <option value="contract">Contract</option>
+            <option value="invoice">Invoice</option>
+            <option value="other">Other</option>
+          </select>
+          <div id="pf-entry-proof-preview" class="pf-proof-preview"></div>
+        </div>
+      </div>
+      <div class="pf-balance-preview" id="pf-ledger-balance-preview"></div>
+      <div class="modal-foot"><button class="btn btn-ghost" data-pf-close-ledger-entry>Cancel</button><button class="btn btn-ghost" data-pf-save-draft>Save Draft</button><button class="btn btn-primary" data-pf-save-ledger-entry>Save &amp; Post</button></div>
+    </div>
+  </div>
+  <div id="pf-account-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pf-account-title" style="display:none">
+    <div class="modal-card" style="max-width:560px">
+      <div class="modal-head"><h3 id="pf-account-title">New Account</h3><button class="icon-btn" data-pf-close-account aria-label="Close">X</button></div>
+      <div class="modal-body">
+        <label class="field"><span>Account Name *</span><input class="input" id="pf-acc-name" placeholder="e.g. BPI Checking"></label>
+        <label class="field"><span>Bank Name</span><input class="input" id="pf-acc-bank" placeholder="e.g. BPI, BDO, Metrobank"></label>
+        <label class="field"><span>Account Type</span>
+          <select class="input" id="pf-acc-type">
+            <option value="cash">Cash on Hand</option>
+            <option value="bank">Bank Account</option>
+            <option value="ewallet">E-Wallet</option>
+            <option value="escrow">Escrow</option>
+          </select>
+        </label>
+        <label class="field"><span>Opening Balance PHP</span><input class="input input-num" id="pf-acc-opening" type="text" inputmode="decimal" placeholder="e.g. 2500000"></label>
+        <label class="field"><span>As of Date</span><input class="input" id="pf-acc-date" type="date"></label>
+        <label class="field"><span>Currency</span><input class="input" id="pf-acc-currency" value="PHP" readonly></label>
+      </div>
+      <div class="modal-foot"><button class="btn btn-ghost" data-pf-close-account>Cancel</button><button class="btn btn-primary" data-pf-save-account>Save Account</button></div>
+    </div>
+  </div>
   <script>
     if (location.protocol === "https:" || location.hostname === "localhost") {
       if ("serviceWorker" in navigator) window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });

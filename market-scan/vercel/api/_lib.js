@@ -44,6 +44,16 @@ async function getProbe(name, fn) {
   return result;
 }
 
+const NAMED_ENTITIES = {
+  ntilde: "ñ", Ntilde: "Ñ", aacute: "á", Aacute: "Á", eacute: "é", Eacute: "É",
+  iacute: "í", Iacute: "Í", oacute: "ó", Oacute: "Ó", uacute: "ú", Uacute: "Ú",
+  agrave: "à", Agrave: "À", egrave: "è", Egrave: "È", igrave: "ì", Igrave: "Ì",
+  ograve: "ò", Ograve: "Ò", ugrave: "ù", Ugrave: "Ù", ccedil: "ç", Ccedil: "Ç",
+  uuml: "ü", Uuml: "Ü", ouml: "ö", Ouml: "Ö", auml: "ä", Auml: "Ä",
+  szlig: "ß", deg: "°", bull: "•", hellip: "…", ndash: "–", mdash: "—",
+  lsquo: "‘", rsquo: "’", ldquo: "“", rdquo: "”", trade: "™",
+};
+
 function htmlDecode(s) {
   if (s == null) return "";
   return String(s)
@@ -55,7 +65,8 @@ function htmlDecode(s) {
     .replace(/&gt;/gi, ">")
     .replace(/&quot;/gi, '"')
     .replace(/&apos;/gi, "'")
-    .replace(/&#39;/g, "'");
+    .replace(/&#39;/g, "'")
+    .replace(/&(ntilde|Ntilde|aacute|Aacute|eacute|Eacute|iacute|Iacute|oacute|Oacute|uacute|Uacute|agrave|Agrave|egrave|Egrave|igrave|Igrave|ograve|Ograve|ugrave|Ugrave|ccedil|Ccedil|uuml|Uuml|ouml|Ouml|auml|Auml|szlig|deg|bull|hellip|ndash|mdash|lsquo|rsquo|ldquo|rdquo|trade);/g, (_, n) => NAMED_ENTITIES[n] || "");
 }
 
 function stripTags(s) {
@@ -75,24 +86,6 @@ function toNumber(raw) {
   if (m) return parseFloat(m[1]);
   return 0;
 }
-
-// ------------------------------------------------------------ benchmark data
-
-const BENCH = {
-  "Manila": 95000, "Makati": 220000, "Taguig": 210000, "Pasig": 140000, "Quezon City": 90000,
-  "Mandaluyong": 150000, "Muntinlupa": 110000, "Parañaque": 100000, "Pasay": 120000,
-  "Cebu City": 85000, "Lapu-Lapu": 60000, "Mandaue": 65000, "Davao City": 55000,
-  "Iloilo City": 52000, "Bacolod": 42000, "Baguio": 58000, "Angeles": 48000,
-  "San Fernando": 42000, "Cagayan de Oro": 46000, "Zamboanga City": 38000,
-  "General Santos": 36000, "Tacloban": 34000, "Puerto Princesa": 32000, "Legazpi": 30000,
-  "Butuan": 30000, "Naga": 32000, "Marawi": 26000, "Imus": 18500, "Bacoor": 17000,
-  "Dasmariñas": 15000, "General Trias": 14000, "Santa Rosa": 28000, "Biñan": 24000,
-  "Calamba": 20000, "Antipolo": 22000, "Meycauayan": 16000, "Silang": 12000, "Tagaytay": 26000,
-  "Lipa": 18000, "Tanauan": 16000, "Malolos": 14000, "Santa Maria": 15000, "Taytay": 17000,
-  "Cainta": 16000, "San Pedro": 19000, "Cabuyao": 20000, "Trece Martires": 12000,
-  "Mariveles": 10000, "Balanga": 12000, "Coron": 28000, "Ormoc": 24000, "Talisay": 45000,
-  "Minglanilla": 38000, "Mabalacat": 35000, "Batangas City": 22000
-};
 
 const DP_TYPE = {
   "Vacant Lot": { sale: "land-for-sale", rent: null },
@@ -146,10 +139,22 @@ function parseDotPropertyCard(card, typeFallback, mode) {
   const out = {
     url: "", title: "", city: "", price: 0, pricePerSqm: 0,
     lotArea: 0, floorArea: 0, bedrooms: 0, bathrooms: 0,
-    propertyType: typeFallback, verified: false, description: ""
+    propertyType: typeFallback, verified: false, description: "",
+    image: "", sourceId: "", postedAt: "", scrapedAt: 0, geo: null
   };
   let m = card.match(/href="(https:\/\/www\.dotproperty\.com\.ph\/ads\/[^"]+)"/);
-  if (m) out.url = m[1];
+  if (m) {
+    out.url = m[1];
+    const im = out.url.match(/\/ads\/([^\/]+)-\d+-\d+/);
+    if (im) out.sourceId = im[1];
+    else out.sourceId = out.url.split("/").pop();
+  }
+  m = card.match(/src="(https:\/\/pix\.dotproperty\.co\.th\/[^"]+)"/i);
+  if (m) out.image = m[1];
+  else {
+    m = card.match(/<img[^>]+src="([^"]+\.(?:jpe?g|png|webp)[^"]*)"/i);
+    if (m) out.image = m[1];
+  }
   m = card.match(/<div class="text-2xl font-semibold[^"]*"[^>]*title="([^"]+)"/);
   if (m) out.title = htmlDecode(m[1]);
   m = card.match(/location-[a-z0-9]+\.svg[^>]*>\s*<\/span>\s*([^<]{2,80}?)\s*<\/div>/);
@@ -253,8 +258,16 @@ function parseMyPropertyListing(x, mode, queryType, pageSlug) {
     lotArea: 0, floorArea: area,
     bedrooms: beds, bathrooms: baths,
     propertyType: ptype, verified: false,
-    description: htmlDecode(String(x.description || ""))
+    description: htmlDecode(String(x.description || "")),
+    image: "", sourceId: "", postedAt: "", scrapedAt: 0, geo: null
   };
+  const im = x.image;
+  if (im) out.image = Array.isArray(im) ? String(im[0] || "") : String(im || "");
+  if (out.url) {
+    const su = out.url.replace(/[?#].*$/, "").split("/").filter(Boolean).pop() || "";
+    out.sourceId = "myp-" + su;
+  }
+  if (lat && lng) out.geo = { lat: parseFloat(lat), lng: parseFloat(lng) };
   if (ptype === "Vacant Lot" && area > 0) { out.lotArea = area; out.floorArea = 0; }
   if (area > 0 && price > 0 && mode !== "rent") out.pricePerSqm = Math.round(price / area);
   return out;
@@ -368,7 +381,8 @@ function newSearchListing(title, url, snippet, query) {
   return {
     url: url, title: title, city: query.city, price: 0, pricePerSqm: 0,
     lotArea: 0, floorArea: 0, bedrooms: 0, bathrooms: 0,
-    propertyType: query.type, verified: false, description: snippet
+    propertyType: query.type, verified: false, description: snippet,
+    image: "", sourceId: "", postedAt: "", scrapedAt: 0, geo: null
   };
 }
 
@@ -531,82 +545,6 @@ async function invokeIndexedListingSite(query, site, label) {
   }
 }
 
-// ------------------------------------------------------------ local benchmark source
-
-function mulberry32(seed) {
-  let a = seed >>> 0;
-  return function () {
-    a |= 0;
-    a = (a + 0x6D2B79F5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function nextInt(rng, min, max) {
-  return min + Math.floor(rng() * (max - min));
-}
-
-function newBenchmarkListing(city, bench, type, mode, seed) {
-  const rng = mulberry32(seed);
-  let lot = 0, floor = 0;
-  switch (type) {
-    case "Vacant Lot": lot = nextInt(rng, 80, 600); break;
-    case "House & Lot": lot = nextInt(rng, 60, 240); floor = Math.round(lot * (0.7 + rng() * 0.6)); break;
-    case "Townhouse": lot = nextInt(rng, 45, 160); floor = Math.round(lot * (0.8 + rng() * 0.5)); break;
-    case "Condominium Unit": floor = nextInt(rng, 20, 140); break;
-    case "Apartment": floor = nextInt(rng, 18, 120); break;
-    case "Shophouse": floor = nextInt(rng, 30, 220); break;
-    case "Commercial": floor = nextInt(rng, 50, 400); break;
-    case "Warehouse": floor = nextInt(rng, 100, 600); break;
-    case "Office": floor = nextInt(rng, 40, 300); break;
-    default: lot = nextInt(rng, 80, 400); floor = 0; break;
-  }
-  let area = lot > 0 ? lot : floor;
-  if (area <= 0) area = 120;
-  const factor = 0.85 + rng() * 0.45;
-  let price = 0;
-  if (mode === "rent") {
-    const value = bench * area * factor;
-    price = Math.round(value * (0.0005 + rng() * 0.0004));
-  } else {
-    price = Math.ceil((bench * area * factor) / 10000) * 10000;
-  }
-  let beds = 0;
-  if (type !== "Vacant Lot" && type !== "Warehouse" && type !== "Office" && type !== "Commercial") {
-    beds = nextInt(rng, 1, 5);
-  }
-  const modeWord = mode === "rent" ? "for rent" : "for sale";
-  const title = type === "Vacant Lot"
-    ? area + " sqm " + type + " " + modeWord + " in " + city
-    : beds + " Bedroom " + type + " " + modeWord + " in " + city;
-  return {
-    url: "", title: title, city: city, price: price,
-    pricePerSqm: area > 0 && mode !== "rent" ? Math.round(price / area) : 0,
-    lotArea: lot, floorArea: floor, bedrooms: beds, bathrooms: 0,
-    propertyType: type, verified: false,
-    description: "Generated from the ES Realty benchmark table for " + city + " (indicative ₱" + bench + "/sqm) — reference data, not a live listing."
-  };
-}
-
-async function invokeLocalBenchmark(query) {
-  const mode = query.mode === "rent" ? "rent" : "sale";
-  let types = ["Vacant Lot", "House & Lot", "Townhouse", "Condominium Unit", "Apartment", "Shophouse", "Commercial", "Warehouse", "Office"];
-  if (query.type) types = [query.type];
-  if (mode === "rent") types = types.filter((t) => t !== "Vacant Lot" && t !== "Warehouse");
-  const list = [];
-  let seed = 1;
-  const cities = Object.keys(BENCH).sort();
-  for (const t of types) {
-    for (const c of cities) {
-      seed++;
-      list.push(newBenchmarkListing(c, BENCH[c], t, mode, seed));
-    }
-  }
-  return { status: "ok", count: list.length, error: "", listings: list };
-}
-
 // ------------------------------------------------------------ filtering
 
 function testListingMatch(l, query) {
@@ -738,10 +676,6 @@ async function runMarketScan(query) {
     }
   }
 
-  const lb = await invokeLocalBenchmark(q);
-  sources.push({ name: "localbenchmark", label: "Local Benchmark (offline)", status: lb.status, count: lb.count, error: lb.error });
-  for (const l of lb.listings) { l.source = "localbenchmark"; l.sourceLabel = "Local Benchmark"; listings.push(l); }
-
   // Cross-source dedupe: same URL (or same title+city when urlless) counted once.
   const seenKey = new Set();
   const uniq = [];
@@ -771,4 +705,6 @@ async function runMarketScan(query) {
   };
 }
 
-module.exports = { runMarketScan };
+module.exports = {
+  runMarketScan, testListingMatch, mergeQueryDefaults, searchQueryText, htmlDecode, bingSiteSearch
+};

@@ -17,11 +17,17 @@
     var role = document.querySelector("#auth-role"); if (role) role.value = "super-admin";
     click("#auth-test"); await wait(500);
     click("#tb-new-deal"); await wait(400);
-    click('[data-step="2"]'); await wait(3000);
+    click('[data-step="2"]'); await wait(5000);
     async function moveTo(place) {
+      var prev = vals().coords;
       setv("#wz-map-q", place); click("#wz-map-btn");
-      for (var i = 0; i < 12; i++) { await wait(1500); var c = vals().coords; if (/—|-\s/.test(c) && !/Resolving/.test(c)) break; }
-      await wait(1200); return vals();
+      var got = false;
+      for (var i = 0; i < 25; i++) {
+        await wait(2000);
+        var c = vals().coords;
+        if (/Pin: Latitude/.test(c) && !/Resolving/.test(c) && (prev === "" || c !== prev)) { got = true; break; }
+      }
+      await wait(1500); return vals();
     }
     var vB = await moveTo("Bauan, Batangas");
     log.push("BAUAN: " + JSON.stringify(vB));

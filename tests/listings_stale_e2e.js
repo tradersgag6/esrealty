@@ -3,13 +3,26 @@
   window.__msLog = log;
   setTimeout(function(){ window.__msDone = true; }, 40000);
   var wait = ms => new Promise(r => setTimeout(r, ms));
+  var setv = (s, v) => { var e = document.querySelector(s); if (e) { e.value = v; e.dispatchEvent(new Event("input", { bubbles: true })); e.dispatchEvent(new Event("change", { bubbles: true })); } return !!e; };
+  var saveModal = () => { var m = document.querySelector("#ls-modal"); if (!m) return false; var b = Array.from(m.querySelectorAll("button")).find(function(x){ return /Save/i.test(x.textContent); }); if (b) { b.click(); return true; } return false; };
   try {
-    // remove demo leftovers but KEEP seeded listing
-    var raw = JSON.parse(localStorage.getItem("esrealty_v1") || "{}");
-    var keep = raw.listings || [];
-    localStorage.removeItem("esrealty_user");
+    localStorage.removeItem("esrealty_v1"); localStorage.removeItem("esrealty_user");
     document.querySelector("#auth-role").value="super-admin";
-    document.querySelector("#auth-test").click(); await wait(600);
+    document.querySelector("#auth-test").click(); await wait(500);
+    document.querySelector('[data-view="listings"]').click(); await wait(650);
+    // CREATE aged listing (createdAt 100 days ago)
+    document.querySelector("[data-ls-new]").click(); await wait(400);
+    setv("#ls-title","Aged House QC"); setv("#ls-city","Quezon City"); setv("#ls-price","10000000"); setv("#ls-lot","200"); setv("#ls-floor","150"); setv("#ls-status","available");
+    document.querySelector("#ls-published").click(); await wait(100);
+    saveModal(); await wait(750);
+    // Use test helper to set createdAt and ensure published
+    var state = window.__ESREALTY_TEST_HELPERS.getState();
+    var newListing = state.listings && state.listings[0];
+    if (newListing) {
+      window.__ESREALTY_TEST_HELPERS.setListingCreatedAt(newListing.id, new Date(Date.now() - 100 * 86400000).toISOString());
+      window.__ESREALTY_TEST_HELPERS.setListingPublished(newListing.id, true);
+    }
+    // Re-render listings view
     document.querySelector('[data-view="listings"]').click(); await wait(800);
     html=document.querySelector("#content").innerHTML;
     checks.push({name:"aged listing shown", ok:/Aged House QC/.test(html), detail:""});

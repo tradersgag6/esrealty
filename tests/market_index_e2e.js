@@ -8,8 +8,12 @@
     // Core unit: monthly pct from synthetic index rows
     var rows = [
       {d:"2026-02-25", c:"Manila", p:90000, n:9},
-      {d:"2026-03-25", c:"Manila", p:93000, n:11},
-      {d:"2026-05-25", c:"Manila", p:97000, n:12},
+      {d:"2026-03-25", c:"Manila", p:91134, n:10},
+      {d:"2026-04-25", c:"Manila", p:92278, n:11},
+      {d:"2026-05-25", c:"Manila", p:93431, n:12},
+      {d:"2026-06-25", c:"Manila", p:94593, n:12},
+      {d:"2026-07-25", c:"Manila", p:95765, n:13},
+      {d:"2026-08-25", c:"Manila", p:96946, n:13},
       {d:"2026-08-25", c:"Cebu City", p:85000, n:5}
     ];
     var m = C.marketIndexMonthlyPct(rows, "Manila");
