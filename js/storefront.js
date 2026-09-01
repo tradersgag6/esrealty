@@ -51,7 +51,7 @@
 
   function footer() {
     return '<footer class="sf-footer"><div class="sf-brand"><span class="sf-brand-mark">ES</span><span><b>ES Realty</b><small>Philippine property intelligence</small></span></div>' +
-      '<p>Find, compare, and inquire about verified properties from one secure platform.</p>' +
+      '<p>Find, compare, and inquire about verified properties from one secure platform. <span class="sf-copyright">&copy; ES Realty ' + new Date().getFullYear() + '</span></p>' +
       '<div><a href="#/search">Browse properties</a><button data-sf-auth="signin">Agent sign in</button></div></footer>';
   }
 
