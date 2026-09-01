@@ -9,20 +9,57 @@
     return s.display !== "none" && s.visibility !== "hidden" && Number(s.opacity) !== 0;
   }
 
+  function parseRgba(c) {
+    var m = c.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/);
+    if (m) {
+      return { r: Number(m[1]), g: Number(m[2]), b: Number(m[3]), a: m[4] === undefined ? 1 : Number(m[4]) };
+    }
+    if (/^#/.test(c)) {
+      var h = c.slice(1);
+      if (h.length === 3) h = h.split("").map(function (x) { return x + x; }).join("");
+      return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16), a: 1 };
+    }
+    return null;
+  }
+
+  function compositeBg(el) {
+    // Walk from the element up to the root, compositing alpha backgrounds over white.
+    var below = { r: 255, g: 255, b: 255 };
+    var layers = [];
+    var cur = el;
+    while (cur && cur !== document.documentElement) {
+      var s = getComputedStyle(cur);
+      var bg = parseRgba(s.backgroundColor);
+      if (bg && bg.a > 0 && bg.a < 1) {
+        layers.unshift({ r: bg.r, g: bg.g, b: bg.b, a: bg.a });
+      } else if (bg && bg.a >= 1) {
+        layers = [{ r: bg.r, g: bg.g, b: bg.b, a: 1 }];
+        break;
+      }
+      cur = cur.parentElement;
+    }
+    if (!layers.length) {
+      var bodyBg = parseRgba(getComputedStyle(document.body).backgroundColor);
+      if (bodyBg && bodyBg.a >= 1) return "rgb(" + bodyBg.r + ", " + bodyBg.g + ", " + bodyBg.b + ")";
+      return "rgb(255, 255, 255)";
+    }
+    var out = { r: below.r, g: below.g, b: below.b };
+    for (var i = 0; i < layers.length; i++) {
+      var l = layers[i];
+      out.r = Math.round(l.r * l.a + out.r * (1 - l.a));
+      out.g = Math.round(l.g * l.a + out.g * (1 - l.a));
+      out.b = Math.round(l.b * l.a + out.b * (1 - l.a));
+    }
+    return "rgb(" + out.r + ", " + out.g + ", " + out.b + ")";
+  }
+
   function getTextContrast(el) {
     if (!visible(el)) return null;
     var cs = getComputedStyle(el);
-    var fg = cs.color;
-    var bg = cs.backgroundColor;
-    if (!fg || !bg || bg === "rgba(0, 0, 0, 0)" || bg === "transparent") {
-      var parent = el.parentElement;
-      while (parent && (bg === "rgba(0, 0, 0, 0)" || bg === "transparent")) {
-        bg = getComputedStyle(parent).backgroundColor;
-        parent = parent.parentElement;
-      }
-    }
-    if (!fg || !bg) return null;
-    return { fg: fg, bg: bg };
+    var fg = parseRgba(cs.color);
+    if (!fg) return null;
+    var bg = compositeBg(el);
+    return { fg: "rgb(" + fg.r + ", " + fg.g + ", " + fg.b + ")", bg: bg };
   }
 
   function rgbToLuminance(r, g, b) {

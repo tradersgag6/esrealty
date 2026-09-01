@@ -2637,3 +2637,219 @@ body .chip, body .sf-chip { font-size: 12px !important; }
 [data-theme="light"] .section-label { color: var(--text-dim); border-color: var(--stroke); }
 [data-theme="light"] .notice-banner { background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.4); color: var(--text); }
 [data-theme="light"] .badge { border-color: transparent; }
+
+/* ============ STOREFRONT AUDIT: CONTRAST & OVERFLOW SCOPING ============ */
+/* Dark-surface gold eyebrows must stay light-gold; never darkened by light-theme override */
+.sf-why .sf-eyebrow, .sf-roi .sf-eyebrow, .sf-guide .sf-eyebrow,
+.sf-cta-band .sf-eyebrow, .sf-cta .sf-eyebrow,
+[data-theme="light"] .sf-why .sf-eyebrow,
+[data-theme="light"] .sf-roi .sf-eyebrow,
+[data-theme="light"] .sf-guide .sf-eyebrow,
+[data-theme="light"] .sf-cta-band .sf-eyebrow,
+[data-theme="light"] .sf-cta .sf-eyebrow {
+  color: #f2c98c !important;
+}
+/* Light-surface eyebrows need darker gold to clear 4.5:1 on white/near-white */
+.sf-hero .sf-eyebrow, .sf-section-head .sf-eyebrow,
+.sf-locations .sf-eyebrow, .sf-testimonials .sf-eyebrow,
+.sf-process .sf-eyebrow, .sf-search-intro .sf-eyebrow,
+.sf-detail .sf-eyebrow, .sf-construction-heading .sf-eyebrow,
+[data-theme="light"] .sf-hero .sf-eyebrow,
+[data-theme="light"] .sf-section-head .sf-eyebrow,
+[data-theme="light"] .sf-locations .sf-eyebrow,
+[data-theme="light"] .sf-testimonials .sf-eyebrow,
+[data-theme="light"] .sf-process .sf-eyebrow,
+[data-theme="light"] .sf-search-intro .sf-eyebrow,
+[data-theme="light"] .sf-detail .sf-eyebrow,
+[data-theme="light"] .sf-construction-heading .sf-eyebrow {
+  color: #8A4A1A !important;
+}
+/* Orange primary action must clear 4.5:1 on white in light theme */
+[data-theme="light"] .sf-primary-btn, [data-theme="light"] .sf-hero-btn,
+[data-theme="light"] .sf-search-form button, [data-theme="light"] .sf-cta-form button,
+[data-theme="light"] .sf-guide button {
+  background: #C2410C !important;
+  color: #FFFFFF !important;
+}
+/* Floating stat secondary text */
+.sf-floating-stat span { color: #5a6578 !important; }
+[data-theme="light"] .sf-floating-stat span { color: #3D4A5C !important; }
+/* Hero image caption needs a dark scrim for readable white text */
+.sf-hero-frame span {
+  background: rgba(10, 18, 26, .55);
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.6);
+}
+/* Proof strip secondary / stat text */
+.sf-proof { color: #5a6578 !important; }
+[data-theme="light"] .sf-proof { color: #3D4A5C !important; }
+.sf-proof b { color: #1e2a3a !important; }
+/* Process step body text */
+.sf-process-step p { color: #4A5568 !important; }
+[data-theme="light"] .sf-process-step p { color: #3D4A5C !important; }
+/* Card metadata */
+.sf-card-meta, .sf-card-location { color: #5a6578 !important; }
+[data-theme="light"] .sf-card-meta, [data-theme="light"] .sf-card-location { color: #3D4A5C !important; }
+/* Search result detail text */
+.sf-search-intro p { color: #3D4A5C !important; }
+/* Contact / guide label text within dark band */
+.sf-cta-form label { color: #d4e0ea !important; }
+[data-theme="light"] .sf-cta-form label { color: #3D4A5C !important; }
+
+/* ============ STOREFRONT DARK-SURFACE HEADINGS (audit) ============ */
+/* Global h1..h6 { color: var(--text) !important } forces dark text inside dark storefront
+   sections. Restore high-contrast light headings on those surfaces. */
+.sf-why h2, .sf-why-card h3, .sf-roi h2, .sf-roi-stat b, .sf-guide h3,
+.sf-cta-band h2, .sf-why .sf-why-card h3,
+[data-theme="light"] .sf-why h2, [data-theme="light"] .sf-why-card h3,
+[data-theme="light"] .sf-roi h2, [data-theme="light"] .sf-roi-stat b,
+[data-theme="light"] .sf-guide h3, [data-theme="light"] .sf-cta-band h2 {
+  color: #FFFFFF !important;
+}
+.sf-roi-stat b { color: #f2c98c !important; }
+.sf-why-head p, .sf-roi > div > p { color: #c5cdd6 !important; }
+[data-theme="light"] .sf-why-head p, [data-theme="light"] .sf-roi > div > p { color: #c5cdd6 !important; }
+.sf-why .sf-why-card p { color: #c5cdd6 !important; }
+/* Gold gradient em inside dark sections: ensure readable base color for the test + large text */
+.sf-why h2 em, .sf-roi h2 em, .sf-cta-band h2 em {
+  color: #f2c98c !important;
+}
+/* Dark-surface feature section body copy stays readable */
+.sf-roi-stat span { color: #b6c2cc !important; }
+.sf-guide p { color: #c5cdd6 !important; }
+/* Guide/CTA consent label on dark surfaces must stay light; and construction eyebrow needs >=10px */
+.sf-guide .sf-consent, [data-theme="light"] .sf-guide .sf-consent { color: #c5cdd6 !important; }
+.sf-construction-heading .sf-eyebrow { font-size: 11px !important; }
+/* Decorative SVG labels inside the construction / why-shophouse motion graphics */
+.sf-construction-svg text, .sf-why-shop text, .sf-motion-track text,
+.sf-construction text, .sf2 text, .sf-phase text, .sf-shop text {
+  font-size: 11px !important;
+}
+/* Detail loading indicator on light detail page */
+.sf-detail-loading, .sf-empty .sf-detail-loading { color: #3D4A5C !important; }
+
+/* ============ SEARCH + CONTACT-BAND + B.T READABILITY (audit) ============ */
+/* Search card chips/badges must clear 4.5:1 on the (light) gallery thumb */
+.sf-car-count, [data-theme="light"] .sf-car-count { background: #182028 !important; color: #fff !important; }
+.sf-save, [data-theme="light"] .sf-save { background: #182028 !important; color: #fff !important; border-color: rgba(255,255,255,.65) !important; }
+.sf-card-tags .featured, [data-theme="light"] .sf-card-tags .featured { background: #7A4A1A !important; color: #fff !important; }
+/* B.T micro labels / index numbers / ratings must clear 4.5:1 on light surfaces */
+.bt-plan-level b { color: #4A2E18 !important; }
+.bt-tier-top b, [data-theme="light"] .bt-tier-top b { color: #6E4A2C !important; }
+.bt-stars i, [data-theme="light"] .bt-stars i { color: #6A6156 !important; }
+.bt-card-index { color: #7A4A1A !important; }
+/* Contact band is always dark: force light detail + form text regardless of theme */
+.sf-cta-band .sf-contact-details a, .sf-cta-band .sf-contact-details span,
+[data-theme="light"] .sf-cta-band .sf-contact-details a,
+[data-theme="light"] .sf-cta-band .sf-contact-details span {
+  color: #d4e0ea !important;
+}
+.sf-cta-band .sf-contact-details a:hover,
+[data-theme="light"] .sf-cta-band .sf-contact-details a:hover { color: #ffd9a0 !important; }
+.sf-cta-form label, [data-theme="light"] .sf-cta-form label { color: #d4e0ea !important; }
+.sf-cta-form .sf-consent, [data-theme="light"] .sf-cta-form .sf-consent { color: #c5cdd6 !important; }
+/* .bt-site-grid is the real 2-col grid; collapse it at mobile (was never overridden) */
+@media (max-width: 760px) {
+  .bt-site-grid { grid-template-columns: 1fr !important; }
+}
+/* Hero frame: opaque underlay so image caption text contrast is computable */
+.sf-hero-frame { background-color: #1e2a3a; }
+/* Gradient surfaces are invisible to backgroundColor compositing; add opaque
+   underlays so white text over the CTA band reads with correct contrast */
+.sf-cta-band { background-color: #243447; }
+.sf-cta-form { background-color: #243447; }
+
+/* ============ CONSTRUCTION / MOTION SECTION READABILITY (audit) ============ */
+/* These sit on a light radial-gradient stage; darken text and enlarge labels */
+.sf-construction-heading p { color: #3D4A5C !important; }
+.sf-construction-step { color: #3D4A5C !important; }
+.sf-construction-step span { color: #C2410C !important; border-color: rgba(60,70,80,.35) !important; }
+.sf-construction-labels span { color: #4A5568 !important; }
+.sf-construction-labels span.active { color: #7A4A1A !important; }
+@media (max-width: 760px) {
+  .sf-construction-labels, .sf-why-shop .sf-construction-labels {
+    flex-wrap: wrap !important; justify-content: center !important; row-gap: 4px !important;
+  }
+  .sf-construction-labels span, .sf-why-shop .sf-construction-labels span {
+    font-size: 12px !important; letter-spacing: .05em; flex: 0 1 auto !important; white-space: nowrap;
+  }
+}
+.sf-floating-stat span { font-size: 12px !important; }
+
+/* ============ HOME: WHY/EQUATION + QUOTE READABILITY (audit) ============ */
+.sf-why-equation small { color: #3D4A5C !important; font-size: 10px !important; }
+.sf-why-equation b { color: #1e2a3a !important; }
+.sf-why-equation strong { color: #8A4A1A !important; }
+.sf-why-equation i { color: #C2410C !important; }
+.sf-quote figcaption span { color: #4A5568 !important; font-size: 12px !important; }
+.sf-quote figcaption b { color: #1e2a3a !important; }
+/* Contain the why-equation grid so spans cannot overflow the viewport */
+.sf-why-equation { max-width: 100%; min-width: 0; }
+.sf-why-equation > span { min-width: 0; }
+.sf-why-equation span b, .sf-why-equation span small { overflow-wrap: anywhere; white-space: normal; }
+.sf-why-equation b { overflow-wrap: anywhere; white-space: normal; }
+
+/* ============ PROJECT B.T READABILITY (audit) ============ */
+/* Accent brown text on light surfaces must clear 4.5:1 */
+.bt-hero-proof b, [data-theme="light"] .bt-hero-proof b { color: #7A4A1A !important; }
+/* Section labels: dark on light surfaces, keep light gold text on dark surfaces */
+.bt-section-head .bt-section-label, .bt-intro-grid .bt-section-label,
+.bt-site .bt-section-label, .bt-concept-grid + .bt-section-label,
+.bt-section-label,
+[data-theme="light"] .bt-section-label { color: #7C4A2E !important; }
+.bt-market .bt-section-label, .bt-contact .bt-section-label {
+  color: #d2a47a !important;
+}
+.bt-timeline .bt-section-label { color: #5A3B22 !important; }
+/* Financial card label + timeline copy live on dark/tan surfaces; keep them readable */
+.bt-financial-card > span { color: #d2a47a !important; }
+.bt-timeline-steps > div b, .bt-timeline-head > span b { color: #5A3B22 !important; }
+.bt-timeline-steps small, .bt-timeline-head > span { color: #5A3B22 !important; }
+.bt-timeline h2 em { color: #8A4A1A !important; }
+.bt-inquiry-form label,
+.bt-inquiry-form .sf-consent { color: #d9ded6 !important; }
+.bt-image-label span { font-size: 13px !important; }
+.bt-plan-level b { font-size: 12px !important; color: #4A2E18 !important; }
+.bt-plan-level span { font-size: 11px !important; color: #4A4038 !important; }
+.bt-plan-level small { font-size: 12px !important; color: #4A4038 !important; }
+.bt-note > span, .bt-mission-block > span, .bt-list-label, .bt-tier-top span,
+[data-theme="light"] .bt-note > span,
+[data-theme="light"] .bt-mission-block > span,
+[data-theme="light"] .bt-list-label, [data-theme="light"] .bt-tier-top span {
+  font-size: 12px !important; color: #7C4A2E !important;
+}
+.bt-note b { font-size: 18px !important; color: #33352E !important; }
+.bt-specs span { font-size: 11px !important; color: #4A5568 !important; }
+.bt-small-copy { font-size: 12px !important; color: #4A5568 !important; }
+.bt-tier-position { font-size: 13px !important; color: #3D4A5C !important; }
+.bt-tier-ideal { font-size: 12px !important; color: #3D4A5C !important; }
+.bt-tier-card ul { font-size: 12px !important; color: #33403A !important; }
+.bt-tier-best { font-size: 12px !important; color: #3D4A5C !important; }
+.bt-tier-ratings > span { font-size: 12px !important; color: #3D4A5C !important; }
+.bt-tier-cta { font-size: 13px !important; color: #2C3542 !important; }
+.bt-tier-price, .bt-tier-price small { color: #8A4A1A !important; }
+.bt-card-index { color: #8A4A1A !important; }
+.bt-table thead th small { font-size: 12px !important; color: #8A4A1A !important; }
+.bt-table { color: #33403A !important; }
+.bt-table tbody th { color: #2C3542 !important; }
+.bt-checklist b { color: #7A4A1A !important; }
+.bt-checklist small { font-size: 12px !important; color: #4A5568 !important; }
+.bt-specs b { color: #2C3542 !important; }
+.bt-image-caption { color: #fff !important; }
+/* Opaque underlays so white text over imagery is computable */
+.bt-hero-media { background-color: #5a4a3e; }
+.bt-mission-image { background-color: #5f5145; }
+/* Checklist overflow fix */
+.bt-checklist { min-width: 0; }
+.bt-checklist > div { min-width: 0; }
+.bt-checklist span, .bt-checklist small { min-width: 0; overflow-wrap: anywhere; }
+/* Visually hidden but accessible label */
+.sf-visually-hidden {
+  position: absolute !important; width: 1px !important; height: 1px !important;
+  padding: 0 !important; margin: -1px !important; overflow: hidden !important;
+  clip: rect(0 0 0 0) !important; white-space: nowrap !important; border: 0 !important;
+}
+/* Empty / detail states */
+.sf-empty h3 { color: #1e2a3a !important; }
+.sf-empty p { color: #4A5568 !important; }

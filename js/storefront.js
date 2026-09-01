@@ -8,7 +8,7 @@
   var requestId = 0;
   var cacheKey = "";
   var viewState = { loading: false, error: "", result: null, mode: "grid" };
-  var siteContact = { eyebrow: "TALK TO A SHOPHOUSE SPECIALIST", title: "Ready to put the ground floor to work?", description: "Tell us your province, budget, and business plan. A shophouse specialist from ES Realty will reply within one business day with listings and next steps.", phone: "+63 900 000 0000", email: "hello@esrealty.ph", address: "Batangas, Philippines", hours: "Monday–Saturday, 9:00 AM–6:00 PM" };
+  var siteContact = { eyebrow: "TALK TO A SHOPHOUSE SPECIALIST", title: "Ready to put the ground floor to work?", description: "Tell us your province, budget, and business plan. A shophouse specialist from ES Realty will reply within one business day with listings and next steps.", phone: "", email: "", address: "", hours: "", contactLoaded: false };
 
   function esc(value) {
     return String(value == null ? "" : value).replace(/[&<>"']/g, function (char) {
@@ -60,11 +60,17 @@
   }
 
   function loadSiteContact() {
-    if (!API || !API.siteSettings) return;
+    if (!API || !API.siteSettings) {
+      siteContact = Object.assign({}, siteContact, { contactLoaded: true });
+      return;
+    }
     API.siteSettings().then(function (result) {
       if (result && result.data) siteContact = Object.assign({}, siteContact, result.data);
+      siteContact.contactLoaded = true;
       if (active && route().path === "home") renderCurrent();
-    }).catch(function () {});
+    }).catch(function () {
+      siteContact = Object.assign({}, siteContact, { contactLoaded: true });
+    });
   }
 
   function firstImage(listing) {
@@ -299,6 +305,20 @@
     '</div></div></section>';
   }
 
+  function contactDetails() {
+    var out = [];
+    if (siteContact.phone) {
+      out.push('<a href="tel:' + encodeURIComponent(String(siteContact.phone).replace(/[^\d+]/g, "")) + '">' + esc(siteContact.phone) + '</a>');
+    }
+    if (siteContact.email) {
+      out.push('<a href="mailto:' + encodeURIComponent(siteContact.email) + '">' + esc(siteContact.email) + '</a>');
+    }
+    if (siteContact.address) out.push('<span>' + esc(siteContact.address) + '</span>');
+    if (siteContact.hours) out.push('<span>' + esc(siteContact.hours) + '</span>');
+    if (!out.length) out.push('<span>Contact details available soon.</span>');
+    return out.join("");
+  }
+
   function home() {
     var listings = viewState.result && viewState.result.data || [];
     // Frontend-only filter: hide obvious placeholder/test listings (numeric titles like 321321, sample)
@@ -347,7 +367,7 @@
       '<section class="sf-roi"><div class="sf-reveal"><p class="sf-eyebrow">THE INVESTOR CASE</p><h2>A shophouse pays you <em>twice.</em></h2><p>Ground-floor trade covers operations while the residence above rents or appreciates. Most of our buyers target returns from both halves of the same building.</p>' +
       '<div class="sf-roi-stats"><div class="sf-roi-stat sf-reveal sf-reveal-up"><b>6–8%</b><span>Indicative gross rental yield on shophouse units</span></div><div class="sf-roi-stat sf-reveal sf-reveal-up"><b data-count="2">2</b><span>Income streams — retail ground floor and residence above</span></div><div class="sf-roi-stat sf-reveal sf-reveal-up"><b data-count="3" data-suffix="+">3+</b><span>Potential tenants a single unit can host over its life</span></div></div></div>' +
       '<div class="sf-guide sf-reveal sf-reveal-right"><h3>Download the Shophouse Investment Guide</h3><p>Financing paths, a location checklist, and unit economics — free for buyers who want the full picture before they view.</p>' +
-      '<form data-sf-guide><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><button type="submit">Send me the guide →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>' +
+      '<form data-sf-guide><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me by email about the guide and relevant listings.</span></label><button type="submit">Send me the guide →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>' +
 
       '<section class="sf-process" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">REAL ESTATE SERVICES</p><h2>Local guidance for every <em>property decision.</em></h2></div><p>Practical real estate support for buyers, sellers, landlords, investors, and developers across the Philippines.</p></div><div class="sf-process-steps">' +
       '<article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Property Sales &amp; Acquisition</h3><p>Buy or sell residential, commercial, land, condominium, townhouse, and shophouse properties with transaction guidance.</p></article>' +
@@ -360,8 +380,8 @@
       '<article class="sf-process-step sf-reveal sf-reveal-up"><b>08</b><h3>Commercial &amp; Shophouse Advisory</h3><p>Match business concepts with visible locations, flexible layouts, tenant demand, and practical operating plans.</p></article>' +
       '</div></section>' +
 
-      '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div class="sf-reveal"><p class="sf-eyebrow">' + esc(siteContact.eyebrow) + '</p><h2>' + esc(siteContact.title) + '</h2><p>' + esc(siteContact.description) + '</p><div class="sf-contact-details"><a href="tel:' + encodeURIComponent(String(siteContact.phone || "").replace(/[^\d+]/g, "")) + '">' + esc(siteContact.phone) + '</a><a href="mailto:' + encodeURIComponent(siteContact.email || "") + '">' + esc(siteContact.email) + '</a><span>' + esc(siteContact.address) + '</span><span>' + esc(siteContact.hours) + '</span></div></div>' +
-      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="+63 900 000 0000"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Province, budget, and business idea..."></textarea></label><button type="submit">Request a call →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>');
+      '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div class="sf-reveal"><p class="sf-eyebrow">' + esc(siteContact.eyebrow) + '</p><h2>' + esc(siteContact.title) + '</h2><p>' + esc(siteContact.description) + '</p><div class="sf-contact-details">' + contactDetails() + '</div></div>' +
+      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" maxlength="50" placeholder="Mobile number (optional)"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Province, budget, and business idea..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about this request.</span></label><button type="submit">Request a call →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>');
   }
 
   function btStars(score) {
@@ -402,7 +422,7 @@
 
       '<section class="bt-highlights bt-section"><div><div class="bt-section-label">09 / INVESTMENT HIGHLIGHTS</div><h2>Not just a building.<br><em>A repeatable model.</em></h2></div><div class="bt-highlight-grid"><article><span>01</span><h3>Rental income</h3><p>Generate income from the upstairs residence, office, or rental unit while the ground floor serves business activity.</p></article><article><span>02</span><h3>Capital appreciation</h3><p>Own a visible, useful asset in a growing community with multiple potential future users.</p></article><article><span>03</span><h3>Scalable investment</h3><p>Start with one unit or a 3-sublot development and build a repeatable shophouse portfolio.</p></article></div></section>' +
 
-      '<section class="bt-contact" id="bt-inquiry"><div class="bt-contact-mark">BT</div><div class="bt-contact-copy"><div class="bt-section-label">10 / START A CONVERSATION</div><h2>Build the next<br><em>Bahay Tindahan.</em></h2><p>Tell us which product direction fits your site, business, or investment plan. ES REALTY will help you explore the right next step.</p></div><form class="bt-inquiry-form" data-bt-inquiry-form><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Interest<select name="interest"><option>Project B.T overview</option><option>Testarossa — Essential</option><option>Carrera — Signature</option><option>Ultima — Prestige</option><option>Site / development partnership</option></select></label><label>Message<textarea name="message" rows="3" maxlength="2000" placeholder="Tell us about your location, business, or investment goal."></textarea></label><button class="bt-button bt-button-light" type="submit">Send inquiry <span>↗</span></button><p class="bt-form-status" aria-live="polite"></p></form></section>' +
+      '<section class="bt-contact" id="bt-inquiry"><div class="bt-contact-mark">BT</div><div class="bt-contact-copy"><div class="bt-section-label">10 / START A CONVERSATION</div><h2>Build the next<br><em>Bahay Tindahan.</em></h2><p>Tell us which product direction fits your site, business, or investment plan. ES REALTY will help you explore the right next step.</p></div><form class="bt-inquiry-form" data-bt-inquiry-form><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Interest<select name="interest"><option>Project B.T overview</option><option>Testarossa — Essential</option><option>Carrera — Signature</option><option>Ultima — Prestige</option><option>Site / development partnership</option></select></label><label>Message<textarea name="message" rows="3" maxlength="2000" placeholder="Tell us about your location, business, or investment goal."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about Project B.T and related developments.</span></label><button class="bt-button bt-button-light" type="submit">Send inquiry <span>↗</span></button><p class="bt-form-status" aria-live="polite"></p></form></section>' +
       '<section class="bt-thanks"><p>ES REALTY</p><h2>Thank you for imagining<br><em>what is possible.</em></h2><a href="#/home">Return to ES Realty <span>↗</span></a></section>');
   }
 
@@ -413,8 +433,8 @@
     var pager = pages > 1 ? '<div class="sf-pager"><button data-sf-page="' + (page - 1) + '"' + (page <= 1 ? " disabled" : "") + '>Previous</button><span>Page ' + page + ' of ' + pages + '</span><button data-sf-page="' + (page + 1) + '"' + (page >= pages ? " disabled" : "") + '>Next</button></div>' : "";
      return shell('<section class="sf-search-page"><div class="sf-search-intro"><p class="sf-eyebrow">PROPERTY SEARCH</p><h1>Find a property that fits.</h1><p>Browse current property inventory across the Philippines.</p></div>' +
       '<div class="sf-filter-stick">' + searchFields(params, true) + '</div><div class="sf-results-bar"><p><b>' + esc(result.total || 0) + '</b> properties</p>' +
-      '<div><select data-sf-sort><option value="date_desc"' + (params.get("sort") === "date_desc" || !params.get("sort") ? " selected" : "") + '>Newest</option><option value="price_asc"' + (params.get("sort") === "price_asc" ? " selected" : "") + '>Price: Low to high</option><option value="price_desc"' + (params.get("sort") === "price_desc" ? " selected" : "") + '>Price: High to low</option></select>' +
-      '<button data-sf-mode="grid" class="' + (viewState.mode === "grid" ? "active" : "") + '">Grid</button><button data-sf-mode="list" class="' + (viewState.mode === "list" ? "active" : "") + '">List</button><button data-sf-mode="map" class="' + (viewState.mode === "map" ? "active" : "") + '">Map</button></div></div>' +
+      '<div><label class="sf-visually-hidden" for="sf-sort">Sort properties</label><select id="sf-sort" data-sf-sort><option value="date_desc"' + (params.get("sort") === "date_desc" || !params.get("sort") ? " selected" : "") + '>Newest</option><option value="price_asc"' + (params.get("sort") === "price_asc" ? " selected" : "") + '>Price: Low to high</option><option value="price_desc"' + (params.get("sort") === "price_desc" ? " selected" : "") + '>Price: High to low</option></select>' +
+      '<button data-sf-mode="grid" aria-pressed="' + (viewState.mode === "grid") + '" class="' + (viewState.mode === "grid" ? "active" : "") + '">Grid</button><button data-sf-mode="list" aria-pressed="' + (viewState.mode === "list") + '" class="' + (viewState.mode === "list" ? "active" : "") + '">List</button><button data-sf-mode="map" aria-pressed="' + (viewState.mode === "map") + '" class="' + (viewState.mode === "map" ? "active" : "") + '">Map</button></div></div>' +
       (viewState.mode === "map"
         ? '<div class="sf-map-wrap"><div id="sf-map"></div><p class="sf-map-hint" id="sf-map-hint">Loading map…</p></div>'
         : '<div class="sf-property-grid ' + (viewState.mode === "list" ? "list" : "") + '">' + cards + '</div>') + pager + '</section>');
@@ -532,14 +552,11 @@
       var eyebrow = contact.querySelector(".sf-eyebrow");
       var title = contact.querySelector("h2");
       var description = contact.querySelector("p:not(.sf-eyebrow)");
-      var details = contact.querySelectorAll(".sf-contact-details > *");
+      var dets = contact.querySelector(".sf-contact-details");
       if (eyebrow) eyebrow.textContent = siteContact.eyebrow;
       if (title) title.textContent = siteContact.title;
       if (description) description.textContent = siteContact.description;
-      if (details[0]) { details[0].textContent = siteContact.phone; details[0].href = "tel:" + String(siteContact.phone || "").replace(/[^\d+]/g, ""); }
-      if (details[1]) { details[1].textContent = siteContact.email; details[1].href = "mailto:" + (siteContact.email || ""); }
-      if (details[2]) details[2].textContent = siteContact.address;
-      if (details[3]) details[3].textContent = siteContact.hours;
+      if (dets) dets.innerHTML = contactDetails();
     }
   }
 
@@ -835,27 +852,26 @@
         var btStatus = btForm.querySelector(".bt-form-status");
         var btButton = btForm.querySelector("button[type=submit]");
         var btData = new FormData(btForm);
-        if (API && API.contact) {
-          btButton.disabled = true;
-          if (btStatus) { btStatus.textContent = "Sending…"; btStatus.className = "bt-form-status"; }
-          API.contact({
-            inquiry_type: "project-bt",
-            full_name: btData.get("name"),
-            email: btData.get("email"),
-            phone: "",
-            message: btData.get("message"),
-            interest: btData.get("interest"),
-            consent: true
-          }).then(function () {
-            btForm.reset();
-            if (btStatus) { btStatus.textContent = "Thanks — your Project B.T inquiry is ready for the ES REALTY team."; btStatus.className = "bt-form-status success"; }
-          }).catch(function (error) {
-            if (btStatus) { btStatus.textContent = error.message || "Could not send. Please try again."; btStatus.className = "bt-form-status error"; }
-          }).finally(function () { btButton.disabled = false; });
-        } else {
-          if (btStatus) { btStatus.textContent = "Thanks — your Project B.T inquiry is ready for the ES REALTY team."; btStatus.className = "bt-form-status success"; }
-          btForm.reset();
+        if (!(API && API.contact)) {
+          if (btStatus) { btStatus.textContent = "The contact service is unavailable right now. Please try again in a moment."; btStatus.className = "bt-form-status error"; }
+          return;
         }
+        btButton.disabled = true;
+        if (btStatus) { btStatus.textContent = "Sending…"; btStatus.className = "bt-form-status"; }
+        API.contact({
+          inquiry_type: "project-bt",
+          full_name: btData.get("name"),
+          email: btData.get("email"),
+          phone: "",
+          message: btData.get("message"),
+          interest: btData.get("interest"),
+          consent: btData.get("consent") === "on"
+        }).then(function () {
+          btForm.reset();
+          if (btStatus) { btStatus.textContent = "Thanks — your Project B.T inquiry has been received. The ES REALTY team will follow up."; btStatus.className = "bt-form-status success"; }
+        }).catch(function (error) {
+          if (btStatus) { btStatus.textContent = error.message || "Could not send. Please try again."; btStatus.className = "bt-form-status error"; }
+        }).finally(function () { btButton.disabled = false; });
         return;
       }
       var guide = event.target.closest("[data-sf-guide]");
@@ -864,19 +880,22 @@
         var guideStatus = guide.querySelector(".sf-form-status");
         var guideButton = guide.querySelector("button[type=submit]");
         var guideData = new FormData(guide);
-        if (API && API.contact) {
-          guideButton.disabled = true;
-          if (guideStatus) { guideStatus.textContent = "Sending…"; guideStatus.className = "sf-form-status"; }
-          API.contact({ inquiry_type: "guide", email: guideData.get("email"), consent: true }).then(function () {
-            guide.reset();
-            if (guideStatus) { guideStatus.textContent = "Thanks — check your inbox for the Shophouse Investment Guide."; guideStatus.className = "sf-form-status success"; }
-          }).catch(function (error) {
-            if (guideStatus) { guideStatus.textContent = error.message || "Could not send. Please try again."; guideStatus.className = "sf-form-status error"; }
-          }).finally(function () { guideButton.disabled = false; });
-        } else {
-          if (guideStatus) { guideStatus.textContent = "Thanks — check your inbox for the Shophouse Investment Guide."; guideStatus.className = "sf-form-status success"; }
-          guide.reset();
+        if (!(API && API.contact)) {
+          if (guideStatus) { guideStatus.textContent = "The guide service is unavailable right now. Please try again in a moment."; guideStatus.className = "sf-form-status error"; }
+          return;
         }
+        guideButton.disabled = true;
+        if (guideStatus) { guideStatus.textContent = "Sending…"; guideStatus.className = "sf-form-status"; }
+        API.contact({ inquiry_type: "guide", email: guideData.get("email"), consent: guideData.get("consent") === "on" }).then(function (res) {
+          guide.reset();
+          var delivered = res && res.data && res.data.delivered;
+          if (guideStatus) {
+            if (delivered) { guideStatus.textContent = "Thanks — check your inbox for the Shophouse Investment Guide."; guideStatus.className = "sf-form-status success"; }
+            else { guideStatus.textContent = "Thanks — your request has been received. A specialist will send the guide shortly."; guideStatus.className = "sf-form-status success"; }
+          }
+        }).catch(function (error) {
+          if (guideStatus) { guideStatus.textContent = error.message || "Could not send. Please try again."; guideStatus.className = "sf-form-status error"; }
+        }).finally(function () { guideButton.disabled = false; });
         return;
       }
       var consult = event.target.closest("[data-sf-consult]");
@@ -885,46 +904,28 @@
         var consultStatus = consult.querySelector(".sf-form-status");
         var consultButton = consult.querySelector("button[type=submit]");
         var consultData = new FormData(consult);
-        if (API && API.contact) {
-          consultButton.disabled = true;
-          if (consultStatus) { consultStatus.textContent = "Sending…"; consultStatus.className = "sf-form-status"; }
-          API.contact({
-            inquiry_type: "consult",
-            full_name: consultData.get("name"),
-            email: consultData.get("email"),
-            phone: consultData.get("phone"),
-            message: consultData.get("message"),
-            consent: true
-          }).then(function () {
-            consult.reset();
-            if (consultStatus) { consultStatus.textContent = "Thanks — a shophouse specialist will reach out within one business day."; consultStatus.className = "sf-form-status success"; }
-          }).catch(function (error) {
-            if (consultStatus) { consultStatus.textContent = error.message || "Could not send. Please try again."; consultStatus.className = "sf-form-status error"; }
-          }).finally(function () { consultButton.disabled = false; });
-        } else {
-          if (consultStatus) { consultStatus.textContent = "Thanks — a shophouse specialist will reach out within one business day."; consultStatus.className = "sf-form-status success"; }
-          consult.reset();
+        if (!(API && API.contact)) {
+          if (consultStatus) { consultStatus.textContent = "The contact service is unavailable right now. Please try again in a moment."; consultStatus.className = "sf-form-status error"; }
+          return;
         }
+        consultButton.disabled = true;
+        if (consultStatus) { consultStatus.textContent = "Sending…"; consultStatus.className = "sf-form-status"; }
+        API.contact({
+          inquiry_type: "consult",
+          full_name: consultData.get("name"),
+          email: consultData.get("email"),
+          phone: consultData.get("phone"),
+          message: consultData.get("message"),
+          consent: consultData.get("consent") === "on"
+        }).then(function () {
+          consult.reset();
+          if (consultStatus) { consultStatus.textContent = "Thanks — a shophouse specialist will reach out within one business day."; consultStatus.className = "sf-form-status success"; }
+        }).catch(function (error) {
+          if (consultStatus) { consultStatus.textContent = error.message || "Could not send. Please try again."; consultStatus.className = "sf-form-status error"; }
+        }).finally(function () { consultButton.disabled = false; });
       }
     });
   }
-
-  // auto aria-label + tiny text bump for public (readability)
-  setInterval(function(){
-    document.querySelectorAll("input,select,textarea").forEach(function(el){
-      if(el.type==="hidden"||el.type==="submit"||el.type==="button") return;
-      if(el.id && document.querySelector('label[for="'+el.id+'"]')) return;
-      if(el.closest("label")||el.getAttribute("aria-label")||el.getAttribute("aria-labelledby")) return;
-      var ph=el.getAttribute("placeholder")||el.getAttribute("name")||el.id||"input";
-      el.setAttribute("aria-label", ph.replace(/[-_]/g," "));
-    });
-    document.querySelectorAll("body *").forEach(function(el){
-      if(el.children.length>0 || !el.textContent.trim()) return;
-      var s=getComputedStyle(el);
-      if(s.display==="none"||s.visibility==="hidden"||Number(s.opacity)===0) return;
-      if(parseFloat(s.fontSize)<12){ el.style.fontSize="12px"; }
-    });
-  },800);
 
   window.ESREALTY_STOREFRONT = {
     mount: function (options) {
