@@ -14299,6 +14299,16 @@ const ccBtn = e.target.closest("[data-cc-calc]");
       '<div class="field"><label>Confirm new password</label><input class="input" id="st-pass-conf" type="password" autocomplete="new-password"></div>' +
       "</div>" +
       '<div class="row mt-16" style="gap:8px"><button class="btn btn-primary" data-settings-pass>' + icon("key", 15) + " Change Password</button></div></div>";
+    if (roleIs("super-admin")) {
+      html += '<div class="card card-pad mt-16"><h3>' + icon("archive", 15) + ' Database backup</h3>' +
+        '<p class="dim mt-4">Download a portable snapshot of your workspace plus your cloud records — CRM leads, user profiles, listings — as a JSON file. Runs entirely in your browser and costs nothing.</p>' +
+        '<div class="row mt-12" style="gap:8px;flex-wrap:wrap">' +
+        '<button class="btn btn-primary" data-backup-json>' + icon("download", 15) + " Download full backup (.json)</button>" +
+        '<button class="btn btn-ghost" data-backup-leads-csv>' + icon("download", 14) + " Leads CSV</button>" +
+        '<button class="btn btn-ghost" data-backup-listings-csv>' + icon("download", 14) + " Listings CSV</button>" +
+        "</div>" +
+        '<div class="dim tiny mt-8">The backup includes your saved records and user data. Stored files (listing photos, vault documents) are exported only as links/references — the bytes live in Supabase Storage, so keep using the free monthly download for those too.</div></div>';
+    }
     return html;
   }
   function settingsChangePassword() {
@@ -14396,6 +14406,84 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     save();
     doFinish("Profile saved");
   }
+  function backupIsSecretKey(k) { return /pass(word)?|passwd|pwd|^pw$/i.test(String(k)); }
+  function backupStripObject(node) {
+    if (!node || typeof node !== "object") return;
+    if (Array.isArray(node)) { node.forEach(backupStripObject); return; }
+    Object.keys(node).forEach(k => {
+      if (backupIsSecretKey(k)) node[k] = undefined;
+      else backupStripObject(node[k]);
+    });
+  }
+  function backupLocalUsers() {
+    let users = [];
+    try { users = JSON.parse(localStorage.getItem("esrealty_users") || "[]"); } catch (e) {}
+    return users.map(u => Object.keys(u).reduce((o, k) => { if (!backupIsSecretKey(k)) o[k] = u[k]; return o; }, {}));
+  }
+  async function backupCloud() {
+    const result = { listings: [], leads: [], profiles: [], storage: { photoUrls: [], documentPaths: [] } };
+    if (SB && currentUser && currentUser.id) {
+      try { const { data } = await SB.from("crm_leads").select("id,ref,name,assigned_to,assigned_to_id,payload,created_by,updated_at").order("updated_at", { ascending: false }); if (Array.isArray(data)) result.leads = data; } catch (e) {}
+      try { const res = await SB.rpc("admin_list_profiles"); if (Array.isArray(res.data)) result.profiles = res.data; } catch (e) {}
+      const seen = {};
+      (state.listings || []).forEach(l => (l.images || []).forEach(i => { const u = i.url; if (u && /supabase\.co\/storage/.test(u) && !seen[u]) { seen[u] = 1; result.storage.photoUrls.push(u); } }));
+      (state.docVault || []).concat((state.transactions || []).reduce((a, t) => a.concat(t.documents || []), [])).forEach(d => { if (d.storagePath && result.storage.documentPaths.indexOf(d.storagePath) < 0) result.storage.documentPaths.push(d.storagePath); });
+    }
+    if (LISTINGS_API) {
+      try { const r = await LISTINGS_API.list({ per_page: 200 }); if (r && Array.isArray(r.data)) result.listings = result.listings.concat(r.data); } catch (e) {}
+      try { const r2 = await LISTINGS_API.mine({ per_page: 200 }); if (r2 && Array.isArray(r2.data)) r2.data.forEach(l => { if (!result.listings.find(x => x.id === l.id)) result.listings.push(l); }); } catch (e) {}
+    }
+    return result;
+  }
+  function backupDownload(filename, content, mime) {
+    const blob = new Blob([content], { type: mime || "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.style.display = "none";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+  async function settingsBackupJson(btn) {
+    if (btn) { btn.dataset.label = btn.innerHTML; btn.disabled = true; btn.textContent = "Preparing backup…"; }
+    try {
+      const exportedAt = new Date().toISOString();
+      const workspace = JSON.parse(JSON.stringify(state || {}));
+      backupStripObject(workspace);
+      const payload = {
+        meta: { app: "ES Realty", exportedAt: exportedAt, exportedBy: currentUser ? (currentUser.email || currentUser.name || "") : "", role: userRole(), source: "Super Admin backup" },
+        workspace: workspace,
+        localUsers: backupLocalUsers(),
+        cloud: await backupCloud()
+      };
+      backupDownload("esrealty-backup-" + exportedAt.slice(0, 10) + ".json", JSON.stringify(payload, null, 1), "application/json");
+      toast("Backup downloaded — store it in a secure, offline place");
+    } catch (e) { toast("Backup failed: " + esc(friendlyErr(e.message || e)), "err"); }
+    finally { if (btn) { btn.disabled = false; btn.innerHTML = btn.dataset.label || "Download full backup (.json)"; } }
+  }
+  function backupCsvRow(arr) {
+    return arr.map(v => { const s = String(v == null ? "" : v).replace(/"/g, '""'); return /[",\n]/.test(s) ? '"' + s + '"' : s; }).join(",");
+  }
+  async function settingsBackupCsv(kind, btn) {
+    if (btn) { btn.dataset.label = btn.innerHTML; btn.disabled = true; btn.textContent = "Preparing…"; }
+    try {
+      const exportedAt = new Date().toISOString();
+      const rows = [];
+      if (kind === "leads") {
+        try { await loadCloudLeads(); } catch (e) {}
+        rows.push(backupCsvRow(["ref", "name", "email", "phone", "type", "status", "interest", "createdAt", "assignedTo", "source", "notes"]));
+        (state.leads || []).forEach(l => rows.push(backupCsvRow([l.ref, l.name, l.email, l.phone, l.type, l.status, l.interest || "", l.createdAt, l.assignedTo || "", l.source || "", String(l.notes || "").slice(0, 200)])));
+        backupDownload("esrealty-leads-" + exportedAt.slice(0, 10) + ".csv", rows.join("\n"), "text/csv");
+        toast("Leads CSV downloaded");
+      } else {
+        const base = location.href.split("#")[0];
+        rows.push(backupCsvRow(["id", "ref", "title", "status", "type", "dealType", "price", "city", "province", "barangay", "bedrooms", "bathrooms", "lotArea", "floorArea", "updatedAt", "url"]));
+        (state.listings || []).forEach(l => rows.push(backupCsvRow([l.id, l.ref, l.title, l.status, l.type, l.dealType, l.price, l.city, l.province, l.barangay, l.bedrooms, l.bathrooms, l.lotArea, l.floorArea, l.updatedAt, base + "#/listing/" + encodeURIComponent(l.id)])));
+        backupDownload("esrealty-listings-" + exportedAt.slice(0, 10) + ".csv", rows.join("\n"), "text/csv");
+        toast("Listings CSV downloaded");
+      }
+    } catch (e) { toast("Export failed: " + esc(friendlyErr(e.message || e)), "err"); }
+    finally { if (btn) { btn.disabled = false; btn.innerHTML = btn.dataset.label || "Export"; } }
+  }
   let settingsHooked = false;
   function bindSettings() {
     if (!settingsHooked) {
@@ -14405,6 +14493,12 @@ const ccBtn = e.target.closest("[data-cc-calc]");
         if (sv) { settingsSaveForm(); return; }
         const cp = e.target.closest("[data-settings-pass]");
         if (cp) { settingsChangePassword(); return; }
+        const bj = e.target.closest("[data-backup-json]");
+        if (bj) { settingsBackupJson(bj); return; }
+        const bl = e.target.closest("[data-backup-leads-csv]");
+        if (bl) { settingsBackupCsv("leads", bl); return; }
+        const li = e.target.closest("[data-backup-listings-csv]");
+        if (li) { settingsBackupCsv("listings", li); return; }
       });
     }
   }
