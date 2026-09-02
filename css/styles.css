@@ -2900,3 +2900,6 @@ body .chip, body .sf-chip { font-size: 12px !important; }
 body .sf-card-tags span { font-size: 12px !important; }
 body .sf-results-bar button { font-size: 12px !important; }
 body .sf-results-bar select { height: 44px !important; }
+
+/* START A CONVERSATION heading — white text on the dark B.T contact band */
+.bt-contact h2 { color: #fff !important; }
