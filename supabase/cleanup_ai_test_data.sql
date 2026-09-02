@@ -70,14 +70,16 @@ where u.email in (
 );
 
 -- Test/sample listings (sample/test titles, developers, or test owners).
-select id, ref, title, developer, status, owner_id
+-- Developer may live at payload top level (imported format) or under
+-- payload -> 'details' (new listing format).
+select id, ref, title, coalesce(payload ->> 'developer', payload -> 'details' ->> 'developer') as developer, status, owner_id
 from public.shared_listings
 where id like 'lst-seed-%'
    or id like 'lst-live-%'
    or title ilike '%test%'
    or title ilike '%sample%'
-   or developer ilike '%sample%'
-   or developer = 'Other Realty'
+   or coalesce(payload ->> 'developer', payload -> 'details' ->> 'developer') ilike '%sample%'
+   or coalesce(payload ->> 'developer', payload -> 'details' ->> 'developer') = 'Other Realty'
    or owner_id in (
      select id from auth.users
      where email in (
@@ -161,8 +163,8 @@ where id like 'lst-seed-%'
    or id like 'lst-live-%'
    or title ilike '%test%'
    or title ilike '%sample%'
-   or developer ilike '%sample%'
-   or developer = 'Other Realty'
+   or coalesce(payload ->> 'developer', payload -> 'details' ->> 'developer') ilike '%sample%'
+   or coalesce(payload ->> 'developer', payload -> 'details' ->> 'developer') = 'Other Realty'
    or owner_id in (
      select id from auth.users
      where email in (
@@ -294,8 +296,8 @@ where id like 'lst-seed-%'
    or id like 'lst-live-%'
    or title ilike '%test%'
    or title ilike '%sample%'
-   or developer ilike '%sample%'
-   or developer = 'Other Realty';
+   or coalesce(payload ->> 'developer', payload -> 'details' ->> 'developer') ilike '%sample%'
+   or coalesce(payload ->> 'developer', payload -> 'details' ->> 'developer') = 'Other Realty';
 
 select count(*) as remaining_test_transactions
 from public.broker_transactions
