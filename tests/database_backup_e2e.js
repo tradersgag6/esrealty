@@ -73,6 +73,7 @@
     check("JSON workspace contains the seeded listing", !!json && /Backup Test Condo/.test(JSON.stringify(json.workspace)), "workspace listing");
     check("JSON local users exported as array", !!json && Array.isArray(json.localUsers), "array");
     check("JSON cloud section exported", !!json && json.cloud && Array.isArray(json.cloud.listings) && Array.isArray(json.cloud.leads) && Array.isArray(json.cloud.profiles), "sections");
+    check("JSON storage manifest present", !!json && json.cloud && json.cloud.storage && Array.isArray(json.cloud.storage.files), "manifest array");
     var jsonText = await blobText(captured[0]);
     check("JSON keeps non-secret data", /SANITY_KEEP_VALUE/.test(jsonText), "keep");
     var stripped = !/(SENTINEL_SECRET_ABC123|pwdsecret987)/.test(jsonText) && !/"(password|pwd|passwd|pass)"\s*:/.test(jsonText);

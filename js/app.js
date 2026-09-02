@@ -14307,7 +14307,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
         '<button class="btn btn-ghost" data-backup-leads-csv>' + icon("download", 14) + " Leads CSV</button>" +
         '<button class="btn btn-ghost" data-backup-listings-csv>' + icon("download", 14) + " Listings CSV</button>" +
         "</div>" +
-        '<div class="dim tiny mt-8">The backup includes your saved records and user data. Stored files (listing photos, vault documents) are exported only as links/references — the bytes live in Supabase Storage, so keep using the free monthly download for those too.</div></div>';
+        '<div class="dim tiny mt-8">The JSON backup also records a <b>storage manifest</b> listing every file in your <b>listing-photos</b> and <b>private-documents</b> buckets (file name, path, size, type, last-modified). Stored files are included as references, not bytes — use the manifest with Supabase Storage → Download to pull the actual files.</div></div>';
     }
     return html;
   }
@@ -14421,16 +14421,28 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     return users.map(u => Object.keys(u).reduce((o, k) => { if (!backupIsSecretKey(k)) o[k] = u[k]; return o; }, {}));
   }
   async function backupCloud() {
-    const result = { listings: [], leads: [], profiles: [], storage: { photoUrls: [], documentPaths: [] } };
+    const result = { listings: [], leads: [], profiles: [], storage: { photoUrls: [], documentPaths: [], files: [] } };
     if (SB && currentUser && currentUser.id) {
       try { const { data } = await SB.from("crm_leads").select("id,ref,name,assigned_to,assigned_to_id,payload,created_by,updated_at").order("updated_at", { ascending: false }); if (Array.isArray(data)) result.leads = data; } catch (e) {}
       try { const res = await SB.rpc("admin_list_profiles"); if (Array.isArray(res.data)) result.profiles = res.data; } catch (e) {}
-      const seen = {};
-      (state.listings || []).forEach(l => (l.images || []).forEach(i => { const u = i.url; if (u && /supabase\.co\/storage/.test(u) && !seen[u]) { seen[u] = 1; result.storage.photoUrls.push(u); } }));
-      (state.docVault || []).concat((state.transactions || []).reduce((a, t) => a.concat(t.documents || []), [])).forEach(d => { if (d.storagePath && result.storage.documentPaths.indexOf(d.storagePath) < 0) result.storage.documentPaths.push(d.storagePath); });
+      const seenU = {}, seenP = {};
+      (state.listings || []).forEach(l => (l.images || []).forEach(i => { const u = i.url; if (u && /supabase\.co\/storage/.test(u) && !seenU[u]) { seenU[u] = 1; result.storage.photoUrls.push(u); } }));
+      (state.docVault || []).concat((state.transactions || []).reduce((a, t) => a.concat(t.documents || []), [])).forEach(d => { if (d.storagePath && !seenP[d.storagePath]) { seenP[d.storagePath] = 1; result.storage.documentPaths.push(d.storagePath); } });
+      const seenF = {};
+      const raw = [];
+      try { const { data } = await SB.storage.from("listing-photos").list("", { limit: 5000 }); raw.push(["listing-photos", data]); } catch (e) {}
+      try { const { data } = await SB.storage.from("private-documents").list("", { limit: 5000 }); raw.push(["private-documents", data]); } catch (e) {}
+      raw.forEach(([bucket, data]) => (Array.isArray(data) ? data : []).forEach(f => {
+        if (!f || typeof f !== "object" || (f.id !== undefined && f.metadata === undefined) || f.name === undefined) return;
+        const name = String(f.name || "");
+        if (!name || String(f.metadata && f.metadata.mimetype || "") === "application/octet-stream") return;
+        const rec = { bucket: bucket, name: name, path: (f.pathname && String(f.pathname)) || name, size: Number(f.metadata && f.metadata.size || 0).toString(), mime: String(f.metadata && f.metadata.mimetype || ""), updatedAt: String(f.updated_at || f.updatedAt || "") };
+        const key = bucket + "/" + name;
+        if (!seenF[key]) { seenF[key] = 1; seenU[bucket + "/" + name] ? rec.inUse = true : 0; result.storage.files.push(rec); }
+      }));
     }
     if (LISTINGS_API) {
-      try { const r = await LISTINGS_API.list({ per_page: 200 }); if (r && Array.isArray(r.data)) result.listings = result.listings.concat(r.data); } catch (e) {}
+      try { const r = await LISTINGS_API.list({ per_page: 200 }); if (r && Array.isArray(r.data)) { r.data.forEach(l => { if (!result.listings.find(x => x.id === l.id)) result.listings.push(l); }); } } catch (e) {}
       try { const r2 = await LISTINGS_API.mine({ per_page: 200 }); if (r2 && Array.isArray(r2.data)) r2.data.forEach(l => { if (!result.listings.find(x => x.id === l.id)) result.listings.push(l); }); } catch (e) {}
     }
     return result;
