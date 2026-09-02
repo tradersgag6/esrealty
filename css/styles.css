@@ -2895,3 +2895,8 @@ body .chip, body .sf-chip { font-size: 12px !important; }
     bottom: calc(9% + 124px) !important;
   }
 }
+
+/* Card tag pills and search view/sort controls — keep text readable */
+body .sf-card-tags span { font-size: 12px !important; }
+body .sf-results-bar button { font-size: 12px !important; }
+body .sf-results-bar select { height: 44px !important; }

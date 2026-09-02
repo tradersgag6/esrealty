@@ -329,6 +329,7 @@
       if (/^sample\d*$/i.test(t)) return false;
       return true;
     });
+    if (!displayListings.length && listings.length) displayListings = listings;
     var cards = viewState.loading ? skeletons(3) : displayListings.length ? displayListings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
     var heroImage = (displayListings.length ? firstImage(displayListings[0]) : "") || (listings.length ? firstImage(listings[0]) : "");
     var cities = ["Batangas City", "Lipa", "Tanauan", "Santo Tomas", "Imus", "Bacoor", "Dasmariñas", "General Trias", "Santa Rosa", "Calamba", "Biñan", "Angeles", "San Fernando", "Antipolo", "Taytay", "Iloilo City", "Cebu City", "Lapu-Lapu", "Cagayan de Oro", "Davao City", "General Santos"];
@@ -527,6 +528,7 @@
       if (/^sample\d*$/i.test(t)) return false;
       return true;
     });
+    if (!displayListings.length && listings.length) displayListings = listings;
     var cards = viewState.loading ? skeletons(3) : displayListings.length ? displayListings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
     var grid = host.querySelector(".sf-property-grid");
     if (grid) grid.innerHTML = cards;
