@@ -2853,3 +2853,41 @@ body .chip, body .sf-chip { font-size: 12px !important; }
 /* Empty / detail states */
 .sf-empty h3 { color: #1e2a3a !important; }
 .sf-empty p { color: #4A5568 !important; }
+
+/* ============ HOME MOBILE OVERLAP FIXES (audit) ============ */
+/* Header: later responsive rules set .sf-link-btn back to display:inline-flex and
+   the actions column (grid 1fr auto) swallows the width, forcing the brand text to
+   overflow into the actions. At <=760px route "Sign in" into the slide-down menu and
+   let the brand shrink so nothing collides with the actions cluster. */
+@media (max-width: 760px) {
+  .sf-header { grid-template-columns: auto auto !important; gap: 8px !important; }
+  header .sf-header-actions, .sf-header .sf-header-actions {
+    display: inline-flex; flex: none; width: auto; justify-content: flex-end; gap: 8px;
+  }
+  header .sf-link-btn, .sf-header .sf-link-btn {
+    display: none !important;
+  }
+  /* Only the primary CTA + hamburger remain in the header actions */
+  header .sf-menu-btn, .sf-header .sf-menu-btn { display: grid; flex: none; }
+  /* Give the brand real room and let its text truncate instead of overflowing */
+  .sf-brand { flex: 1 1 auto; min-width: 0; max-width: calc(100% - 150px); }
+  .sf-brand b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+/* Hero: the "Live-work, done right" caption (bottom:25px of the frame) and the
+   floating stat card (bottom:9%, 98px tall) land in the same bottom zone and
+   collide.  On small screens place the caption well above the stat card band. */
+@media (max-width: 760px) {
+  .sf-hero-frame span {
+    bottom: auto !important;
+    top: 38% !important;
+    left: 18px !important;
+    max-width: calc(100% - 36px) !important;
+  }
+}
+/* On wider screens raise the caption clear of the stat card's top edge too. */
+@media (min-width: 761px) {
+  .sf-hero-frame span {
+    bottom: calc(9% + 124px) !important;
+  }
+}
