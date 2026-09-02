@@ -8,11 +8,9 @@ const corsHeaders = {
 
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const SITE_URL = (Deno.env.get("SITE_URL") ?? "https://tradersgag6.github.io/esrealty").replace(/\/$/, "");
-// Canonical host that serves the crawlable per-property pages. Derived from
-// the function's own public URL, pinned to https since Supabase only serves
-// edge functions over TLS. `/seo` is dropped so sitemap entries are stable
-// regardless of how the request path is formed.
-const EDGE_ORIGIN = "https://mrngaqtbaseewzcsogqi.supabase.co";
+// Canonical host + platform prefix that serves the crawlable per-property
+// pages. Omitting the /functions/v1 prefix makes sitemap URLs 404 from Google.
+const EDGE_ORIGIN = "https://mrngaqtbaseewzcsogqi.supabase.co/functions/v1";
 
 const PUBLIC_COLUMNS = [
   "id", "title", "description", "property_type", "offer_type", "status",
