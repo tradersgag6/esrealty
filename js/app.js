@@ -14442,8 +14442,17 @@ const ccBtn = e.target.closest("[data-cc-calc]");
       }));
     }
     if (LISTINGS_API) {
-      try { const r = await LISTINGS_API.list({ per_page: 200 }); if (r && Array.isArray(r.data)) { r.data.forEach(l => { if (!result.listings.find(x => x.id === l.id)) result.listings.push(l); }); } } catch (e) {}
-      try { const r2 = await LISTINGS_API.mine({ per_page: 200 }); if (r2 && Array.isArray(r2.data)) r2.data.forEach(l => { if (!result.listings.find(x => x.id === l.id)) result.listings.push(l); }); } catch (e) {}
+      try {
+        // page in safe chunks (the public API rejects per_page > 50).
+        const fromCloud = await loadAllListingPages(LISTINGS_API.list, { sort: "date_desc" });
+        fromCloud.forEach(l => { if (l && l.id && !result.listings.find(x => x.id === l.id)) result.listings.push(l); });
+      } catch (e) {}
+      if (currentUser && currentUser.id) {
+        try {
+          const mine = await loadAllListingPages(LISTINGS_API.mine, {});
+          mine.forEach(l => { if (l && l.id && !result.listings.find(x => x.id === l.id)) result.listings.push(l); });
+        } catch (e) {}
+      }
     }
     return result;
   }
