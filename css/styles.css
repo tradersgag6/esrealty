@@ -958,8 +958,8 @@ body .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding:
 .sf-site button, .sf-site input, .sf-site select, .sf-site textarea { font: inherit; }
 .sf-header { position: sticky; top: 0; z-index: 40; height: 78px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 clamp(22px, 5vw, 76px); border-bottom: 1px solid rgba(23, 30, 36, .12); background: rgba(244, 242, 235, .92); backdrop-filter: blur(16px); }
 .sf-brand { display: inline-flex; align-items: center; gap: 11px; color: #1b2027; text-decoration: none; justify-self: start; }
-.sf-brand-mark { display: grid; place-items: center; width: 39px; height: 39px; border-radius: 50%; background: #1e2a3a; color: #fff; font-family: Georgia, serif; font-size: 14px; letter-spacing: -.04em; }
-.sf-brand span:last-child { display: flex; flex-direction: column; line-height: 1.05; }
+.sf-brand-mark { display: grid; place-items: center; flex: 0 0 auto; width: 39px; height: 39px; border-radius: 50%; background: linear-gradient(135deg, #F97316, #EA580C); color: #1e2a3a; font-family: Georgia, serif; font-size: 15px; font-weight: 700; letter-spacing: -.04em; }
+.sf-brand span:last-child { display: flex; flex-direction: column; line-height: 1.05; min-width: 0; }
 .sf-brand b { font-family: Georgia, 'Times New Roman', serif; font-size: 20px; font-weight: 500; }
 .sf-brand small { margin-top: 5px; color: #5a6578; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
 .sf-nav { display: flex; align-items: center; gap: 34px; }
@@ -1183,7 +1183,7 @@ body .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding:
 .sf-detail-loading { min-height: 500px; display: grid; place-items: center; color: #6e7882; }
 .sf-footer { display: grid; grid-template-columns: 1fr 1fr auto; align-items: center; gap: 30px; padding: 45px clamp(22px, 6vw, 92px); border-top: 1px solid rgba(255, 255, 255, .12); background: #141a22; color: #fff; }
 .sf-footer .sf-brand { color: #fff; }
-.sf-footer .sf-brand-mark { background: #d3a169; color: #1e2a3a; }
+.sf-footer .sf-brand-mark { background: linear-gradient(135deg, #F97316, #EA580C); color: #fff; }
 .sf-footer p { color: #9aa4ae; font-size: 11px; }
 .sf-footer > div:last-child { display: flex; align-items: center; gap: 18px; }
 .sf-footer a, .sf-footer button { color: #fff; text-decoration: none; font-size: 11px; }
@@ -2253,7 +2253,9 @@ body input, body select, body textarea { font-size: 16px !important; }
 body button, body a, body [role="button"], body .tab, body .tab-btn,
 body .nav-item, body .nav-dropdown-item, body .opt, body .check-line, body .ms-chk, body .chip,
 body .sf-nav a, body .sf-link-btn, body .sf-primary-btn { min-height: 44px !important; min-width: 44px !important; }
-body .brand-mark { color: #0A0E14 !important; }
+body .brand-mark { color: #1e2a3a !important; }
+[data-theme="light"] .brand-mark { background-image: linear-gradient(135deg, #F97316, #EA580C) !important; color: #1e2a3a !important; }
+[data-theme="dark"] .brand-mark { background-color: #EA580C !important; background-image: linear-gradient(135deg, #F97316, #EA580C) !important; color: #1e2a3a !important; }
 body .user-avatar { color: #0A0E14 !important; }
 body .link-btn { color: var(--text) !important; }
 [data-theme="light"] body .nav-section { color: var(--text-dim) !important; }
@@ -2286,7 +2288,7 @@ body .badge.green, body .badge.gold, body .badge.red { filter: brightness(0.85);
 [data-theme="dark"] .notice-banner.warn { background: #451A03 !important; border-color: #9A3412 !important; color: #FFEDD5 !important; }
 [data-theme="dark"] .wstep.active { background: #C2410C !important; color: #fff !important; }
 [data-theme="dark"] .wstep.active .n { background: #fff !important; color: #C2410C !important; }
-[data-theme="dark"] .brand-mark { background-color: #EA580C !important; background-image: none !important; color: #fff !important; }
+[data-theme="dark"] .brand-mark { background-color: #EA580C !important; background-image: linear-gradient(135deg, #F97316, #EA580C) !important; color: #fff !important; }
 [data-theme="dark"] .user-avatar { background-color: #EA580C !important; background-image: none !important; color: #fff !important; }
 [data-theme="dark"] .sf-eyebrow, [data-theme="dark"] .bt-eyebrow, [data-theme="dark"] .kicker, [data-theme="dark"] .eyebrow { color: #FDBA74 !important; }
 body .chip, body .sf-chip { font-size: 12px !important; }
