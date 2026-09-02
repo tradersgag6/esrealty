@@ -8,6 +8,11 @@ const corsHeaders = {
 
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const SITE_URL = (Deno.env.get("SITE_URL") ?? "https://tradersgag6.github.io/esrealty").replace(/\/$/, "");
+// Canonical host that serves the crawlable per-property pages. Derived from
+// the function's own public URL, pinned to https since Supabase only serves
+// edge functions over TLS. `/seo` is dropped so sitemap entries are stable
+// regardless of how the request path is formed.
+const EDGE_ORIGIN = "https://mrngaqtbaseewzcsogqi.supabase.co";
 
 const PUBLIC_COLUMNS = [
   "id", "title", "description", "property_type", "offer_type", "status",
@@ -69,21 +74,18 @@ Deno.serve(async (req) => {
       .select("id,updated_at").eq("status", "available").order("published_at", { ascending: false }).limit(2000);
     const rows = r.data ?? [];
     const today = new Date().toISOString().slice(0, 10);
+    // Only the canonical crawlable pages (served by this function at
+    // /seo/property/<id>). Listing them once avoids duplicate-URL penalties.
     const urls = rows.map(x =>
-      `  <url><loc>${SITE_URL}/#/property/${esc(x.id)}</loc><lastmod>${String(x.updated_at || today).slice(0, 10)}</lastmod><changefreq>daily</changefreq></url>`
+      `  <url><loc>${EDGE_ORIGIN}/seo/property/${esc(x.id)}</loc><lastmod>${String(x.updated_at || today).slice(0, 10)}</lastmod><changefreq>daily</changefreq></url>`
     ).join("\n");
-    // NOTE: hash URLs in sitemaps are not ideal long-term; the canonical
-    // crawlable page is served at /seo/property/<id> below.
-    const canonUrls = rows.map(x =>
-      `  <url><loc>${url.origin}${url.pathname}/property/${esc(x.id)}</loc><lastmod>${String(x.updated_at || today).slice(0, 10)}</lastmod><changefreq>daily</changefreq></url>`
-    ).join("\n");
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${canonUrls}\n${urls}\n</urlset>`;
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`;
     return new Response(xml, { status: 200, headers: { ...corsHeaders, "Content-Type": "application/xml" } });
   }
 
   // ── /robots.txt ────────────────────────────────────────────────────
   if (url.pathname.endsWith("/robots.txt")) {
-    const txt = `User-agent: *\nAllow: /\nSitemap: ${url.origin}${url.pathname.replace("/robots.txt", "/sitemap.xml")}\n`;
+    const txt = `User-agent: *\nAllow: /\nSitemap: ${EDGE_ORIGIN}/seo/sitemap.xml\n`;
     return new Response(txt, { status: 200, headers: { ...corsHeaders, "Content-Type": "text/plain" } });
   }
 
@@ -96,20 +98,21 @@ Deno.serve(async (req) => {
     if (!r.data) return html(`<!doctype html><title>Listing not found</title><meta http-equiv="refresh" content="1;url=${SITE_URL}/">`);
     const l: any = r.data;
     const spaUrl = `${SITE_URL}/#/property/${id}`;
+    const canonicalUrl = `${EDGE_ORIGIN}/seo/property/${id}`;
     const img = Array.isArray(l.images) && l.images[0] ? l.images[0] : "";
     const desc = (l.description || "").slice(0, 300) || `${l.property_type} for ${l.offer_type === "rent" ? "rent" : "sale"} in ${[l.city, l.province].filter(Boolean).join(", ")}.`;
     const priceTxt = money(l.price || l.rent) + (l.offer_type === "rent" ? "/mo" : "");
-    const ld = JSON.stringify(listingJsonLd(l, `${url.origin}${url.pathname}`));
+    const ld = JSON.stringify(listingJsonLd(l, canonicalUrl));
     const out = `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
 <title>${esc(l.title)} — ES Realty</title>
 <meta name="description" content="${esc(desc)}">
-<link rel="canonical" href="${esc(`${url.origin}${url.pathname}`)}">
+<link rel="canonical" href="${esc(canonicalUrl)}">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${esc(l.title)}">
 <meta property="og:description" content="${esc(desc)}">
-<meta property="og:url" content="${esc(`${url.origin}${url.pathname}`)}">
+<meta property="og:url" content="${esc(canonicalUrl)}">
 ${img ? `<meta property="og:image" content="${esc(img)}">` : ""}
 <meta property="og:price:amount" content="${Number(l.price || 0)}">
 <meta property="og:price:currency" content="PHP">
