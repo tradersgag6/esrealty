@@ -10160,6 +10160,42 @@ premise: "Fee Simple / As Improved",
   function lsPhotoThumb(url) {
     return '<div class="ls-photo-thumb"><img src="' + esc(url) + '" alt="Photo" loading="lazy"><button type="button" class="ls-photo-remove" data-ls-photo-remove title="Remove photo">&times;</button></div>';
   }
+  function lsReadAsDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      const rd = new FileReader();
+      rd.onload = () => resolve(rd.result);
+      rd.onerror = () => reject(rd.error || new Error("Could not read image"));
+      rd.readAsDataURL(file);
+    });
+  }
+  // Downscale photos before upload: the site renders cards/detail at <= 1600px,
+  // and full-size originals burn storage egress for no visible benefit.
+  function lsOptimizeImage(file) {
+    return new Promise(function (resolve) {
+      const keep = () => resolve({ blob: file, contentType: file.type, ext: (file.name.match(/\.([a-zA-Z0-9]+)$/) || [, "jpg"])[1].toLowerCase() });
+      if (!/image\/(jpeg|png|webp|gif|bmp|avif)/.test(file.type || "")) { keep(); return; }
+      lsReadAsDataUrl(file).then(function (dataUrl) {
+        const img = new Image();
+        img.onload = function () {
+          const MAX_SIDE = 1600;
+          const ratio = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
+          const w = Math.max(1, Math.round(img.width * ratio));
+          const h = Math.max(1, Math.round(img.height * ratio));
+          const canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          try { ctx.imageSmoothingQuality = "high"; } catch (e) {}
+          try { ctx.drawImage(img, 0, 0, w, h); } catch (e) { keep(); return; }
+          canvas.toBlob(function (blob) {
+            if (blob && blob.size < file.size) resolve({ blob: blob, contentType: "image/jpeg", ext: "jpg" });
+            else keep();
+          }, "image/jpeg", 0.82);
+        };
+        img.onerror = keep;
+        img.src = dataUrl;
+      }).catch(keep);
+    });
+  }
   async   function lsUploadPhotos(files) {
     const list = Array.from(files || []).filter(f => /^image\//.test(f.type || ""));
     if (!list.length) { toast("Choose a JPG, PNG or WebP image", "err"); return; }
@@ -10192,10 +10228,11 @@ premise: "Fee Simple / As Improved",
     let done = 0;
     for (const file of list) {
       if (file.size > 4 * 1024 * 1024) { toast(esc(file.name) + " is larger than 4 MB", "err"); done += 1; continue; }
-      const ext = (file.name.match(/\.([a-zA-Z0-9]+)$/) || [, "jpg"])[1].toLowerCase();
-      const path = currentUser.id + "/" + (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.floor(Math.random() * 1e9)) + "." + ext;
+      let optimized;
+      try { optimized = await lsOptimizeImage(file); } catch (e) { toast("Could not process " + esc(file.name), "err"); done += 1; continue; }
+      const path = currentUser.id + "/" + (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.floor(Math.random() * 1e9)) + "." + optimized.ext;
       try {
-        const { error } = await SB.storage.from("listing-photos").upload(path, file, { contentType: file.type, upsert: false });
+        const { error } = await SB.storage.from("listing-photos").upload(path, optimized.blob, { contentType: optimized.contentType, upsert: false, cacheControl: "31536000" });
         if (error) throw error;
         const { data } = SB.storage.from("listing-photos").getPublicUrl(path);
         const url = data && data.publicUrl ? data.publicUrl : "";
