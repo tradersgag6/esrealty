@@ -2240,7 +2240,7 @@ body.preload .topbar { visibility: hidden !important; }
   .notice-banner { padding: 8px 10px !important; flex-wrap: wrap !important; }
   .topbar { padding: 8px 10px !important; }
   .row { gap: 8px !important; margin: 0 !important; }
-  .pb-page, .content, .main { max-width: 100vw !important; overflow-x: hidden !important; }
+  .pb-page, .content, .main { max-width: 100vw !important; overflow-x: clip !important; }
   #pf-construction-modal .modal-body, #pf-phase-modal .modal-body, #pf-vendor-modal .modal-body, #pf-invoice-modal .modal-body, #pf-change-modal .modal-body { display: flex !important; flex-direction: column !important; }
   #pf-construction-modal .modal-body label, #pf-phase-modal .modal-body label, #pf-vendor-modal .modal-body label, #pf-invoice-modal .modal-body label, #pf-change-modal .modal-body label { width: 100% !important; }
 }
