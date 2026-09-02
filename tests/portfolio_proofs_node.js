@@ -42,9 +42,9 @@ function run() {
   record("zero byte file is rejected",
     ledger.validateProofFile(jpg({ size: 0 })).valid === false, "size=0");
   record("oversized file is rejected",
-    ledger.validateProofFile(jpg({ size: 5 * 1024 * 1024 + 1 })).valid === false && /5MB/.test(ledger.validateProofFile(jpg({ size: 5 * 1024 * 1024 + 1 })).errors.join(" ")), "size=" + (5 * 1024 * 1024 + 1));
-  record("5MB is still accepted",
-    ledger.validateProofFile(jpg({ size: 5 * 1024 * 1024 })).valid === true, "at-limit");
+    ledger.validateProofFile(jpg({ size: 2 * 1024 * 1024 + 1 })).valid === false && /2MB/.test(ledger.validateProofFile(jpg({ size: 2 * 1024 * 1024 + 1 })).errors.join(" ")), "size=" + (2 * 1024 * 1024 + 1));
+  record("2MB is still accepted",
+    ledger.validateProofFile(jpg({ size: 2 * 1024 * 1024 })).valid === true, "at-limit");
   record("invalid category is rejected",
     ledger.validateProofFile(jpg({ category: "selfie" })).valid === false, "category");
   record("blank category defaults to other",

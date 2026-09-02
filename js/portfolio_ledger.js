@@ -252,7 +252,7 @@
 
   // ── Financial proofs (images first, PDF allowed) ─────────────────
   var PROOF_CATEGORIES = ["receipt", "deposit_slip", "transfer_confirmation", "contract", "invoice", "other"];
-  var PROOF_MAX_BYTES = 5 * 1024 * 1024;
+  var PROOF_MAX_BYTES = 2 * 1024 * 1024;
   var PROOF_MIME_EXT = {
     "image/jpeg": [".jpg", ".jpeg"],
     "image/png": [".png"],
@@ -280,7 +280,7 @@
     if (!(size > 0)) {
       errs.push("file size must be a positive number of bytes");
     } else if (size > PROOF_MAX_BYTES) {
-      errs.push("file exceeds the 5MB maximum");
+      errs.push("file exceeds the 2MB maximum");
     }
     if (category && PROOF_CATEGORIES.indexOf(category) < 0) {
       errs.push("category must be one of " + PROOF_CATEGORIES.join(", "));

@@ -4261,7 +4261,7 @@ html+='</div></div>';
       if (!/^data:image\//.test(dataUrl)) { done(dataUrl); return; }
       const img = new Image();
       img.onload = () => {
-        const max = 1600;
+        const max = 1280;
         let w = img.width, h = img.height;
         if (Math.max(w, h) > max) { const r = max / Math.max(w, h); w = Math.round(w * r); h = Math.round(h * r); }
         if (w !== img.width || h !== img.height) {
@@ -6030,9 +6030,11 @@ premise: "Fee Simple / As Improved",
 
   function readPhotoFiles(files, done) {
     const out = [];
-    let remaining = files.length;
-    if (!remaining) { done(out); return; }
-    [].forEach.call(files, f => {
+    const MAX_PHOTOS = 10, PHOTO_MAX_BYTES = 3 * 1024 * 1024;
+    const list = Array.from(files || []).filter(f => (/^image\//.test(f.type || "")) && f.size <= PHOTO_MAX_BYTES).slice(0, MAX_PHOTOS);
+    let remaining = list.length;
+    if (!remaining) { toast("No usable photos (JPG/PNG/WebP up to 3 MB)", "err"); done(out); return; }
+    list.forEach(f => {
       const reader = new FileReader();
       reader.onload = () => {
         const img = new Image();
@@ -10168,8 +10170,8 @@ premise: "Fee Simple / As Improved",
       rd.readAsDataURL(file);
     });
   }
-  // Downscale photos before upload: the site renders cards/detail at <= 1600px,
-  // and full-size originals burn storage egress for no visible benefit.
+  // Downscale photos before upload: the site renders cards/detail at <= 1280px,
+  // and full-size originals burn storage and egress for no visible benefit.
   function lsOptimizeImage(file) {
     return new Promise(function (resolve) {
       const keep = () => resolve({ blob: file, contentType: file.type, ext: (file.name.match(/\.([a-zA-Z0-9]+)$/) || [, "jpg"])[1].toLowerCase() });
@@ -10177,7 +10179,7 @@ premise: "Fee Simple / As Improved",
       lsReadAsDataUrl(file).then(function (dataUrl) {
         const img = new Image();
         img.onload = function () {
-          const MAX_SIDE = 1600;
+          const MAX_SIDE = 1280;
           const ratio = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
           const w = Math.max(1, Math.round(img.width * ratio));
           const h = Math.max(1, Math.round(img.height * ratio));
@@ -10189,7 +10191,7 @@ premise: "Fee Simple / As Improved",
           canvas.toBlob(function (blob) {
             if (blob && blob.size < file.size) resolve({ blob: blob, contentType: "image/jpeg", ext: "jpg" });
             else keep();
-          }, "image/jpeg", 0.82);
+          }, "image/jpeg", 0.8);
         };
         img.onerror = keep;
         img.src = dataUrl;
@@ -10204,7 +10206,7 @@ premise: "Fee Simple / As Improved",
       const status = $("#ls-photo-status");
       let done = 0;
       for (const file of list) {
-        if (file.size > 4 * 1024 * 1024) { toast(esc(file.name) + " is larger than 4 MB", "err"); done += 1; continue; }
+        if (file.size > 2 * 1024 * 1024) { toast(esc(file.name) + " is larger than 2 MB", "err"); done += 1; continue; }
         const rd = new FileReader();
         rd.onload = () => {
           const ta = $("#ls-photos");
@@ -10227,7 +10229,7 @@ premise: "Fee Simple / As Improved",
     if (status) status.textContent = "Uploading " + list.length + " photo" + (list.length === 1 ? "" : "s") + "…";
     let done = 0;
     for (const file of list) {
-      if (file.size > 4 * 1024 * 1024) { toast(esc(file.name) + " is larger than 4 MB", "err"); done += 1; continue; }
+      if (file.size > 2 * 1024 * 1024) { toast(esc(file.name) + " is larger than 2 MB", "err"); done += 1; continue; }
       let optimized;
       try { optimized = await lsOptimizeImage(file); } catch (e) { toast("Could not process " + esc(file.name), "err"); done += 1; continue; }
       const path = currentUser.id + "/" + (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.floor(Math.random() * 1e9)) + "." + optimized.ext;
@@ -13087,7 +13089,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     closeVault();
     const docs = vaultDocs(ownerType, ownerId);
     const catOpts = vaultCategories(ownerType).map(c => '<option value="' + esc(c) + '">' + esc(c) + "</option>").join("");
-    const maxLabel = currentUser && currentUser.demo ? "900 KB" : "4 MB";
+    const maxLabel = currentUser && currentUser.demo ? "800 KB" : "2 MB";
     const body =
       '<div class="notice-banner">' + icon("shield", 14) + ' <span>Handle personal and transaction records according to the Data Privacy Act of 2012 (RA 10173). Upload only files required for this transaction.</span></div>' +
       '<div class="vault-upload"><label class="vault-drop" for="vl-file">' + icon("upload", 22) + '<span><b id="vl-file-name">Choose a document</b><small>PDF, JPG, PNG, DOC or DOCX · maximum ' + maxLabel + '</small></span><input type="file" id="vl-file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></label>' +
@@ -13130,8 +13132,8 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     const file = fileEl.files[0];
     const allowed = /\.(pdf|jpe?g|png|docx?)$/i.test(file.name || "");
     if (!allowed) { toast("Use a PDF, JPG, PNG, DOC or DOCX file", "err"); return; }
-    const maxBytes = currentUser && currentUser.demo ? 900000 : 4000000;
-    if (file.size > maxBytes) { toast("File is too large (maximum " + (maxBytes < 1000000 ? "900 KB" : "4 MB") + ")", "err"); return; }
+    const maxBytes = currentUser && currentUser.demo ? 800000 : 2000000;
+    if (file.size > maxBytes) { toast("File is too large (maximum " + (maxBytes < 1000000 ? "800 KB" : "2 MB") + ")", "err"); return; }
     const saveButton = $("[data-vault-save]");
     if (saveButton) { saveButton.disabled = true; saveButton.textContent = "Uploading..."; }
     const finishUpload = (rec) => {
