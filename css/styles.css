@@ -1176,7 +1176,7 @@ body .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding:
 .sf-contact-card input, .sf-contact-card textarea { width: 100%; margin-top: 5px; border: 1px solid #dcdedf; border-radius: 4px; padding: 10px 11px; outline: none; background: #fafafa; color: #1b2027; }
 .sf-contact-card input:focus, .sf-contact-card textarea:focus { border-color: #1e2a3a; }
 .sf-consent { display: flex; gap: 8px; align-items: flex-start; color: #707a84; font-size: 9px; line-height: 1.5; }
-.sf-consent input { width: auto; margin: 1px 0 0; }
+.sf-consent input { width: auto; margin: 1px 0 0; justify-self: start; }
 .sf-form-status { min-height: 15px; margin: 0; color: #6a737d; font-size: 10px; line-height: 1.4; }
 .sf-form-status.success { color: #9a6d3a; }
 .sf-form-status.error { color: #b53b37; }
@@ -2531,9 +2531,11 @@ body .chip, body .sf-chip { font-size: 12px !important; }
   .sf-link-btn { min-height: 48px !important; padding: 12px 16px !important; display: inline-flex; align-items: center; }
   
   /* Storefront form labels */
-  .sf-search-form label span, .sf-cta-form label,
-  .sf-contact-card label, .sf-guide label,
-  .bt-inquiry-form label { font-size: 13px !important; display: block; margin-bottom: 6px !important; }
+  .sf-search-form label span { font-size: 13px !important; display: block; margin-bottom: 6px !important; }
+  .sf-cta-form label, .sf-contact-card label, .sf-guide label,
+  .bt-inquiry-form label { font-size: 13px !important; display: grid; gap: 6px; margin-bottom: 6px !important; }
+  .sf-cta-form .sf-consent, .sf-contact-card .sf-consent,
+  .sf-guide .sf-consent, .bt-inquiry-form .sf-consent { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px !important; }
   
   /* Header menu button */
   .sf-menu-btn { width: 48px !important; height: 48px !important; }
