@@ -77,8 +77,10 @@ const FUNCTIONS = [
     name: "nearby-scan",
     // NOTE: the app computes nearby amenities locally and does not call this
     // function, so a miss here is informational, not a live outage.
+    skipBlocking: true,
+    deployHint: "OPTIONAL / UNUSED by the app (nearby is computed locally). Can be left as-is or re-deployed with --no-verify-jwt.",
     probes: [
-      { path: "/nearby-scan", method: "POST", expect: 400, note: "rejects missing coords (function unused by app)", body: {} },
+      { path: "/nearby-scan", method: "POST", expect: 400, note: "rejects missing coords", body: {} },
     ],
   },
 ];
@@ -111,7 +113,7 @@ function extractEnvRefs(file) {
   return [...seen].filter(v => !AUTO_VARS.has(v) && KNOWN_VARS.has(v));
 }
 
-async function probe(base, p, fnName) {
+async function probe(base, p, fnName, optional) {
   const url = base + p.path;
   try {
     const res = await fetch(url, {
@@ -126,9 +128,9 @@ async function probe(base, p, fnName) {
     if (p.expect === 200 && status === 401) {
       extra = "  [deployed but JWT-LOCKED — re-deploy with --no-verify-jwt]";
     }
-    return { name: fnName, method: p.method, path: p.path, expect: p.expect, got: status, note: p.note || "", extra, ok: status === p.expect };
+    return { name: fnName, method: p.method, path: p.path, expect: p.expect, got: status, note: p.note || "", extra, ok: status === p.expect, optional: !!optional };
   } catch (e) {
-    return { name: fnName, method: p.method, path: p.path, expect: p.expect, got: "ERR", note: p.note || "", extra: " [not reachable: " + (e && e.message || e) + "]", ok: false };
+    return { name: fnName, method: p.method, path: p.path, expect: p.expect, got: "ERR", note: p.note || "", extra: " [not reachable: " + (e && e.message || e) + "]", ok: false, optional: !!optional };
   }
 }
 
@@ -142,7 +144,7 @@ async function probe(base, p, fnName) {
     let srcFile = path.join(fnDir, fn.name, "index.ts");
     if (!fs.existsSync(srcFile)) srcFile = path.join(fnDir, fn.name, "mod.ts");
     for (const p of fn.probes) {
-      const r = await probe(BASE, p, fn.name);
+      const r = await probe(BASE, p, fn.name, fn.skipBlocking);
       out.push(r);
       if (!r.ok) ok = false;
     }
@@ -181,11 +183,43 @@ async function probe(base, p, fnName) {
 
   // 4) Status summary
   const total = out.length, passed = out.filter(r => r.ok).length;
+  const failed = out.filter(r => !r.ok);
   console.log("=== SUMMARY ===\n");
-  console.log("Probes: " + passed + "/" + total + (ok ? " — ALL GOOD" : " — SEE FAILURES ABOVE"));
+  console.log("Probes: " + passed + "/" + total);
+
+  if (failed.length) {
+    const blocking = failed.filter(r => !r.optional);
+    const optional = failed.filter(r => r.optional);
+    if (blocking.length) {
+      console.log("\n=== MUST FIX (" + blocking.length + " probe" + (blocking.length === 1 ? "" : "s") + ") ===\n");
+      const byFn = {};
+      blocking.forEach(r => (byFn[r.name] = byFn[r.name] || []).push(r));
+      Object.keys(byFn).sort().forEach(name => {
+        const fn = FUNCTIONS.find(f => f.name === name);
+        console.log("  " + name);
+        byFn[name].forEach(r => {
+          const ctx = r.got === 404 ? "NOT DEPLOYED" : r.got === 401 ? "DEPLOYED BUT JWT-LOCKED" : "unexpected " + r.got;
+          console.log("    " + r.method + " " + r.path + "  ->  got " + r.got + " (" + ctx + r.extra + ")");
+        });
+        const recommend = (fn && fn.deployHint) || ("supabase functions deploy " + name + " --no-verify-jwt --project-ref " + REF);
+        console.log("    FIX: " + recommend + "\n");
+      });
+    } else {
+      console.log("\nNo blocking failures. Everything required is deployed and behaving correctly.");
+    }
+    if (optional.length) {
+      console.log("\n=== INFORMATIONAL (non-blocking" + (optional.length === 1 ? ")" : "s)") + " ===\n");
+      optional.forEach(r => console.log("  " + r.method + " " + r.path + "  ->  got " + r.got + r.extra + (r.note ? " [" + r.note + "]" : "")));
+      console.log("");
+    }
+  } else {
+    console.log("ALL GOOD — every function is deployed and behaving as expected.");
+  }
+
   console.log("\nHow to read the check:");
   console.log("  - A route returning its EXPECTED status proves the function is DEPLOYED.");
   console.log("  - Protected routes expecting 401/403 prove auth is ENFORCED (not just deployed).");
+  console.log("  - '404' = function not deployed; '401' on a public route = deploy with --no-verify-jwt.");
   console.log("  - 'ERR' (no HTTP status) usually means the function is NOT deployed at BASE.");
-  if (!ok) { process.exit(1); }
+  if (failed.some(r => !r.optional)) { process.exit(1); }
 })();
