@@ -7,7 +7,7 @@
 create table if not exists public.storefront_inquiries (
   id uuid primary key default gen_random_uuid(),
   inquiry_type text not null default 'consult'
-    check (inquiry_type in ('consult', 'guide')),
+    check (inquiry_type in ('consult', 'guide', 'project-bt')),
   user_id uuid references auth.users(id) on delete set null,
   full_name text not null default '',
   email text not null default '',
@@ -21,6 +21,14 @@ create table if not exists public.storefront_inquiries (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Migration: allow Project B.T submissions in the archive. Existing databases
+-- created the inline check with the default auto-generated name, so drop and
+-- re-add it to include 'project-bt'.
+alter table if exists public.storefront_inquiries drop constraint if exists storefront_inquiries_inquiry_type_check;
+alter table if exists public.storefront_inquiries
+  add constraint storefront_inquiries_inquiry_type_check
+  check (inquiry_type in ('consult', 'guide', 'project-bt'));
 
 create index if not exists storefront_inquiries_type_date_idx
   on public.storefront_inquiries (inquiry_type, created_at desc);
