@@ -13378,7 +13378,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
       row("Monthly income", C.money(pg.income)) +
       row("Affordable monthly (35% of income)", C.money(pg.affordableMonthly)) +
       row("Max affordable loan (est.)", C.money(pg.maxAffordable)) +
-      row("Result", pg.eligible ? '<span style="color:#34C77B">Eligible for this scenario</span>' : '<span style="color:#F26B5B">Income likely insufficient — reduce price/DP or raise income</span>') +
+      row("Result", pg.eligible ? '<span style="color:#0E7A45">Eligible for this scenario</span>' : '<span style="color:#C0392B">Income likely insufficient — reduce price/DP or raise income</span>') +
       "</tbody></table></div>" +
       '<div class="notice-banner mt-8">' + icon("shield", 14) + " Pag-IBIG limits (e.g. max loan, interest rates) change periodically and depend on membership. Verify with HDMF before relying on any number.</div></div>";
     html += '<div class="card card-pad"><h3>Saved Scenarios</h3>' + (state.financingScenarios && state.financingScenarios.length ?

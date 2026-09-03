@@ -199,10 +199,12 @@
     }
 
     document.documentElement.setAttribute("data-theme", "dark");
+    void document.body.offsetHeight; // force synchronous style/layout flush
     await wait(200);
     auditPage("dark theme dashboard", allowedOverflow);
     document.documentElement.setAttribute("data-theme", "light");
-    await wait(200);
+    void document.body.offsetHeight; // force the flipped palette to paint before we audit
+    await wait(400);
     auditPage("light theme dashboard", allowedOverflow);
 
     var inputTest = document.createElement("input");
