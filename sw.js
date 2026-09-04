@@ -3,9 +3,9 @@
    - Never cache app logic (js/*): network-first, so updates always land.
    - Cache-first for immutable vendor assets, fonts, map tiles.
    - Navigations: network-first with offline fallback to the shell. */
-const VERSION = "esrealty-v4";
-const VENDOR_CACHE = "esrealty-vendor-v4";
-const IMG_CACHE = "esrealty-img-v1";
+const VERSION = "esrealty-pages-v1";
+const VENDOR_CACHE = "esrealty-vendor-pages-v1";
+const IMG_CACHE = "esrealty-img-pages-v1";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
