@@ -1399,11 +1399,25 @@
     };
     attempt();
   }
+  function customPinIcon() {
+    return L.divIcon({
+      className: "es-pin-icon",
+      html: '<svg width="38" height="48" viewBox="0 0 38 48" aria-hidden="true" focusable="false">'
+        + '<path d="M19 1.5C10.9 1.5 4.3 8.1 4.3 16.2 4.3 27 19 46.5 19 46.5s14.7-19.5 14.7-30.3C33.7 8.1 27.1 1.5 19 1.5z" fill="var(--accent, #F97316)"/>'
+        + '<path d="M19 5C12.7 5 7.6 10.1 7.6 16.4c0 8.8 11.4 25.8 11.4 25.8s11.4-17 11.4-25.8C30.4 10.1 25.3 5 19 5z" fill="rgba(255,255,255,0.28)"/>'
+        + '<circle cx="19" cy="16.5" r="7.2" fill="#fff"/>'
+        + '<circle cx="19" cy="16.5" r="3.8" fill="var(--accent, #F97316)"/>'
+        + '</svg>',
+      iconSize: [38, 48],
+      iconAnchor: [19, 47],
+      popupAnchor: [0, -42]
+    });
+  }
   function pinMap(id, ll, zoom) {
     const entry = _mapRegistry[id];
     if (!entry) return;
     if (!entry.marker) {
-      entry.marker = L.marker(ll, { draggable: true }).addTo(entry.map);
+      entry.marker = L.marker(ll, { draggable: true, icon: customPinIcon() }).addTo(entry.map);
       entry.marker.on("dragend", () => pinMap(id, entry.marker.getLatLng()));
       entry.marker.on("drag", () => { if (entry.onDrag) entry.onDrag(); });
     } else {
@@ -1444,13 +1458,13 @@
     if (hasPlotUI) {
       setupPlotMode(id, map, entry, { polygon: polygon, onPlot: onPlot, lotArea: C.num(lotArea, 0) });
       if (hasPin) {
-        entry.marker = L.marker(center, { draggable: true }).addTo(map);
+        entry.marker = L.marker(center, { draggable: true, icon: customPinIcon() }).addTo(map);
         entry.marker.on("dragend", () => pinMap(id, entry.marker.getLatLng()));
         entry.marker.on("drag", () => { if (entry.onDrag) entry.onDrag(); });
       }
     } else {
       if (hasPin) {
-        entry.marker = L.marker(center, { draggable: true }).addTo(map);
+        entry.marker = L.marker(center, { draggable: true, icon: customPinIcon() }).addTo(map);
         entry.marker.on("dragend", () => pinMap(id, entry.marker.getLatLng()));
         entry.marker.on("drag", () => { if (entry.onDrag) entry.onDrag(); });
       }
@@ -2011,7 +2025,7 @@
     setupPlotMode(id, map, entry, { polygon: polygon, onPlot: onPlot, lotArea: C.num(lotArea, 0) });
 
     if (hasPin) {
-      entry.marker = L.marker([latN, lngN], { draggable: true }).addTo(map);
+      entry.marker = L.marker([latN, lngN], { draggable: true, icon: customPinIcon() }).addTo(map);
       entry.marker.on("dragend", () => pinMap(id, entry.marker.getLatLng()));
       const c = document.getElementById(id + "-coords");
       if (c) c.innerHTML = "Pin: Latitude <b>" + esc(String(lat)) + "</b> &middot; Longitude <b>" + esc(String(lng)) + "</b>";
@@ -10271,7 +10285,7 @@ premise: "Fee Simple / As Improved",
     try {
       const map = L.map(id, { center: [latN, lngN], zoom: 15, scrollWheelZoom: false });
       L.tileLayer(tiles, { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 19 }).addTo(map);
-      L.marker([latN, lngN]).addTo(map);
+      L.marker([latN, lngN], { icon: customPinIcon() }).addTo(map);
       setTimeout(() => { try { map.invalidateSize(); } catch (e) { /* noop */ } }, 120);
     } catch (e) { /* noop */ }
   }

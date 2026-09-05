@@ -618,7 +618,7 @@
     element.innerHTML = "";
     var map = L.map(element, { scrollWheelZoom: false }).setView([Number(listing.latitude), Number(listing.longitude)], 15);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors" }).addTo(map);
-    L.marker([Number(listing.latitude), Number(listing.longitude)]).addTo(map);
+    L.marker([Number(listing.latitude), Number(listing.longitude)], { icon: L.divIcon({ className: "es-pin-icon", html: '<svg width="38" height="48" viewBox="0 0 38 48" aria-hidden="true" focusable="false"><path d="M19 1.5C10.9 1.5 4.3 8.1 4.3 16.2 4.3 27 19 46.5 19 46.5s14.7-19.5 14.7-30.3C33.7 8.1 27.1 1.5 19 1.5z" fill="var(--accent, #F97316)"/><path d="M19 5C12.7 5 7.6 10.1 7.6 16.4c0 8.8 11.4 25.8 11.4 25.8s11.4-17 11.4-25.8C30.4 10.1 25.3 5 19 5z" fill="rgba(255,255,255,0.28)"/><circle cx="19" cy="16.5" r="7.2" fill="#fff"/><circle cx="19" cy="16.5" r="3.8" fill="var(--accent, #F97316)"/></svg>', iconSize: [38, 48], iconAnchor: [19, 47], popupAnchor: [0, -42] })}).addTo(map);
   }
 
   function toggleMenu(open) {

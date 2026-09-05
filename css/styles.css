@@ -808,6 +808,10 @@ input:focus, textarea:focus, select:focus, .map-search input:focus { caret-color
 .plot-status b { color: var(--text); }
 .plot-status .btn { font-size: 11px; padding: 4px 10px; }
 
+/* ============ CUSTOM MAP PIN ============ */
+.es-pin-icon { background: transparent; border: none; }
+.es-pin-icon svg { display: block; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35)); }
+
 /* ============ PLOT LAND UI ============ */
 .plot-status.ok { color: #16A34A; }
 .plot-status.warn { color: var(--red); }
