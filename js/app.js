@@ -1281,7 +1281,7 @@
 
   function freshDeal() {
     return {
-      property: { name: "", region: "", province: "", city: "", barangay: "", address: "", lat: "", lng: "", lotArea: 200, frontage: 10, depth: 20, roadWidth: 8, roadType: "Barangay Road", landUse: "Residential", zoning: "Residential", floodRisk: "Low", propertyType: "Vacant Lot", structureType: "House", structures: [], yearBuilt: 0, floors: 1, existingFloorArea: 0, condition: "Good", improvementValue: 0, incomeGenerating: "No", monthlyIncome: 0, marketValuePerSqm: 0, birZonalPerSqm: 0, growthRate: 0.07, utilities: { Electricity: true, Water: true, Internet: true, Sewer: false } },
+      property: { name: "", region: "", province: "", city: "", barangay: "", address: "", lat: "", lng: "", landPolygon: [], plotArea: 0, lotArea: 200, frontage: 10, depth: 20, roadWidth: 8, roadType: "Barangay Road", landUse: "Residential", zoning: "Residential", floodRisk: "Low", propertyType: "Vacant Lot", structureType: "House", structures: [], yearBuilt: 0, floors: 1, existingFloorArea: 0, condition: "Good", improvementValue: 0, incomeGenerating: "No", monthlyIncome: 0, marketValuePerSqm: 0, birZonalPerSqm: 0, growthRate: 0.07, utilities: { Electricity: true, Water: true, Internet: true, Sewer: false } },
       purchase: { price: 4000000, negotiatedPrice: 3800000, sellerType: "Owner", taxes: 0, transferFees: 60000, legalFees: 50000, surveyCost: 30000, miscCost: 25000 },
       financing: { type: "Bank Loan", loanPct: 60, interestRate: 7.5, years: 15 },
       development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far: 1.5, floorArea: 0, buildMonths: 14, siteDevPct: 8, profFeesPct: 6, permits: 150000, contingencyPct: 10, marketing: 0, amenities: 0, lots: 0, lotSqm: 0, roadPct: 20, openSpacePct: 10, lotDevCostPerSqm: 0, projectBudget: 0, units: 0, floors: 0, mixResPct: 0, carryingMonthly: 0 },
@@ -1372,8 +1372,12 @@
     const hasPin = !!(lat && lng);
     return '<div class="field col-12"><label>Pinpoint Location on Map</label>' +
       '<div class="map-search"><input class="input" id="' + id + '-q" type="text" placeholder="Search a place — e.g. Makati City, Cavite" value=""><button class="btn btn-ghost btn-sm" id="' + id + '-btn" type="button">' + icon("pin", 13) + ' Locate</button></div>' +
+      '<div class="map-tools"><button type="button" class="opt on" id="' + id + '-pinmode">' + icon("pin", 12) + ' Pin Location</button>' +
+      '<button type="button" class="opt" id="' + id + '-plotmode">' + icon("grid", 12) + ' Plot Land</button></div>' +
       '<div class="map-picker" id="' + id + '"></div>' +
-      '<div class="map-coords" id="' + id + '-coords">' + (hasPin ? 'Pin: Latitude <b>' + esc(lat) + '</b> &middot; Longitude <b>' + esc(lng) + '</b>' : 'Select a Region / Province / City above, or search below — the map jumps there and Latitude/Longitude fill in automatically.') + '</div></div>';
+      '<div class="map-coords" id="' + id + '-coords">' + (hasPin ? 'Pin: Latitude <b>' + esc(lat) + '</b> &middot; Longitude <b>' + esc(lng) + '</b>' : 'Select a Region / Province / City above, or search below — the map jumps there and Latitude/Longitude fill in automatically.') + '</div>' +
+      '<div class="plot-status" id="' + id + '-plot"><span class="dim">Use <b>Plot Land</b> to draw the property boundary — corners are saved to the deal automatically.</span></div>' +
+      '<div class="plot-corners" id="' + id + '-corners"></div></div>';
   }
   function destroyMapPickers() {
     Object.keys(_mapRegistry).forEach(k => { try { _mapRegistry[k].map.remove(); } catch (e) { /* noop */ } });
@@ -1422,9 +1426,9 @@
       });
     }, 400);
   }
-  function initMapPicker(id, lat, lng, onPick, searchText) {
+  function initMapPicker(id, lat, lng, onPick, searchText, polygon, onPlot, lotArea) {
     if (!document.getElementById(id)) return;
-    if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initMapPicker(id, lat, lng, onPick, searchText)); return; }
+    if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initMapPicker(id, lat, lng, onPick, searchText, polygon, onPlot, lotArea)); return; }
     if (_mapRegistry[id]) { try { _mapRegistry[id].map.remove(); } catch (e) { /* noop */ } }
     const tiles = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
     const latN = parseFloat(lat), lngN = parseFloat(lng);
@@ -1436,12 +1440,22 @@
       maxZoom: 19
     }).addTo(map);
     const entry = { map: map, marker: null, onPick: onPick, onDrag: null, token: 0, deb: null };
-    if (hasPin) {
-      entry.marker = L.marker(center, { draggable: true }).addTo(map);
-      entry.marker.on("dragend", () => pinMap(id, entry.marker.getLatLng()));
-      entry.marker.on("drag", () => { if (entry.onDrag) entry.onDrag(); });
+    const hasPlotUI = !!(document.getElementById(id + "-plotmode") && document.getElementById(id + "-plot"));
+    if (hasPlotUI) {
+      setupPlotMode(id, map, entry, { polygon: polygon, onPlot: onPlot, lotArea: C.num(lotArea, 0) });
+      if (hasPin) {
+        entry.marker = L.marker(center, { draggable: true }).addTo(map);
+        entry.marker.on("dragend", () => pinMap(id, entry.marker.getLatLng()));
+        entry.marker.on("drag", () => { if (entry.onDrag) entry.onDrag(); });
+      }
+    } else {
+      if (hasPin) {
+        entry.marker = L.marker(center, { draggable: true }).addTo(map);
+        entry.marker.on("dragend", () => pinMap(id, entry.marker.getLatLng()));
+        entry.marker.on("drag", () => { if (entry.onDrag) entry.onDrag(); });
+      }
+      map.on("click", e => pinMap(id, e.latlng));
     }
-    map.on("click", e => pinMap(id, e.latlng));
     _mapRegistry[id] = entry;
     const q = document.getElementById(id + "-q"), btn = document.getElementById(id + "-btn");
     if (q && btn) {
@@ -1720,6 +1734,231 @@
     return Math.abs(area) / 2 * R * R;
   }
 
+  /* ---------- Plot engine: a proper, accurate land-plotted boundary tool.
+   * Shared by the Appraisal map and the wizard map picker. Offers numbered
+   * draggable vertices, per-edge distances, perimeter, area in sqm and ha,
+   * a declared-lot-area check, a copyable corner table, a live edge preview,
+   * shape validation (self-intersection / duplicate points), Undo / Clear, and
+   * live auto-save via onPlot(). ---------- */
+  function haversineM(a, b) {
+    const R = 6371000, toRad = Math.PI / 180;
+    const dLat = (parseFloat(b[0]) - parseFloat(a[0])) * toRad;
+    const dLon = (parseFloat(b[1]) - parseFloat(a[1])) * toRad;
+    const s = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(parseFloat(a[0]) * toRad) * Math.cos(parseFloat(b[0]) * toRad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
+  }
+  function plotPerimeter(points) {
+    if (!points || points.length < 2) return 0;
+    let p = 0;
+    for (let i = 0; i < points.length; i++) p += haversineM(points[i], points[(i + 1) % points.length]);
+    return p;
+  }
+  function orient3(a, b, c) {
+    const v = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+    return v > 1e-12 ? 1 : v < -1e-12 ? -1 : 0;
+  }
+  function onSeg(a, b, p) {
+    return parseFloat(p[0]) >= Math.min(parseFloat(a[0]), parseFloat(b[0])) - 1e-9 && parseFloat(p[0]) <= Math.max(parseFloat(a[0]), parseFloat(b[0])) + 1e-9 &&
+      parseFloat(p[1]) >= Math.min(parseFloat(a[1]), parseFloat(b[1])) - 1e-9 && parseFloat(p[1]) <= Math.max(parseFloat(a[1]), parseFloat(b[1])) + 1e-9;
+  }
+  function segInt(a, b, c, d) {
+    const o1 = orient3(a, b, c), o2 = orient3(a, b, d), o3 = orient3(c, d, a), o4 = orient3(c, d, b);
+    if (o1 !== o2 && o3 !== o4) return true;
+    if (o1 === 0 && onSeg(a, b, c)) return true;
+    if (o2 === 0 && onSeg(a, b, d)) return true;
+    if (o3 === 0 && onSeg(c, d, a)) return true;
+    if (o4 === 0 && onSeg(c, d, b)) return true;
+    return false;
+  }
+  function plotSelfCrosses(points) {
+    const n = points.length;
+    if (n < 4) return null;
+    for (let i = 0; i < n; i++) {
+      const a = points[i], b = points[(i + 1) % n];
+      for (let j = i + 2; j < n; j++) {
+        if (i === 0 && j === n - 1) continue;
+        const c = points[j], d = points[(j + 1) % n];
+        if (segInt(a, b, c, d)) return [i, j];
+      }
+    }
+    return null;
+  }
+  function plotVertexIcon(n, isFirst) {
+    return L.divIcon({ className: "plot-vtx-icon", html: '<div class="plot-vtx' + (isFirst ? " plot-vtx-first" : "") + '">' + n + "</div>", iconSize: [24, 24], iconAnchor: [12, 12] });
+  }
+  function buildPlotStatus(id, entry, opts) {
+    const statusEl = document.getElementById(id + "-plot");
+    if (!statusEl) return;
+    const n = entry.points.length;
+    const area = n >= 3 ? polygonAreaM2(entry.points) : 0;
+    const per = plotPerimeter(entry.points);
+    const crossing = plotSelfCrosses(entry.points);
+    let dup = -1;
+    for (let i = 1; i < n; i++) if (haversineM(entry.points[i - 1], entry.points[i]) < 1.5) { dup = i; break; }
+    const hasClosed = entry.plotClosed || n >= 3;
+    let warning = "";
+    if (crossing) warning = '<span class="plot-warn">' + icon("alert", 12) + ' Edges ' + (crossing[0] + 1) + " &amp; " + (crossing[1] + 1) + ' cross each other — fix before finishing.</span>';
+    else if (dup >= 0) warning = '<span class="plot-warn">' + icon("alert", 12) + " Point " + (dup + 1) + ' is too close to point ' + dup + '.</span>';
+    let lotLine = "";
+    if (opts.lotArea > 0 && n >= 3) {
+      const diffPct = Math.abs(area - opts.lotArea) / opts.lotArea;
+      lotLine = '<span class="' + (diffPct <= 0.15 ? "plot-ok" : "plot-warn") + '">Declared ' + C.fmtNum(Math.round(opts.lotArea)) + " sqm &middot; plotted " + C.fmtNum(Math.round(area)) + " sqm" + (diffPct <= 0.15 ? " &middot; within 15% ✓" : " &middot; deviates " + C.pct(diffPct) + " — recheck") + ".</span>";
+    }
+    const btns = [];
+    if (n > 0) btns.push('<button class="btn btn-ghost btn-sm" id="' + id + '-undo" type="button">' + icon("back", 12) + " Undo</button>");
+    if (n > 0) btns.push('<button class="btn btn-ghost btn-sm" id="' + id + '-clear" type="button">' + icon("trash", 12) + " Clear</button>");
+    if (n >= 3 && !crossing) btns.push('<button class="btn btn-sm" id="' + id + '-finish" type="button">' + icon("check", 12) + " Finish Plot</button>");
+    let html = "";
+    if (n === 0) {
+      html = '<span class="dim">No land plot yet — switch to <b>Plot Land</b> and click the corners of the property on the map.</span>';
+    } else if (n < 3) {
+      html = '<b>' + n + ' point' + (n === 1 ? "" : "s") + '</b> plotted &middot; perimeter so far <b>' + C.fmtNum(Math.round(per)) + ' m</b> &middot; click the remaining corners' + (hasClosed ? "" : " (3+ to close the shape)") + '<br>' + (dup >= 0 ? warning : "");
+    } else {
+      html = '<b>' + n + ' corners</b> &middot; area <b>' + C.fmtNum(Math.round(area)) + ' sqm</b>' +
+        (area >= 10000 ? ' <b>(' + (Math.round(area / 100) / 100) + ' ha)</b>' : '') +
+        ' &middot; perimeter <b>' + C.fmtNum(Math.round(per)) + ' m</b> ' + warning + (lotLine ? "<br>" + lotLine : "");
+    }
+    html += '<div class="plot-actions">' + btns.join(" ") + "</div>";
+    statusEl.innerHTML = html;
+    Object.keys(entry.handlers || {}).forEach(k => {
+      const el = document.getElementById(k);
+      if (el && entry.handlers[k]) { el.removeEventListener("click", entry.handlers[k]); el.addEventListener("click", entry.handlers[k]); }
+    });
+  }
+  function buildPlotCornersTable(id, entry) {
+    const box = document.getElementById(id + "-corners");
+    if (!box) return;
+    const n = entry.points.length;
+    if (n < 3) {
+      box.innerHTML = '<div class="dim tiny">Plot at least 3 corners to see the corner table, segment lengths, and the declared-area check.</div>';
+      return;
+    }
+    let rows = "";
+    for (let i = 0; i < n; i++) {
+      const seg = i < n - 1 ? haversineM(entry.points[i], entry.points[i + 1]) : 0;
+      rows += "<tr><td><b>" + (i + 1) + "</b></td><td>" + parseFloat(entry.points[i][0]).toFixed(6) + "</td><td>" + parseFloat(entry.points[i][1]).toFixed(6) + "</td><td>" + C.fmtNum(Math.round(seg)) + " m</td></tr>";
+    }
+    const area = polygonAreaM2(entry.points), per = plotPerimeter(entry.points);
+    box.innerHTML = '<div class="plot-corner-head">' + icon("grid", 13) + ' <b>Corner table</b> — copy for the Technical Description</div>' +
+      '<table class="plot-corner-table"><thead><tr><th>#</th><th>Latitude</th><th>Longitude</th><th>Side</th></tr></thead><tbody>' + rows +
+      '<tr class="plot-corner-total"><td></td><td colspan="2">Perimeter</td><td><b>' + C.fmtNum(Math.round(per)) + " m</b></td></tr>" +
+      '<tr class="plot-corner-total"><td></td><td colspan="2">Area</td><td><b>' + C.fmtNum(Math.round(area)) + " sqm</b></td></tr></tbody></table>" +
+      '<div class="dim tiny">Coordinates from OSM tiles are approximate — verify against an official survey / Geodetic control point before finalizing the report.</div>';
+  }
+  function setupPlotMode(id, map, entry, opts) {
+    opts = opts || {};
+    const plotBtn = document.getElementById(id + "-plotmode");
+    const pinBtn = document.getElementById(id + "-pinmode");
+    const hasPlotUI = !!(plotBtn && document.getElementById(id + "-plot"));
+    entry.plotMode = hasPlotUI && entry._defaultPlotMode ? "plot" : "pin";
+    entry.plotClosed = false;
+    entry.vtxMarkers = [];
+    entry.previewLine = null;
+    entry.edgeLabels = [];
+    entry.handlers = {};
+    if (!entry.points) entry.points = [];
+    if (opts.polygon && opts.polygon.length) {
+      entry.points = opts.polygon.map(p => [parseFloat(p[0]), parseFloat(p[1])]);
+      if (entry.points.length >= 3) entry.plotClosed = true;
+    }
+    if (!pinBtn && !plotBtn) return;
+    const setMode = m => {
+      if (!hasPlotUI && m === "plot") return;
+      entry.plotMode = m;
+      if (pinBtn) pinBtn.classList.toggle("on", m === "pin");
+      if (plotBtn) plotBtn.classList.toggle("on", m === "plot");
+      map.getContainer().style.cursor = m === "plot" ? "crosshair" : "";
+      if (m === "plot" && !entry.previewLine) {
+        entry.previewLine = L.polyline([], { color: "#f59e0b", weight: 2, dashArray: "4 6", opacity: 0.9 }).addTo(map);
+      } else if (m === "pin" && entry.previewLine) {
+        entry.previewLine.setLatLngs([]);
+      }
+    };
+    const persist = () => {
+      if (opts.onPlot) opts.onPlot(entry.points.slice(), entry.points.length >= 3 ? Math.round(polygonAreaM2(entry.points)) : 0);
+    };
+    const draw = (withStatus) => {
+      if (entry.polyLayer) { map.removeLayer(entry.polyLayer); entry.polyLayer = null; }
+      if (entry.openLine) { map.removeLayer(entry.openLine); entry.openLine = null; }
+      entry.edgeLabels.forEach(l => { try { map.removeLayer(l); } catch (e) { /* noop */ } });
+      entry.edgeLabels = [];
+      if (entry.points.length > 1 && !entry.plotClosed) {
+        entry.openLine = L.polyline(entry.points, { color: "#f59e0b", weight: 2, dashArray: "5 5" }).addTo(map);
+      }
+      if (entry.points.length >= 3 && entry.plotClosed) {
+        entry.polyLayer = L.polygon(entry.points, { color: "#22c55e", weight: 2.5, fillColor: "#22c55e", fillOpacity: 0.16 }).addTo(map);
+        for (let i = 0; i < entry.points.length; i++) {
+          const a = entry.points[i], b = entry.points[(i + 1) % entry.points.length];
+          const mid = L.latLng((parseFloat(a[0]) + parseFloat(b[0])) / 2, (parseFloat(a[1]) + parseFloat(b[1])) / 2);
+          let label = "";
+          try { label = Math.round(haversineM(a, b)) + " m"; } catch (e) { label = ""; }
+          const lm = L.marker(mid, { icon: L.divIcon({ className: "plot-edge-label", html: '<span>' + label + "</span>", iconSize: [0, 0] }), interactive: false }).addTo(map);
+          entry.edgeLabels.push(lm);
+        }
+      }
+      entry.vtxMarkers.forEach(m => { try { map.removeLayer(m.marker); } catch (e) { /* noop */ } });
+      entry.vtxMarkers = [];
+      entry.points.forEach((p, i) => {
+        const mk = L.marker(L.latLng(parseFloat(p[0]), parseFloat(p[1])), { draggable: true, icon: plotVertexIcon(i + 1, i === 0) });
+        mk.on("drag", () => {
+          const ll = mk.getLatLng();
+          entry.points[i] = [ll.lat, ll.lng];
+        });
+        mk.on("dragend", () => {
+          const ll = mk.getLatLng();
+          entry.points[i] = [ll.lat, ll.lng];
+          draw(true);
+          persist();
+        });
+        mk.addTo(map);
+        entry.vtxMarkers.push({ marker: mk, index: i });
+      });
+      if (withStatus) { try { buildPlotStatus(id, entry, opts); buildPlotCornersTable(id, entry); } catch (e) { /* noop */ } }
+    };
+    entry.redraw = draw;
+    if (hasPlotUI) {
+      const pinHandler = () => setMode("pin");
+      const plotHandler = () => setMode("plot");
+      pinBtn.addEventListener("click", pinHandler);
+      plotBtn.addEventListener("click", plotHandler);
+      entry.handlers[id + "-undo"] = () => { entry.points.pop(); draw(true); persist(); };
+      entry.handlers[id + "-clear"] = () => { entry.points = []; entry.plotClosed = false; draw(true); persist(); };
+      entry.handlers[id + "-finish"] = () => {
+        if (entry.points.length < 3) return;
+        if (plotSelfCrosses(entry.points)) { toast("Fix crossing edges before finishing the plot", "err"); return; }
+        entry.plotClosed = true;
+        draw(true);
+        persist();
+        setMode("pin");
+        toast("Land plot saved — " + entry.points.length + " corners, ≈ " + C.fmtNum(Math.round(polygonAreaM2(entry.points))) + " sqm", "ok");
+      };
+    }
+    map.off("click");
+    map.on("click", e => {
+      if (entry.plotMode === "plot") {
+        const bounds = map.getBounds();
+        if (!bounds.contains(e.latlng)) return;
+        const n = entry.points.length;
+        if (n >= 3 && entry.points.length >= 3) {
+          const first = L.latLng(parseFloat(entry.points[0][0]), parseFloat(entry.points[0][1]));
+          if (first.distanceTo(e.latlng) < 12) { if (entry.handlers[id + "-finish"]) entry.handlers[id + "-finish"](); return; }
+        }
+        entry.points.push([e.latlng.lat, e.latlng.lng]);
+        draw(true);
+        persist();
+        return;
+      }
+      pinMap(id, e.latlng);
+    });
+    map.on("mousemove", e => {
+      if (entry.plotMode === "plot" && entry.previewLine && entry.points.length) {
+        entry.previewLine.setLatLngs(entry.points.concat([e.latlng]));
+      }
+    });
+    if (hasPlotUI) setMode(entry.plotMode);
+    draw(true);
+  }
+
   function apprMapHtml(id, lat, lng, polygon, area) {
     const hasPin = !!(lat && lng);
     const pts = (polygon && polygon.length) ? polygon : [];
@@ -1730,8 +1969,9 @@
       '<div class="map-picker" id="' + id + '"></div>' +
       '<div class="map-coords" id="' + id + '-coords">' + (hasPin ? 'Pin: Latitude <b>' + esc(lat) + '</b> &middot; Longitude <b>' + esc(lng) + '</b>' : 'Click the map to pin the property, or switch to <b>Plot Land</b> to draw its boundary.') + '</div>' +
       '<div class="plot-status" id="' + id + '-plot">' + (pts.length >= 3
-        ? '<b>' + pts.length + ' points</b> plotted &middot; area &asymp; <b>' + C.fmtNum(Math.round(polygonAreaM2(pts))) + ' sqm</b>'
-        : '<span class="dim">No land plot yet — switch to <b>Plot Land</b> and click the corners of the property on the map.</span>') + '</div></div>';
+        ? '<b>' + pts.length + ' corners</b> plotted &middot; area &asymp; <b>' + C.fmtNum(Math.round(polygonAreaM2(pts))) + ' sqm</b>'
+        : '<span class="dim">No land plot yet — switch to <b>Plot Land</b> and click the corners of the property on the map.</span>') + '</div>' +
+      '<div class="plot-corners" id="' + id + '-corners"></div></div>';
   }
 
   function apprPlotSketch(pts, area) {
@@ -1752,9 +1992,9 @@
       '<text x="' + (W / 2) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="11" fill="#16202E" font-weight="600">Plotted land boundary · ≈ ' + C.fmtNum(Math.round(area || polygonAreaM2(pts))) + ' sqm</text></svg></div>';
   }
 
-  function initAppraisalMap(id, lat, lng, onPin, polygon, onPlot, searchText) {
+  function initAppraisalMap(id, lat, lng, onPin, polygon, onPlot, searchText, lotArea) {
     if (!document.getElementById(id)) return;
-    if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initAppraisalMap(id, lat, lng, onPin, polygon, onPlot, searchText)); return; }
+    if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initAppraisalMap(id, lat, lng, onPin, polygon, onPlot, searchText, lotArea)); return; }
     if (_mapRegistry[id]) { try { _mapRegistry[id].map.remove(); } catch (e) { /* noop */ } }
     const tiles = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
     const latN = parseFloat(lat), lngN = parseFloat(lng);
@@ -1764,64 +2004,11 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19
     }).addTo(map);
-    const entry = { map, marker: null, onPick: onPin, token: 0, deb: null, plotMode: "pin", points: [], poly: null, line: null };
+    const entry = { map, marker: null, onPick: onPin, token: 0, deb: null };
     if (polygon && polygon.length) entry.points = polygon.map(p => [parseFloat(p[0]), parseFloat(p[1])]);
     _mapRegistry[id] = entry;
 
-    const renderPlot = () => {
-      if (entry.line) { map.removeLayer(entry.line); entry.line = null; }
-      if (entry.poly) { map.removeLayer(entry.poly); entry.poly = null; }
-      if (entry.points.length > 1) entry.line = L.polyline(entry.points, { color: "#f59e0b", weight: 2, dashArray: "5 5" }).addTo(map);
-      if (entry.points.length >= 3) entry.poly = L.polygon(entry.points, { color: "#22c55e", weight: 2, fillColor: "#22c55e", fillOpacity: 0.15 }).addTo(map);
-      plotStatus();
-    };
-
-    const plotStatus = () => {
-      const box = document.getElementById(id + "-plot");
-      if (!box) return;
-      const n = entry.points.length;
-      const btns = (extra) =>
-        '<button class="btn btn-ghost btn-sm" id="' + id + '-undo" type="button">Undo</button> ' +
-        '<button class="btn btn-ghost btn-sm" id="' + id + '-clear" type="button">Clear</button> ' +
-        extra;
-      if (n >= 3) {
-        box.innerHTML = '<b>' + n + ' points</b> plotted &middot; area &asymp; <b>' + C.fmtNum(Math.round(polygonAreaM2(entry.points))) + ' sqm</b> ' +
-          btns('<button class="btn btn-sm" id="' + id + '-done" type="button">Finish Plot</button>');
-      } else if (n > 0) {
-        box.innerHTML = '<b>' + n + ' point' + (n === 1 ? "" : "s") + '</b> plotted — click the remaining corners (3+ to close). ' + btns("");
-      } else {
-        box.innerHTML = '<span class="dim">No land plot yet — switch to <b>Plot Land</b> and click the corners of the property on the map.</span>';
-      }
-      const done = document.getElementById(id + "-done");
-      if (done) done.addEventListener("click", () => {
-        if (entry.points.length >= 3) {
-          onPlot(entry.points.slice(), Math.round(polygonAreaM2(entry.points)));
-          plotStatus();
-        }
-      });
-      const undo = document.getElementById(id + "-undo");
-      if (undo) undo.addEventListener("click", () => { entry.points.pop(); renderPlot(); });
-      const clear = document.getElementById(id + "-clear");
-      if (clear) clear.addEventListener("click", () => { entry.points = []; renderPlot(); });
-    };
-
-    map.on("click", e => {
-      if (entry.plotMode === "plot") {
-        entry.points.push([e.latlng.lat, e.latlng.lng]);
-        renderPlot();
-      } else {
-        pinMap(id, e.latlng);
-      }
-    });
-
-    const pinBtn = document.getElementById(id + "-pinmode"), plotBtn = document.getElementById(id + "-plotmode");
-    const setMode = m => {
-      entry.plotMode = m;
-      if (pinBtn) pinBtn.classList.toggle("on", m === "pin");
-      if (plotBtn) plotBtn.classList.toggle("on", m === "plot");
-    };
-    if (pinBtn) pinBtn.addEventListener("click", () => setMode("pin"));
-    if (plotBtn) plotBtn.addEventListener("click", () => setMode("plot"));
+    setupPlotMode(id, map, entry, { polygon: polygon, onPlot: onPlot, lotArea: C.num(lotArea, 0) });
 
     if (hasPin) {
       entry.marker = L.marker([latN, lngN], { draggable: true }).addTo(map);
@@ -1829,8 +2016,6 @@
       const c = document.getElementById(id + "-coords");
       if (c) c.innerHTML = "Pin: Latitude <b>" + esc(String(lat)) + "</b> &middot; Longitude <b>" + esc(String(lng)) + "</b>";
     }
-
-    renderPlot();
 
     const q = document.getElementById(id + "-q"), btn = document.getElementById(id + "-btn");
     if (q && btn) {
@@ -3271,7 +3456,12 @@ function bindPerView() {
         };
         if (gap < 1100) setTimeout(fire, 1100 - gap); else fire();
       }, 700);
-    }, searchText);
+    }, searchText, d0 && d0.property.landPolygon, (pts, area) => {
+      const dd = state.current || freshDeal();
+      dd.property.landPolygon = pts;
+      dd.property.plotArea = area;
+      save();
+    }, C.num(d0 && d0.property.lotArea, 0));
     var _mapEntry = _mapRegistry["wz-map"];
     if (_mapEntry) {
       _mapEntry.onDrag = function () {
@@ -6812,7 +7002,7 @@ premise: "Fee Simple / As Improved",
       appraisalAudit("Land boundary plotted on map (" + points.length + " points, ≈ " + C.fmtNum(area) + " sqm)");
       save();
       toast("Land plot saved — ≈ " + C.fmtNum(area) + " sqm", "ok");
-    }, apSearchText);
+    }, apSearchText, C.num(pd0.lotArea, 0));
     _forceMapSearch = false;
     $$("#content [data-ap-pd]").forEach(inp => {
       const saveVal = () => {
