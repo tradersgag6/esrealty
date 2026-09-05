@@ -235,7 +235,7 @@
           <option value="tenant">Tenant</option>
         </select>
       </div>
-      <div class="version">ES Realty v2.0</div>
+      <div class="version" id="app-version">ES Realty 2026</div>
     </div>
   </aside>
 
@@ -423,6 +423,10 @@
     if (location.protocol === "https:" || location.hostname === "localhost") {
       if ("serviceWorker" in navigator) window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
     }
+  </script>
+  <script>
+    const vEl = document.getElementById("app-version");
+    if (vEl) { const _y = new Date().getFullYear(); if (vEl.textContent.indexOf(String(_y)) === -1) vEl.textContent = "ES Realty " + _y; }
   </script>
 </body>
 </html>
