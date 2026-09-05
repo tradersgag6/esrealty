@@ -14,16 +14,14 @@ async function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
     if (nav) { nav.click(); await wait(2500); }
     const detailsTab = document.querySelector('[data-atab="details"]');
     if (detailsTab) { detailsTab.click(); await wait(3000); }
-    const mapEl = document.querySelector("#ap-map");
-    chk("map-rendered", !!mapEl, "ap-map=" + !!mapEl);
-    chk("plot-toggle-btn", !!document.querySelector("#ap-map-plotmode"), "plotmode btn exists");
-    chk("plot-status-box", !!document.querySelector("#ap-map-plot"), "plot status box exists");
-    chk("corners-box", !!document.querySelector("#ap-map-corners"), "corners box exists");
+    const mapEl = document.querySelector("#ap-plot");
+    chk("map-rendered", !!mapEl, "ap-plot=" + !!mapEl);
+    chk("pin-map-rendered", !!document.querySelector("#ap-map"), "ap-map exists");
+    chk("plot-status-box", !!document.querySelector("#ap-plot-plot"), "plot status box exists");
+    chk("corners-box", !!document.querySelector("#ap-plot-corners"), "corners box exists");
     if (!mapEl || !window.L) { window.__msOk = false; window.__msDone = true; return; }
     // NOTE: the app's _mapRegistry is closure-scoped; interact purely via DOM events.
-    // switch to Plot Land mode
-    const plotBtn = document.querySelector("#ap-map-plotmode");
-    if (plotBtn) plotBtn.click();
+    // The plot map is plot-only (always drawings corners on click).
     await wait(500);
     // Use the map container's bounding box to click 4 corners of a square.
     const containerR = mapEl.getBoundingClientRect();
@@ -46,38 +44,58 @@ async function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
     window.__msLog.push("polygonLen=" + (pd.landPolygon || []).length);
     chk("autosaved-landPolygon", Array.isArray(pd.landPolygon) && pd.landPolygon.length >= 3, "len=" + (pd.landPolygon || []).length);
     chk("autosaved-plotArea", typeof pd.plotArea === "number" && pd.plotArea > 0, "area=" + pd.plotArea);
-    const statusEl = document.querySelector("#ap-map-plot");
+    const statusEl = document.querySelector("#ap-plot-plot");
     const statusTxt = statusEl ? statusEl.textContent : "";
     window.__msLog.push("status=" + statusTxt.slice(0, 160));
     chk("status-has-area", /sqm/.test(statusTxt), "area in status");
     chk("status-has-perimeter", /m\s/.test(statusTxt), "perimeter in status");
     chk("status-has-corner-word", /corners/.test(statusTxt), "corners title");
-    chk("undo-btn", !!document.querySelector("#ap-map-undo"), "undo");
-    chk("clear-btn", !!document.querySelector("#ap-map-clear"), "clear");
-    chk("finish-btn", !!document.querySelector("#ap-map-finish"), "finish");
-    const table = document.querySelector("#ap-map-corners .plot-corner-table");
+    chk("undo-btn", !!document.querySelector("#ap-plot-undo"), "undo");
+    chk("clear-btn", !!document.querySelector("#ap-plot-clear"), "clear");
+    chk("finish-btn", !!document.querySelector("#ap-plot-finish"), "finish");
+    const table = document.querySelector("#ap-plot-corners .plot-corner-table");
     chk("corner-table-rendered", !!table, "corners table present");
     if (table) {
       const rows = table.querySelectorAll("tbody tr").length;
       chk("corner-table-row-count", rows >= 5, "rows=" + rows);
-      const head = document.querySelector("#ap-map-corners .plot-corner-head") || {};
+      const head = document.querySelector("#ap-plot-corners .plot-corner-head") || {};
       chk("corner-table-head", /Corner table/.test(head.textContent || ""), "head present");
+      const latInputs = table.querySelectorAll("tbody input.plot-clat").length;
+      chk("editable-lat-input", latInputs >= 4, "lat inputs=" + latInputs);
+      const copyBtn = document.querySelector("#ap-plot-ccopy");
+      chk("copy-td-btn", !!copyBtn, "copy for TD button");
     }
-    const vtx = document.querySelectorAll("#ap-map .plot-vtx").length;
+    const vtx = document.querySelectorAll("#ap-plot .plot-vtx").length;
     window.__msLog.push("vtxMarkers=" + vtx);
     chk("vertex-markers", vtx >= 3, "vtx=" + vtx);
     // finish
-    const finish = document.querySelector("#ap-map-finish");
+    const finish = document.querySelector("#ap-plot-finish");
     if (finish) { finish.click(); await wait(600); }
-    const edges = document.querySelectorAll("#ap-map .plot-edge-label").length;
+    const edges = document.querySelectorAll("#ap-plot .plot-edge-label").length;
     window.__msLog.push("edgeLabels=" + edges);
     chk("edge-labels", edges >= 3, "edges=" + edges);
     // vertex markers persist after finish
-    const vtx2 = document.querySelectorAll("#ap-map .plot-vtx").length;
+    const vtx2 = document.querySelectorAll("#ap-plot .plot-vtx").length;
     chk("vtx-after-finish", vtx2 >= 3, "vtx2=" + vtx2);
     // verify it stays saved after finish (no clear)
     const pd2 = storedState().appraisal ? storedState().appraisal.propertyDetails || {} : {};
     chk("kept-after-finish", Array.isArray(pd2.landPolygon) && pd2.landPolygon.length >= 3, "len=" + (pd2.landPolygon || []).length);
+    // after finish: map click must NOT add another corner
+    const vtxBefore = document.querySelectorAll("#ap-plot .plot-vtx").length;
+    const R2 = mapEl.getBoundingClientRect();
+    mapEl.dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: R2.left + 40, clientY: R2.top + 40, button: 0 }));
+    await wait(400);
+    const vtxAfter = document.querySelectorAll("#ap-plot .plot-vtx").length;
+    chk("no-corner-after-finish", vtxAfter === vtxBefore, "vtx=" + vtxBefore + "->" + vtxAfter + " (dot=" + !!document.querySelector("#ap-plot-corners .plot-corner-table") + ")");
+    // "Insert corner after last" let you add a corner even after finish
+    const addBtn = document.querySelector("#ap-plot-cadd");
+    chk("add-corner-btn", !!addBtn, "cadd btn");
+    if (addBtn) {
+      addBtn.click();
+      await wait(500);
+      const vtx3 = document.querySelectorAll("#ap-plot .plot-vtx").length;
+      chk("add-corner-after-finish", vtx3 === vtxBefore + 1, "vtx=" + vtx3);
+    }
     window.__msOk = window.__msChecks.every(c => c.ok);
   } catch (e) {
     window.__msLog.push("caught: " + (e && e.message));
