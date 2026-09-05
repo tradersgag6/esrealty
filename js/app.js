@@ -1364,7 +1364,7 @@
     syncSalesToDevelopment(d);
   }
 
-  /* ================= MAP PINPOINT (Leaflet + OSM/CARTO + Nominatim) ================= */
+  /* ================= MAP PINPOINT (Leaflet + Esri/OSM + Nominatim) ================= */
   const _mapRegistry = {};
   let _forceMapSearch = false;
   window.__esrMaps = _mapRegistry;
@@ -1428,15 +1428,15 @@
     if (_mapRegistry[id]) { try { _mapRegistry[id].map.remove(); } catch (e) { /* noop */ } }
     const dark = (document.documentElement.getAttribute("data-theme") || "dark") === "dark";
     const tiles = dark
-      ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-      : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+      ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+      : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
     const latN = parseFloat(lat), lngN = parseFloat(lng);
     const hasPin = isFinite(latN) && isFinite(lngN);
     const center = hasPin ? [latN, lngN] : [13.0, 122.0];
     const map = L.map(id, { center: center, zoom: hasPin ? 14 : 5, scrollWheelZoom: true });
     L.tileLayer(tiles, {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: "abcd", maxZoom: 19
+      attribution: '&copy; <a href="https://www.esri.com">Esri</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19
     }).addTo(map);
     const entry = { map: map, marker: null, onPick: onPick, onDrag: null, token: 0, deb: null };
     if (hasPin) {
@@ -1761,14 +1761,14 @@
     if (_mapRegistry[id]) { try { _mapRegistry[id].map.remove(); } catch (e) { /* noop */ } }
     const dark = (document.documentElement.getAttribute("data-theme") || "dark") === "dark";
     const tiles = dark
-      ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-      : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+      ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+      : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
     const latN = parseFloat(lat), lngN = parseFloat(lng);
     const hasPin = isFinite(latN) && isFinite(lngN);
     const map = L.map(id, { center: hasPin ? [latN, lngN] : [13.0, 122.0], zoom: hasPin ? 14 : 5, scrollWheelZoom: true });
     L.tileLayer(tiles, {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: "abcd", maxZoom: 19
+      attribution: '&copy; <a href="https://www.esri.com">Esri</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19
     }).addTo(map);
     const entry = { map, marker: null, onPick: onPin, token: 0, deb: null, plotMode: "pin", points: [], poly: null, line: null };
     if (polygon && polygon.length) entry.points = polygon.map(p => [parseFloat(p[0]), parseFloat(p[1])]);
@@ -10084,10 +10084,10 @@ premise: "Fee Simple / As Improved",
     const latN = parseFloat(lat), lngN = parseFloat(lng);
     if (!isFinite(latN) || !isFinite(lngN)) { el.innerHTML = '<div class="dim">No map pin set for this listing.</div>'; return; }
     const dark = (document.documentElement.getAttribute("data-theme") || "dark") === "dark";
-    const tiles = dark ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
+    const tiles = dark ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}" : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
     try {
       const map = L.map(id, { center: [latN, lngN], zoom: 15, scrollWheelZoom: false });
-      L.tileLayer(tiles, { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>', subdomains: "abcd", maxZoom: 19 }).addTo(map);
+      L.tileLayer(tiles, { attribution: '&copy; <a href="https://www.esri.com">Esri</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19 }).addTo(map);
       L.marker([latN, lngN]).addTo(map);
       setTimeout(() => { try { map.invalidateSize(); } catch (e) { /* noop */ } }, 120);
     } catch (e) { /* noop */ }

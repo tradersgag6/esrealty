@@ -474,7 +474,7 @@
       var L = window.L;
       if (sfMapRef) { try { sfMapRef.remove(); } catch (e) {} sfMapRef = null; }
       sfMapRef = L.map(el, { scrollWheelZoom: true });
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 19, attribution: "&copy; OpenStreetMap &copy; CARTO" }).addTo(sfMapRef);
+      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: "&copy; Esri &copy; OpenStreetMap" }).addTo(sfMapRef);
       var items = (viewState.result && viewState.result.data) || [];
       var pts = [];
       items.forEach(function (l) {
@@ -617,7 +617,7 @@
     if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(function () { mountMap(); }); return; }
     element.innerHTML = "";
     var map = L.map(element, { scrollWheelZoom: false }).setView([Number(listing.latitude), Number(listing.longitude)], 15);
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 20, attribution: "&copy; OpenStreetMap &copy; CARTO" }).addTo(map);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", { maxZoom: 20, attribution: "&copy; Esri &copy; OpenStreetMap" }).addTo(map);
     L.marker([Number(listing.latitude), Number(listing.longitude)]).addTo(map);
   }
 
