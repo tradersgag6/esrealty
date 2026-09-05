@@ -1426,16 +1426,13 @@
     if (!document.getElementById(id)) return;
     if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initMapPicker(id, lat, lng, onPick, searchText)); return; }
     if (_mapRegistry[id]) { try { _mapRegistry[id].map.remove(); } catch (e) { /* noop */ } }
-    const dark = (document.documentElement.getAttribute("data-theme") || "dark") === "dark";
-    const tiles = dark
-      ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
-      : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
+    const tiles = "https://tile.openstreetmap.org/{z}/{x}/{y}";
     const latN = parseFloat(lat), lngN = parseFloat(lng);
     const hasPin = isFinite(latN) && isFinite(lngN);
     const center = hasPin ? [latN, lngN] : [13.0, 122.0];
     const map = L.map(id, { center: center, zoom: hasPin ? 14 : 5, scrollWheelZoom: true });
     L.tileLayer(tiles, {
-      attribution: '&copy; <a href="https://www.esri.com">Esri</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19
     }).addTo(map);
     const entry = { map: map, marker: null, onPick: onPick, onDrag: null, token: 0, deb: null };
@@ -1759,15 +1756,12 @@
     if (!document.getElementById(id)) return;
     if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initAppraisalMap(id, lat, lng, onPin, polygon, onPlot, searchText)); return; }
     if (_mapRegistry[id]) { try { _mapRegistry[id].map.remove(); } catch (e) { /* noop */ } }
-    const dark = (document.documentElement.getAttribute("data-theme") || "dark") === "dark";
-    const tiles = dark
-      ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
-      : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
+    const tiles = "https://tile.openstreetmap.org/{z}/{x}/{y}";
     const latN = parseFloat(lat), lngN = parseFloat(lng);
     const hasPin = isFinite(latN) && isFinite(lngN);
     const map = L.map(id, { center: hasPin ? [latN, lngN] : [13.0, 122.0], zoom: hasPin ? 14 : 5, scrollWheelZoom: true });
     L.tileLayer(tiles, {
-      attribution: '&copy; <a href="https://www.esri.com">Esri</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19
     }).addTo(map);
     const entry = { map, marker: null, onPick: onPin, token: 0, deb: null, plotMode: "pin", points: [], poly: null, line: null };
@@ -10083,11 +10077,10 @@ premise: "Fee Simple / As Improved",
     if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initListingStaticMap(id, lat, lng)); return; }
     const latN = parseFloat(lat), lngN = parseFloat(lng);
     if (!isFinite(latN) || !isFinite(lngN)) { el.innerHTML = '<div class="dim">No map pin set for this listing.</div>'; return; }
-    const dark = (document.documentElement.getAttribute("data-theme") || "dark") === "dark";
-    const tiles = dark ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}" : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
+    const tiles = "https://tile.openstreetmap.org/{z}/{x}/{y}";
     try {
       const map = L.map(id, { center: [latN, lngN], zoom: 15, scrollWheelZoom: false });
-      L.tileLayer(tiles, { attribution: '&copy; <a href="https://www.esri.com">Esri</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 19 }).addTo(map);
+      L.tileLayer(tiles, { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 19 }).addTo(map);
       L.marker([latN, lngN]).addTo(map);
       setTimeout(() => { try { map.invalidateSize(); } catch (e) { /* noop */ } }, 120);
     } catch (e) { /* noop */ }
