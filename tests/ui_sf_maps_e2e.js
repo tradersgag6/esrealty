@@ -22,9 +22,13 @@ async function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
     const tiles1 = [...document.querySelectorAll(".leaflet-tile-pane img")].map(t => t.src).filter(Boolean);
     const osm1 = tiles1.filter(s => /tile\.openstreetmap\.org/.test(s));
     const esri1 = tiles1.filter(s => /arcgisonline/.test(s));
-    window.__msLog.push("searchTiles=" + tiles1.length + " osm=" + osm1.length + " esri=" + esri1.length + " sample=" + (tiles1[0] || "none"));
+    const loaded1 = [...document.querySelectorAll(".leaflet-tile-pane img")].filter(t => t.complete && t.naturalWidth > 0).length;
+    const noPng1 = tiles1.filter(s => /tile\.openstreetmap\.org/.test(s) && !/\.png$/.test(s));
+    window.__msLog.push("searchTiles=" + tiles1.length + " osm=" + osm1.length + " esri=" + esri1.length + " loaded=" + loaded1 + " sample=" + (tiles1[0] || "none"));
     chk("sf-search-map-rendered", tiles1.length > 0, "tiles=" + tiles1.length + " osm=" + osm1.length);
     chk("sf-search-tiles-osm", osm1.length > 0, "osm=" + osm1.length);
+    chk("sf-search-tiles-loaded", loaded1 === tiles1.length, "loaded=" + loaded1 + " total=" + tiles1.length);
+    chk("sf-search-tiles-png-ext", noPng1.length === 0, "noPng=" + noPng1.length);
     chk("sf-search-no-esri", esri1.length === 0, "esri=" + esri1.length);
 
     if (listingId) {
@@ -35,9 +39,13 @@ async function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
       const tiles2 = detailMap ? [...detailMap.querySelectorAll(".leaflet-tile-pane img")].map(t => t.src).filter(Boolean) : [];
       const osm2 = tiles2.filter(s => /tile\.openstreetmap\.org/.test(s));
       const esri2 = tiles2.filter(s => /arcgisonline/.test(s));
-      window.__msLog.push("detailTiles=" + tiles2.length + " osm=" + osm2.length + " esri=" + esri2.length + " sample=" + (tiles2[0] || "none"));
+      const loaded2 = detailMap ? [...detailMap.querySelectorAll(".leaflet-tile-pane img")].filter(t => t.complete && t.naturalWidth > 0).length : 0;
+      const noPng2 = tiles2.filter(s => /tile\.openstreetmap\.org/.test(s) && !/\.png$/.test(s));
+      window.__msLog.push("detailTiles=" + tiles2.length + " osm=" + osm2.length + " esri=" + esri2.length + " loaded=" + loaded2 + " sample=" + (tiles2[0] || "none"));
       chk("sf-detail-map-rendered", tiles2.length > 0, "tiles=" + tiles2.length);
       chk("sf-detail-tiles-osm", osm2.length > 0, "osm=" + osm2.length);
+      chk("sf-detail-tiles-loaded", loaded2 === tiles2.length, "loaded=" + loaded2 + " total=" + tiles2.length);
+      chk("sf-detail-tiles-png-ext", noPng2.length === 0, "noPng=" + noPng2.length);
       chk("sf-detail-no-esri", esri2.length === 0, "esri=" + esri2.length);
     } else {
       window.__msLog.push("no-card-listing-to-open");

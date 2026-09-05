@@ -18,11 +18,15 @@ async function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
     chk("map-rendered", !!mapEl, "ap-map=" + !!mapEl);
     const tiles = [...document.querySelectorAll(".leaflet-tile-pane img")].map(t => t.src).filter(Boolean);
     chk("has-tiles", tiles.length > 0, "tiles=" + tiles.length);
+    const loaded = [...document.querySelectorAll(".leaflet-tile-pane img")].filter(t => t.complete && t.naturalWidth > 0).length;
     const osm = tiles.filter(s => /tile\.openstreetmap\.org/.test(s));
     const esri = tiles.filter(s => /arcgisonline/.test(s));
     const carto = tiles.filter(s => /cartocdn/.test(s));
-    window.__msLog.push("sampleTile=" + (tiles[0] || "none"));
+    const noPng = tiles.filter(s => /tile\.openstreetmap\.org/.test(s) && !/\.png$/.test(s));
+    window.__msLog.push("sampleTile=" + (tiles[0] || "none") + " loaded=" + loaded);
     chk("tiles-from-osm", osm.length > 0, "osm=" + osm.length + " sample=" + (tiles[0] || ""));
+    chk("osmtiles-have-png-ext", noPng.length === 0, "noPng=" + noPng.length);
+    chk("osmtiles-actually-load", loaded === tiles.length, "loaded=" + loaded + " total=" + tiles.length);
     chk("no-esri-tiles", esri.length === 0, "esri=" + esri.length);
     chk("no-carto-tiles", carto.length === 0, "carto=" + carto.length);
     document.documentElement.setAttribute("data-theme", "dark");

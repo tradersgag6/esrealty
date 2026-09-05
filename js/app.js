@@ -1426,7 +1426,7 @@
     if (!document.getElementById(id)) return;
     if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initMapPicker(id, lat, lng, onPick, searchText)); return; }
     if (_mapRegistry[id]) { try { _mapRegistry[id].map.remove(); } catch (e) { /* noop */ } }
-    const tiles = "https://tile.openstreetmap.org/{z}/{x}/{y}";
+    const tiles = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
     const latN = parseFloat(lat), lngN = parseFloat(lng);
     const hasPin = isFinite(latN) && isFinite(lngN);
     const center = hasPin ? [latN, lngN] : [13.0, 122.0];
@@ -1756,7 +1756,7 @@
     if (!document.getElementById(id)) return;
     if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initAppraisalMap(id, lat, lng, onPin, polygon, onPlot, searchText)); return; }
     if (_mapRegistry[id]) { try { _mapRegistry[id].map.remove(); } catch (e) { /* noop */ } }
-    const tiles = "https://tile.openstreetmap.org/{z}/{x}/{y}";
+    const tiles = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
     const latN = parseFloat(lat), lngN = parseFloat(lng);
     const hasPin = isFinite(latN) && isFinite(lngN);
     const map = L.map(id, { center: hasPin ? [latN, lngN] : [13.0, 122.0], zoom: hasPin ? 14 : 5, scrollWheelZoom: true });
@@ -10077,7 +10077,7 @@ premise: "Fee Simple / As Improved",
     if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(() => initListingStaticMap(id, lat, lng)); return; }
     const latN = parseFloat(lat), lngN = parseFloat(lng);
     if (!isFinite(latN) || !isFinite(lngN)) { el.innerHTML = '<div class="dim">No map pin set for this listing.</div>'; return; }
-    const tiles = "https://tile.openstreetmap.org/{z}/{x}/{y}";
+    const tiles = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
     try {
       const map = L.map(id, { center: [latN, lngN], zoom: 15, scrollWheelZoom: false });
       L.tileLayer(tiles, { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 19 }).addTo(map);
