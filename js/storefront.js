@@ -391,7 +391,7 @@
 
   function projectBtPage() {
     var heroImage = "assets/listings/bt1.jpg";
-    var conceptImage = "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=82";
+    var conceptImage = "assets/listings/bt2.jpg";
     return shell('<section class="bt-hero"><div class="bt-hero-copy"><p class="bt-eyebrow">ES REALTY / DEVELOPMENT CONCEPT 01</p><h1>Project B.T <span>— Bahay Tindahan</span></h1>' +
       '<p class="bt-hero-lede">A modern mixed-use real estate concept combining commercial and residential spaces in a single two-storey building.</p>' +
       '<div class="bt-actions"><button class="bt-button bt-button-dark" data-bt-inquire="Project B.T">Inquire About Project B.T <span>↗</span></button><a class="bt-link" href="#bt-concept" data-sf-scroll="#bt-concept">Explore the concept <span>↓</span></a></div>' +
