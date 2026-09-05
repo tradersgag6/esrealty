@@ -51,7 +51,7 @@
   <script src="js/portfolio_ledger.js" defer></script>
   <script src="js/portfolio_cloud.js" defer></script>
   <script src="js/app.min.js" defer></script>
-  <script>window.setTimeout(function () { document.body.classList.remove("preload"); }, 2500);</script>
+  <script>(function(){var t=0;var intv=setInterval(function(){t+=500;if(window.__ESREALTY_READY){clearInterval(intv);return;}if(t>12000){document.body.classList.remove("preload");clearInterval(intv);}},500);})();</script>
 </head>
 <body class="preload">
   <div class="app-bg"></div>

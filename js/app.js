@@ -1860,6 +1860,7 @@
     const playbookModal = document.getElementById("pb-modal");
     if (playbookModal && (!currentUser || !state || state.view !== "playbook" || !playbookAllowed())) playbookModal.remove();
     if (!currentUser) {
+      document.documentElement.setAttribute("data-theme", "light");
       const auth = $("#auth-screen");
       if (auth) auth.classList.add("hidden");
       $("#sidebar").classList.add("hidden");
@@ -1965,7 +1966,6 @@
       if(s.display==="none"||s.visibility==="hidden"||Number(s.opacity)===0) return;
       if(parseFloat(s.fontSize)<12){ el.style.fontSize="12px"; }
     });
-    document.body.classList.remove("preload");
   }
 
   function showAuth() {
@@ -14636,5 +14636,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     bindAuthState();
     bindNotifications();
     render();
+    document.body.classList.remove("preload");
+    window.__ESREALTY_READY = true;
   });
 })();
