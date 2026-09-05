@@ -617,7 +617,7 @@
     if (!window.L) { window.ESREALTY_LEAFLET.ensure().then(function () { mountMap(); }); return; }
     element.innerHTML = "";
     var map = L.map(element, { scrollWheelZoom: false }).setView([Number(listing.latitude), Number(listing.longitude)], 15);
-    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", { maxZoom: 20, attribution: "&copy; Esri &copy; OpenStreetMap" }).addTo(map);
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19, attribution: "&copy; Esri &copy; OpenStreetMap" }).addTo(map);
     L.marker([Number(listing.latitude), Number(listing.longitude)]).addTo(map);
   }
 
