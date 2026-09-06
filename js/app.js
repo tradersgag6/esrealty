@@ -239,6 +239,11 @@
   let demoResetRequests = [];
   let pmsCreatedPassword = "";
   let lsCarIndex = 0;
+  const PAGE_SIZE = 24;
+  let pagState = { listings: 1, transactions: 1, users: 1 };
+  let leadColExpanded = {};
+  let userFiltQ = "";
+  let userFiltRole = "";
 
   function temporaryPassword() {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@$";
@@ -283,6 +288,49 @@
     schedulePmsCloudSave();
   }
 
+  function paginateRows(arr, view) {
+    const pages = Math.max(1, Math.ceil(arr.length / PAGE_SIZE));
+    const p = Math.min(Math.max(1, pagState[view] || 1), pages);
+    pagState[view] = p;
+    return arr.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
+  }
+  function pagPageGo(view, dir) {
+    const max = Math.max(1, pagMaxPageOf(view));
+    const next = Math.min(max, Math.max(1, (pagState[view] || 1) + dir));
+    pagState[view] = next;
+    if (view === "listings") { if (state.listingDetail) return; scopedRender("#ls-results", lsResultsHTML()); }
+    else if (view === "transactions") { render({ keepScroll: true }); }
+    else if (view === "users") {
+      render({ keepScroll: true });
+      const si = $("#users-search"); if (si) si.value = userFiltQ;
+      const rf = $("#users-role-filter"); if (rf) rf.value = userFiltRole;
+      applyUsersFilters();
+    }
+  }
+  function paginationBar(view) {
+    const total = pagTotalOf(view);
+    const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const cur = Math.min(Math.max(1, pagState[view] || 1), pages);
+    if (pages <= 1) return "";
+    return '<div class="pagination row" style="gap:8px;align-items:center;margin-top:16px;flex-wrap:wrap"><span class="dim tiny">' + ((cur - 1) * PAGE_SIZE + 1) + "&ndash;" + Math.min(cur * PAGE_SIZE, total) + " of " + total + '</span>' +
+      '<button class="btn btn-ghost btn-sm" data-pag-prev="' + view + '"' + (cur <= 1 ? " disabled" : "") + '>Prev</button>' +
+      '<span class="dim tiny">Page ' + cur + " / " + pages + "</span>" +
+      '<button class="btn btn-ghost btn-sm" data-pag-next="' + view + '"' + (cur >= pages ? " disabled" : "") + '>Next</button></div>';
+  }
+  function pagMaxPageOf(view) { return Math.max(1, Math.ceil(pagTotalOf(view) / PAGE_SIZE)); }
+  function pagTotalOf(view) {
+    if (view === "listings") return lsFiltered().length;
+    if (view === "transactions") return transactionScope().filter(t => !t.voided).length;
+    if (view === "users") return userFilterTotal();
+    return 0;
+  }
+  function userFilterTotal() {
+    const cloudMode = (SB && currentUser && currentUser.id) || (currentUser && currentUser.demo);
+    if (!cloudMode) return (state.users || []).length;
+    const q = userFiltQ, role = userFiltRole;
+    const pool = state.usersTab === "all" ? remoteProfiles : remoteProfiles.filter(u => u.registration_status === state.usersTab);
+    return pool.filter(u => (!q || [u.full_name, u.email, u.agency].join(" ").toLowerCase().indexOf(q) >= 0) && (!role || u.role === role)).length;
+  }
   function schedulePmsCloudSave() {
     if (!SB || !currentUser || !currentUser.id || currentUser.role !== "super-admin") return;
     const ownerId = currentUser.id;
@@ -949,7 +997,7 @@
       const archProj = q("[data-ps-archive-project]");
       if (archProj) {
         const pid2 = archProj.getAttribute("data-ps-archive-project");
-        if (!confirm("Archive this project? Its units stay intact.")) return;
+        if (!(await confirmModal({ title: "Archive project", message: "Archive this project? Its units stay intact.", confirmLabel: "Archive" }))) return;
         const pj = psProject(pid2);
         if (pj) pj.status = "archived";
         save();
@@ -979,7 +1027,7 @@
       const selfRes = q("[data-ps-self-reserve]");
       if (selfRes) {
         const uid3 = selfRes.getAttribute("data-ps-self-reserve");
-        if (!confirm("Reserve this unit under your account?")) return;
+        if (!(await confirmModal({ title: "Reserve unit", message: "Reserve this unit under your account?", confirmLabel: "Reserve" }))) return;
         await psSetUnitStatusForBuyer(uid3);
         return;
       }
@@ -1277,6 +1325,107 @@
     };
     wrap.addEventListener("click", e => { if (e.target === wrap) dismiss(); });
     setTimeout(dismiss, 4000);
+  }
+
+  function confirmModal(opts) {
+    opts = opts || {};
+    const title = opts.title || "Please confirm";
+    const message = opts.message != null ? opts.message : "Are you sure?";
+    const confirmLabel = opts.confirmLabel || "Confirm";
+    const cancelLabel = opts.cancelLabel || "Cancel";
+    const danger = !!opts.danger;
+    const typeToConfirm = opts.typeToConfirm ? String(opts.typeToConfirm) : "";
+    const requireReason = !!opts.requireReason;
+    const reasonLabel = opts.reasonLabel || "Reason for this action";
+    const prevFocus = document.activeElement;
+    const old = $("#cx-modal");
+    if (old) old.remove();
+    let settle = null;
+    const p = new Promise(r => { settle = r; });
+    const close = val => {
+      const ov = document.getElementById("cx-modal");
+      if (ov) ov.remove();
+      document.removeEventListener("keydown", onKey, true);
+      try { if (prevFocus && prevFocus.focus) prevFocus.focus(); } catch (e) {}
+      if (settle) settle(val);
+    };
+    function onKey(e) {
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(false); return; }
+      if (e.key === "Enter" && e.target && e.target.tagName === "TEXTAREA") { refresh(); return; }
+      if (e.key === "Enter") {
+        const ok = document.getElementById("cx-ok");
+        if (ok && !ok.disabled) close(requireReason ? String((document.getElementById("cx-reason") || {}).value || "").trim() : true);
+      }
+    }
+    function refresh() {
+      const ok = document.getElementById("cx-ok");
+      if (!ok) return;
+      const t = document.getElementById("cx-type");
+      const r = document.getElementById("cx-reason");
+      const typed = !typeToConfirm || (t && t.value === typeToConfirm);
+      const reason = !requireReason || (r && String(r.value || "").trim().length > 0);
+      ok.disabled = !(typed && reason);
+    }
+    const typeEl = typeToConfirm
+      ? '<div class="field"><label>Type <b>' + esc(typeToConfirm) + '</b> to confirm</label><input class="input" id="cx-type" type="text" autocomplete="off" autocapitalize="off" data-tc="' + esc(typeToConfirm) + '"></div>'
+      : "";
+    const reasonEl = requireReason
+      ? '<div class="field" style="margin-top:10px"><label>' + esc(reasonLabel) + ' <b>*</b></label><textarea class="input" id="cx-reason" rows="2" placeholder="Required"></textarea></div>'
+      : "";
+    const ov = document.createElement("div");
+    ov.className = "modal-overlay";
+    ov.id = "cx-modal";
+    ov.style.zIndex = "600";
+    ov.innerHTML =
+      '<div class="modal-card" style="max-width:480px;width:100%"><div class="modal-head"><h3>' + (danger ? icon("alert", 16) : icon("check", 16)) + ' <span> ' + esc(title) + '</span></h3><button class="icon-btn" data-cx-x title="Close">&times;</button></div>' +
+      '<div class="modal-body"><div class="cx-msg" style="font-size:13.5px;line-height:1.6;color:var(--text);white-space:pre-line"></div>' + typeEl + reasonEl + "</div>" +
+      '<div class="modal-foot"><button class="btn btn-ghost" data-cx-cancel>' + esc(cancelLabel) + '</button><button class="btn ' + (danger ? "btn-danger" : "btn-primary") + '" data-cx-ok' + (typeToConfirm || requireReason ? " disabled" : "") + '>' + (danger ? icon("trash", 14) : icon("check", 14)) + ' ' + esc(confirmLabel) + "</button></div></div>";
+    document.body.appendChild(ov);
+    const msgEl = ov.querySelector(".cx-msg");
+    if (msgEl) msgEl.textContent = String(message == null ? "" : message).replace(/\u200b/g, "");
+    ov.addEventListener("click", e => {
+      if (e.target === ov) { close(false); return; }
+      if (e.target.closest("[data-cx-x]") || e.target.closest("[data-cx-cancel]")) { close(false); return; }
+      const ok = e.target.closest("[data-cx-ok]");
+      if (ok && !ok.disabled) close(requireReason ? String((document.getElementById("cx-reason") || {}).value || "").trim() : true);
+    });
+    const typIn = document.getElementById("cx-type");
+    const rsnIn = document.getElementById("cx-reason");
+    if (typIn) typIn.addEventListener("input", refresh);
+    if (rsnIn) rsnIn.addEventListener("input", refresh);
+    document.addEventListener("keydown", onKey, true);
+    if (typIn) typIn.focus(); else if (rsnIn) rsnIn.focus(); else { const ok = document.getElementById("cx-ok"); if (ok) ok.focus(); }
+    return p;
+  }
+
+  function fieldInErr(inputId, msg) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const wrap = (input.closest && input.closest(".field")) || input.parentElement;
+    if (!wrap) return;
+    let err = wrap.querySelector(".field-err");
+    if (!err) {
+      err = document.createElement("div");
+      err.className = "field-err";
+      wrap.appendChild(err);
+    }
+    err.textContent = msg;
+    err.classList.add("show");
+    input.classList.add("input-err");
+    if (!input.hasAttribute("data-err-bound") && input.addEventListener) {
+      input.setAttribute("data-err-bound", "1");
+      input.addEventListener("input", () => fieldInErrClear(inputId));
+      if (input.tagName === "SELECT") input.addEventListener("change", () => fieldInErrClear(inputId));
+    }
+    try { input.focus(); } catch (e) {}
+  }
+  function fieldInErrClear(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const wrap = (input.closest && input.closest(".field")) || input.parentElement;
+    const err = wrap && wrap.querySelector(".field-err");
+    if (err) { err.textContent = ""; err.classList.remove("show"); }
+    input.classList.remove("input-err");
   }
 
   function freshDeal() {
@@ -2133,7 +2282,8 @@
     save();
     render();
   }
-  function render() {
+  function render(opts) {
+    opts = opts || {};
     if (currentUser && state && !navAllowed(state.view)) state.view = firstAllowedView();
     const playbookModal = document.getElementById("pb-modal");
     if (playbookModal && (!currentUser || !state || state.view !== "playbook" || !playbookAllowed())) playbookModal.remove();
@@ -2222,6 +2372,9 @@
     if (languageToggle) { languageToggle.textContent = lang === "fil" ? "FIL" : "EN"; languageToggle.title = lang === "fil" ? "Switch to English" : "Lumipat sa Filipino"; }
     const content = $("#content");
     destroyMapPickers();
+    const prevScroll = opts.keepScroll && content ? content.scrollTop : null;
+    const prevFocus = opts.keepFocus && document.activeElement ? document.activeElement : null;
+    const prevFocusId = prevFocus && prevFocus.id ? prevFocus.id : null;
     const map = { dashboard: renderDashboard, wizard: renderWizard, deal: renderDeal, portfolio: renderPortfolio, pms: renderPMS, assistant: renderAssistant, reports: renderReports, appraisal: renderAppraisal, market: renderMarketScan, listings: renderListings, leads: renderLeads, transactions: renderTransactions, financing: renderFinancing, presell: renderPresell, portal: renderBuyerPortal, playbook: renderPlaybook, users: renderUsers, admin: renderAdmin, settings: renderSettings };
     content.innerHTML = map[state.view] ? map[state.view]() : "";
     updateDealPicker();
@@ -2244,6 +2397,26 @@
       if(s.display==="none"||s.visibility==="hidden"||Number(s.opacity)===0) return;
       if(parseFloat(s.fontSize)<12){ el.style.fontSize="12px"; }
     });
+    if (prevScroll != null && content) content.scrollTop = prevScroll;
+    if (prevFocusId) {
+      const el = document.getElementById(prevFocusId);
+      if (el) { try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } }
+    }
+  }
+
+  function rerender() { save(); render({ keepFocus: true, keepScroll: true }); }
+
+  function scopedRender(sel, html) {
+    const el = sel && typeof sel === "string" ? document.querySelector(sel) : sel;
+    if (el) {
+      const prevActive = document.activeElement;
+      el.innerHTML = html;
+      if (prevActive && prevActive.id) {
+        const refocus = document.getElementById(prevActive.id);
+        if (refocus && refocus !== prevActive) { try { refocus.focus({ preventScroll: true }); } catch (e) { refocus.focus(); } }
+      }
+    }
+    return !!el;
   }
 
   function showAuth() {
@@ -2639,6 +2812,10 @@
     bindNumFormatting();
     // Listings bulk selection: capture-phase so card-open click never fires
     document.addEventListener("click", function (e) {
+      const pgPrev = e.target.closest("[data-pag-prev]");
+      if (pgPrev) { e.preventDefault(); e.stopPropagation(); pagPageGo(pgPrev.getAttribute("data-pag-prev"), -1); return; }
+      const pgNext = e.target.closest("[data-pag-next]");
+      if (pgNext) { e.preventDefault(); e.stopPropagation(); pagPageGo(pgNext.getAttribute("data-pag-next"), 1); return; }
       const blk = e.target.closest("[data-ls-bulk]");
       if (blk) {
         e.preventDefault(); e.stopPropagation();
@@ -2647,8 +2824,7 @@
         const at = window._lsBulkSel.indexOf(id);
         if (blk.checked && at === -1) window._lsBulkSel.push(id);
         if (!blk.checked && at >= 0) window._lsBulkSel.splice(at, 1);
-        const res2 = document.getElementById("ls-results");
-        if (res2) res2.innerHTML = lsResultsHTML();
+        scopedRender("#ls-results", lsResultsHTML());
         return;
       }
       const act = e.target.closest("[data-bulk-act]");
@@ -2667,6 +2843,45 @@
           toast((a === "publish" ? "Published " : a === "draft" ? "Unpublished " : "Marked ") + n + " listing(s)", "ok");
         }
         save(); render(); return;
+      }
+      const tbx = e.target.closest("[data-tx-bulk]");
+      if (tbx) {
+        e.preventDefault(); e.stopPropagation();
+        const id = tbx.getAttribute("data-tx-bulk");
+        window._txBulkSel = window._txBulkSel || [];
+        const at = window._txBulkSel.indexOf(id);
+        if (tbx.checked && at === -1) window._txBulkSel.push(id);
+        if (!tbx.checked && at >= 0) window._txBulkSel.splice(at, 1);
+        scopedRender("#tx-results", txResultsHTML());
+        return;
+      }
+      const txact = e.target.closest("[data-tx-bulk-act]");
+      if (txact && (window._txBulkSel || []).length) {
+        e.preventDefault(); e.stopPropagation();
+        const a = txact.getAttribute("data-tx-bulk-act");
+        if (a === "clear") { window._txBulkSel = []; scopedRender("#tx-results", txResultsHTML()); return; }
+        if (!txCanManage()) { toast("You don't have permission to modify transactions", "err"); return; }
+        const ids = window._txBulkSel.slice();
+        if (a === "void") {
+          (async () => {
+            const names = ids.map(id => { const t = (state.transactions || []).find(x => x.id === id); return t ? (t.title || t.ref || id) : id; });
+            const confirmed = await confirmModal({ title: "Void " + ids.length + " transaction(s)?", message: "Void removes \"" + names.slice(0, 3).join("\", \"") + (names.length > 3 ? "\" and " + (names.length - 3) + " more" : "\"") + "\" from the transaction list. Voided records can be restored from their detail page.", confirmLabel: "Void transactions", danger: true, typeToConfirm: "VOID" });
+            if (!confirmed) return;
+            let n = 0;
+            ids.forEach(id => { const t = (state.transactions || []).find(x => x.id === id); if (t) { t.voided = true; t.voidedAt = new Date().toISOString(); t.voidedBy = (currentUser && currentUser.name) || "admin"; t.updatedAt = new Date().toISOString(); n++; } });
+            window._txBulkSel = [];
+            save(); render();
+            toast("Voided " + n + " transaction(s)", "ok");
+          })();
+          return;
+        }
+        if (a === "paid") {
+          let n = 0;
+          ids.forEach(id => { const t = (state.transactions || []).find(x => x.id === id); if (t) { t.feePaid = true; t.updatedAt = new Date().toISOString(); n++; } });
+          save(); render(); toast("Marked fee received on " + n + " transaction(s)", "ok");
+          return;
+        }
+        return;
       }
     }, true);
     document.addEventListener("mousedown", function (e) {
@@ -2857,7 +3072,7 @@ if (e.target && e.target.id === "pf-ledger-link-type") updateLedgerLinkOptions(e
       const comp = q("[data-cb-complete]");
       if (comp) { await setCobrokeStatus(comp.getAttribute("data-cb-complete"), "completed"); return; }
       const can = q("[data-cb-cancel]");
-      if (can) { if (confirm("Cancel this proposal?")) await setCobrokeStatus(can.getAttribute("data-cb-cancel"), "cancelled"); return; }
+      if (can) { if (await confirmModal({ title: "Cancel proposal", message: "Cancel this proposal?", confirmLabel: "Cancel proposal" })) await setCobrokeStatus(can.getAttribute("data-cb-cancel"), "cancelled"); return; }
     });
   }
 
@@ -2874,12 +3089,15 @@ function bindPerView() {
       const d = state.deals.find(x => x.id === b.getAttribute("data-edit-deal"));
       if (d) { state.current = JSON.parse(JSON.stringify(d.data)); state.wizardStep = 1; save(); navigate("wizard"); toast("Editing <b>" + esc(d.data.property.name) + "</b> in the wizard"); }
     }));
-    $$("#content [data-delete-deal]").forEach(b => b.addEventListener("click", () => {
+    $$("#content [data-delete-deal]").forEach(b => b.addEventListener("click", async () => {
       const id = b.getAttribute("data-delete-deal");
       const d = state.deals.find(x => x.id === id);
-      if (d && confirm('Delete "' + d.data.property.name + '" from portfolio?')) {
-        state.deals = state.deals.filter(x => x.id !== id);
-        save(); render(); toast("Deal deleted", "err");
+      if (d) {
+        const ok = await confirmModal({ title: "Delete investment", message: 'Delete "' + d.data.property.name + '" from portfolio?', danger: true, confirmLabel: "Delete" });
+        if (ok) {
+          state.deals = state.deals.filter(x => x.id !== id);
+          save(); render(); toast("Deal deleted", "err");
+        }
       }
     }));
     $$("#content [data-status-deal]").forEach(sel => sel.addEventListener("change", () => {
@@ -3621,8 +3839,8 @@ function bindPerView() {
     });
 
     const cancel = $("#wz-cancel");
-    if (cancel) cancel.addEventListener("click", () => {
-      if (!confirm("Discard this draft investment?")) return;
+    if (cancel) cancel.addEventListener("click", async () => {
+      if (!(await confirmModal({ title: "Discard draft", message: "Discard this draft investment?", confirmLabel: "Discard" }))) return;
       state.current = null;
       state.wizardStep = 1;
       save();
@@ -3671,7 +3889,7 @@ function bindPerView() {
       '<div class="row" style="gap:10px"><span class="badge ' + (rec.pass ? "green" : "red") + '" style="font-size:13px;padding:7px 14px">Grade ' + rec.grade + ' · ' + rec.verdict + '</span>' +
       '<button class="btn btn-ghost btn-sm" id="make-appraisal">' + icon("scale", 14) + ' Create Appraisal</button>' +
       '<button class="btn btn-ghost btn-sm" id="edit-deal">' + icon("edit", 14) + ' Edit in Wizard</button>' +
-      '<button class="btn btn-ghost btn-sm" id="ds-preview">' + icon("print", 14) + ' Deal Summary PDF</button>' +
+      '<button class="btn btn-ghost btn-sm" id="ds-preview">' + icon("print", 14) + ' Print Deal Summary</button>' +
       '<button class="btn btn-ghost btn-sm" id="save-deal">' + icon("check", 14) + ' Save to Portfolio</button></div></div>';
 
     const tab = state.dealTab || "overview";
@@ -4701,11 +4919,11 @@ html+='</div></div>';
     if(idx<0) return null;
     return { entry:e, arr:arr, idx:idx, proof:arr[idx] };
   }
-  function pfRemoveProof(entryId, proofId){
+  async function pfRemoveProof(entryId, proofId){
     if(!pfCanWrite()) return toast("Admin only","err");
     const found=pfFindProof(entryId, proofId);
     if(!found) return toast("Proof not found","err");
-    if(!confirm("Remove proof '"+(found.proof.filename||"")+"' ? The removal is audited.")) return;
+    if(!(await confirmModal({ title: "Remove proof", message: "Remove proof '"+(found.proof.filename||"")+"' ? The removal is audited.", danger: true, confirmLabel: "Remove" }))) return;
     const name=found.proof.filename||"";
     if(pfCloud() && window.ESPFCLOUD && window.ESPFCLOUD.isUuid(found.proof.id)) pfCloudDelete("portfolio_proofs", found.proof.id);
     found.arr.splice(found.idx,1);
@@ -5023,11 +5241,11 @@ function pfAudit(action, refId, refLabel, detail){
     if(entry.status==="voided") return toast("Voided entries cannot be edited","err");
     pfOpenLedgerEntryModal(entry);
   }
-  function pfReverse(id){
+  async function pfReverse(id){
     if(!pfCanWrite()) return toast("Admin only","err");
     const e=(state.cashEntries||[]).find(x=>x.id===id);
     if(!e) return toast("Not found","err");
-    if(!confirm("Reverse "+e.id+" ? This creates an auditable reversal.")) return;
+    if(!(await confirmModal({ title: "Reverse entry", message: "Reverse "+e.id+" ? This creates an auditable reversal.", danger: true, confirmLabel: "Reverse" }))) return;
     const L=window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
     const ledger={ opening: 0, entries: state.cashEntries.slice() };
     const res= L? L.reverse(ledger, id, (currentUser&&currentUser.email)||"admin") : {ok:true, reversal:{id:"R"+id, reversalOf:id, direction: e.direction==="in"?"out":"in", amount:e.amount, accountId:e.accountId, status:"posted"}};
@@ -5036,14 +5254,14 @@ function pfAudit(action, refId, refLabel, detail){
     if(pfCloud() && window.ESPFCLOUD){ window.ESPFCLOUD.ensureUuid(res.reversal); pfCloudWrite("cash_entries", window.ESPFCLOUD.entryToDb(res.reversal)); }
     pfAudit("entry_reversed", e.id, e.description, "reversal "+res.reversal.id); save(); render(); toast("Reversed","ok");
   }
-  function pfVoidEntry(id){
+  async function pfVoidEntry(id){
     if(!pfCanWrite()) return toast("Admin only","err");
     const e=(state.cashEntries||[]).find(x=>x.id===id);
     if(!e) return toast("Not found","err");
     if(e.status==="posted") return toast("Posted entries must be reversed, not voided","err");
     if(e.status==="voided") return toast("Already voided","err");
     if(e.reversalOf) return toast("Cannot void a reversal","err");
-    if(!confirm("Void '"+ (e.description||String(e.id).slice(0,8)) +"' ? The record is kept but excluded from active lists.")) return;
+    if(!(await confirmModal({ title: "Void entry", message: "Void '"+ (e.description||String(e.id).slice(0,8)) +"' ? The record is kept but excluded from active lists.", danger: true, confirmLabel: "Void" }))) return;
     const L=window.ESPOR || (typeof require!=="undefined"? require("./portfolio_ledger.js"):null);
     const res= L? L.voidEntry({entries:state.cashEntries}, id, (currentUser&&currentUser.email)||"admin") : {ok:true};
     if(!res.ok) return toast(res.errors.join("; "),"err");
@@ -5052,12 +5270,12 @@ function pfAudit(action, refId, refLabel, detail){
     pfAudit("entry_voided", e.id, e.description, "");
     save(); render(); toast("Voided","ok");
   }
-  function pfPurgeEntry(id){
+  async function pfPurgeEntry(id){
     if(!pfCanWrite()) return toast("Admin only","err");
     const e=(state.cashEntries||[]).find(x=>x.id===id);
     if(!e) return toast("Not found","err");
     if(e.status!=="voided") return toast("Only voided entries can be permanently deleted","err");
-    if(!confirm("Permanently delete the voided entry '"+ (e.description||String(e.id).slice(0,8)) +"' ? An audit event is recorded.")) return;
+    if(!(await confirmModal({ title: "Delete entry permanently", message: "Permanently delete the voided entry '"+ (e.description||String(e.id).slice(0,8)) +"' ? An audit event is recorded.", danger: true, confirmLabel: "Delete", typeToConfirm: "DELETE" }))) return;
     if(pfCloud() && window.ESPFCLOUD && window.ESPFCLOUD.isUuid(id)){
       pfCloudDelete("cash_entries", id);
       (e.proofs||[]).forEach(p=>{ if(p && p.id) pfCloudDelete("portfolio_proofs", p.id); });
@@ -5355,7 +5573,7 @@ function pfSavePhase(){
     state.portfolioSelectedConstructionId=projectId;
     pfClosePhaseModal(); save(); render();
   }
-  function pfDelPhase(id){
+  async function pfDelPhase(id){
     if(!pfCanWrite()) return toast("Admin only","err");
     const ph=(state.constructionPhases||[]).find(p=>p.id===id);
     if(!ph) return toast("Phase not found","err");
@@ -5364,7 +5582,7 @@ function pfSavePhase(){
     if(invoices.length) return toast("Reassign or delete "+invoices.length+" invoice(s) on this phase first — invoices must be attributed to a phase","err");
     if(posted.length) return toast("This phase has "+posted.length+" posted cash entry(ies). Reverse them first, then delete the phase. Posted records are never silently removed.","err");
     const msg="Delete phase '"+ph.name+"' ?\n\nIts planned/committed/paid budget will be removed from the project totals. Invoices and posted cash entries on this phase are blocked from deletion until cleared.";
-    if(!confirm(msg)) return;
+    if(!(await confirmModal({ title: "Delete phase", message: msg, danger: true, confirmLabel: "Delete" }))) return;
     if(pfCloud() && window.ESPFCLOUD && window.ESPFCLOUD.isUuid(id)) pfCloudDelete("construction_phases", id);
     state.constructionPhases=(state.constructionPhases||[]).filter(p=>p.id!==id);
     pfAudit("phase_deleted", ph.id, ph.name, "planned budget "+ph.planned_budget);
@@ -5415,14 +5633,14 @@ if(editId){
     if(!pfCanWrite()) return toast("Admin only","err");
     pfOpenConstructionModal(null);
   }
-  function pfDeleteConstruction(id){
+  async function pfDeleteConstruction(id){
     if(!pfCanWrite()) return toast("Admin only","err");
     const proj=(state.constructionProjects||[]).find(p=>p.id===id);
     if(!proj) return toast("Project not found","err");
     const linkedCash=(state.cashEntries||[]).filter(e=> e.linked_construction_id===id || e.linked_phase_id && (state.constructionPhases||[]).find(ph=>ph.id===e.linked_phase_id && ph.project_id===id)).length;
     const linkedPhases=(state.constructionPhases||[]).filter(ph=>ph.project_id===id).length;
     const msg="Delete '"+proj.name+"' ?\n\nThis will also remove "+linkedPhases+" phase(s)"+(linkedCash?" and unlink "+linkedCash+" cash entry(ies)":"")+". This cannot be undone.";
-    if(!confirm(msg)) return;
+    if(!(await confirmModal({ title: "Delete construction project", message: msg, danger: true, confirmLabel: "Delete" }))) return;
     if(pfCloud() && window.ESPFCLOUD){
       const P=window.ESPFCLOUD;
       if(P.isUuid(id)) pfCloudDelete("construction_projects", id);
@@ -5486,13 +5704,13 @@ if(editId){
     }
     pfCloseVendorModal(); save(); render();
   }
-  function pfDelVendor(id){
+  async function pfDelVendor(id){
     if(!pfCanWrite()) return toast("Admin only","err");
     const v=(state.constructionVendors||[]).find(x=>x.id===id);
     if(!v) return toast("Vendor not found","err");
     const inv=(state.constructionInvoices||[]).filter(i=> i.vendor_id===id);
     if(inv.length) return toast(inv.length+" invoice(s) reference this vendor — reassign or delete them first","err");
-    if(!confirm("Delete vendor '"+v.name+"' ?\n\nInvoices referencing it must be reassigned first.")) return;
+    if(!(await confirmModal({ title: "Delete vendor", message: "Delete vendor '"+v.name+"' ?\n\nInvoices referencing it must be reassigned first.", danger: true, confirmLabel: "Delete" }))) return;
     if(pfCloud() && window.ESPFCLOUD && window.ESPFCLOUD.isUuid(id)) pfCloudDelete("construction_vendors", id);
     state.constructionVendors=(state.constructionVendors||[]).filter(x=>x.id!==id);
     pfAudit("vendor_deleted", v.id, v.name, "project "+v.project_id);
@@ -5557,12 +5775,12 @@ if(editId){
     }
     pfCloseInvoiceModal(); save(); render();
   }
-  function pfDelInvoice(id){
+  async function pfDelInvoice(id){
     if(!pfCanWrite()) return toast("Admin only","err");
     const inv=(state.constructionInvoices||[]).find(i=>i.id===id);
     if(!inv) return toast("Invoice not found","err");
     if(inv.ledger_entry_id) return toast("This invoice was paid — reverse the posted cash entry instead of deleting it.","err");
-    if(!confirm("Delete invoice '"+inv.invoice_no+"' (₱"+C.money(inv.amount)+") ?")) return;
+    if(!(await confirmModal({ title: "Delete invoice", message: "Delete invoice '"+inv.invoice_no+"' (₱"+C.money(inv.amount)+") ?", danger: true, confirmLabel: "Delete" }))) return;
     if(pfCloud() && window.ESPFCLOUD && window.ESPFCLOUD.isUuid(id)) pfCloudDelete("construction_invoices", id);
     state.constructionInvoices=(state.constructionInvoices||[]).filter(i=>i.id!==id);
     pfAudit("invoice_deleted", inv.id, inv.invoice_no, "amount "+inv.amount);
@@ -5648,12 +5866,12 @@ if(editId){
     }
     pfCloseChangeModal(); save(); render();
   }
-  function pfDelChange(id){
+  async function pfDelChange(id){
     if(!pfCanWrite()) return toast("Admin only","err");
     const ch=(state.changeOrders||[]).find(x=>x.id===id);
     if(!ch) return toast("Change order not found","err");
     const msg="Delete change order '"+(ch.reason||ch.id).slice(0,40)+"' (₱"+C.money(ch.amount)+") ?\n\nIts amount will be removed from the project forecast.";
-    if(!confirm(msg)) return;
+    if(!(await confirmModal({ title: "Delete change order", message: msg, danger: true, confirmLabel: "Delete" }))) return;
     if(pfCloud() && window.ESPFCLOUD && window.ESPFCLOUD.isUuid(id)) pfCloudDelete("construction_change_orders", id);
     state.changeOrders=(state.changeOrders||[]).filter(x=>x.id!==id);
     pfAudit("change_order_deleted", ch.id, ch.reason, "amount "+ch.amount);
@@ -5709,15 +5927,15 @@ if(editId){
 
     let html = '<div class="hero"><div><h1>Report Generator</h1><p>Deliverables for: <b>' + esc(name) + '</b></p></div></div>';
     html += '<div class="grid grid-3">' +
-      '<div class="card scenario" data-report="exec">' + icon("file", 16) + '<div class="sc-name" style="margin-top:6px">Executive Summary</div><div class="sc-sub">One-page verdict with grade and key metrics.</div><span class="badge blue mt-8">PDF</span></div>' +
-      '<div class="card scenario" data-report="summary">' + icon("doc", 16) + '<div class="sc-name" style="margin-top:6px">Deal Summary</div><div class="sc-sub">Complete investment details, costs, returns, risks, and comparables.</div><span class="badge blue mt-8">PDF</span></div>' +
-      '<div class="card scenario" data-report="bank">' + icon("dollar", 16) + '<div class="sc-name" style="margin-top:6px">Bank Loan Report</div><div class="sc-sub">Loan terms and amortization schedule.</div><span class="badge gold mt-8">Excel</span></div>' +
-      '<div class="card scenario" data-report="feas">' + icon("layers", 16) + '<div class="sc-name" style="margin-top:6px">Feasibility Study</div><div class="sc-sub">Full cost, revenue, returns and scenarios.</div><span class="badge blue mt-8">PDF</span></div>' +
+      '<div class="card scenario" data-report="exec">' + icon("file", 16) + '<div class="sc-name" style="margin-top:6px">Executive Summary</div><div class="sc-sub">One-page verdict with grade and key metrics. Opens a print dialog — choose "Save as PDF" there.</div><span class="badge blue mt-8">Print</span></div>' +
+      '<div class="card scenario" data-report="summary">' + icon("doc", 16) + '<div class="sc-name" style="margin-top:6px">Deal Summary</div><div class="sc-sub">Complete investment details, costs, returns, risks, and comparables. Opens a print dialog — choose "Save as PDF" there.</div><span class="badge blue mt-8">Print</span></div>' +
+      '<div class="card scenario" data-report="bank">' + icon("dollar", 16) + '<div class="sc-name" style="margin-top:6px">Bank Loan Report</div><div class="sc-sub">Loan terms and amortization schedule. Downloads an Excel-compatible .xls workbook.</div><span class="badge gold mt-8">Excel (.xls)</span></div>' +
+      '<div class="card scenario" data-report="feas">' + icon("layers", 16) + '<div class="sc-name" style="margin-top:6px">Feasibility Study</div><div class="sc-sub">Full cost, revenue, returns and scenarios. Opens a print dialog — choose "Save as PDF" there.</div><span class="badge blue mt-8">Print</span></div>' +
       '<div class="card scenario" data-report="budget">' + icon("briefcase", 16) + '<div class="sc-name" style="margin-top:6px">Construction Budget</div><div class="sc-sub">Line-item development cost breakdown.</div><span class="badge green mt-8">CSV</span></div>' +
-      '<div class="card scenario" data-report="fin">' + icon("trending", 16) + '<div class="sc-name" style="margin-top:6px">Financial Statements</div><div class="sc-sub">Summary, costs, cash flow, amortization.</div><span class="badge gold mt-8">Excel</span></div>' +
+      '<div class="card scenario" data-report="fin">' + icon("trending", 16) + '<div class="sc-name" style="margin-top:6px">Financial Statements</div><div class="sc-sub">Summary, costs, cash flow, amortization. Downloads an Excel-compatible .xls workbook.</div><span class="badge gold mt-8">Excel (.xls)</span></div>' +
       '<div class="card scenario" data-report="amort">' + icon("chart", 16) + '<div class="sc-name" style="margin-top:6px">Amortization Schedule</div><div class="sc-sub">Monthly repayment schedule export.</div><span class="badge green mt-8">CSV</span></div>' +
       '</div>';
-    html += '<div class="card card-pad mt-24"><h3 class="mb-16">Report Preview</h3><div class="ai-banner">' + icon("spark", 14) + ' <span>Reports pull live data from the loaded property record. In production, PDF generation uses react-pdf/Puppeteer and Excel uses exceljs.</span></div><div class="row mt-16" style="gap:10px">' +
+    html += '<div class="card card-pad mt-24"><h3 class="mb-16">Report Preview</h3><div class="ai-banner">' + icon("spark", 14) + ' <span>Reports pull live data from the loaded property record. On-screen previews and print PDFs use the browser print dialog; Excel reports download as Excel-compatible .xls workbooks.</span></div><div class="row mt-16" style="gap:10px">' +
       '<button class="btn btn-ghost btn-sm" id="preview-exec">Preview Executive Summary</button>' +
       '<button class="btn btn-ghost btn-sm" id="preview-feas">Preview Feasibility</button>' +
       '<button class="btn btn-ghost btn-sm" id="preview-summary">Preview Deal Summary</button></div></div>';
@@ -5936,25 +6154,136 @@ if(editId){
     if (!raw) return "";
     const m = C.model(raw), rec = C.recommend(raw);
     const a = m.acquisition, dd = m.development, r = m.returns;
-    const s = raw.sales;
-    const t2 = (k, v) => "<tr><td><b>" + k + "</b></td><td>" + v + "</td></tr>";
-    const meta = [["Property", raw.property.name || "Untitled"], ["Location", [raw.property.address, raw.property.barangay, raw.property.city, raw.property.province].filter(Boolean).join(", ") || "—"], ["Grade / Verdict", rec.grade + " (" + rec.total + "/100) · " + rec.verdict], ["Generated", new Date().toLocaleString()]];
-    const s1 = '<table>' + t2("Total Investment", C.money(r.investment)) + t2("Gross Revenue", C.money(r.grossRevenue)) + t2("Net Revenue", C.money(r.netRevenue)) + t2("Selling Costs", C.money(r.sellingCosts) + " (" + C.pct(r.sellPct) + ")") + t2("Net Profit", C.money(r.profit)) + t2("ROI", C.pct(r.roi)) + t2("IRR", C.pct(r.irr)) + t2("NPV", C.money(r.npv)) + t2("Cash-on-Cash", C.pct(r.cashOnCash)) + t2("Cap Rate", C.pct(r.capRate)) + t2("Payback", r.paybackYears + " yrs") + "</table>";
-    const s2 = '<table>' + t2("Purchase Price", C.money(a.price)) + t2("Negotiated Price", C.money(a.negotiated)) + t2("Closing Costs", C.money(a.totalFees)) + t2("Total Acquisition", C.money(a.acquisitionCost)) + t2("Financing", a.finType) + t2("Loan Amount", C.money(a.loanAmount) + (a.isLoan ? " (" + C.pct(a.loanPct) + " · loanable " + C.money(a.loanEligible) + ")" : "")) + t2("Equity Required", C.money(a.equity)) + t2("Monthly Amortization", C.money(a.monthly) + "/mo") + "</table>";
-    const devRows = [["Construction", dd.construction], ["Site Development", dd.siteDev], ["Professional Fees", dd.profFees], ["Permits", dd.permits], ["Contingency", dd.contingency], ["Amenities", dd.amenities], ["Carrying during build", dd.carrying], ["Marketing", dd.marketing], ["Financing during construction", m.financingCost], ["TOTAL", dd.total + m.financingCost]];
-    const s3 = "<table><tr><th>Line Item</th><th class='num'>Amount</th></tr>" + devRows.map(x => "<tr><td>" + x[0] + "</td><td>" + C.money(x[1]) + "</td></tr>").join("") + "</table>";
-    const s4 = '<table>' + t2("Sale Mode", s.saleMode === "sell" ? "Develop & Sell" : s.saleMode === "rent" ? "Buy & Hold / Rent" : "Hybrid") + t2("Gross Revenue", C.money(r.grossRevenue)) + t2("Transfer-Cost Tax Base", C.money(r.taxBase)) + t2("Selling Costs (total)", C.pct(r.sellPct)) + t2("Transfer Costs (total)", C.money(r.transferCost) + " (" + C.pct(r.transferCostPct) + ")") + t2("Capital Gains Tax", C.money(r.cgt) + " (" + C.pct(r.cgtEffectivePct) + ")") + t2("Documentary Stamp Tax", C.money(r.dst) + " (" + C.pct(r.dstEffectivePct) + ")") + t2("LGU Transfer Tax", C.money(r.transferTax) + " (" + C.pct(r.transferTaxEffectivePct) + ")") + t2("Registry of Deeds Fees", C.money(r.registrationFee) + " (" + C.pct(r.registrationFeeEffectivePct) + ")") + t2("Notarial Fees", C.money(r.notarialFee) + " (" + C.pct(r.notarialFeeEffectivePct) + ")") + t2("Broker Commission", C.money(r.brokerFee) + " (" + C.pct(r.brokerPct) + ")") + t2("VAT", C.money(r.vat) + " (" + C.pct(r.vatPct) + ")") + t2("Annual NOI (rent path)", C.money(r.noi)) + t2("Annual Operating Expenses", C.money(r.annualOpEx)) + t2("Appreciation", C.pct(C.num(s.appreciationRate, 7) / 100)) + t2("Holding Period", C.num(s.holdYears, 10) + " yrs") + "</table>";
-    const s5 = '<table>' + t2("Location Score", rec.loc.locationScore + "/100") + t2("Demand Score", rec.loc.demandScore + "/100") + t2("Investment Score", rec.loc.investmentScore + "/100") + t2("Risk Score", rec.risk.score + "/100") + t2("Nearby Types", rec.loc.present + "/" + D.NEARBY_TYPES.length) + "</table><h3>Recommendation</h3><p>" + esc(rec.verdict) + "</p><p><b>Best use:</b> " + esc(rec.hbu.recommendation.label) + "</p>";
+    const p = raw.property || {}, b = raw.purchase || {}, f = raw.financing || {}, d = raw.development || {}, s = raw.sales || {}, loc = raw.location || {};
+    const escV = v => (v === undefined || v === null || v === "") ? "—" : esc(String(v));
+    const sqm = v => (v === undefined || v === null || v === "") ? "—" : C.numFmt(v) + " sqm";
+    const mtr = v => (v === undefined || v === null || v === "") ? "—" : C.numFmt(v) + " m";
+    const pctIn = v => (v === undefined || v === null || v === "") ? "—" : v + "%";
+    const moneyIn = v => (v === undefined || v === null || v === "") ? "—" : C.money(v);
+    const utilityList = Object.keys(p.utilities || {}).filter(k => p.utilities[k]).join(", ") || "—";
+    const nearbyList = Object.keys(loc.nearby || {}).filter(k => loc.nearby[k]).join(", ") || "—";
+    const goalLabel = (DEVELOPMENT_GOALS.find(x => x[0] === (d.goal || "custom")) || DEVELOPMENT_GOALS[0])[1];
+    const saleModeLabel = s.saleMode === "sell" ? "Develop & Sell" : s.saleMode === "rent" ? "Buy & Hold / Rent" : s.saleMode === "hybrid" ? "Hybrid" : escV(s.saleMode);
+    const KV = rows => "<table class='ds-kv'><tbody>" + rows.map(x => "<tr><th>" + x[0] + "</th><td" + (x[2] ? " class='ds-num'" : "") + ">" + x[1] + "</td></tr>").join("") + "</tbody></table>";
+    const SEC = (t, html) => "<section class='ds-sec'><h2>" + esc(t) + "</h2>" + html + "</section>";
+    const kpi = (k, v, sub, c) => '<div class="ds-kpi" style="--t:' + c + '"><div class="k">' + k + '</div><div class="v">' + v + '</div><div class="s">' + sub + '</div></div>';
+    const lv = x => { const L = String(x || "low").toLowerCase(); if (L === "high") return '<span class="lv-hi">High</span>'; if (L === "medium") return '<span class="lv-med">Medium</span>'; return '<span class="lv-lo">Low</span>'; };
+
+    const head =
+      '<div class="ds-head">' +
+        '<div class="ds-brand">ES Realty <em>· Investment Intelligence</em></div>' +
+        '<div class="ds-title"><h1>Investment Deal Summary</h1>' +
+          '<div class="ds-grade"><div class="g">' + esc(rec.grade) + '</div><div class="v">' + esc(rec.total) + '/100 · ' + esc(rec.verdict) + '</div></div>' +
+        '</div>' +
+        '<div class="ds-prop-name">' + escV(p.name) + '</div>' +
+        '<div class="ds-loc">' + escV([p.address, p.barangay, p.city, p.province, p.region].filter(Boolean).join(", ")) + '</div>' +
+        '<div class="ds-meta">' +
+          '<div><b>Title</b> &nbsp;<span>' + escV([p.titleKind, p.titleNo, p.lotNo, p.surveyNo].filter(Boolean).join(" · ") || "No title number captured") + '</span></div>' +
+          '<div><b>Zoning / Land Use</b> &nbsp;<span>' + escV([p.zoning, p.landUse].filter(Boolean).join(" · ")) + '</span></div>' +
+          '<div><b>Type / Lot Area</b> &nbsp;<span>' + escV(p.propertyType) + ' · ' + sqm(p.lotArea) + '</span></div>' +
+          '<div><b>Generated</b> &nbsp;<span>' + new Date().toLocaleString() + '</span></div>' +
+        '</div>' +
+      '</div>';
+
+    const kpis = '<div class="ds-kpis">' +
+      kpi("Total Investment", C.money(r.investment), "acquiring + development", "#EA580C") +
+      kpi("Gross Revenue", C.money(r.grossRevenue), C.numFmt(r.saleableArea) + " sqm saleable", "#2563EB") +
+      kpi("Net Profit", C.money(r.profit), "after selling costs", "#0F9D58") +
+      kpi("Cash Required", C.money(a.equity), "equity + closing + financing", "#F59E0B") +
+      "</div>";
+
+    const sProp = KV([
+      ["Property Type", escV(p.propertyType)], ["Current Land Use", escV(p.landUse)], ["Zoning", escV(p.zoning)],
+      ["Title", escV([p.titleKind, p.titleNo, p.lotNo, p.surveyNo].filter(Boolean).join(" · ") || "—")],
+      ["Lot Area", sqm(p.lotArea), 1], ["Frontage", mtr(p.frontage), 1], ["Depth", mtr(p.depth), 1],
+      ["Road Width / Type", escV([p.roadWidth ? C.numFmt(p.roadWidth) + " m" : "", p.roadType].filter(Boolean).join(" · "))],
+      ["Flood Risk", escV(p.floodRisk)], ["Utilities", escV(utilityList)],
+      ["Existing Structure", escV(p.structureType)], ["Year Built", escV(p.yearBuilt)], ["Existing Floors", escV(p.floors)], ["Existing Floor Area", sqm(p.existingFloorArea)],
+      ["Condition", escV(p.condition)], ["Improvement Value", moneyIn(p.improvementValue), 1], ["Income Generating", escV(p.incomeGenerating)], ["Monthly Income", moneyIn(p.monthlyIncome), 1],
+      ["Market Value / sqm", moneyIn(m.marketValuePerSqm), 1], ["Estimated Market Value", moneyIn(m.estMarketValue), 1], ["BIR Zonal / sqm", moneyIn(m.birZonalPerSqm), 1],
+      ["Growth Rate", (p.growthRate === undefined || p.growthRate === null || p.growthRate === "" ? "—" : C.num(p.growthRate, 0) * 100 + "% / yr")]
+    ]);
+
+    const sLoc = KV([
+      ["Region", escV(p.region)], ["Province", escV(p.province)], ["City / Municipality", escV(p.city)], ["Barangay", escV(p.barangay)],
+      ["Complete Address", escV(p.address)], ["Coordinates", p.lat && p.lng ? esc(p.lat + ", " + p.lng) : "—"], ["Nearby Establishments", escV(nearbyList)],
+      ["Accessibility Score", escV(loc.accessibilityScore) + "/100"], ["Traffic Load", escV(loc.trafficScore) + "/100"], ["Population Score", escV(loc.populationScore) + "/100"],
+      ["Future Development", escV(loc.futureDevScore) + "/100"], ["Competition", escV(loc.competitionScore) + "/100"], ["Commercial Growth", escV(loc.commercialGrowthScore) + "/100"]
+    ]);
+
+    const sAcq = KV([
+      ["Purchase Price", C.money(a.price), 1], ["Negotiated Price", C.money(a.negotiated), 1], ["Seller Type", escV(b.sellerType)],
+      ["Taxes", moneyIn(a.taxes), 1], ["Transfer Fees", moneyIn(a.transferFees), 1], ["Legal Fees", moneyIn(a.legalFees), 1], ["Survey Cost", moneyIn(a.surveyCost), 1], ["Miscellaneous Costs", moneyIn(a.miscCost), 1],
+      ["Total Closing Costs", C.money(a.totalFees), 1], ["Land Cost", C.money(a.landCost), 1], ["Total Acquisition", C.money(a.acquisitionCost), 1],
+      ["Financing Type", escV(a.finType)], ["Loan % of Price", a.isLoan ? C.pct(a.loanPct) : "—"], ["Loan Amount", moneyIn(a.loanAmount), 1],
+      ["Loan Eligibility", a.isLoan && a.loanEligible ? C.money(a.loanEligible) + " (LTV cap " + C.pct(a.ltvCap) + ")" : "—"], ["Loan Shortfall", a.isLoan ? moneyIn(a.loanShortfall) : "—", 1],
+      ["Interest Rate", escV(f.interestRate) + "% / year"], ["Term", f.years ? f.years + " years" : "—"], ["Equity Required", C.money(a.equity), 1],
+      ["Monthly Amortization", C.money(a.monthly) + "/mo", 1], ["Total Interest", moneyIn(a.totalInterest), 1], ["Total Payment", moneyIn(a.totalPayment), 1]
+    ]);
+
+    const sDevPlan = KV([
+      ["Development Goal", escV(goalLabel)], ["Development Type", escV(d.devType)], ["Units / Lots", escV(d.units || d.lots)], ["Floors", escV(d.floors)],
+      ["Total Floor Area", sqm(d.floorArea)], ["Typical Lot Size", sqm(d.lotSqm)], ["Shophouse Lots", escV(d.shophouseLots)],
+      ["Construction Months", escV(d.buildMonths)], ["Construction Cost / sqm", moneyIn(d.constCostPerSqm), 1], ["Site Development", pctIn(d.siteDevPct)], ["Professional Fees", pctIn(d.profFeesPct)],
+      ["Permit Fees", moneyIn(d.permits), 1], ["Contingency", pctIn(d.contingencyPct)], ["Amenities Budget", moneyIn(d.amenities), 1], ["Marketing Budget", moneyIn(d.marketing), 1],
+      ["Carrying Cost / month", moneyIn(d.carryingMonthly), 1], ["Planned Project Budget", moneyIn(d.projectBudget), 1]
+    ]);
+
+    const devRows = [["Construction", dd.construction], ["Site Development", dd.siteDev], ["Professional Fees", dd.profFees], ["Permits", dd.permits], ["Contingency", dd.contingency], ["Amenities", dd.amenities], ["Carrying during build", dd.carrying], ["Marketing", dd.marketing], ["Financing during construction", m.financingCost]];
+    const sDevCost = "<table class='ds-cos'><thead><tr><th>Line Item</th><th class='ds-num'>Amount</th></tr></thead><tbody>" +
+      devRows.map(x => "<tr><td>" + x[0] + "</td><td class='ds-num'>" + C.money(x[1]) + "</td></tr>").join("") +
+      "<tr class='ds-total'><th>Total Development Budget</th><td class='ds-num'>" + C.money(dd.total + m.financingCost) + "</td></tr></tbody></table>";
+
+    const sSales = KV([
+      ["Sale Mode", saleModeLabel], ["Exit Target (sell / sqm)", moneyIn(s.sellPricePerSqm), 1], ["Land Exit Target (sell / sqm)", moneyIn(s.landSellPricePerSqm), 1], ["Rental Target (/ sqm / month)", moneyIn(s.rentalRatePerSqm), 1],
+      ["Units / Lots for Sale", escV(s.units)], ["Saleable Area", (s.saleablePct ? s.saleablePct + "%" : "—") + (r.saleableArea ? " · " + C.numFmt(r.saleableArea) + " sqm" : "")], ["Leasable Area", pctIn(s.leasablePct)], ["Occupancy", pctIn(s.occupancyPct)], ["Operating Expenses", pctIn(s.opCostPct)],
+      ["Annual Appreciation", pctIn(s.appreciationRate)], ["Holding Period", s.holdYears ? s.holdYears + " years" : "—"], ["Discount Rate", pctIn(s.discountRate)], ["Broker Commission", pctIn(s.brokerPct)], ["VAT", pctIn(s.vatPct)]
+    ]);
+
+    const sExit = KV([
+      ["Gross Revenue", C.money(r.grossRevenue), 1], ["Selling Costs (total)", C.money(r.sellingCosts) + " (" + C.pct(r.sellPct) + ")"], ["Tax Base", moneyIn(r.taxBase), 1],
+      ["Capital Gains Tax", C.money(r.cgt) + " (" + C.pct(r.cgtEffectivePct) + ")"], ["Documentary Stamp Tax", C.money(r.dst) + " (" + C.pct(r.dstEffectivePct) + ")"], ["LGU Transfer Tax", C.money(r.transferTax) + " (" + C.pct(r.transferTaxEffectivePct) + ")"],
+      ["Registry of Deeds Fees", C.money(r.registrationFee) + " (" + C.pct(r.registrationFeeEffectivePct) + ")"], ["Notarial Fees", C.money(r.notarialFee) + " (" + C.pct(r.notarialFeeEffectivePct) + ")"], ["Broker Commission Fee", C.money(r.brokerFee) + " (" + C.pct(r.brokerPct) + ")"], ["VAT on Sale", C.money(r.vat) + " (" + C.pct(r.vatPct) + ")"],
+      ["Annual NOI (rent path)", moneyIn(r.noi), 1], ["Annual Operating Expenses", moneyIn(r.annualOpEx), 1]
+    ]);
+
+    const sMetrics = KV([
+      ["Total Investment", C.money(r.investment), 1], ["Gross Revenue", C.money(r.grossRevenue), 1], ["Net Revenue", C.money(r.netRevenue), 1],
+      ["Net Profit", C.money(r.profit), 1], ["Profit Margin", C.pct(r.profitMargin), 1], ["ROI", C.pct(r.roi), 1], ["IRR", C.pct(r.irr), 1],
+      ["NPV", C.money(r.npv), 1], ["Cash-on-Cash", C.pct(r.cashOnCash), 1], ["Cap Rate", C.pct(r.capRate), 1], ["Payback", escV(r.paybackYears) + " yrs"]
+    ]);
+
+    const sRiskScores = KV([
+      ["Location Score", escV(rec.loc.locationScore) + "/100"], ["Demand Score", escV(rec.loc.demandScore) + "/100"], ["Investment Score", escV(rec.loc.investmentScore) + "/100"],
+      ["Risk Score", escV(rec.risk.score) + "/100"], ["Nearby Types Present", escV(rec.loc.present) + "/" + D.NEARBY_TYPES.length]
+    ]);
+    const sRiskTable = "<table class='ds-cos'><thead><tr><th>Risk</th><th>Level</th><th>Basis</th><th>Mitigation</th></tr></thead><tbody>" +
+      (rec.risk.risks || []).map(x => "<tr><td><b>" + esc(x.name) + "</b></td><td>" + lv(x.level) + "</td><td>" + esc(x.basis || "") + "</td><td>" + esc(x.mitigation || "") + "</td></tr>").join("") + "</tbody></table>";
+
+    const sRec = '<div class="ds-reco"><b>Verdict</b><p style="margin:6px 0 10px">' + esc(rec.verdict) + "</p>" +
+      '<span class="hbu">Highest &amp; best use — ' + esc(rec.hbu.recommendation.label) + '</span>' +
+      "<ul>" + (rec.hbu.recommendation.reasons || []).map(x => "<li>" + esc(x) + "</li>").join("") + "</ul></div>";
+
     const comps = (raw.comparables || []).filter(c => C.num(c.price, 0) > 0);
-    const s6 = comps.length ? "<table><tr><th>#</th><th>Address</th><th>City</th><th>Price</th><th>Lot (sqm)</th><th>Source</th></tr>" + comps.map((c, i) => "<tr><td>" + (i + 1) + "</td><td>" + esc(c.address) + "</td><td>" + esc(c.city) + "</td><td>" + C.money(c.price) + "</td><td>" + C.numFmt(c.lotArea) + "</td><td>" + esc(c.source) + "</td></tr>").join("") + "</table>" : "<p>No comparables recorded.</p>";
-    return reportHTML("Investment Deal Summary", meta, [
-      { title: "Key Metrics", html: s1 },
-      { title: "Acquisition & Financing", html: s2 },
-      { title: "Development Cost", html: s3 },
-      { title: "Returns & Disposition", html: s4 },
-      { title: "Location & Risk", html: s5 },
-      { title: "Comparables", html: s6 }
-    ], "#EA580C");
+    const sSix = comps.length
+      ? "<table class='ds-cos'><thead><tr><th>#</th><th>Address</th><th>City</th><th>Type</th><th class='ds-num'>Price</th><th class='ds-num'>Lot (sqm)</th><th>Source</th></tr></thead><tbody>" +
+        comps.map((c, i) => "<tr><td>" + (i + 1) + "</td><td>" + esc(c.address) + "</td><td>" + esc(c.city) + "</td><td>" + esc(c.type) + "</td><td class='ds-num'>" + C.money(c.price) + "</td><td class='ds-num'>" + C.numFmt(c.lotArea) + "</td><td>" + esc(c.source) + "</td></tr>").join("") + "</tbody></table>"
+      : "<p style='color:#5B6B7E'>No comparables recorded.</p>";
+
+    return '<div class="ds-wrap rpt">' +
+      head + kpis +
+      SEC("Property & Existing Structure", sProp) +
+      SEC("Location & Site", sLoc) +
+      SEC("Acquisition & Financing", sAcq) +
+      SEC("Development Plan", sDevPlan) +
+      SEC("Development Budget", sDevCost) +
+      SEC("Sales & Disposition", sSales + sExit) +
+      SEC("Key Metrics", sMetrics) +
+      SEC("Location & Risk Register", sRiskScores + sRiskTable) +
+      SEC("Recommendation", sRec) +
+      SEC("Comparables", sSix) +
+      '<div class="ds-foot">ES Realty Investment Intelligence · This is an automated analysis for informational purposes only and does not constitute licensed financial, legal, or investment advice.</div>' +
+      "</div>";
   }
 
   function saveCurrentDeal() {
@@ -6696,9 +7025,9 @@ premise: "Fee Simple / As Improved",
     html += '<div class="field col-3"><label>Sign-off Date</label><input class="input" type="date" id="apc-date" value="' + esc(a.cert.date || "") + '"></div></div>';
     html += '<p class="dim tiny mt-8">These fields are left blank for manual sign-off — never auto-filled. Certification requires the appraisal name, a confirmed final value opinion, and the certification fields above.</p>';
     html += '<div class="row mt-16" style="gap:10px;flex-wrap:wrap">' +
-      '<button class="btn btn-primary btn-sm" id="ap-preview">' + icon("print", 14) + ' Print PDF</button>' +
-      '<button class="btn btn-ghost btn-sm" id="ap-xls-grid">' + icon("download", 14) + ' Export Adjustment Grid (Excel)</button>' +
-      '<button class="btn btn-ghost btn-sm" id="ap-xls-calc">' + icon("download", 14) + ' Export Calculations (Excel)</button>' +
+      '<button class="btn btn-primary btn-sm" id="ap-preview">' + icon("print", 14) + ' Print report (Save as PDF)</button>' +
+      '<button class="btn btn-ghost btn-sm" id="ap-xls-grid">' + icon("download", 14) + ' Export Adjustment Grid (Excel .xls)</button>' +
+      '<button class="btn btn-ghost btn-sm" id="ap-xls-calc">' + icon("download", 14) + ' Export Calculations (CSV)</button>' +
       '<button class="btn btn-ghost btn-sm" id="ap-status-review">' + icon("edit", 14) + ' Mark Under Review</button>' +
       '<button class="btn btn-ghost btn-sm" id="ap-status-cert">' + icon("check", 14) + ' Mark Certified</button></div>';
     html += '<div id="ap-cert-msg" class="mt-12"></div>';
@@ -7084,24 +7413,27 @@ premise: "Fee Simple / As Improved",
         save(); render(); toast("Appraisal loaded — pick up where you left off");
       }
     }));
-    $$("#content [data-rm-appr]").forEach(b => b.addEventListener("click", () => {
+    $$("#content [data-rm-appr]").forEach(b => b.addEventListener("click", async () => {
       const sv = state.appraisals.find(x => x.id === b.getAttribute("data-rm-appr"));
-      if (sv && confirm('Delete saved appraisal "' + (sv.name || "Untitled") + '"?')) {
-        state.appraisals = state.appraisals.filter(x => x.id !== sv.id);
-        if (state.appraisal && state.appraisal.id === sv.id) {
-      state.appraisal = freshAppraisal();
-      state.appraisal.comparables = sampleComparables(state.appraisal);
-          toast("Saved appraisal deleted — started a new appraisal");
-        } else {
-          toast("Saved appraisal deleted", "err");
+      if (sv) {
+        const ok = await confirmModal({ title: "Delete appraisal", message: 'Delete saved appraisal "' + (sv.name || "Untitled") + '"?', danger: true, confirmLabel: "Delete" });
+        if (ok) {
+          state.appraisals = state.appraisals.filter(x => x.id !== sv.id);
+          if (state.appraisal && state.appraisal.id === sv.id) {
+            state.appraisal = freshAppraisal();
+            state.appraisal.comparables = sampleComparables(state.appraisal);
+            toast("Saved appraisal deleted — started a new appraisal");
+          } else {
+            toast("Saved appraisal deleted", "err");
+          }
+          save(); render();
         }
-        save(); render();
       }
     }));
     const resetEng = $("#ap-reset");
-    if (resetEng) resetEng.addEventListener("click", () => {
+    if (resetEng) resetEng.addEventListener("click", async () => {
       const hasWork = (a.name && a.name.trim()) || (a.comparables || []).length > 0 || (a.adjustments || []).length > 0 || a.finalValue != null || (a.photos || []).length > 0;
-      if (hasWork && !confirm("Start a new appraisal? Current working data will be reset.")) return;
+      if (hasWork && !(await confirmModal({ title: "Start new appraisal", message: "Start a new appraisal? Current working data will be reset.", confirmLabel: "Start new" }))) return;
       state.appraisal = freshAppraisal();
       state.appraisal.comparables = sampleComparables(state.appraisal);
       save(); render(); toast("New appraisal started — name it to autosave");
@@ -7160,14 +7492,14 @@ premise: "Fee Simple / As Improved",
         save(); render(); toast(a.photos.length + " photo(s) attached", "ok");
       });
     });
-    $("#ap-photo-grid") && $("#ap-photo-grid").addEventListener("click", ev => {
+    $("#ap-photo-grid") && $("#ap-photo-grid").addEventListener("click", async ev => {
       const btn = ev.target.closest("[data-photo-rm], [data-photo-cover]");
       if (!btn) return;
       const id = btn.getAttribute("data-photo-rm") || btn.getAttribute("data-photo-cover");
       const ph = a.photos.find(x => x.id === id);
       if (!ph) return;
       if (btn.hasAttribute("data-photo-rm")) {
-        if (!confirm('Remove this photo? It will be dropped from the report Addenda.')) return;
+        if (!(await confirmModal({ title: "Remove photo", message: "Remove this photo? It will be dropped from the report Addenda.", danger: true, confirmLabel: "Remove" }))) return;
         a.photos = a.photos.filter(x => x.id !== id);
         if (ph.cover && a.photos.length) a.photos[0].cover = true;
         a.updatedAt = Date.now();
@@ -7634,6 +7966,25 @@ premise: "Fee Simple / As Improved",
       }
     });
   }
+  async function pmsSyncStatuses(btn) {
+    if (!pmsCan("manage") && userRole() !== "super-admin") { toast("You don't have permission to sync statuses", "err"); return; }
+    const changed = pmsActiveLeases().filter(l => pmsAutoStatus(l) !== l.status).length + pmsActiveUnits().length;
+    const confirmed = await confirmModal({
+      title: "Sync lease / unit statuses?",
+      message: "Re-marks lease statuses (active / expiring / expired) and unit occupancy based on today's date, then saves. Changed records: " + changed + ".",
+      confirmLabel: "Sync statuses",
+      danger: false
+    });
+    if (!confirmed) return;
+    let count = 0;
+    pmsActiveLeases().forEach(l => { const s = pmsAutoStatus(l); if (s !== l.status) { l.status = s; count++; } });
+    pmsActiveUnits().forEach(u => {
+      const names = pmsUnitTenants(u.id);
+      const want = names.length ? "occupied" : "vacant";
+      if (u.status !== want) { u.status = want; u.tenant_name = names.join(", "); count++; }
+    });
+    save(); render(); toast("Synced " + count + " status change(s)", "ok");
+  }
   function pmsVisibleProperties() {
     const list = pmsActiveProperties();
     if (userRole() === "owner") {
@@ -7652,8 +8003,6 @@ premise: "Fee Simple / As Improved",
   function renderPMS() {
     if (userRole() === "tenant") return pmsTenantPortal();
     if (userRole() === "owner") return pmsOwnerPortal();
-    syncLeaseStatuses();
-    syncUnitFromLeases();
     const tab = state.pmsTab || "properties";
     const canManage = pmsCan("manage");
     const props = pmsActiveProperties(), units = pmsActiveUnits(), owners = pmsActiveOwners(),
@@ -7675,6 +8024,7 @@ premise: "Fee Simple / As Improved",
       kpi("Collected", C.money(collected), "all-time paid", "green", "dollar") +
       kpi("Arrears", C.money(arrears), "overdue rent", arrears > 0 ? "red" : "green", "trending") + '</div>';
     html += '<div class="tabs">' + PMS_TABS.map(t => '<button class="tab' + (state.pmsTab === t[0] ? " active" : "") + '" data-pmtab="' + t[0] + '">' + t[1] + '</button>').join("") + '</div>';
+    html += (canManage ? '<div class="row mt-8" style="gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" data-pms-sync-status title="Re-mark active/expiring/expired based on today\'s date and unit occupancy">' + icon("refresh", 13) + " Sync lease / unit statuses</button></div>" : "");
     html += renderPMSList();
     return html;
   }
@@ -9330,7 +9680,7 @@ premise: "Fee Simple / As Improved",
     const msg = kind === "owner"
       ? 'Delete "' + label + '"? It will be hidden from PMS lists and its account removed from Users & Access.'
       : 'Archive "' + label + '"? It will be hidden from lists but kept in the records.';
-    if (!confirm(msg)) return;
+    if (!(await confirmModal({ title: kind === "owner" ? "Delete owner" : "Archive record", message: msg, danger: kind === "owner", confirmLabel: kind === "owner" ? "Delete" : "Archive" }))) return;
     if (kind === "owner" && rec.authUserId) {
       try {
         if (currentUser && currentUser.demo) {
@@ -10094,6 +10444,8 @@ premise: "Fee Simple / As Improved",
     document.addEventListener("click", e => {
       const tabBtn = e.target.closest("[data-pmtab]");
       if (tabBtn) { state.pmsTab = tabBtn.getAttribute("data-pmtab"); state.pmsQuery = ""; state.pmsStatusFilter = ""; state.pmsPropertyFilter = ""; state.pmsExtraFilter = ""; state.pmsLeaseFilter = ""; save(); render(); return; }
+      const syncSt = e.target.closest("[data-pms-sync-status]");
+      if (syncSt) { pmsSyncStatuses(syncSt); return; }
       const pl = e.target.closest("[data-pms-paylink]");
       if (pl) { state.pmsTab = "payments"; state.pmsQuery = ""; state.pmsStatusFilter = ""; state.pmsPropertyFilter = ""; state.pmsExtraFilter = ""; state.pmsLeaseFilter = pl.getAttribute("data-pms-paylink"); save(); render(); return; }
       const emailPayment = e.target.closest("[data-pms-email-payment]");
@@ -10252,7 +10604,7 @@ premise: "Fee Simple / As Improved",
         '<button class="btn btn-ghost btn-sm" data-bulk-act="publish">Publish</button>' +
         '<button class="btn btn-ghost btn-sm" data-bulk-act="draft">Unpublish</button>' +
         '<button class="btn btn-danger btn-sm" data-bulk-act="clear">Clear selection</button></div>' : "") +
-      "<div class='ls-grid'>" + arr.map(listingCard).join("") + "</div>";
+      "<div class='ls-grid'>" + paginateRows(arr, "listings").map(listingCard).join("") + "</div>" + paginationBar("listings");
   }
   function renderListings() {
     if (state.listingDetail) {
@@ -10425,7 +10777,7 @@ premise: "Fee Simple / As Improved",
     const l = (state.listings || []).find(x => x.id === id);
     if (!l) return;
     if (!listingCanEdit(l)) { toast("You can only delete listings owned by your account", "err"); return; }
-    if (!confirm('Delete listing "' + (l.title || "") + '"?')) return;
+    if (!(await confirmModal({ title: "Delete listing", message: 'Delete listing "' + (l.title || "") + '"?', danger: true, confirmLabel: "Delete" }))) return;
     try {
       if (!(IS_LOCAL_DEV && !currentUser.registrationStatus)) await deleteListingFromCloud(id);
       state.listings = state.listings.filter(x => x.id !== id);
@@ -10797,19 +11149,18 @@ premise: "Fee Simple / As Improved",
       el.addEventListener(evt || "change", () => {
         state.listingFilters[key] = el.value;
         save();
-        const res = $("#ls-results");
-        if (res) res.innerHTML = lsResultsHTML();
+        scopedRender("#ls-results", lsResultsHTML());
       });
     };
     bind("ls-q", "q", "input");
     bind("ls-type", "type"); bind("ls-status", "status"); bind("ls-city", "city"); bind("ls-fin", "financing");
     bind("ls-minp", "minPrice", "input"); bind("ls-maxp", "maxPrice", "input"); bind("ls-minb", "minBeds", "input"); bind("ls-mina", "minArea", "input");
     bind("ls-rfo", "rfo"); bind("ls-sort", "sort");
-    const updAttrs = () => { const f = state.listingFilters = state.listingFilters || {}; ["furnishing", "pet", "balcony"].forEach(k => { const el = document.getElementById("ls-" + k); if (el) f[k] = el.value; }); const dp = document.getElementById("ls-drop"); if (dp) f.dropOnly = dp.checked; save(); const res2 = $("#ls-results"); if (res2) res2.innerHTML = lsResultsHTML(); };
+    const updAttrs = () => { const f = state.listingFilters = state.listingFilters || {}; ["furnishing", "pet", "balcony"].forEach(k => { const el = document.getElementById("ls-" + k); if (el) f[k] = el.value; }); const dp = document.getElementById("ls-drop"); if (dp) f.dropOnly = dp.checked; save(); scopedRender("#ls-results", lsResultsHTML()); };
     ["ls-furnishing", "ls-pet", "ls-balcony"].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener("change", updAttrs); });
     const dropChk = document.getElementById("ls-drop"); if (dropChk) dropChk.addEventListener("change", updAttrs);
     const fav = document.getElementById("ls-fav");
-    if (fav) fav.addEventListener("change", () => { state.listingFilters.favOnly = fav.checked; save(); const res = $("#ls-results"); if (res) res.innerHTML = lsResultsHTML(); });
+    if (fav) fav.addEventListener("change", () => { state.listingFilters.favOnly = fav.checked; save(); scopedRender("#ls-results", lsResultsHTML()); });
   }
   async function loadListingInquiries() {
     // Merge cloud rows for MY listings with local demo seeds; never throws.
@@ -11370,6 +11721,10 @@ premise: "Fee Simple / As Improved",
     toast("Transaction <b>" + esc(tx.ref) + "</b> created from lead", "ok");
   }
   function leadFollowupState(l) {    if (!l.nextFollowUp || l.status === "closed" || l.status === "lost") return null;
+    if (l.snoozedUntil) {
+      const snz = new Date(l.snoozedUntil);
+      if (!isNaN(snz.getTime()) && snz.getTime() > Date.now()) return null;
+    }
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const d = new Date(l.nextFollowUp + "T00:00:00");
     if (isNaN(d)) return null;
@@ -11381,13 +11736,17 @@ premise: "Fee Simple / As Improved",
   function leadCard(l) {
     const can = leadCanEdit(l);
     const fu = leadFollowupState(l);
+    const snzAt = l.snoozedUntil ? new Date(l.snoozedUntil) : null;
+    const snoozing = snzAt && !isNaN(snzAt.getTime()) && snzAt.getTime() > Date.now();
     return '<div class="lead-card" data-lead-open="' + esc(l.id) + '">' +
       '<div class="lead-card-top">' + leadAvatar(l.name) +
         '<div class="grow"><div class="lead-card-name">' + esc(l.name || "Unnamed") + "</div>" +
         '<div class="lead-card-sub dim tiny">' + esc(l.ref || "") + " · " + esc(leadTypeLabel(l.type)) + "</div></div>" +
+        (can ? '<button class="icon-btn btn-sm" data-lead-snooze="' + esc(l.id) + '" data-snz-days="' + (snoozing ? 0 : 7) + '" title="' + (snoozing ? "Unsnooze follow-up" : "Snooze follow-up 7 days") + '">' + icon("bell", 13) + "</button>" : "") +
         (can ? '<button class="icon-btn btn-sm" data-lead-edit="' + esc(l.id) + '" title="Edit">' + icon("edit", 13) + "</button>" : "") +
       "</div>" +
       '<div class="lead-card-meta">' +
+        (snoozing ? '<div style="margin-bottom:4px"><span class="badge purple">' + icon("bell", 11) + " Snoozed until " + esc(snzAt.toLocaleDateString()) + "</span></div>" : "") +
         (fu ? '<div style="margin-bottom:4px"><span class="badge ' + fu.cls + '">' + icon("calendar", 11) + " " + fu.label + "</span></div>" : "") +
         (l.budget || l.askingPrice || l.rentBudget ? '<div class="lead-card-budget">' + leadBudget(l) + "</div>" : "") +
         '<div class="dim tiny">' + icon("pin", 11) + " " + esc(l.source ? leadSourceLabel(l.source) : "—") + "</div>" +
@@ -11401,8 +11760,11 @@ premise: "Fee Simple / As Improved",
     const all = leadFiltered();
     const cols = LEAD_STATUSES.map(s => {
       const items = all.filter(l => l.status === s[0]);
+      const showMore = leadColExpanded[s[0]];
+      const shown = showMore ? items : items.slice(0, 30);
       return '<div class="lead-col"><div class="lead-col-head"><span class="badge ' + s[2] + '">' + esc(s[1]) + "</span><span class='dim tiny'>" + items.length + "</span></div><div class='lead-col-body'>" +
-        (items.length ? items.map(leadCard).join("") : '<div class="lead-col-empty dim tiny">No leads</div>') +
+        (shown.length ? shown.map(leadCard).join("") : '<div class="lead-col-empty dim tiny">No leads</div>') +
+        (items.length > shown.length ? '<button class="btn btn-ghost btn-sm mt-8" data-lead-show-more="' + esc(s[0]) + '">Show ' + (items.length - shown.length) + " more</button>" : "") +
         "</div></div>";
     }).join("");
     return '<div class="lead-board">' + cols + "</div>";
@@ -11537,12 +11899,13 @@ premise: "Fee Simple / As Improved",
     save(); render(); syncLead(lead);
     toast(created ? "Calendar event scheduled" : "Calendar event updated");
   }
-  function calendarDeleteEvent() {
+  async function calendarDeleteEvent() {
     const modal = $("#ce-modal");
     if (!modal) return;
     const lead = leadScope().find(l => l.id === modal.getAttribute("data-lead-id"));
     const eventId = modal.getAttribute("data-event-id");
-    if (!lead || !eventId || !confirm("Delete this calendar event?")) return;
+    if (!lead || !eventId) return;
+    if (!(await confirmModal({ title: "Delete event", message: "Delete this calendar event?", danger: true, confirmLabel: "Delete" }))) return;
     lead.calendarEvents = (lead.calendarEvents || []).filter(ev => ev.id !== eventId);
     lead.updatedAt = new Date().toISOString();
     closeCalendarEventModal();
@@ -11783,7 +12146,7 @@ premise: "Fee Simple / As Improved",
     const $v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
     const $n = id => { const el = document.getElementById(id); return el ? C.num(el.value, 0) : 0; };
     const name = $v("ld-name");
-    if (!name) { toast("Lead name is required", "err"); return; }
+    if (!name) { fieldInErr("ld-name", "Lead name is required"); return; }
     const m = $("#ld-modal");
     const editId = m ? (m.getAttribute("data-edit-id") || "") : "";
     const rec = editId ? ((state.leads || []).find(x => x.id === editId) || {}) : {};
@@ -11859,6 +12222,27 @@ premise: "Fee Simple / As Improved",
     save(); render();
     syncLead(l);
     toast("Lead status updated");
+  }
+  function leadSnooze(id, days) {
+    const l = (leadScope() || []).find(x => x.id === id);
+    if (!l) return;
+    if (!leadCanEdit(l)) { toast("You can only edit leads you created", "err"); return; }
+    if (days > 0) {
+      const until = new Date(Date.now() + days * 86400000);
+      l.snoozedUntil = until.toISOString();
+      l.updatedAt = new Date().toISOString();
+      l.activity = l.activity || [];
+      l.activity.push({ date: l.updatedAt, text: "Follow-up snoozed until " + until.toLocaleDateString() });
+      save(); render();
+      toast("Follow-up snoozed until " + esc(until.toLocaleDateString()), "ok");
+    } else {
+      delete l.snoozedUntil;
+      l.updatedAt = new Date().toISOString();
+      l.activity = l.activity || [];
+      l.activity.push({ date: l.updatedAt, text: "Follow-up unsnoozed" });
+      save(); render();
+      toast("Follow-up unsnoozed", "ok");
+    }
   }
   function leadAddActivity(id) {
     const inp = $("#lead-new-act");
@@ -12017,11 +12401,11 @@ premise: "Fee Simple / As Improved",
     setTimeout(() => { root.innerHTML = ""; root.style.display = "none"; }, 2500);
     toast("Call sheet opened — choose 'Save as PDF'");
   }
-  function leadDelete(id) {
+  async function leadDelete(id) {
     const l = (state.leads || []).find(x => x.id === id);
     if (!l) return;
     if (!leadCanEdit(l)) { toast("You can only edit leads you created", "err"); return; }
-    if (!confirm('Delete lead "' + (l.name || "") + '"?')) return;
+    if (!(await confirmModal({ title: "Delete lead", message: 'Delete lead "' + (l.name || "") + '"?', danger: true, confirmLabel: "Delete" }))) return;
     state.leads = state.leads.filter(x => x.id !== id);
     if (state.leadDetail === id) state.leadDetail = null;
     save(); render(); toast("Lead deleted", "err");
@@ -12034,6 +12418,8 @@ premise: "Fee Simple / As Improved",
       document.addEventListener("click", e => {
         const mode = e.target.closest("[data-lead-mode]");
         if (mode) { state.leadMode = mode.getAttribute("data-lead-mode"); save(); render(); return; }
+        const showMore = e.target.closest("[data-lead-show-more]");
+        if (showMore) { leadColExpanded[showMore.getAttribute("data-lead-show-more")] = true; scopedRender("#lead-results", leadBoardHTML()); return; }
         const calEvent = e.target.closest("[data-cal-event]");
         if (calEvent) { e.stopPropagation(); openCalendarEventEditor("", calEvent.getAttribute("data-cal-lead"), calEvent.getAttribute("data-cal-event")); return; }
         const calNew = e.target.closest("[data-cal-new]");
@@ -12050,6 +12436,8 @@ premise: "Fee Simple / As Improved",
         if (calCancel) { closeCalendarEventModal(); return; }
         const ed = e.target.closest("[data-lead-edit]");
         if (ed) { e.stopPropagation(); openLeadEditor(ed.getAttribute("data-lead-edit")); return; }
+        const snz = e.target.closest("[data-lead-snooze]");
+        if (snz) { e.stopPropagation(); leadSnooze(snz.getAttribute("data-lead-snooze"), Number(snz.getAttribute("data-snz-days")) || 0); return; }
         const open = e.target.closest("[data-lead-open]");
         if (open) { state.leadDetail = open.getAttribute("data-lead-open"); save(); render(); return; }
         const back = e.target.closest("[data-lead-back]");
@@ -12109,8 +12497,7 @@ premise: "Fee Simple / As Improved",
       el.addEventListener(evt || "change", () => {
         state.leadFilters[key] = el.value;
         save();
-        const res = $("#lead-results");
-        if (res) res.innerHTML = leadBoardHTML();
+        scopedRender("#lead-results", leadBoardHTML());
       });
     };
     bind("lf-q", "q", "input");
@@ -12413,7 +12800,8 @@ premise: "Fee Simple / As Improved",
   async function removePlaybook(id) {
     if (!playbookAllowed()) { toast("Super Admin access required", "err"); return; }
     const rec = (state.salesPlaybooks || []).find(x => x.id === id);
-    if (!rec || !confirm('Permanently delete "' + rec.title + '"?')) return;
+    if (!rec) return;
+    if (!(await confirmModal({ title: "Delete playbook", message: 'Permanently delete "' + rec.title + '"?', danger: true, confirmLabel: "Delete", typeToConfirm: "DELETE" }))) return;
     try { await deletePlaybookCloud(id); state.salesPlaybooks = state.salesPlaybooks.filter(x => x.id !== id); if (!playbookUsesCloud()) save(); render(); toast("Playbook deleted", "err"); }
     catch (error) { toast("Could not delete playbook: " + esc(friendlyErr(error.message)), "err"); }
   }
@@ -12845,12 +13233,12 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     if (cloudAccountSaving) return;
     const $v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
     const name = $v("cu-name"), email = $v("cu-email"), role = $v("cu-role") || "buyer";
-    if (!name) { toast("Full name is required", "err"); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { toast("Enter a valid email address", "err"); return; }
+    if (!name) { fieldInErr("cu-name", "Full name is required"); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { fieldInErr("cu-email", "Enter a valid email address"); return; }
     const pass = $v("cu-pass"), prc = $v("cu-prc"), resa = $v("cu-resa"), agency = $v("cu-agency"), broker = $v("cu-broker");
-    if (!currentUser.demo && !pass) { toast("Temporary password is required", "err"); return; }
-    if (role === "broker" && !prcValid(prc)) { toast("A valid PRC license is required for brokers", "err"); return; }
-    if (role === "agent" && !broker) { toast("Agents must be linked to a supervising broker", "err"); return; }
+    if (!currentUser.demo && !pass) { fieldInErr("cu-pass", "Temporary password is required"); return; }
+    if (role === "broker" && !prcValid(prc)) { fieldInErr("cu-prc", "A valid PRC license is required for brokers"); return; }
+    if (role === "agent" && !broker) { fieldInErr("cu-broker", "Agents must be linked to a supervising broker"); return; }
     if (currentUser.demo) {
       closeCloudUserModal();
       remoteProfiles.unshift({ id: "demo-add-" + Date.now().toString(36), email: email, full_name: name, role: role, registration_status: "pending", requested_role: role, prc: prc || "", resa: resa || "", agency: agency || "", broker: broker || "" });
@@ -12907,6 +13295,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
       const tab = (["pending", "approved", "rejected", "all"].indexOf(state.usersTab) >= 0) ? state.usersTab : "pending";
       const srcBadge = currentUser.demo ? '<span class="chip">Demo data</span>' : (roleIs("super-admin") ? '<span class="chip">Live Supabase</span>' : "");
       const shown = tab === "all" ? remoteProfiles : remoteProfiles.filter(u => u.registration_status === tab);
+      const filteredShown = shown.filter(u => (!userFiltQ || [u.full_name, u.email, u.agency].join(" ").toLowerCase().indexOf(userFiltQ) >= 0) && (!userFiltRole || u.role === userFiltRole));
       const tabsHtml = '<div class="tabs">' +
         '<button class="tab' + (tab === "pending" ? " active" : "") + '" data-users-tab="pending">Pending (' + pending + ")</button>" +
         '<button class="tab' + (tab === "approved" ? " active" : "") + '" data-users-tab="approved">Approved (' + approved + ")</button>" +
@@ -12929,8 +13318,8 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
       } else if (!remoteProfilesLoaded) {
         gridHtml = '<div class="card card-pad empty">Loading registrations...</div>';
       } else if (shown.length) {
-        gridHtml = shown.map(cloudUserCard).join("");
-      } else if (tab === "pending" && remoteProfiles.length > 0) {
+        gridHtml = filteredShown.length ? paginateRows(filteredShown, "users").map(cloudUserCard).join("") + paginationBar("users") : "";
+      } else if (tab === "pending" && remoteProfiles.length > 0 && !userFiltQ && !userFiltRole) {
         gridHtml = '<div class="card card-pad empty">' + icon("check", 40) + '<h3>No pending registrations</h3><p class="dim">There are ' + remoteProfiles.length + ' account(s) on file, but none are awaiting approval. Accounts created via <b>Add Account</b> are auto-approved — check the <b>Approved</b> tab.</p>' +
           '<div class="row mt-8" style="justify-content:center;gap:8px"><button class="btn btn-ghost btn-sm" data-users-tab="approved">View Approved</button><button class="btn btn-ghost btn-sm" data-users-tab="all">View All</button></div></div>';
       } else {
@@ -12955,7 +13344,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     html += '<div class="ls-stat-row">' +
       lsStat("Total users", users.length) + lsStat("Brokers", brokers.length) + lsStat("Agents", agents.length) +
       lsStat("Owners", users.filter(u => u.role === "owner").length) + lsStat("Buyers/Clients", users.filter(u => u.role === "buyer").length) + lsStat("Sellers/Developers", users.filter(u => u.role === "seller").length) + "</div>";
-    html += '<div class="user-grid mt-16">' + (users.length ? users.map(userCard).join("") : '<div class="card card-pad empty">No users yet.</div>') + "</div>";
+    html += '<div class="user-grid mt-16">' + (users.length ? paginateRows(users, "users").map(userCard).join("") : '<div class="card card-pad empty">No users yet.</div>') + "</div>" + paginationBar("users");
     html += '<div class="notice-banner mt-16">' + icon("shield", 14) + ' <span>Per RA 9646 (Real Estate Service Act), real estate <b>agents</b> must operate under a licensed <b>broker</b>. Broker PRC license numbers and RESA accreditation are shown on listings and agent profiles for DHSUD/PRC advertising compliance.</span></div>';
     return html + '</section>';
   }
@@ -12991,10 +13380,14 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
   function userSaveForm() {
     const $v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
     const name = $v("us-name"), email = $v("us-email");
-    if (!name || !email) { toast("Name and email are required", "err"); return; }
+    if (!name || !email) {
+      if (!name) fieldInErr("us-name", "Full name is required");
+      if (!email) fieldInErr("us-email", "Email is required");
+      return;
+    }
     const role = $v("us-role") || "buyer", prc = $v("us-prc"), broker = $v("us-broker");
-    if (role === "broker" && !prcValid(prc)) { toast("A valid 6–7 digit or 12-digit PRC license is required for brokers", "err"); return; }
-    if (role === "agent" && !broker) { toast("Agents must be linked to a supervising broker", "err"); return; }
+    if (role === "broker" && !prcValid(prc)) { fieldInErr("us-prc", "A valid 6–7 digit or 12-digit PRC license is required for brokers"); return; }
+    if (role === "agent" && !broker) { fieldInErr("us-broker", "Agents must be linked to a supervising broker"); return; }
     const m = $("#us-modal");
     const editId = m ? (m.getAttribute("data-edit-id") || "") : "";
     const rec = editId ? ((state.users || []).find(x => x.id === editId) || {}) : {};
@@ -13016,7 +13409,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     save(); render();
     toast(editId ? "User updated" : "User added");
   }
-  function userDeleteForm(id) {
+  async function userDeleteForm(id) {
     if (!canManageUsers()) { toast("You don't have permission to manage users", "err"); return; }
     const u = (state.users || []).find(x => x.id === id);
     if (!u) { toast("User not found", "err"); return; }
@@ -13026,7 +13419,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     if (linkedOwner && !allowPmsOwnerDeletion(linkedOwner)) return;
     const linked = u.pmsOwnerId || u.pmsTenantId;
     const note = u.pmsOwnerId ? " The linked Property Management owner will also be deleted." : (linked ? " This user is linked to a PMS record." : "");
-    if (!confirm("Delete " + (u.name || u.email) + "? Their login and access will be removed." + note)) return;
+    if (!(await confirmModal({ title: "Delete user", message: "Delete " + (u.name || u.email) + "? Their login and access will be removed." + note, danger: true, confirmLabel: "Delete" }))) return;
     state.users = (state.users || []).filter(x => x.id !== id);
     let auth = [];
     try { auth = JSON.parse(localStorage.getItem("esrealty_users") || "[]"); } catch (e) {}
@@ -13178,7 +13571,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     if (!canManageUsers()) { toast("You don't have permission to manage users", "err"); return; }
     const p = remoteProfiles.find(x => x.id === id);
     const name = p ? (p.full_name || p.email) : id;
-    if (!confirm("Reset the password for " + name + "? A new temporary password will be generated — give it to the user in person.")) return;
+    if (!(await confirmModal({ title: "Reset password", message: "Reset the password for " + name + "? A new temporary password will be generated — give it to the user in person.", confirmLabel: "Reset password" }))) return;
     if (currentUser.demo) {
       const temp = randomTempPassword();
       showTempPasswordModal(name, temp);
@@ -13206,7 +13599,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     if (!canManageUsers()) { toast("You don't have permission to manage users", "err"); return; }
     const r = passwordResetRequests.find(x => String(x.user_id) === String(id));
     const name = r ? (r.full_name || r.email) : id;
-    if (!confirm("Cancel the password reset request for " + name + "? The user will not receive a new temporary password.")) return;
+    if (!(await confirmModal({ title: "Cancel reset", message: "Cancel the password reset request for " + name + "? The user will not receive a new temporary password.", confirmLabel: "Cancel request" }))) return;
     if (currentUser.demo) {
       passwordResetRequests = passwordResetRequests.filter(x => String(x.user_id) !== String(id));
       toast("Reset request cancelled");
@@ -13241,7 +13634,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     const linkedTenant = (pms().tenants || []).find(t => t.archived !== true && String(t.authUserId || "") === String(id));
     if (linkedTenant && !allowPmsTenantDeletion(linkedTenant)) return;
     if (p && p.registration_status !== "rejected") { toast("Only rejected accounts can be deleted", "err"); return; }
-    if (!confirm("Delete the account for " + name + "? This permanently removes the user, their profile, and their access. This cannot be undone.")) return;
+    if (!(await confirmModal({ title: "Delete account", message: "Delete the account for " + name + "? This permanently removes the user, their profile, and their access. This cannot be undone.", danger: true, confirmLabel: "Delete", typeToConfirm: "DELETE" }))) return;
     if (currentUser.demo) {
       remoteProfiles = remoteProfiles.filter(x => x.id !== id);
       removeLinkedPmsOwner(id);
@@ -13276,17 +13669,22 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
   function applyUsersFilters() {
     const search = String(($("#users-search") || {}).value || "").trim().toLowerCase();
     const role = String(($("#users-role-filter") || {}).value || "");
-    const cards = $$("#users-grid .cloud-user-card");
-    let visible = 0;
-    cards.forEach(card => {
-      const show = (!search || String(card.getAttribute("data-user-search") || "").indexOf(search) >= 0) && (!role || card.getAttribute("data-user-role") === role);
-      card.style.display = show ? "" : "none";
-      if (show) visible++;
-    });
-    const count = $("#users-visible-count");
-    if (count) count.textContent = visible + " account" + (visible === 1 ? "" : "s");
-    const empty = $("#users-filter-empty");
-    if (empty) empty.style.display = cards.length && !visible ? "" : "none";
+    if (search !== userFiltQ || role !== userFiltRole) {
+      userFiltQ = search;
+      userFiltRole = role;
+      const no = $("#users-filter-empty");
+      let visible = 0;
+      const virtual = userFilterTotal();
+      if (no) no.style.display = virtual > 0 ? "none" : "";
+      const count = $("#users-visible-count");
+      if (count) count.textContent = virtual + " account" + (virtual === 1 ? "" : "s");
+      const cards = $$("#users-grid .cloud-user-card");
+      cards.forEach(card => {
+        const show = (!search || String(card.getAttribute("data-user-search") || "").indexOf(search) >= 0) && (!role || card.getAttribute("data-user-role") === role);
+        card.style.display = show ? "" : "none";
+        if (show) visible++;
+      });
+    }
   }
   function bindUsers() {
     if ((SB && currentUser && currentUser.id) || (currentUser && currentUser.demo)) loadCloudProfiles();
@@ -13490,7 +13888,8 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     const doc = (state.docVault || []).find(d => d.id === id);
     const sharedTx = (state.transactions || []).find(t => (t.documents || []).some(d => d.id === id));
     const target = doc || (sharedTx && (sharedTx.documents || []).find(d => d.id === id));
-    if (!target || !confirm('Remove "' + (target.name || "document") + '" from this record?')) return;
+    if (!target) return;
+    if (!(await confirmModal({ title: "Remove document", message: 'Remove "' + (target.name || "document") + '" from this record?', danger: true, confirmLabel: "Remove" }))) return;
     if (target.storagePath && SB) { try { await SB.storage.from(VAULT_BUCKET).remove([target.storagePath]); } catch (cloudErr) {} }
     state.docVault = (state.docVault || []).filter(d => d.id !== id);
     if (sharedTx) { sharedTx.documents = (sharedTx.documents || []).filter(d => d.id !== id); sharedTx.updatedAt = new Date().toISOString(); persistTransactionToCloud(sharedTx); }
@@ -13878,14 +14277,29 @@ const ccBtn = e.target.closest("[data-cc-calc]");
   function txCard(t) {
     const c = txCompute(t);
     const lt = txLinkedTitle(t);
+    const can = txCanManage();
     return '<div class="tx-card card card-pad" data-tx-open="' + esc(t.id) + '">' +
       '<div class="row spread"><div class="grow"><div class="tx-title">' + esc(t.title || "Untitled transaction") + "</div>" +
-      '<div class="dim tiny">' + esc(t.ref || "") + " · " + esc(t.buyerName || "Buyer") + (t.sellerName ? " ← " + esc(t.sellerName) : "") + (lt ? " · " + esc(lt) : "") + '</div></div><div class="row" style="gap:6px">' + txStatusBadge(t.stage) + '<button class="btn btn-ghost btn-sm" data-tx-print="' + esc(t.id) + '" title="Print transaction">' + icon("print", 13) + ' Print</button></div></div>' +
+      '<div class="dim tiny">' + esc(t.ref || "") + " · " + esc(t.buyerName || "Buyer") + (t.sellerName ? " ← " + esc(t.sellerName) : "") + (lt ? " · " + esc(lt) : "") + '</div></div><div class="row" style="gap:6px">' +
+      (can ? '<label style="background:#fff;border:1px solid #cbd4df;border-radius:5px;padding:2px 5px;cursor:pointer" title="Select for bulk actions"><input type="checkbox" data-tx-bulk="' + esc(t.id) + '"' + ((window._txBulkSel || []).indexOf(t.id) >= 0 ? " checked" : "") + '></label>' : "") +
+      txStatusBadge(t.stage) + (t.feePaid ? '<span class="badge green">Fee received</span>' : "") + '<button class="btn btn-ghost btn-sm" data-tx-print="' + esc(t.id) + '" title="Print transaction">' + icon("print", 13) + ' Print</button></div></div>' +
       '<div class="row mt-8" style="gap:16px"><div><div class="tx-price">' + C.money(c.price) + '</div><div class="dim tiny">Price</div></div>' +
       '<div><div class="tx-price">' + C.money(c.monthly) + '</div><div class="dim tiny">Est. monthly (loan)</div></div>' +
       '<div><div class="tx-price">' + C.money(c.dpTotal) + '</div><div class="dim tiny">Down payment</div></div></div>' +
       (t.stage === "doas" || t.stage === "done" ? '<div class="mt-8"><div class="dim tiny">Closing costs (est.)</div><div class="tx-price">' + C.money(txCostEstimator(t).total) + "</div></div>" : "") +
       "</div>";
+  }
+  function txResultsHTML() {
+    const arr = transactionScope().slice().filter(t => !t.voided).sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
+    const can = txCanManage();
+    let inner = arr.length ? '<div class="tx-grid mt-16">' + paginateRows(arr, "transactions").map(txCard).join("") + "</div>" + paginationBar("transactions") : '<div class="card card-pad empty mt-16">' + icon("file", 40) + "<h3>No transactions yet</h3><p>Start a reservation to track a deal through closing.</p></div>";
+    if (arr.length && can && (window._txBulkSel || []).length) {
+      inner = '<div class="card card-pad mb-16" id="tx-bulkbar"><b>' + window._txBulkSel.length + ' selected</b> &nbsp; ' +
+        '<button class="btn btn-ghost btn-sm" data-tx-bulk-act="paid">Mark Fee Received</button>' +
+        '<button class="btn btn-danger btn-sm" data-tx-bulk-act="void">Void</button>' +
+        '<button class="btn btn-ghost btn-sm" data-tx-bulk-act="clear">Clear selection</button></div>' + inner;
+    }
+    return '<div id="tx-results">' + inner + "</div>";
   }
   function renderTransactions() {
     if (state.txDetail) {
@@ -13897,8 +14311,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     let html = '<div class="hero"><div><h1>Transactions</h1><p>Reservation &rarr; Contract to Sell &rarr; Deed of Absolute Sale &rarr; Completed, with computation sheets and closing-cost estimates.</p></div>' +
       '<div class="actions">' + (canManageTx ? '<button class="btn btn-primary" data-tx-new>' + icon("plus", 15) + " New Transaction</button>" : "") + "</div></div>";
     html += roleIs("agent") ? '<div class="notice-banner">' + icon("shield", 14) + '<span>Read-only transactions shared by your linked licensed broker.</span></div>' : '<div class="notice-banner">' + icon("shield", 14) + ' <span>Computation sheets and transfer-cost figures are <b>estimates only</b>, subject to verification by the LGU, BIR, Registry of Deeds, and notary. This system does not provide legal or tax advice. Have a licensed broker or lawyer review documents before signing.</span></div>';
-    const arr = transactionScope().slice().sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
-    html += arr.length ? '<div class="tx-grid mt-16">' + arr.map(txCard).join("") + "</div>" : '<div class="card card-pad empty mt-16">' + icon("file", 40) + "<h3>No transactions yet</h3><p>Start a reservation to track a deal through closing.</p></div>";
+    html += txResultsHTML();
     return html;
   }
   function txRow(k, v) { return "<tr><td>" + k + "</td><td>" + (v === "" || v === null ? "—" : v) + "</td></tr>"; }
@@ -13913,10 +14326,14 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     const lt = txLinkedTitle(t);
     const ltLink = lt && t.listingId ? (state.listings || []).find(x => x.id === t.listingId) : null;
     let html = '<div class="hero"><div><button class="btn btn-ghost btn-sm" data-tx-back>' + icon("back", 13) + " Back to transactions</button>" +
-      '<h1 class="mt-8">' + esc(t.title || "Transaction") + "</h1><div class='row mt-8' style='gap:8px'>" + txStatusBadge(t.stage) + '<span class="badge blue">' + esc(t.ref || "") + "</span></div></div>" +
+      '<h1 class="mt-8">' + esc(t.title || "Transaction") + "</h1><div class='row mt-8' style='gap:8px'>" + txStatusBadge(t.stage) + (t.feePaid ? '<span class="badge green">Fee received</span>' : "") + '<span class="badge blue">' + esc(t.ref || "") + "</span></div></div>" +
       '<div class="actions"><button class="btn btn-ghost btn-sm" data-tx-print="' + esc(t.id) + '">' + icon("print", 14) + ' Print Transaction</button>' + (canManageTx ? '<button class="btn btn-ghost btn-sm" data-tx-edit="' + esc(t.id) + '">' + icon("edit", 14) + " Edit</button>" +
       (t.stage !== "done" ? '<button class="btn btn-primary" data-tx-advance="' + esc(t.id) + '">' + icon("arrow", 14) + " Advance to " + esc((txStageCfg(TX_STAGE_ORDER[Math.min(TX_STAGE_ORDER.indexOf(t.stage) + 1, TX_STAGE_ORDER.length - 1)]).label)) + "</button>" : "") +
       '<button class="btn btn-ghost btn-sm" data-tx-del="' + esc(t.id) + '">' + icon("trash", 14) + " Delete</button>" : "") + "</div></div>";
+    if (t.voided) {
+      html += '<div class="notice-banner err mt-16">' + icon("alert", 14) + ' <span>This transaction was voided on <b>' + esc((t.voidedAt || "").slice(0, 10) || "—") + "</b>" + (t.voidedBy ? " by <b>" + esc(t.voidedBy) + "</b>" : "") + '. It is hidden from the transaction list. Restore it to bring it back.</span>' +
+        '<div class="mt-8"><button class="btn btn-primary btn-sm" data-tx-restore>' + icon("refresh", 14) + " Restore transaction</button></div></div>";
+    }
     html += '<div class="grid grid-3 mb-24">';
     html += '<div class="card card-pad" style="grid-column:span 2"><h3>Parties</h3><div class="table-wrap mt-8"><table class="data"><tbody>' +
       txRow("Linked listing", lt ? (ltLink ? '<a class="link" data-tx-goto-listing="' + esc(ltLink.id) + '">' + esc(lt) + "</a>" : esc(lt)) : "") +
@@ -14048,7 +14465,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     const $v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ""; };
     const $n = id => { const el = document.getElementById(id); return el ? C.num(el.value, 0) : 0; };
     const title = $v("tx-title");
-    if (!title) { toast("Transaction title is required", "err"); return; }
+    if (!title) { fieldInErr("tx-title", "Transaction title is required"); return; }
     const m = $("#tx-modal");
     const editId = m ? (m.getAttribute("data-edit-id") || "") : "";
     const rec = editId ? ((state.transactions || []).find(x => x.id === editId) || {}) : {};
@@ -14101,11 +14518,11 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     persistTransactionToCloud(t);
     toast("Transaction → <b>" + esc(txStageCfg(next).label) + "</b> (" + esc(prevLabel) + " completed)");
   }
-  function txDelete(id) {
+  async function txDelete(id) {
     if (!txCanManage()) { toast("Transactions shared with agents are read-only", "err"); return; }
     const t = transactionScope().find(x => x.id === id);
     if (!t) return;
-    if (!confirm('Delete transaction "' + (t.title || "") + '"?')) return;
+    if (!(await confirmModal({ title: "Delete transaction", message: 'Delete transaction "' + (t.title || "") + '"?', danger: true, confirmLabel: "Delete" }))) return;
     state.transactions = state.transactions.filter(x => x.id !== id);
     state.docVault = (state.docVault || []).filter(d => !(d.ownerType === "tx" && d.ownerId === id));
     if (state.commission && state.commission.payouts) {
@@ -14152,6 +14569,8 @@ const ccBtn = e.target.closest("[data-cc-calc]");
         if (cc) { closeTxModal(); return; }
         const vl = e.target.closest("[data-tx-vault]");
         if (vl) { openVault("tx", vl.getAttribute("data-tx-vault"), "Transaction Documents"); return; }
+        const rest = e.target.closest("[data-tx-restore]");
+        if (rest) { const t = (state.transactions || []).find(x => x.id === state.txDetail); if (t) { t.voided = false; delete t.voidedAt; delete t.voidedBy; t.updatedAt = new Date().toISOString(); save(); } render(); toast("Transaction restored", "ok"); return; }
       });
       document.addEventListener("change", e => {
         const ch = e.target.closest("[data-tx-chk]");
@@ -14192,6 +14611,23 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     if (!state.commission.payouts.find(x => x.transactionId === t.id)) {
       state.commission.payouts.push({ transactionId: t.id, status: "pending", createdAt: new Date().toISOString() });
     }
+  }
+  function ensurePayoutAll() {
+    brokerageTransactions().forEach(t => ensurePayout(t));
+  }
+  async function payoutGenerateAll(btn) {
+    if (!can("payout.approve")) { toast("You don't have permission to generate payouts", "err"); return; }
+    const missings = brokerageTransactions().filter(t => (t.stage === "doas" || t.stage === "done") && !brokeragePayouts().find(x => x.transactionId === t.id));
+    if (!missings.length) { toast("No closed deals are waiting for a payout"); return; }
+    const confirmed = await confirmModal({
+      title: "Generate pending payouts?",
+      message: "This creates a Pending payout record for each closed deal (DOAS / Completed) that does not have one yet: " + missings.length + " deal(s). You can mark each one Paid individually afterwards.",
+      confirmLabel: "Generate payouts",
+      danger: false
+    });
+    if (!confirmed) return;
+    ensurePayoutAll();
+    save(); render(); toast("Generated pending payouts for " + missings.length + " closed deal(s)", "ok");
   }
   function adminTabAllowed(tab) {
     const capability = { overview: "brokerage.view", commission: "commission.manage", payouts: "payout.approve", analytics: "brokerage.view", cobroke: "brokerage.view", inventory: "inventory.view" };
@@ -14399,18 +14835,19 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     return html;
   }
   function adminPayouts() {
-    ensurePayoutAll();
     const transactions = brokerageTransactions();
     const payouts = brokeragePayouts().slice().reverse();
-    let html = '<div class="card card-pad"><h3>Payout History</h3>' + (payouts.length ?
+    const missings = transactions.filter(t => (t.stage === "doas" || t.stage === "done") && !brokeragePayouts().find(x => x.transactionId === t.id));
+    const pendingCount = payouts.filter(p => p.status === "pending").length;
+    let html = '<div class="card card-pad"><div class="row" style="gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap"><h3>Payout History</h3>' +
+      '<button class="btn btn-primary btn-sm" data-payouts-generate' + (missings.length ? "" : " disabled") + '>' + icon("play", 13) + " Generate pending payouts" + (missings.length ? " (" + missings.length + ")" : "") + "</button></div>" +
+      (pendingCount ? '<div class="dim tiny mt-4">' + pendingCount + " payout(s) still pending — mark them paid individually below.</div>" : "") +
+      (payouts.length ?
       '<div class="table-wrap mt-8"><table class="data"><thead><tr><th>Transaction</th><th>Gross commission</th><th>Status</th><th>Mark</th></tr></thead><tbody>' +
       payouts.map(p => { const t = transactions.find(x => x.id === p.transactionId); const c = t ? commissionFor(t) : { gross: 0 }; return "<tr><td>" + esc((t && t.title) || p.transactionId) + "</td><td>" + C.money(c.gross) + "</td><td>" + (p.status === "paid" ? '<span class="badge green">Paid' + (p.paidAt ? " · " + new Date(p.paidAt).toLocaleDateString() : "") + "</span>" : '<span class="badge gold">Pending</span>') + "</td><td>" +
         (p.status === "paid" ? '<button class="btn btn-ghost btn-sm" data-payout="' + esc(p.transactionId) + '" data-payout-status="pending">Revert</button>' : '<button class="btn btn-primary btn-sm" data-payout="' + esc(p.transactionId) + '" data-payout-status="paid">Mark paid</button>') + "</td></tr>"; }).join("") +
       "</tbody></table></div>" : '<div class="dim mt-8">No payouts yet.</div>') + "</div>";
     return html;
-  }
-  function ensurePayoutAll() {
-    brokerageTransactions().forEach(t => ensurePayout(t));
   }
   async function loadTeamPerformance() {
     if (state.teamPerformanceLoaded) return;
@@ -14546,6 +14983,8 @@ const ccBtn = e.target.closest("[data-cc-calc]");
         if (cs) { adminComSave(); return; }
         const po = e.target.closest("[data-payout]");
         if (po) { payoutMark(po.getAttribute("data-payout"), po.getAttribute("data-payout-status")); return; }
+        const pgen = e.target.closest("[data-payouts-generate]");
+        if (pgen) { payoutGenerateAll(pgen); return; }
         const tl = e.target.closest("[data-tl-toggle]");
         if (tl) { toggleLang(); return; }
         const ld = e.target.closest("[data-ls-dev]");
@@ -14560,7 +14999,6 @@ const ccBtn = e.target.closest("[data-cc-calc]");
         }
       });
     }
-    if (state.view === "admin" && (state.adminTab === "overview" || state.adminTab === "payouts")) ensurePayoutAll();
     if (state.view === "admin" && state.adminTab === "inventory" && Date.now() - (state.invLastSynced || 0) > 10000) refreshAdminInventory();
   }
 
@@ -14615,6 +15053,8 @@ const ccBtn = e.target.closest("[data-cc-calc]");
         '<button class="btn btn-primary" data-backup-json>' + icon("download", 15) + " Download full backup (.json)</button>" +
         '<button class="btn btn-ghost" data-backup-leads-csv>' + icon("download", 14) + " Leads CSV</button>" +
         '<button class="btn btn-ghost" data-backup-listings-csv>' + icon("download", 14) + " Listings CSV</button>" +
+        '<button class="btn btn-ghost" data-restore-json>' + icon("upload", 14) + " Restore workspace (.json)</button>" +
+        '<input type="file" id="st-restore-file" accept="application/json,.json" style="display:none">' +
         "</div>" +
         '<div class="dim tiny mt-8">The JSON backup also records a <b>storage manifest</b> listing every file in your <b>listing-photos</b> and <b>private-documents</b> buckets (file name, path, size, type, last-modified). Stored files are included as references, not bytes — use the manifest with Supabase Storage → Download to pull the actual files.</div></div>';
     }
@@ -14715,13 +15155,13 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     save();
     doFinish("Profile saved");
   }
-  function backupIsSecretKey(k) { return /pass(word)?|passwd|pwd|^pw$/i.test(String(k)); }
+  function backupIsSecretKey(k) { return /pass(word)?|passwd|pwd|^pw$|^pass$|secret|api[_-]?key|token|pin$/i.test(String(k)); }
   function backupStripObject(node) {
     if (!node || typeof node !== "object") return;
     if (Array.isArray(node)) { node.forEach(backupStripObject); return; }
     Object.keys(node).forEach(k => {
       if (backupIsSecretKey(k)) node[k] = undefined;
-      else backupStripObject(node[k]);
+      else if (node[k] && typeof node[k] === "object") backupStripObject(node[k]);
     });
   }
   function backupLocalUsers() {
@@ -14793,6 +15233,53 @@ const ccBtn = e.target.closest("[data-cc-calc]");
   function backupCsvRow(arr) {
     return arr.map(v => { const s = String(v == null ? "" : v).replace(/"/g, '""'); return /[",\n]/.test(s) ? '"' + s + '"' : s; }).join(",");
   }
+  function settingsRestoreFromFile(inputEl) {
+    const file = inputEl && inputEl.files && inputEl.files[0];
+    if (!file) return;
+    if (String(file.size || 0) > 20000000) { toast("Backup file too large (max 20 MB)", "err"); if (inputEl) inputEl.value = ""; return; }
+    const btn = $("[data-restore-json]");
+    const prevLabel = btn ? btn.innerHTML : "";
+    if (btn) { btn.disabled = true; btn.textContent = "Reading backup…"; }
+    const reader = new FileReader();
+    reader.onerror = () => { toast("Could not read the backup file", "err"); if (btn) { btn.disabled = false; btn.innerHTML = prevLabel; } if (inputEl) inputEl.value = ""; };
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result || ""));
+        if (!parsed || typeof parsed !== "object" || !parsed.workspace || typeof parsed.workspace !== "object" || Array.isArray(parsed.workspace)) {
+          throw new Error("Not an ES Realty backup file (missing workspace object)");
+        }
+        const ws = parsed.workspace;
+        if (!Array.isArray(ws.deals) && (ws.deals === undefined || ws.deals === null)) {
+          ws.deals = ws.deals || [];
+        }
+        const doRestore = async () => {
+          const confirmed = await confirmModal({
+            title: "Restore workspace backup?",
+            message: "This will replace your current workspace (deals, portfolio, listings, leads, settings) with the contents of this backup, then save. This cannot be undone. Back up your current workspace first if unsure.",
+            confirmLabel: "Restore workspace",
+            danger: true,
+            typeToConfirm: "RESTORE"
+          });
+          if (!confirmed) { toast("Restore cancelled"); if (btn) { btn.disabled = false; btn.innerHTML = prevLabel; } if (inputEl) inputEl.value = ""; return; }
+          ws.current = ws.current || null;
+          ws.view = ws.view || "dashboard";
+          state = Object.assign(state || {}, ws);
+          state.view = firstAllowedView();
+          save();
+          render({ keepScroll: false });
+          toast("Workspace restored from backup", "ok");
+          if (btn) { btn.disabled = false; btn.innerHTML = prevLabel; }
+          if (inputEl) inputEl.value = "";
+        };
+        doRestore();
+      } catch (e) {
+        toast("Restore failed: " + esc(friendlyErr(e.message || e)), "err");
+        if (btn) { btn.disabled = false; btn.innerHTML = prevLabel; }
+        if (inputEl) inputEl.value = "";
+      }
+    };
+    reader.readAsText(file);
+  }
   async function settingsBackupCsv(kind, btn) {
     if (btn) { btn.dataset.label = btn.innerHTML; btn.disabled = true; btn.textContent = "Preparing…"; }
     try {
@@ -14825,10 +15312,16 @@ const ccBtn = e.target.closest("[data-cc-calc]");
         if (cp) { settingsChangePassword(); return; }
         const bj = e.target.closest("[data-backup-json]");
         if (bj) { settingsBackupJson(bj); return; }
+        const rs = e.target.closest("[data-restore-json]");
+        if (rs) { const fi = document.getElementById("st-restore-file"); if (fi) fi.click(); return; }
         const bl = e.target.closest("[data-backup-leads-csv]");
         if (bl) { settingsBackupCsv("leads", bl); return; }
         const li = e.target.closest("[data-backup-listings-csv]");
         if (li) { settingsBackupCsv("listings", li); return; }
+      });
+      document.addEventListener("change", e => {
+        const fi = e.target && e.target.closest ? e.target.closest("#st-restore-file") : null;
+        if (fi) settingsRestoreFromFile(fi);
       });
     }
   }

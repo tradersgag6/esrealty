@@ -582,6 +582,43 @@ body .toast.err { border-left: 3px solid var(--red); }
 .print-root .rpt table { border-collapse: collapse; width: 100%; margin: 8px 0 16px; }
 .print-root .rpt td, .print-root .rpt th { border: 1px solid #CBD4DF; padding: 6px 10px; font-size: 12px; font-family: Georgia, serif; }
 .print-root .rpt h1 { color: #EA580C; }
+/* ==== Deal Summary print design ==== */
+.print-root .ds-wrap { font-family: Georgia, serif; color: #1B2430; line-height: 1.55; max-width: 820px; margin: 0 auto; padding: 28px 26px; }
+.print-root .ds-wrap table { border-collapse: collapse; width: 100%; margin: 8px 0 20px; }
+.print-root .ds-wrap td, .print-root .ds-wrap th { border: 1px solid #E3E9F1; padding: 7px 10px; font-size: 12px; vertical-align: top; }
+.print-root .ds-wrap h1 { font-size: 26px; color: #16202E; margin: 0; line-height: 1.2; }
+.print-root .ds-wrap h2 { font-size: 15px; color: #EA580C; border-bottom: 2px solid #F3CFBA; padding-bottom: 5px; margin: 22px 0 10px; }
+.print-root .ds-head { border-bottom: 3px solid #EA580C; padding-bottom: 16px; margin-bottom: 16px; }
+.print-root .ds-brand { font-size: 11px; letter-spacing: 0.22em; color: #EA580C; font-weight: 700; text-transform: uppercase; }
+.print-root .ds-brand em { font-style: normal; color: #98A5B8; font-weight: 400; letter-spacing: 0.1em; }
+.print-root .ds-title { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
+.print-root .ds-prop-name { font-size: 22px; font-weight: 700; color: #16202E; line-height: 1.25; }
+.print-root .ds-loc { font-size: 12px; color: #5B6B7E; margin-top: 3px; }
+.print-root .ds-grade { text-align: center; border: 2px solid #EA580C; border-radius: 12px; padding: 10px 18px; background: #FBF3EC; min-width: 128px; page-break-inside: avoid; break-inside: avoid; }
+.print-root .ds-grade .g { font-size: 23px; font-weight: 700; color: #EA580C; line-height: 1.1; }
+.print-root .ds-grade .v { font-size: 11px; color: #5B6B7E; margin-top: 3px; }
+.print-root .ds-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px 24px; margin-top: 14px; font-size: 12px; }
+.print-root .ds-meta b { color: #16202E; }
+.print-root .ds-meta span { color: #5B6B7E; }
+.print-root .ds-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 6px 0 20px; }
+.print-root .ds-kpi { border: 1px solid #E3E9F1; border-top: 3px solid var(--t, #EA580C); border-radius: 8px; padding: 10px 12px; page-break-inside: avoid; break-inside: avoid; }
+.print-root .ds-kpi .k { font-size: 10px; text-transform: uppercase; letter-spacing: 0.09em; color: #5B6B7E; }
+.print-root .ds-kpi .v { font-size: 19px; font-weight: 700; color: var(--t, #EA580C); margin-top: 3px; line-height: 1.2; }
+.print-root .ds-kpi .s { font-size: 10px; color: #98A5B8; margin-top: 2px; }
+.print-root .ds-sec { page-break-inside: auto; break-inside: auto; }
+.print-root .ds-kv th { width: 34%; background: #FAF6F1; color: #16202E; font-weight: 700; text-align: left; }
+.print-root .ds-kv td { color: #33404F; }
+.print-root .ds-kv .ds-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.print-root .ds-cos th { background: #EA580C; color: #FFFFFF; text-align: left; }
+.print-root .ds-cos th.ds-num, .print-root .ds-cos td.ds-num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.print-root .ds-total th, .print-root .ds-total td { background: #FDEDDE; font-weight: 700; border-top: 2px solid #EA580C; }
+.print-root .lv-hi { color: #D93025; font-weight: 700; }
+.print-root .lv-med { color: #B8860B; font-weight: 700; }
+.print-root .lv-lo { color: #0F9D58; font-weight: 700; }
+.print-root .ds-reco { border: 2px solid #EA580C; border-radius: 10px; padding: 14px 18px; background: #FBF3EC; margin: 8px 0 18px; page-break-inside: avoid; break-inside: avoid; }
+.print-root .ds-reco .hbu { display: inline-block; background: #EA580C; color: #FFFFFF; border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 700; margin: 8px 0 6px; }
+.print-root .ds-reco ul { margin: 6px 0 0 0; padding-left: 18px; font-size: 12px; }
+.print-root .ds-foot { margin-top: 26px; padding-top: 10px; border-top: 1px solid #E3E9F1; font-size: 10px; color: #98A5B8; }
 .print-root .tx-print-signatures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 48px; }
 .print-root .tx-print-signatures div { padding-top: 7px; border-top: 1px solid #333; text-align: center; font-size: 10px; }
 .print-root .fv-opinion { text-align: center; margin: 24px 0; padding: 20px 16px; border: 2px solid #EA580C; border-radius: 10px;     background: #FFF3E6; page-break-inside: avoid; break-inside: avoid; }
@@ -2991,4 +3028,20 @@ body .sf-results-bar select { height: 44px !important; }
 .sf-footer p { text-align: center; }
 @media (max-width: 760px) {
   .sf-footer p { margin: 0 auto; max-width: 90%; }
+}
+
+/* Mobile: keep consent checkboxes as compact native boxes instead of inheriting the
+   text-input sizing (16px font / 48px min-height / 14px padding / rounded corners)
+   applied to .sf-consent input below 760px. Larger specificity + later source order
+   wins over the generic mobile input rule. */
+@media (max-width: 760px) {
+  form .sf-consent input {
+    width: 18px !important;
+    height: 18px !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 1px 0 0 !important;
+    border-radius: 3px !important;
+    flex: none !important;
+  }
 }

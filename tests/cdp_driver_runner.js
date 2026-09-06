@@ -59,6 +59,30 @@ const { chromium: pw } = chromium;
     context = await browser.newContext({ viewport: { width: W, height: H } });
     page = await context.newPage();
     page.on("dialog", async d => { try { await d.accept(); } catch (e) { /* noop */ } });
+    await context.addInitScript(() => {
+      // Auto-confirm the in-app confirm modal (replaces native confirm auto-accept).
+      const autoConfirm = () => {
+        const ov = document.getElementById("cx-modal");
+        if (!ov || ov.dataset.autoconfirmed) return;
+        ov.dataset.autoconfirmed = "1";
+        const typeIn = document.getElementById("cx-type");
+        if (typeIn) { typeIn.value = typeIn.getAttribute("data-tc") || "DELETE"; typeIn.dispatchEvent(new Event("input", { bubbles: true })); }
+        const reasonIn = document.getElementById("cx-reason");
+        if (reasonIn) { reasonIn.value = "auto-confirm (e2e)"; reasonIn.dispatchEvent(new Event("input", { bubbles: true })); }
+        const ok = ov.querySelector("[data-cx-ok]");
+        const tryClick = () => {
+          if (!ok) return;
+          const ti2 = document.getElementById("cx-type");
+          const ri2 = document.getElementById("cx-reason");
+          if (ti2 && ti2.getAttribute("data-tc") && ti2.value === ti2.getAttribute("data-tc")) ok.disabled = false;
+          if (ri2 && String(ri2.value || "").trim().length > 0) ok.disabled = false;
+          if (!ok.disabled) ok.click();
+        };
+        tryClick();
+        if (ok && ok.disabled) { setTimeout(tryClick, 60); setTimeout(tryClick, 150); }
+      };
+      setInterval(autoConfirm, 50);
+    });
     await page.goto(Url, { waitUntil: "domcontentloaded", timeout: 60000 });
     await page.waitForTimeout(NavDelayMs);
 
