@@ -5,7 +5,7 @@
 // Serves http://localhost:8932/api/ping and /api/market-scan
 
 const http = require("http");
-const { runMarketScan } = require("./api/_lib");
+const { runMarketScan } = require("./lib/_lib");
 
 const PORT = parseInt(process.env.PORT || "8932", 10);
 

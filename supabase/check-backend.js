@@ -85,6 +85,52 @@ const FUNCTIONS = [
   },
 ];
 
+// Tables the app reads/writes through the REST API (publishable key). Missing
+// tables surface as PGRST205 on the client and break cloud features; this check
+// flags them before the app does. 200 = present, 404 = MISSING (run the SQL),
+// 401 = present but not REST-visible to the publishable key (expected for RLS).
+const REST = {
+  base: `https://${REF}.supabase.co/rest/v1`,
+  headers: {
+    apikey: "sb_publishable_OtrE6VXTJb4OrSCe6Z-f6g_qAcKyOvk",
+    Authorization: "Bearer sb_publishable_OtrE6VXTJb4OrSCe6Z-f6g_qAcKyOvk",
+  },
+};
+const REST_TABLES = [
+  { table: "shared_listings", note: "public listing store" },
+  { table: "public_listing_catalog", note: "catalog view the API serves" },
+  { table: "listing_inquiries", note: "inquiry submissions" },
+  { table: "storefront_inquiries", note: "contact/inquiry fallback" },
+  { table: "crm_leads", note: "CRM leads" },
+  { table: "profiles", note: "user profiles" },
+  { table: "app_state", note: "site settings live here" },
+  { table: "presell_projects", note: "presell projects" },
+  { table: "presell_payments", note: "presell payments" },
+  { table: "portfolio_accounts", note: "portfolio cloud (portfolio_a_investor.sql)" },
+  { table: "cash_entries", note: "portfolio cash ledger" },
+  { table: "construction_projects", note: "construction projects" },
+  { table: "construction_phases", note: "construction phases" },
+  { table: "construction_vendors", note: "construction vendors" },
+  { table: "construction_invoices", note: "construction invoices" },
+  { table: "construction_change_orders", note: "construction change orders" },
+  { table: "portfolio_proofs", note: "proof documents" },
+];
+
+async function probeTable(entry) {
+  const url = `${REST.base}/${entry.table}?select=*&limit=1`;
+  try {
+    const res = await fetch(url, { headers: REST.headers });
+    const got = res.status;
+    const ok = got === 200;
+    let extra = "";
+    if (got === 404) extra = "  <-- MISSING — run the matching supabase/*.sql";
+    if (got === 401) extra = "  [present but not REST-visible to publishable key]";
+    return { table: entry.table, note: entry.note, got, ok, extra };
+  } catch (e) {
+    return { table: entry.table, note: entry.note, got: "ERR", ok: false, extra: " [not reachable: " + (e && e.message || e) + "]" };
+  }
+}
+
 // Extract referenced env vars from each function source for the "must be set"
 // report. Managed/auto-injected vars (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 // are excluded from the "manual" list.
@@ -181,11 +227,24 @@ async function probe(base, p, fnName, optional) {
     console.log("  - " + r.var + "\n    " + r.desc + "\n    [" + kind + "]\n");
   });
 
-  // 4) Status summary
+  // 4) REST table presence check (publishable key — tells the app/client what the DB has)
+  console.log("=== REST TABLE PRESENCE ===\n");
+  const tableResults = [];
+  for (const entry of REST_TABLES) {
+    const r = await probeTable(entry);
+    tableResults.push(r);
+    const mark = r.ok ? "OK " : "FAIL";
+    console.log("  " + mark + "  " + r.table + (r.note ? "  (" + r.note + ")" : "") + "  ->  got " + r.got + r.extra);
+    if (!r.ok) ok = false;
+  }
+  console.log("");
+
+  // 5) Status summary
   const total = out.length, passed = out.filter(r => r.ok).length;
   const failed = out.filter(r => !r.ok);
+  const missingTables = tableResults.filter(r => !r.ok);
   console.log("=== SUMMARY ===\n");
-  console.log("Probes: " + passed + "/" + total);
+  console.log("Probes: " + passed + "/" + total + "   Tables present: " + (REST_TABLES.length - missingTables.length) + "/" + REST_TABLES.length);
 
   if (failed.length) {
     const blocking = failed.filter(r => !r.optional);
@@ -216,10 +275,17 @@ async function probe(base, p, fnName, optional) {
     console.log("ALL GOOD — every function is deployed and behaving as expected.");
   }
 
+  if (missingTables.length) {
+    console.log("\n=== MISSING REST TABLES (" + missingTables.length + ") ===\n");
+    missingTables.forEach(r => console.log("  " + r.table + "  ->  got " + r.got + r.extra + (r.note ? "  [" + r.note + "]" : "")));
+    console.log("  FIX: run the matching supabase/*.sql in the SQL Editor (e.g. portfolio_a_investor.sql for the portfolio_* / construction_* tables), then all good.");
+    console.log("");
+  }
+
   console.log("\nHow to read the check:");
   console.log("  - A route returning its EXPECTED status proves the function is DEPLOYED.");
   console.log("  - Protected routes expecting 401/403 prove auth is ENFORCED (not just deployed).");
   console.log("  - '404' = function not deployed; '401' on a public route = deploy with --no-verify-jwt.");
   console.log("  - 'ERR' (no HTTP status) usually means the function is NOT deployed at BASE.");
-  if (failed.some(r => !r.optional)) { process.exit(1); }
+  if (failed.some(r => !r.optional) || missingTables.length) { process.exit(1); }
 })();

@@ -4898,7 +4898,7 @@ html+='</div></div>';
       if (state.view === "portfolio") render();
     } catch (e) {
       const msg = String((e && e.message) || e || "").toLowerCase();
-      if (/does not exist|relation|42p01|querying schema|failed to fetch schema|database error/i.test(msg)) {
+      if (/does not exist|relation|42p01|querying schema|failed to fetch schema|database error|pgrst205|schema cache|could not find the table/i.test(msg)) {
         pfCloudWiring.available = false;
         pfCloudWiring.missing = true;
         pfCloudWiring.loaded = false;

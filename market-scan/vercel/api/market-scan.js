@@ -1,6 +1,6 @@
 "use strict";
 
-const { runMarketScan } = require("./_lib");
+const { runMarketScan } = require("../lib/_lib");
 
 function cors(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");

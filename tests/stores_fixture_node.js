@@ -7,7 +7,7 @@
 
 const https = require("https");
 const { EventEmitter } = require("events");
-const engine = require("../market-scan/vercel/api/store_chains.js");
+const engine = require("../market-scan/vercel/lib/store_chains.js");
 
 const realGet = https.get;
 const checks = [];

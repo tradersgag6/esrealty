@@ -147,7 +147,7 @@ create table if not exists public.construction_invoices (
   invoice_date date not null default current_date,
   amount numeric(14,2) not null check (amount > 0),
   status text not null default 'pending' check (status in ('pending','approved','paid')),
-  ledger_entry_id uuid references public.cash_entries(id) on delete set null,
+  ledger_entry_id uuid,
   paid_at timestamptz,
   created_by uuid references auth.users(id) on delete set null,
   created_at timestamptz not null default now(),
@@ -227,6 +227,15 @@ create table if not exists public.cash_entries (
 );
 exception when duplicate_table then null;
 end $$;
+-- construction_invoices FKs cash_entries, which is created above; adding the
+-- FK via ALTER here (instead of inline in the CREATE TABLE) avoids the
+-- 42P01 "relation public.cash_entries does not exist" forward-reference from
+-- the earlier construction_invoices DDL.
+do $$ begin
+  alter table public.construction_invoices add constraint construction_invoices_ledger_entry_fk
+    foreign key (ledger_entry_id) references public.cash_entries(id) on delete set null;
+exception when duplicate_object or duplicate_table then null;
+end $$;
 alter table public.cash_entries add column if not exists linked_presell_project_id uuid references public.presell_projects(id) on delete set null;
 -- add checks idempotently
 do $$ begin
@@ -297,5 +306,7 @@ create policy "portfolio proofs owner write" on public.portfolio_proofs for all
 drop trigger if exists portfolio_proofs_set_updated_at on public.portfolio_proofs;
 create trigger portfolio_proofs_set_updated_at before update on public.portfolio_proofs
   for each row execute function public.set_updated_at();
+
+notify pgrst, 'reload schema';
 
 commit;

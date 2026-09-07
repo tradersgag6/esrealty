@@ -1,6 +1,6 @@
 "use strict";
 
-const { findStores } = require("../store_chains");
+const { findStores } = require("../../lib/store_chains");
 
 module.exports = async function (req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");

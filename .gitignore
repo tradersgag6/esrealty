@@ -4,3 +4,6 @@ Desktop.ini
 node_modules/
 market-scan/worker/store/
 
+
+.vercel
+.env*

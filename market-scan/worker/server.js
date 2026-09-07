@@ -3,7 +3,7 @@
 // =====================================================================
 //  Market Scan worker (ES Realty) — runs on http://localhost:8932.
 //  Zero required deps: plain Node http wrapper around the shared engine
-//  (../vercel/api/_lib.js), plus:
+//  (../vercel/lib/_lib.js), plus:
 //    * listing history / price-drop tracking + live-median benchmarks (store.js)
 //    * Facebook Marketplace scraping via optional Playwright (scan-browser.js)
 //  The frontend uses this worker when the app runs on localhost and falls
@@ -12,8 +12,8 @@
 
 const http = require("http");
 const path = require("path");
-const { runMarketScan, mergeQueryDefaults, testListingMatch, htmlDecode } = require("../vercel/api/_lib.js");
-const { findStores } = require("../vercel/api/store_chains.js");
+const { runMarketScan, mergeQueryDefaults, testListingMatch, htmlDecode } = require("../vercel/lib/_lib.js");
+const { findStores } = require("../vercel/lib/store_chains.js");
 
 const storesCache = new Map();
 const inflight = new Map();

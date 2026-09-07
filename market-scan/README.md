@@ -21,7 +21,7 @@ The frontend (`js/app.js`, Market Scan view) calls `http://localhost:8932`
 - `worker/scan-browser.js` — Facebook Marketplace adapter via **optional**
   Playwright. Guards everything: if Playwright is missing, the worker still
   serves scans and reports `fb.available: false` honestly.
-- `vercel/api/_lib.js` — shared scraping engine (single source of truth).
+- `vercel/lib/_lib.js` — shared scraping engine (single source of truth).
   Sources: DotProperty, MyProperty, Google→DuckDuckGo→Bing web search,
   `site:` searches for Facebook / Instagram / TikTok / Lamudi / ZipMatch.
   Also exports the query-matching helpers used by the worker
@@ -31,7 +31,7 @@ The frontend (`js/app.js`, Market Scan view) calls `http://localhost:8932`
   has actually observed (store medians). No synthesized/offline data — when
   nothing has been observed for the requested area, the source is omitted.
 - `vercel/api/market-scan.js` — serverless handler for Vercel.
-- `vercel/api/store_chains.js` — **Store Locator** engine: real geocoded
+- `vercel/lib/store_chains.js` — **Store Locator** engine: real geocoded
   branch records from OpenStreetMap (Overpass + Nominatim). Honest rule — only chains
   with real found branches are returned; nothing is fabricated. Category
   filter (convenience / grocery / mini), `minBranches` gate, lazily-loading
@@ -46,7 +46,9 @@ The frontend (`js/app.js`, Market Scan view) calls `http://localhost:8932`
   Each response returns `coverage[]` (every scanned chain with its status:
   `found` / `zero` / `below-min` / `error`) and `warnings[]`.
 - `vercel/api/market-scan/stores.js` — serverless handler mirroring the
-  worker's `/api/market-scan/stores` path.
+  worker's `/api/market-scan/stores` path. Library modules live under
+  `vercel/lib/` on purpose — Vercel only auto-exposes `api/*.js` as
+  serverless functions, so shared engines must stay out of `api/`.
 - `UPGRADE_PROMPT.md` — analysis + implementation prompt that drove this
   upgrade (FB Marketplace scraper, richer fields, persistence, UI).
 - `STORE_LOCATOR_PROMPT.md` — feasibility analysis + prompt that drove the
