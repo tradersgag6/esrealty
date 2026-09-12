@@ -3,9 +3,11 @@
 // Local dev server for the Market Scan engine (replaces the PowerShell
 // HttpListener for testing). Run:  node server.js
 // Serves http://localhost:8932/api/ping and /api/market-scan
+// /api/market-scan uses the same two-tier cache handler as the Vercel function
+// (lib/handler.js); without KV env vars it degrades to the in-memory fallback.
 
 const http = require("http");
-const { runMarketScan } = require("./lib/_lib");
+const { handleMarketScan } = require("./lib/handler");
 
 const PORT = parseInt(process.env.PORT || "8932", 10);
 
@@ -36,7 +38,9 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === "/api/market-scan") {
       const query = {};
       for (const [k, v] of url.searchParams.entries()) query[k] = v;
-      send(200, await runMarketScan(query));
+      const { payload, cacheControl } = await handleMarketScan(query);
+      res.setHeader("Cache-Control", cacheControl);
+      send(200, payload);
       return;
     }
     send(404, { ok: false, error: "Not found: " + url.pathname });

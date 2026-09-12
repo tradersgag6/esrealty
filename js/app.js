@@ -1433,8 +1433,8 @@
       property: { name: "", region: "", province: "", city: "", barangay: "", address: "", lat: "", lng: "", landPolygon: [], plotArea: 0, lotArea: 200, frontage: 10, depth: 20, roadWidth: 8, roadType: "Barangay Road", landUse: "Residential", zoning: "Residential", floodRisk: "Low", propertyType: "Vacant Lot", titleKind: "", titleNo: "", lotNo: "", surveyNo: "", registryDeeds: "", structureType: "House", structures: [], yearBuilt: 0, floors: 1, existingFloorArea: 0, condition: "Good", improvementValue: 0, incomeGenerating: "No", monthlyIncome: 0, marketValuePerSqm: 0, birZonalPerSqm: 0, growthRate: 0.07, utilities: { Electricity: true, Water: true, Internet: true, Sewer: false } },
       purchase: { price: 4000000, negotiatedPrice: 3800000, sellerType: "Owner", taxes: 0, transferFees: 60000, legalFees: 50000, surveyCost: 30000, miscCost: 25000 },
       financing: { type: "Bank Loan", loanPct: 60, interestRate: 7.5, years: 15 },
-      development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far: 1.5, floorArea: 0, buildMonths: 14, siteDevPct: 8, profFeesPct: 6, permits: 150000, contingencyPct: 10, marketing: 0, amenities: 0, lots: 0, lotSqm: 0, roadPct: 20, openSpacePct: 10, lotDevCostPerSqm: 0, projectBudget: 0, units: 0, floors: 0, mixResPct: 0, carryingMonthly: 0 },
-      sales: { saleMode: "sell", sellPricePerSqm: 115000, landSellPricePerSqm: 22000, rentalRatePerSqm: 450, units: 6, saleablePct: 82, leasablePct: 70, occupancyPct: 90, opCostPct: 25, capRate: 0, appreciationRate: 7, holdYears: 10, sellingCostPct: 5, cgtPct: 6, dstPct: 1.5, registrationFeePct: 0.25, notarialFeePct: 0.5, cgtAmount: 0, dstAmount: 0, transferTaxAmount: 0, registrationFeeAmount: 0, notarialFeeAmount: 0, brokerPct: 3, vatPct: 0, discountRate: 10 },
+development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far: 1.5, floorArea: 0, buildMonths: 14, siteDevPct: 8, profFeesPct: 6, permits: 150000, contingencyPct: 10, marketing: 0, amenities: 0, lots: 0, lotSqm: 0, roadPct: 20, openSpacePct: 10, lotDevCostPerSqm: 0, projectBudget: 0, units: 0, floors: 0, mixResPct: 0, carryingMonthly: 0, siteFront: 0, siteDepth: 0, siteSetF: 7, siteSetS: 2, unitWidth: 8, unitDepth: 15 },
+       sales: { saleMode: "sell", sellPricePerSqm: 115000, landSellPricePerSqm: 22000, rentalRatePerSqm: 450, units: 6, saleablePct: 82, leasablePct: 70, occupancyPct: 90, opCostPct: 25, capRate: 0, appreciationRate: 7, holdYears: 10, sellingCostPct: 5, cgtPct: 6, dstPct: 1.5, registrationFeePct: 0.25, notarialFeePct: 0.5, cgtAmount: 0, dstAmount: 0, transferTaxAmount: 0, registrationFeeAmount: 0, notarialFeeAmount: 0, brokerPct: 3, vatPct: 0, discountRate: 10, unitPrice: 0, reservationFee: 20000, downPct: 10, dpTermMo: 24, velocity: 5, cancelPct: 5 },
       location: { nearby: {}, accessibilityScore: 60, trafficScore: 40, populationScore: 60, futureDevScore: 60, competitionScore: 40, commercialGrowthScore: 60 },
       building: { constructionType: "CHB / Masonry" },
       comparables: [],
@@ -1499,7 +1499,7 @@
     const lot = Math.max(0, C.num(d.property.lotArea, 0));
     const type = scenario ? scenario.devType : selectedType;
     const presets = {
-      "Townhouse": { floorArea: Math.round(lot * 1.2), units: Math.max(2, Math.floor(lot / 45)), floors: 2, constCostPerSqm: 38000, buildMonths: 14 },
+      "Townhouse": { floorArea: Math.round(lot * 1.2), units: Math.max(2, Math.floor(lot / 45)), floors: 2, constCostPerSqm: 38000, buildMonths: 14, unitWidth: 8, unitDepth: 15, siteSetF: 7, siteSetS: 2 },
       "Apartment": { floorArea: Math.round(lot * 1.8), units: Math.max(4, Math.floor(lot / 35)), floors: 3, constCostPerSqm: 36000, buildMonths: 16 },
       "Shophouse": { floorArea: Math.round(lot * 1.2), units: Math.max(2, Math.floor(lot / 50)), floors: 2, constCostPerSqm: 42000, buildMonths: 14 },
       "Commercial": { floorArea: Math.round(lot * 0.7), units: 0, floors: 1, constCostPerSqm: 35000, buildMonths: 12 },
@@ -3871,7 +3871,7 @@ function bindPerView() {
   /* ================= DEAL ANALYSIS ================= */
   const TABS = [
     ["overview", "Overview"], ["details", "Investment Details"], ["ai", "AI Analysis"], ["returns", "Returns"], ["development", "Development"],
-    ["financing", "Financing"], ["scenarios", "Scenarios"], ["location", "Location"], ["risk", "Risk"]
+    ["financing", "Financing"], ["scenarios", "Scenarios"], ["location", "Location"], ["risk", "Risk"], ["feasibility", "Feasibility"]
   ];
 
   function renderDeal() {
@@ -3902,6 +3902,7 @@ function bindPerView() {
     if (tab === "scenarios") html += dealScenarios(m, raw);
     if (tab === "location") html += dealLocation(m, raw);
     if (tab === "risk") html += dealRisk(m, rec, raw);
+    if (tab === "feasibility") html += dealFeasibility(m, raw);
     return html;
   }
 
@@ -4081,6 +4082,276 @@ function bindPerView() {
     });
     html += '</table></div></div>';
     return html;
+  }
+
+  /* ================= FEASIBILITY STUDIO (Site Planner -> Project P&L -> Sales Simulator) ================= */
+  let _fzM = null;
+  const FZ_MAP = {
+    siteFront: ["development", "siteFront"], siteDepth: ["development", "siteDepth"], siteSetF: ["development", "siteSetF"], siteSetS: ["development", "siteSetS"],
+    unitWidth: ["development", "unitWidth"], unitDepth: ["development", "unitDepth"],
+    unitPrice: ["sales", "unitPrice"], constCost: ["development", "constCostPerSqm"], marketing: ["development", "marketing"],
+    resFee: ["sales", "reservationFee"], downPct: ["sales", "downPct"], dpTerm: ["sales", "dpTermMo"], velocity: ["sales", "velocity"], cancelPct: ["sales", "cancelPct"]
+  };
+  function fzKeySet(raw, key, val) {
+    const p = FZ_MAP[key];
+    if (!p || !raw || !raw[p[0]]) return;
+    raw[p[0]][p[1]] = val;
+  }
+  function feasibilityPlan(raw) {
+    const d = raw.development || {}, p = raw.property || {};
+    const siteFront = C.num(d.siteFront, C.num(p.frontage, 50));
+    const siteDepth = C.num(d.siteDepth, C.num(p.depth, 25));
+    const setF = C.num(d.siteSetF, 7);
+    const setS = C.num(d.siteSetS, 2);
+    const unitW = C.num(d.unitWidth, 8);
+    const unitD = C.num(d.unitDepth, 15);
+    const buildW = Math.max(0, siteFront - 2 * setS);
+    const units = Math.max(0, Math.floor(buildW / unitW));
+    const unitSize = unitW * unitD;
+    const floorArea = units * unitSize;
+    const buildD = Math.max(0, siteDepth - setF);
+    return { siteFront, siteDepth, setF, setS, unitW, unitD, buildW, units, unitSize, floorArea, buildD, fitsUnitDepth: unitD <= buildD };
+  }
+  function fzCostStack(dev, plan) {
+    const constCost = C.num(dev.constCostPerSqm, 38000);
+    const construction = constCost * plan.floorArea;
+    const sdp = C.num(dev.siteDevPct, 8) / 100;
+    const pp = C.num(dev.profFeesPct, 6) / 100;
+    const siteDev = construction * sdp;
+    const profFees = construction * pp;
+    const permits = C.num(dev.permits, 150000);
+    const amenities = C.num(dev.amenities, 0);
+    const marketing = C.num(dev.marketing, 0);
+    const base = construction + siteDev + profFees + permits + amenities;
+    const contingency = base * C.num(dev.contingencyPct, 10) / 100;
+    const carrying = C.num(dev.carryingMonthly, 0) * Math.max(0, C.num(dev.buildMonths, 14));
+    const total = base + contingency + marketing + carrying;
+    return { constCost, construction, siteDev, profFees, permits, amenities, marketing, base, contingency, carrying, total };
+  }
+  function fzProjectPandL(plan, dev, sales, stack) {
+    const unitSize = plan.unitSize > 0 ? plan.unitSize : 1;
+    const unitPrice = C.num(sales.unitPrice, 0) || Math.round(C.num(sales.sellPricePerSqm, 0) * unitSize / 10000) * 10000;
+    const grossRevenue = unitPrice * plan.units;
+    const profit = grossRevenue - stack.total;
+    const margin = grossRevenue > 0 ? profit / grossRevenue : 0;
+    return { unitPrice, grossRevenue, profit, margin, breakEvenUnits: unitPrice > 0 ? Math.ceil(stack.total / unitPrice) : 0 };
+  }
+  function fzSalesSim(plan, sales, unitPrice) {
+    const resFee = C.num(sales.reservationFee, 20000);
+    const downPct = Math.max(0, Math.min(90, C.num(sales.downPct, 10))) / 100;
+    const dpTerm = Math.max(1, Math.round(C.num(sales.dpTermMo, 24)));
+    const velocity = Math.max(1, C.num(sales.velocity, 5));
+    const cancel = Math.max(0, Math.min(90, C.num(sales.cancelPct, 5))) / 100;
+    const toSell = Math.max(0, plan.units);
+    const sold = Math.round(toSell * (1 - cancel));
+    const dpAmount = unitPrice * downPct;
+    const monthlyDp = dpAmount / dpTerm;
+    return { resFee, downPct, dpTerm, velocity, cancel, toSell, sold, dpAmount, monthlyDp, resTotal: sold * resFee, dpTotal: sold * dpAmount };
+  }
+  function fzCompute(raw) {
+    const plan = feasibilityPlan(raw);
+    const stack = fzCostStack(raw.development || {}, plan);
+    const pnl = fzProjectPandL(plan, raw.development || {}, raw.sales || {}, stack);
+    const sim = fzSalesSim(plan, raw.sales || {}, pnl.unitPrice);
+    return { plan, stack, pnl, sim };
+  }
+  function fzApplyRaw(raw) {
+    const fz = fzCompute(raw);
+    const d = raw.development, s = raw.sales;
+    d.units = fz.plan.units; d.floorArea = fz.plan.floorArea;
+    if (!d.devType) d.devType = "Townhouse";
+    s.units = fz.plan.units; s.saleMode = "sell";
+    if (fz.pnl.unitPrice > 0 && fz.plan.unitSize > 0) s.sellPricePerSqm = Math.round(fz.pnl.unitPrice / fz.plan.unitSize);
+    return fz;
+  }
+  function fzSiteSvg(plan) {
+    const W = 320, H = 190;
+    const pad = 34;
+    const lotW = Math.max(1, plan.siteFront), lotD = Math.max(1, plan.siteDepth);
+    const bw = plan.buildW / lotW * (W - pad * 2), bh = plan.unitD / lotD * (H - pad * 2);
+    const ox = pad, oy = pad;
+    const draw = [];
+    draw.push('<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" style="max-width:100%" role="img" aria-label="Site plan">');
+    draw.push('<rect x="' + ox + '" y="' + oy + '" width="' + (W - pad * 2) + '" height="' + (H - pad * 2) + '" fill="#0d1117" stroke="#30363d" stroke-width="2"/>');
+    const cellW = plan.units > 0 ? (plan.buildW / lotW * (W - pad * 2)) / plan.units : 0;
+    const nShow = Math.min(plan.units, 24);
+    for (let i = 0; i < nShow; i++) {
+      const x = ox + (plan.setS / lotW * (W - pad * 2)) + i * cellW;
+      draw.push('<rect x="' + x.toFixed(1) + '" y="' + (oy + bh * 0.15).toFixed(1) + '" width="' + (cellW - 2).toFixed(1) + '" height="' + (bh * 0.7).toFixed(1) + '" rx="3" fill="rgba(15,157,88,.28)" stroke="#0F9D58" stroke-width="1.5"/>');
+    }
+    if (plan.units > nShow) draw.push('<text x="' + (ox + (W - pad * 2) / 2) + '" y="' + (H - 8) + '" fill="#8b949e" font-size="11" text-anchor="middle">' + plan.units + ' units — showing first ' + nShow + '</text>');
+    draw.push('<text x="' + ox + '" y="' + (H - 8) + '" fill="#8b949e" font-size="10">' + plan.siteFront + ' m</text>');
+    draw.push('</svg>');
+    return draw.join("");
+  }
+  function fzWarnHtml(plan, pnl, m) {
+    let out = "";
+    if (!plan.fitsUnitDepth) out += '<div class="ai-banner mb-16">' + icon("alert", 14) + '<span>Unit depth <b>' + plan.unitD + ' m</b> exceeds the buildable depth of <b>' + Math.round(plan.buildD * 10) / 10 + ' m</b> (lot depth \u2212 front setback).</span></div>';
+    const priceBench = C.num(m && m.marketValuePerSqm, 0);
+    const effPsqm = plan.unitSize > 0 ? pnl.unitPrice / plan.unitSize : 0;
+    if (priceBench > 0 && effPsqm > priceBench * 1.15) {
+      const gap = Math.round((effPsqm / priceBench - 1) * 100);
+      out += '<div class="ai-banner mb-16">' + icon("alert", 14) + '<span>Selling price of <b>' + C.money(Math.round(effPsqm)) + '/sqm</b> is <b>+' + gap + '%</b> above the local benchmark of <b>' + C.money(Math.round(priceBench)) + '/sqm</b>. Validate against product-specific comparables.</span></div>';
+    }
+    return out;
+  }
+  function fzCostRowsHtml(stack) {
+    const rows = [
+      ["Construction", stack.construction], ["Site Development (" + C.pct(stack.siteDev / Math.max(1, stack.construction)) + ")", stack.siteDev],
+      ["Professional Fees", stack.profFees], ["Permits", stack.permits], ["Amenities", stack.amenities],
+      ["Contingency", stack.contingency], ["Marketing", stack.marketing], ["Carrying during build", stack.carrying]
+    ];
+    const total = stack.total;
+    return rows.map((r, i) => "<tr" + (i === rows.length - 1 ? '' : '') + "><td>" + r[0] + "</td><td class='num'>" + C.money(r[1]) + "</td><td class='num'>" + C.pct(total > 0 ? r[1] / total : 0) + "</td></tr>").join("") +
+      "<tr style='font-weight:700'><td>TOTAL PROJECT COST</td><td class='num'>" + C.money(total) + "</td><td class='num'>100%</td></tr>";
+  }
+  function fzSchedRowsHtml(sim) {
+    const rows = [];
+    rows.push("<tr><td>Month 0 \u00b7 Reservations</td><td class='num'>" + sim.sold + "</td><td class='num'>" + C.money(sim.resTotal) + "</td><td class='num'>\u2014</td></tr>");
+    let remaining = sim.sold;
+    const cap = 60;
+    for (let m = 1; m <= sim.dpTerm; m++) {
+      const newly = Math.min(sim.velocity, remaining);
+      remaining = Math.max(0, remaining - newly);
+      rows.push("<tr><td>Month " + m + "</td><td class='num'>" + newly + "</td><td class='num'>\u2014</td><td class='num'>" + C.money(sim.monthlyDp * sim.sold) + "</td></tr>");
+      if (m >= cap && m < sim.dpTerm) { rows.push("<tr><td colspan='4' class='dim'>\u2026 schedule continues at " + C.money(sim.monthlyDp * sim.sold) + "/mo to month " + sim.dpTerm + "</td></tr>"); break; }
+    }
+    return rows.join("");
+  }
+  function fzSensRowsHtml(plan, dev, sales, stack, pnl) {
+    const out = [];
+    const m1 = delta => { const r = pnl.grossRevenue * (1 + delta); const p = r - stack.total; return r > 0 ? p / r : 0; };
+    const m2 = delta => { const t = stack.total * (1 + delta); const p = pnl.grossRevenue - t; return pnl.grossRevenue > 0 ? p / pnl.grossRevenue : 0; };
+    [-0.1, 0, 0.1].forEach(dd => out.push(["Unit Price " + (dd >= 0 ? "+" : "") + Math.round(dd * 100) + "%", m1(dd)]));
+    [-0.1, 0, 0.1].forEach(dd => out.push(["Project Cost " + (dd >= 0 ? "+" : "") + Math.round(dd * 100) + "%", m2(dd)]));
+    return out.map(r => "<tr><td>" + r[0] + "</td><td class='num'" + (r[1] < 0 ? ' style="color:#EF4444"' : '') + ">" + (Math.round(r[1] * 1000) / 10) + "%</td></tr>").join("");
+  }
+  function fzSliderHtml(id, label, unit, min, max, step, val, fzKey) {
+    const numId = id + "-num";
+    return '<div class="field col-6"><label>' + esc(label) + ' <span class="dim">(' + esc(unit) + ')</span></label><div class="row" style="gap:8px;align-items:center">' +
+      '<input type="range" class="input" id="' + id + '" data-fz="' + fzKey + '" data-fzmate="' + numId + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '" style="flex:1;min-width:0">' +
+      '<input type="number" class="input" id="' + numId + '" data-fz="' + fzKey + '" data-fzmate="' + id + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + val + '" style="width:108px"></div></div>';
+  }
+  function dealFeasibility(m, raw) {
+    _fzM = m;
+    const fz = fzCompute(raw);
+    const plan = fz.plan, stack = fz.stack, pnl = fz.pnl, sim = fz.sim;
+    const marginPct = Math.round(pnl.margin * 1000) / 10;
+    const verdict = pnl.margin < 0 ? ["red", "Negative margin \u2014 review unit price or build cost"] : pnl.margin < 0.08 ? ["gold", "Thin margin \u2014 below 8%"] : ["green", "Passes feasibility check"];
+    const lotAreaR = plan.siteFront * plan.siteDepth;
+    let html = '<div class="ai-banner mb-24">' + icon("layers", 14) + '<span>Feasibility chains a <b>site plan</b> into a <b>project P&amp;L</b> and a <b>sales schedule</b>. Edits here update the deal\u2019s units and floor area used by the Returns and Pre-Selling modules.</span></div>';
+    html += '<div class="grid grid-4 mb-24">' +
+      kpi("Units Buildable", '<span id="fz-units">' + plan.units + '</span>', '<span id="fz-buildw">' + Math.round(plan.buildW * 10) / 10 + " m buildable width</span>", "blue", "layers") +
+      kpi("Total Floor Area", '<span id="fz-floorarea">' + C.numFmt(plan.floorArea) + '</span> sqm', C.numFmt(plan.unitSize) + " sqm / unit", "green", "grid") +
+      kpi("Gross Revenue", '<span id="fz-gross">' + C.money(pnl.grossRevenue) + '</span>', '<span id="fz-unitprice-lbl">' + C.money(pnl.unitPrice) + '</span> / unit', "green", "trending") +
+      kpi("Net Profit", '<span id="fz-profit">' + C.money(pnl.profit) + '</span>', '<span id="fz-margin" style="' + (pnl.margin < 0 ? "color:#EF4444" : "") + '">' + marginPct + '% margin</span>', pnl.margin < 0 ? "red" : "gold", "check") + '</div>';
+    html += '<div class="row" style="gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:20px">' +
+      '<span class="badge ' + verdict[0] + '" id="fz-verdict" style="font-size:13px;padding:8px 14px">' + verdict[1] + '</span>' +
+      '<span class="dim tiny">Break-even at <b id="fz-breakeven">' + pnl.breakEvenUnits + '</b> of ' + plan.units + ' units sold</span></div>';
+    html += '<div id="fz-warnbox">' + fzWarnHtml(plan, pnl, m) + '</div>';
+
+    /* Stage 1 — Site Planner */
+    html += '<div class="card card-pad mb-24"><div class="row spread mb-16" style="flex-wrap:wrap;gap:8px"><h3 style="margin:0">' + icon("grid", 15) + ' Stage 1 \u2014 Site Planner</h3><span class="badge blue">Feed-forward: units &amp; floor area drive Stages 2\u20133</span></div>' +
+      '<div class="grid grid-2">' +
+      fzSliderHtml("fz-lotW", "Lot Width", "m", 4, 150, 1, plan.siteFront, "siteFront") +
+      fzSliderHtml("fz-lotD", "Lot Depth", "m", 4, 150, 1, plan.siteDepth, "siteDepth") +
+      fzSliderHtml("fz-setF", "Front Setback", "m", 0, 20, 0.5, plan.setF, "siteSetF") +
+      fzSliderHtml("fz-setS", "Side Setback", "m", 0, 15, 0.5, plan.setS, "siteSetS") +
+      fzSliderHtml("fz-uw", "Unit Width", "m", 3, 15, 0.5, plan.unitW, "unitWidth") +
+      fzSliderHtml("fz-ud", "Unit Depth", "m", 4, 25, 0.5, plan.unitD, "unitDepth") +
+      '</div>' +
+      '<div class="grid grid-2 mt-16" style="align-items:center">' +
+      '<div id="fz-site-svg">' + fzSiteSvg(plan) + '</div>' +
+      '<div><div class="dim tiny">Buildable width</div><b>' + Math.round(plan.buildW * 10) / 10 + ' m</b>' +
+      '<div class="dim tiny mt-8">Lot area (simple)</div><b>' + C.numFmt(Math.round(lotAreaR)) + ' sqm</b>' +
+      '<div class="dim tiny mt-8">Buildable depth</div><b>' + Math.round(plan.buildD * 10) / 10 + ' m</b>' +
+      '<p class="dim tiny mt-8">Units = \u230a(' + plan.siteFront + ' \u2212 2 \u00d7 ' + plan.setS + ') \u00f7 ' + plan.unitW + '\u230b = ' + plan.units + '.</p></div>' +
+      '</div></div>';
+
+    /* Stage 2 — Project P&L */
+    html += '<div class="card card-pad mb-24"><div class="row spread mb-16" style="flex-wrap:wrap;gap:8px"><h3 style="margin:0">' + icon("chart", 15) + ' Stage 2 \u2014 Project P&amp;L</h3><span class="badge blue">Cost model mirrors Deal Analysis</span></div>' +
+      '<div class="grid grid-2">' +
+      fzSliderHtml("fz-unitPrice", "Unit Selling Price", "₱", 500000, 20000000, 50000, pnl.unitPrice, "unitPrice") +
+      fzSliderHtml("fz-const", "Construction Cost / sqm", "₱", 15000, 80000, 1000, stack.constCost, "constCost") +
+      fzSliderHtml("fz-market", "Marketing Budget", "₱", 0, 3000000, 50000, stack.marketing, "marketing") +
+      '</div>' +
+      '<div class="grid grid-4 mt-16">' +
+      kpi("Gross Revenue", '<span id="fz-gross2">' + C.money(pnl.grossRevenue) + '</span>', C.money(pnl.unitPrice) + " \u00d7 " + plan.units + " units", "green") +
+      kpi("Total Project Cost", '<span id="fz-total">' + C.money(stack.total) + '</span>', C.numFmt(stack.constCost) + " /sqm const", "gold") +
+      kpi("Net Profit", '<span id="fz-profit2">' + C.money(pnl.profit) + '</span>', "after all cost lines", pnl.margin < 0 ? "red" : "green") +
+      kpi("Margin", '<span id="fz-margin2">' + marginPct + '%</span>', '<span id="fz-breakeven2">' + pnl.breakEvenUnits + '</span> units to break even', "cyan") + '</div>' +
+      '<div class="table-wrap mt-16"><table class="data"><thead><tr><th>Line Item</th><th class="num">Amount</th><th class="num">% of Total</th></tr></thead><tbody id="fz-costbody">' + fzCostRowsHtml(stack) + '</tbody></table></div></div>';
+
+    /* Stage 3 — Sales Simulator */
+    html += '<div class="card card-pad mb-24"><div class="row spread mb-16" style="flex-wrap:wrap;gap:8px"><h3 style="margin:0">' + icon("dollar", 15) + ' Stage 3 \u2014 Sales Simulator</h3><button class="btn btn-primary btn-sm" id="fz-push">' + icon("layers", 14) + ' Push to Pre-Selling</button></div>' +
+      '<div class="grid grid-2">' +
+      fzSliderHtml("fz-resFee", "Reservation Fee / unit", "₱", 0, 200000, 5000, sim.resFee, "resFee") +
+      fzSliderHtml("fz-downPct", "Down Payment", "%", 0, 40, 1, Math.round(sim.downPct * 100), "downPct") +
+      fzSliderHtml("fz-dpTerm", "DP Term", "mo", 6, 60, 6, sim.dpTerm, "dpTerm") +
+      fzSliderHtml("fz-velocity", "Sales Velocity", "units/mo", 1, 30, 1, sim.velocity, "velocity") +
+      fzSliderHtml("fz-cancelPct", "Cancellation", "%", 0, 40, 1, Math.round(sim.cancel * 100), "cancelPct") +
+      '</div>' +
+      '<div class="grid grid-4 mt-16">' +
+      kpi("Units for Sale", '<span id="fz-netunits">' + sim.sold + '</span>', 'of ' + sim.toSell + ' buildable', "blue") +
+      kpi("Reservations", '<span id="fz-resfee">' + C.money(sim.resTotal) + '</span>', C.money(sim.resFee) + " / unit", "green") +
+      kpi("Down Payments", '<span id="fz-dptotal">' + C.money(sim.dpTotal) + '</span>', Math.round(sim.downPct * 100) + "% over " + sim.dpTerm + " mo", "cyan") +
+      kpi("Equity / month", '<span id="fz-dpmonth">' + C.money(sim.monthlyDp) + '</span>', "per unit \u00d7 " + sim.sold + " sold", "gold") + '</div>' +
+      '<div class="table-wrap mt-16"><table class="data"><thead><tr><th>Month</th><th class="num">New Units</th><th class="num">Reservations</th><th class="num">Equity Collections</th></tr></thead><tbody id="fz-schedbody">' + fzSchedRowsHtml(sim) + '</tbody></table></div>' +
+      '<p class="dim tiny mt-8">Assumes a level equity schedule: each sold unit pays ' + C.money(sim.monthlyDp) + '/mo for ' + sim.dpTerm + ' months after reserving at ' + sim.velocity + ' units/mo. For planning only \u2014 build a full cash ledger in Pre-Selling.</p></div>';
+
+    /* Sensitivity */
+    html += '<div class="card card-pad"><h3 class="mb-8">' + icon("activity", 15) + ' Sensitivity \u2014 margin at \u00b110%</h3><div class="dim tiny mb-16">Holding everything else equal.</div>' +
+      '<div class="table-wrap"><table class="data"><thead><tr><th>Shock</th><th class="num">Margin</th></tr></thead><tbody id="fz-sensbody">' + fzSensRowsHtml(plan, raw.development, raw.sales, stack, pnl) + '</tbody></table></div></div>';
+    return html;
+  }
+  function fzRefreshDom() {
+    const raw = state.current;
+    if (!raw) return;
+    const fz = fzCompute(raw);
+    const plan = fz.plan, stack = fz.stack, pnl = fz.pnl, sim = fz.sim;
+    const marginPct = Math.round(pnl.margin * 1000) / 10;
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.innerHTML = v; };
+    set("fz-units", plan.units);
+    set("fz-buildw", Math.round(plan.buildW * 10) / 10 + " m buildable width");
+    set("fz-floorarea", C.numFmt(plan.floorArea));
+    set("fz-gross", C.money(pnl.grossRevenue));
+    set("fz-unitprice-lbl", C.money(pnl.unitPrice));
+    set("fz-profit", C.money(pnl.profit));
+    set("fz-margin", marginPct + "% margin");
+    const mEl = document.getElementById("fz-margin");
+    if (mEl) mEl.style.color = (pnl.margin < 0 ? "#EF4444" : "");
+    const verdict = pnl.margin < 0 ? "Negative margin — review unit price or build cost" : pnl.margin < 0.08 ? "Thin margin — below 8%" : "Passes feasibility check";
+    const vEl = document.getElementById("fz-verdict");
+    if (vEl) { vEl.textContent = verdict; vEl.className = "badge " + (pnl.margin < 0 ? "red" : pnl.margin < 0.08 ? "gold" : "green") + ""; }
+    set("fz-breakeven", pnl.breakEvenUnits);
+    set("fz-warnbox", fzWarnHtml(plan, pnl, _fzM));
+    set("fz-site-svg", fzSiteSvg(plan));
+    set("fz-gross2", C.money(pnl.grossRevenue));
+    set("fz-total", C.money(stack.total));
+    set("fz-profit2", C.money(pnl.profit));
+    set("fz-margin2", marginPct + "%");
+    set("fz-breakeven2", pnl.breakEvenUnits);
+    set("fz-costbody", fzCostRowsHtml(stack));
+    set("fz-netunits", sim.sold);
+    set("fz-resfee", C.money(sim.resTotal));
+    set("fz-dptotal", C.money(sim.dpTotal));
+    set("fz-dpmonth", C.money(sim.monthlyDp));
+    set("fz-schedbody", fzSchedRowsHtml(sim));
+    set("fz-sensbody", fzSensRowsHtml(plan, raw.development, raw.sales, stack, pnl));
+  }
+  function fzPushToPresell(raw) {
+    const fz = fzCompute(raw);
+    if (!fz.plan.units) { toast("No buildable units on the site plan", "err"); return; }
+    psEnsure();
+    const pid = "psp-fz-" + Date.now();
+    const loc = [raw.property.city, raw.property.province].filter(Boolean).join(", ") || "Philippines";
+    const to = new Date();
+    to.setMonth(to.getMonth() + (C.num(raw.development.buildMonths, 14) || 14) + 12);
+    state.presellProjects.push({ id: pid, name: (raw.property.name || "Townhouse") + " — Feasibility", developer: "ES Realty Development", location: loc, lts_no: "", turnover_date: to.toISOString().slice(0, 10), description: "Imported from Feasibility Studio: " + fz.plan.units + " units, " + C.numFmt(fz.plan.floorArea) + " sqm, " + C.money(fz.pnl.unitPrice) + "/unit.", status: "active" });
+    for (let i = 1; i <= fz.plan.units; i++) state.presellUnits.push({ id: "psu-" + pid + "-" + i, project_id: pid, unit_no: "TH-" + String(i).padStart(2, "0"), tower: "", floor: 1, unit_type: "Townhouse", price: fz.pnl.unitPrice, status: "available", reserved_for: "", reserved_at: null, notes: "" });
+    save();
+    toast("Created <b>" + fz.plan.units + "</b> townhouse units in Pre-Selling");
+    navigate("presell");
   }
 
   function dealFinancing(m, raw) {
@@ -6090,6 +6361,21 @@ if(editId){
   /* ================= DEAL TAB BINDINGS ================= */
   function bindDealContent() {
     $$("#content [data-dtab]").forEach(b => b.addEventListener("click", () => { state.dealTab = b.getAttribute("data-dtab"); save(); render(); }));
+    $$("#content [data-fz]").forEach(i => i.addEventListener("input", () => {
+      const raw = state.current;
+      if (!raw) return;
+      const k = i.getAttribute("data-fz");
+      const v = parseFloat(i.value);
+      if (Number.isNaN(v)) return;
+      fzKeySet(raw, k, v);
+      const mateId = i.getAttribute("data-fzmate");
+      if (mateId) { const mate = document.getElementById(mateId); if (mate && mate !== i) mate.value = i.value; }
+      fzApplyRaw(raw);
+      save();
+      fzRefreshDom();
+    }));
+    const fzPush = $("#fz-push");
+    if (fzPush) fzPush.addEventListener("click", () => fzPushToPresell(state.current));
     $$("#content [data-scenario]").forEach(b => b.addEventListener("click", () => {
       toast("Scenario selected: <b>" + esc(b.getAttribute("data-scenario")) + "</b> — view in Scenarios tab");
     }));
@@ -6234,6 +6520,15 @@ if(editId){
       devRows.map(x => "<tr><td>" + x[0] + "</td><td class='ds-num'>" + C.money(x[1]) + "</td></tr>").join("") +
       "<tr class='ds-total'><th>Total Development Budget</th><td class='ds-num'>" + C.money(dd.total + m.financingCost) + "</td></tr></tbody></table>";
 
+    const fzP = feasibilityPlan(raw), fzS = fzCostStack(d, fzP), fzL = fzProjectPandL(fzP, d, s, fzS), fzI = fzSalesSim(fzP, s, fzL.unitPrice);
+    const sFeas = KV([
+      ["Site (W \u00d7 D)", C.numFmt(fzP.siteFront) + " m \u00d7 " + C.numFmt(fzP.siteDepth) + " m"], ["Setbacks (Front / Side)", C.numFmt(fzP.setF) + " m / " + C.numFmt(fzP.setS) + " m"],
+      ["Unit Size", C.numFmt(fzP.unitW) + " m \u00d7 " + C.numFmt(fzP.unitD) + " m (" + C.numFmt(fzP.unitSize) + " sqm)"], ["Units Buildable", C.numFmt(fzP.units), 1],
+      ["Total Floor Area", C.numFmt(fzP.floorArea) + " sqm", 1], ["Unit Price", moneyIn(fzL.unitPrice), 1], ["Gross Revenue", moneyIn(fzL.grossRevenue), 1],
+      ["Total Project Cost", moneyIn(fzS.total), 1], ["Net Profit", moneyIn(fzL.profit), 1], ["Margin", (Math.round(fzL.margin * 1000) / 10) + "%", 1],
+      ["Break-Even Units", C.numFmt(fzL.breakEvenUnits), 1], ["Sales Plan", fzI.sold + "/" + fzI.toSell + " units net of " + Math.round(fzI.cancel * 100) + "% cancellations \u00b7 " + moneyIn(fzI.resTotal) + " reservations + " + moneyIn(fzI.dpTotal) + " down payments over " + fzI.dpTerm + " mo"]
+    ]);
+
     const sSales = KV([
       ["Sale Mode", saleModeLabel], ["Exit Target (sell / sqm)", moneyIn(s.sellPricePerSqm), 1], ["Land Exit Target (sell / sqm)", moneyIn(s.landSellPricePerSqm), 1], ["Rental Target (/ sqm / month)", moneyIn(s.rentalRatePerSqm), 1],
       ["Units / Lots for Sale", escV(s.units)], ["Saleable Area", (s.saleablePct ? s.saleablePct + "%" : "—") + (r.saleableArea ? " · " + C.numFmt(r.saleableArea) + " sqm" : "")], ["Leasable Area", pctIn(s.leasablePct)], ["Occupancy", pctIn(s.occupancyPct)], ["Operating Expenses", pctIn(s.opCostPct)],
@@ -6277,6 +6572,7 @@ if(editId){
       SEC("Acquisition & Financing", sAcq) +
       SEC("Development Plan", sDevPlan) +
       SEC("Development Budget", sDevCost) +
+      SEC("Feasibility \u2014 Site Plan & Project P&L", sFeas) +
       SEC("Sales & Disposition", sSales + sExit) +
       SEC("Key Metrics", sMetrics) +
       SEC("Location & Risk Register", sRiskScores + sRiskTable) +
@@ -9949,6 +10245,11 @@ premise: "Fee Simple / As Improved",
     }).join("") + '</div>';
     const rowCounts = {};
     (st.results || []).forEach(l => { const k = l.source || "?"; rowCounts[k] = (rowCounts[k] || 0) + 1; });
+    chips += '<div class="row" style="gap:6px;align-items:center;margin-top:4px">' +
+      (st.cached
+        ? '<span class="badge gold" title="Served from the Market Scan cache; a live refresh may be running in the background">Cached · observed ' + esc((st.cachedAt || "").replace("T", " ").replace("Z", " UTC").slice(0, 19)) + '</span>'
+        : '<span class="badge green" title="Fresh result from a live scan">Live scan</span>') +
+      '</div>';
     chips += '<div class="row" style="align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">' +
       '<label class="dim tiny">Source:</label>' +
       '<select class="input" id="ms-source" style="max-width:280px">' +
@@ -10009,7 +10310,7 @@ premise: "Fee Simple / As Improved",
       .then(d => {
         if (!d || !d.ok) throw new Error((d && d.error) || "Backend error");
         const filtered = marketPostFilter(d.listings || [], q);
-        state.market = { query: q, results: filtered, all: d.listings || [], sources: d.sources || [], total: filtered.length, elapsedMs: d.elapsedMs, ranAt: Date.now() };
+        state.market = { query: q, results: filtered, all: d.listings || [], sources: d.sources || [], total: filtered.length, elapsedMs: d.elapsedMs, cached: !!d.cached, cachedAt: d.cachedAt || "", ranAt: Date.now() };
         save(); captureMarketIndex(filtered); render();
       })
       .catch(err => {

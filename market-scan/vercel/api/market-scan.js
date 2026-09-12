@@ -1,6 +1,6 @@
 "use strict";
 
-const { runMarketScan } = require("../lib/_lib");
+const { handleMarketScan } = require("../lib/handler");
 
 function cors(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -19,8 +19,8 @@ module.exports = async function (req, res) {
     return;
   }
   try {
-    const payload = await runMarketScan(req.query || {});
-    res.setHeader("Cache-Control", "public, s-maxage=900, stale-while-revalidate=300");
+    const { payload, cacheControl } = await handleMarketScan(req.query || {});
+    res.setHeader("Cache-Control", cacheControl);
     res.status(200).json(payload);
   } catch (err) {
     res.status(500).json({ ok: false, error: String(err && err.message || err) });
