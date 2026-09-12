@@ -12054,7 +12054,8 @@ premise: "Fee Simple / As Improved",
       "</div>" +
       (l.listingTitle ? '<div class="lead-card-listing dim tiny">' + icon("home", 11) + " " + esc(l.listingTitle) + "</div>" : "") +
       '<div class="lead-card-foot"><span class="dim tiny">' + icon("calendar", 11) + " " + esc(leadDaysSince(l)) + "</span>" +
-      (l.assignedTo ? '<span class="dim tiny">' + icon("users", 11) + " " + esc(l.assignedTo) + "</span>" : "") + "</div>" +
+      (l.assignedTo ? '<span class="dim tiny">' + icon("users", 11) + " " + esc(l.assignedTo) + "</span>" : "") +
+      ((l.agentNextRecheck || (l.agent && l.agent.nextRecheck)) ? '<span class="dim tiny">' + icon("robot", 11) + " agent " + esc(new Date(l.agentNextRecheck || l.agent.nextRecheck).toLocaleDateString()) + "</span>" : "") + "</div>" +
     "</div>";
   }
   function leadBoardHTML() {
@@ -12280,6 +12281,7 @@ premise: "Fee Simple / As Improved",
       '<div class="crm-switch"><button data-lead-mode="pipeline" class="' + (mode === "pipeline" ? "on" : "") + '">' + icon("layers", 14) + ' Pipeline</button><button data-lead-mode="calendar" class="' + (mode === "calendar" ? "on" : "") + '">' + icon("calendar", 14) + ' Calendar</button></div>' +
       (can && mode === "calendar" ? '<button class="btn btn-primary" data-cal-new>' + icon("plus", 15) + " Add Event</button>" : "") +
       (can ? '<button class="btn btn-primary" data-lead-new>' + icon("plus", 15) + " Add Lead</button>" : "") +
+      (can ? '<button class="btn btn-ghost" data-lead-agent-all title="Run the CRM Autopilot on every lead in scope">' + icon("play", 15) + " Run Agent</button>" : "") +
       '<button class="btn btn-ghost" data-lead-sheet>' + icon("doc", 15) + " Call Sheet</button>" +
       '<button class="btn btn-ghost" data-lead-digest>' + icon("trending-up", 15) + " Weekly Digest</button>" +
       '<button class="btn btn-ghost" data-lead-csv>' + icon("download", 15) + " Export CSV</button></div></div>";
@@ -12330,6 +12332,165 @@ premise: "Fee Simple / As Improved",
       '<a class="badge purple" href="' + vb + '">Viber</a></span>';
   }
   function leadActLine(a) { return '<div class="lead-act"><div class="lead-act-dot"></div><div class="grow"><div class="lead-act-text">' + esc(a.text || "") + '</div><div class="lead-act-date dim tiny">' + esc(new Date(a.date).toLocaleString()) + "</div></div></div>"; }
+
+  /* ================= CRM AUTOPILOT — self-scheduled follow-up agent + evidence ledger ================= */
+  const AGENT_RECHECK_DAYS = { "stale-new": 2, contacted: 0.1, "site-visit": 1, negotiation: 2, dormant: 7 };
+  const AGENT_CLAIM_FIELDS = ["name", "email", "phone", "budget", "askingPrice", "rentBudget", "propertyInterest", "incomeBand", "civilStatus", "spaReady", "finMode"];
+  let agentCloudReady = null;
+  const agentCloudFetched = {};
+  function agentLastActAt(l) {
+    const ts = (l.activity || []).map(a => new Date(a.date || a.ts || 0).getTime()).filter(t => !isNaN(t) && t > 0);
+    return ts.length ? Math.max.apply(null, ts) : 0;
+  }
+  function agentRecheckDate(days) {
+    const d = new Date(Date.now() + Math.max(1, days * 24 * 3600000));
+    d.setHours(0, 0, 0, 0);
+    return d.toISOString();
+  }
+  function agentClassify(l) {
+    const s = l.status;
+    if (!l || s === "closed" || s === "lost") return "closed";
+    const act = agentLastActAt(l) || new Date(l.createdAt || Date.now()).getTime();
+    const days = (Date.now() - act) / 86400000;
+    if (s === "new" && days >= 2) return "stale-new";
+    if (l.nextFollowUp) {
+      const d = new Date(String(l.nextFollowUp).replace(",", " ") + " " + new Date().getFullYear() + "T00:00:00");
+      if (!isNaN(d) && d.getTime() < Date.now() + 86400000) return "contacted";
+    }
+    const vis = (visitsFor(l.id) || []).find(v => v.status === "scheduled" && !isNaN(new Date(String(v.date || "").split("T")[0] + "T00:00:00").getTime()));
+    if (vis) return "site-visit";
+    if ((s === "offer" || s === "negotiation") && days >= 4) return "negotiation";
+    return "dormant";
+  }
+  function agentLadder(l) {
+    const kind = agentClassify(l);
+    const steps = [];
+    const who = ((currentUser && currentUser.name) || "CRM Autopilot").trim();
+    const push = o => steps.push(Object.assign({ ts: new Date().toISOString(), by: who }, o));
+    if (kind === "closed") {
+      push({ kind: "observation", summary: l.status === "closed" ? "Lead closed — agent paused" : "Lead lost — agent stopped", reason: "Status is " + l.status, confident: true, detail: { field: "status" } });
+    } else if (kind === "stale-new") {
+      push({ kind: "observation", summary: "No touch since " + new Date(agentLastActAt(l) || Date.parse(l.createdAt)).toLocaleDateString(), reason: "New lead never qualified", confident: true, detail: { field: "lastActivity" } });
+      push({ kind: "suggestion", summary: "Call " + (l.name || "the lead") + " to qualify", reason: "First contact within 48h converts best", confident: false, detail: { field: "qualify", suggestion: "Book a discovery call or site visit" } });
+    } else if (kind === "contacted") {
+      push({ kind: "observation", summary: "Follow-up (" + l.nextFollowUp + ") is due", reason: "A promise to reconnect was made", confident: true, detail: { field: "nextFollowUp" } });
+      push({ kind: "suggestion", summary: "Re-engage " + (l.name || "the lead") + " today", reason: "Last touch " + (agentLastActAt(l) ? new Date(agentLastActAt(l)).toLocaleDateString() : "unknown"), confident: false, detail: { field: "reengage" } });
+    } else if (kind === "site-visit") {
+      push({ kind: "suggestion", summary: "Remind " + (l.name || "the lead") + " of the booked site visit", reason: "Visit upcoming — no-shows cost half a day", confident: false, detail: { field: "visit" } });
+    } else if (kind === "negotiation") {
+      push({ kind: "observation", summary: l.status + " quiet for " + Math.max(1, Math.round((Date.now() - (agentLastActAt(l) || Date.parse(l.createdAt))) / 86400000)) + "d", reason: "Offer in play", confident: true, detail: { field: "lastActivity" } });
+      push({ kind: "suggestion", summary: "Re-engage on the " + (l.status === "offer" ? "offer" : "counter-offer"), reason: "Momentum fades after 4+ days", confident: false, detail: { field: "negotiation" } });
+    } else {
+      push({ kind: "observation", summary: "Nothing due — holding", reason: "Dormant control avoids spamming", confident: true, detail: { field: "dormant" } });
+    }
+    return { steps, kind, recheck: kind === "closed" ? null : agentRecheckDate(AGENT_RECHECK_DAYS[kind] != null ? AGENT_RECHECK_DAYS[kind] : 7) };
+  }
+  function agentWhatNext(l) {
+    switch (agentClassify(l)) {
+      case "stale-new": return "No qualification call yet";
+      case "contacted": return "A promised follow-up is due";
+      case "site-visit": return "Keep the booked viewing warm";
+      case "negotiation": return "Offer momentum needs a touch";
+      case "closed": return "Lead finished — agent paused";
+      default: return "Holding — nothing fabricated";
+    }
+  }
+  async function agentRunLeadNow(id, quiet) {
+    const l = (state.leads || []).find(x => x.id === id);
+    if (!l) return 0;
+    if (!leadCanEdit(l)) { if (!quiet) toast("You can only run the agent on leads you can edit", "err"); return 0; }
+    const res = agentLadder(l);
+    const steps = res.steps.map(s => Object.assign({ _tmp: "loc-" + Date.now() + "-" + Math.floor(Math.random() * 99999), state: s.kind === "suggestion" ? "open" : "done" }, s));
+    l.agentSteps = (l.agentSteps || []).slice(0, 60).concat(steps);
+    l.agent = { lastRun: new Date().toISOString(), nextRecheck: res.recheck || "" };
+    l.agentNextRecheck = l.agent.nextRecheck;
+    l.updatedAt = new Date().toISOString();
+    save();
+    persistLeadToCloud(l).then(() => {});
+    if (!quiet) toast("Autopilot ran on <b>" + esc(l.name || "lead") + "</b> — " + (res.recheck ? "next recheck " + new Date(res.recheck).toLocaleDateString() : "agent paused"));
+    if (state.leadDetail === id) render();
+    return steps.length;
+  }
+  async function agentRunAll() {
+    const targets = leadScope().slice(0, 40);
+    let n = 0, steps = 0;
+    for (const l of targets) { if (!leadCanEdit(l)) continue; steps += await agentRunLeadNow(l.id, true); n++; }
+    toast("Autopilot ticked <b>" + n + "</b> leads in scope (" + steps + " steps)");
+    if (state.view === "leads" && !state.leadDetail) scopedRender("#lead-results", leadBoardHTML());
+  }
+  function agentStepAt(_tmp) {
+    for (const l of (state.leads || [])) {
+      const hit = (l.agentSteps || []).find(s => s._tmp === _tmp);
+      if (hit) return { l, step: hit };
+    }
+    return null;
+  }
+  async function agentResolveStep(l, step, st2) {
+    const idx = (l.agentSteps || []).findIndex(x => x._tmp === step._tmp);
+    if (idx >= 0) { l.agentSteps[idx].state = st2; l.agentSteps[idx].resolvedBy = (currentUser && currentUser.name) || "agent"; }
+    if (st2 === "approved") {
+      const ev = (l.evidence || []).slice();
+      ev.unshift({ id: "ev-" + Date.now() + "-" + Math.floor(Math.random() * 99999), field: (step.detail && step.detail.field) || "agent", value: String((step.detail && step.detail.suggestion) || step.summary || "").slice(0, 120), src: "observed", confidence: 0.8, by: "agent:" + ((currentUser && currentUser.name) || "agent"), ts: new Date().toISOString() });
+      l.evidence = ev.slice(0, 60);
+    }
+    save();
+    persistLeadToCloud(l).then(() => {});
+    if (step.cloud && step.cloudId != null && SB) {
+      try { await SB.rpc("agent_set_step", { p_step: step.cloudId, p_state: st2, p_by: (currentUser && currentUser.name) || "agent" }); } catch (e) {}
+    }
+    if (state.leadDetail === l.id) render();
+  }
+  function agentStepHtml(s) {
+    const kindChip = s.kind === "observation"
+      ? '<span class="badge blue">Observed</span>'
+      : '<span class="badge gold">Suggestion</span>';
+    let actions = "";
+    if (s.kind === "suggestion" && !s.confident && s.state === "open") {
+      actions = '<div class="row mt-8" style="gap:8px">' +
+        '<button class="btn btn-ghost btn-sm" data-agent-approve="' + esc(s._tmp) + '">' + icon("check", 12) + " Approve</button>" +
+        '<button class="btn btn-ghost btn-sm" data-agent-reject="' + esc(s._tmp) + '">' + icon("x", 12) + " Reject</button></div>";
+    } else if (s.state === "approved") { actions = '<div class="row mt-8"><span class="badge green">Approved</span></div>'; }
+    else if (s.state === "rejected") { actions = '<div class="row mt-8"><span class="badge">Rejected</span></div>'; }
+    return '<div class="lead-act"><div class="lead-act-dot"></div><div class="grow"><div class="lead-act-text">' + esc(s.summary || "") + " " + kindChip + "</div>" +
+      '<div class="lead-act-date dim tiny">' + (s.reason ? esc(s.reason) + " · " : "") + esc(new Date(s.ts).toLocaleString()) + (s.cloud ? " · scheduled worker" : " · this device") + "</div>" + actions + "</div></div>";
+  }
+  function agentMetaChips(l) {
+    const open = (l.agentSteps || []).filter(s => s.kind === "suggestion" && !s.confident && s.state === "open").length;
+    const out = [];
+    if (l.agent && l.agent.lastRun) out.push('<span class="badge blue">last run ' + esc(new Date(l.agent.lastRun).toLocaleString()) + "</span>");
+    if (l.agent && l.agent.nextRecheck) out.push('<span class="badge purple">recheck ' + esc(new Date(l.agent.nextRecheck).toLocaleDateString()) + "</span>");
+    if (open) out.push('<span class="badge gold">' + open + " suggestion" + (open > 1 ? "s" : "") + " to settle</span>");
+    return out.join(" ") || '<span class="dim tiny">Never run</span>';
+  }
+  function agentEvidenceRows(l) {
+    return (l.evidence || []).map(e => "<tr><td>" + esc(e.field) + "</td><td>" + esc(String(e.value).slice(0, 90)) + "</td><td>" +
+      (e.src === "observed" ? '<span class="badge green">Observed</span>' : '<span class="badge gold">Claimed</span>') +
+      '</td><td class="num">' + Math.round((e.confidence || 0) * 100) + '%</td><td>' + esc(e.by || "—") + "</td></tr>").join("");
+  }
+  async function agentFetchCloudSteps(leadId) {
+    if (!SB || !currentUser || !currentUser.id || agentCloudFetched[leadId]) return;
+    if (agentCloudReady === "missing") return;
+    agentCloudFetched[leadId] = true;
+    const l = (state.leads || []).find(x => x.id === leadId);
+    if (!l) return;
+    try {
+      const { data, error } = await SB.from("agent_steps").select("id,kind,summary,detail,confident,state,done_by,created_at,lead_id").eq("lead_id", l.id).order("created_at", { ascending: false }).limit(20);
+      if (error) {
+        if (String(error.message || "").match(/does not exist|schema cache|querying schema|relation "public.agent_steps"/i)) agentCloudReady = "missing";
+        return;
+      }
+      const have = {};
+      (l.agentSteps || []).forEach(s => { if (s.cloudId) have[s.cloudId] = true; });
+      const fresh = (data || []).filter(r => !have[r.id]).map(r => ({
+        _tmp: "cloud-" + r.id, cloudId: r.id, kind: r.kind, summary: r.summary || "", reason: (r.detail && r.detail.reason) || "",
+        detail: r.detail || {}, confident: !!r.confident, state: r.state || "done", by: r.done_by || "agent", ts: r.created_at, cloud: true
+      }));
+      if (!fresh.length) return;
+      l.agentSteps = fresh.concat(l.agentSteps || []);
+      save();
+      if (state.leadDetail === leadId) render();
+    } catch (e) {}
+  }
   function renderLeadDetail(l) {
     const can = leadCanEdit(l);
     const acts = (l.activity || []).slice().reverse();
@@ -12383,6 +12544,14 @@ premise: "Fee Simple / As Improved",
       "</div>" + (visits.length ? '<div class="table-wrap mt-8"><table class="data"><thead><tr><th>Date / Time</th><th>Location</th><th>Reminder</th><th>Status</th><th></th></tr></thead><tbody>' +
       visits.map(v => "<tr><td>" + esc(v.date) + " " + esc(v.time) + "</td><td>" + esc(v.location || "—") + "</td><td>" + (v.remind === "0" ? "None" : esc(v.remind || "3") + " hr before") + "</td><td>" + visitBadge(v.status) + "</td><td>" + (can && v.status === "scheduled" ? '<button class="btn btn-ghost btn-sm" data-visit-status="done" data-visit-id="' + esc(v.id) + '">Complete</button> <button class="btn btn-ghost btn-sm" data-visit-status="cancelled" data-visit-id="' + esc(v.id) + '">Cancel</button>' : "") + "</td></tr>").join("") +
       "</tbody></table></div>" : '<div class="dim mt-8">No site viewings scheduled.</div>') + "</div>";
+    html += '<div class="card card-pad mb-24"><div class="row spread mb-16" style="flex-wrap:wrap;gap:10px;align-items:flex-start"><div><h3>' + icon("robot", 15) + ' CRM Autopilot</h3><div class="dim tiny mt-8">The agent books its own follow-ups and never guesses — <b>observations</b> are what it saw, <b>suggestions</b> are for you to settle.</div></div>' +
+      (can ? '<button class="btn btn-primary btn-sm" data-agent-run="' + esc(l.id) + '">' + icon("play", 13) + ' Run now</button>' : "") + "</div>" +
+      '<div class="row" style="gap:10px;flex-wrap:wrap">' + agentMetaChips(l) + "</div>" +
+      '<div class="lead-acts mt-16" id="agent-steps">' + ((l.agentSteps || []).length ? l.agentSteps.slice().reverse().map(agentStepHtml).join("") : '<div class="dim tiny">No steps yet — run the agent on this lead to see its reasoning.</div>') + "</div>" +
+      (l.agent && l.agent.nextRecheck ? '<div class="ai-banner mt-16">' + icon("clock", 13) + ' <span>Next recheck <b>' + new Date(l.agent.nextRecheck).toLocaleDateString() + "</b> — " + esc(agentWhatNext(l)) + "</span></div>" : "") +
+      "</div>";
+    html += '<div class="card card-pad mb-24"><div class="row spread"><div><h3>' + icon("shield", 15) + ' Evidence Ledger</h3><div class="dim tiny mt-8">Every fact tagged with its source — <b>observed</b> by the system or <b>claimed</b> by a human. Approving a suggestion writes it here as observed.</div></div></div>' +
+      ((l.evidence || []).length ? '<div class="table-wrap mt-8"><table class="data"><thead><tr><th>Field</th><th>Value</th><th>Source</th><th class="num">Confidence</th><th>By</th></tr></thead><tbody>' + agentEvidenceRows(l) + "</tbody></table></div>" : '<p class="dim tiny mt-8">No evidence yet. Approve a suggestion to record it.</p>') + "</div>";
     return html;
   }
   function leadSelOpt(opts, val) { return opts.map(o => '<option value="' + o[0] + '"' + (val === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>").join(""); }
@@ -12451,6 +12620,7 @@ premise: "Fee Simple / As Improved",
     const m = $("#ld-modal");
     const editId = m ? (m.getAttribute("data-edit-id") || "") : "";
     const rec = editId ? ((state.leads || []).find(x => x.id === editId) || {}) : {};
+    const agentPrr = editId ? JSON.parse(JSON.stringify(rec)) : {};
     rec.id = rec.id || ("lead-" + Date.now() + "-" + Math.floor(Math.random() * 1000));
     rec.ref = rec.ref || "LD-" + String((state.leads || []).length + 1).padStart(4, "0");
     rec.name = name;
@@ -12476,6 +12646,14 @@ premise: "Fee Simple / As Improved",
     rec.listingId = $v("ld-listing");
     rec.listingTitle = $v("ld-listing") ? ((state.listings || []).find(x => x.id === rec.listingId) || {}).title : "";
     rec.notes = $v("ld-notes");
+    const agentClm = (rec.evidence || []).slice();
+    AGENT_CLAIM_FIELDS.forEach(f => {
+      const val = rec[f];
+      if (val == null || val === "" || (typeof val === "number" && !val)) return;
+      if (editId && String(agentPrr[f] == null ? "" : agentPrr[f]) === String(val)) return;
+      agentClm.unshift({ id: "ev-" + Date.now() + "-" + Math.floor(Math.random() * 99999), field: f, value: String(val).slice(0, 120), src: "claimed", confidence: 0.5, by: (currentUser && currentUser.name) || "agent", ts: new Date().toISOString() });
+    });
+    rec.evidence = agentClm.slice(0, 60);
     const newAct = $v("ld-newact");
     if (newAct) { rec.activity = rec.activity || []; rec.activity.push({ date: new Date().toISOString(), text: newAct }); }
     rec.updatedAt = new Date().toISOString();
@@ -12789,6 +12967,14 @@ premise: "Fee Simple / As Improved",
         if (saveBtn) { leadSaveForm(); return; }
         const cancel = e.target.closest("[data-lead-cancel]");
         if (cancel) { closeLeadModal(); return; }
+        const agRunAll = e.target.closest("[data-lead-agent-all]");
+        if (agRunAll) { agentRunAll(); return; }
+        const agRun = e.target.closest("[data-agent-run]");
+        if (agRun) { agentRunLeadNow(agRun.getAttribute("data-agent-run")); return; }
+        const agApp = e.target.closest("[data-agent-approve]");
+        if (agApp) { const st = agentStepAt(agApp.getAttribute("data-agent-approve")); if (st) agentResolveStep(st.l, st.step, "approved"); return; }
+        const agRej = e.target.closest("[data-agent-reject]");
+        if (agRej) { const st = agentStepAt(agRej.getAttribute("data-agent-reject")); if (st) agentResolveStep(st.l, st.step, "rejected"); return; }
       });
     }
     const f = state.leadFilters = state.leadFilters || {};
@@ -12804,6 +12990,7 @@ premise: "Fee Simple / As Improved",
     bind("lf-q", "q", "input");
     bind("lf-type", "type"); bind("lf-status", "status"); bind("lf-source", "source"); bind("lf-agent", "agent");
     bind("lf-minb", "minBudget", "input");
+    if (state.leadDetail) agentFetchCloudSteps(state.leadDetail);
   }
   function ensureLeads() {
     if (!state.leads || !state.leads.length) state.leads = seedLeads();
