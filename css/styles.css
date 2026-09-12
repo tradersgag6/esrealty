@@ -3030,18 +3030,28 @@ body .sf-results-bar select { height: 44px !important; }
   .sf-footer p { margin: 0 auto; max-width: 90%; }
 }
 
-/* Mobile: keep consent checkboxes as compact native boxes instead of inheriting the
-   text-input sizing (16px font / 48px min-height / 14px padding / rounded corners)
-   applied to .sf-consent input below 760px. Larger specificity + later source order
-   wins over the generic mobile input rule. */
+/* Consent checkboxes must stay compact square boxes at every viewport instead of
+   inheriting text-input sizing from the host form/container rules (width:100% stretches
+   them into thin bars at ≥801px; 16px font / 48px min-height / 14px padding makes huge
+   boxes at 761-800px, and the generic mobile input rule fights them below 760px).
+   Higher specificity + !important + later source order wins over all of those. */
+form .sf-consent input,
+.bt-cta-form .sf-consent input,
+.bt-contact .sf-consent input,
+.bt-inquiry-form .sf-consent input {
+  width: 18px !important;
+  height: 18px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 2px 0 0 !important;
+  border-radius: 3px !important;
+  flex: none !important;
+}
 @media (max-width: 760px) {
-  form .sf-consent input {
-    width: 18px !important;
-    height: 18px !important;
-    min-height: 0 !important;
-    padding: 0 !important;
+  form .sf-consent input,
+  .bt-cta-form .sf-consent input,
+  .bt-contact .sf-consent input,
+  .bt-inquiry-form .sf-consent input {
     margin: 1px 0 0 !important;
-    border-radius: 3px !important;
-    flex: none !important;
   }
 }
