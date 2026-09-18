@@ -13124,6 +13124,14 @@ premise: "Fee Simple / As Improved",
           '<button class="btn btn-ghost btn-sm" data-comp-del="' + esc(r.id) + '">' + icon("trash", 13) + " Delete</button></td></tr>";
       }).join("") +
       "</tbody></table></div></div>";
+    const agentRows = rows.filter(r => (r.agentSteps || []).length);
+    html += '<div class="card card-pad mt-16"><div class="row spread"><h3>Renewal Agent</h3>' +
+      '<button class="btn btn-ghost btn-sm" data-comp-run-all>' + icon("zap", 13) + (due.length ? " Run renewer" : " Refresh") + '</button></div>' +
+      (due.length ? '<p class="dim tiny">Approve to record observed evidence and queue the supervisor renewer task via <b>compliance_schedule_renewals</b>.</p>' : "") +
+      (agentRows.length
+        ? agentRows.map(r => '<div class="mt-16"><div class="row" style="gap:8px;flex-wrap:wrap;align-items:center"><b>' + esc(r.name) + "</b>" + complianceAgentChips(r) + "</div>" + complianceAgentHtml(r) + "</div>").join("")
+        : '<div class="dim mt-8">No renewer suggestions yet — press <b>Run renewer</b> to start.</div>') +
+      "</div>";
     return html;
   }
   function openComplianceModal(id) {
@@ -13175,6 +13183,113 @@ premise: "Fee Simple / As Improved",
     state.compliance = state.compliance.filter(x => x.id !== id);
     save(); render();
     toast("Compliance record deleted", "ok");
+  }
+  function complianceLadder(r) {
+    const st = complianceStatusOf(r);
+    const steps = [];
+    const who = ((currentUser && currentUser.name) || "Regulatory Autopilot").trim();
+    const push = o => steps.push(Object.assign({ ts: new Date().toISOString(), by: who }, o));
+    const nameTag = (r.name || "registry entry") + (r.number ? " (#" + r.number + ")" : "");
+    const exp = r.expiresAt ? new Date(r.expiresAt).toLocaleDateString() : "—";
+    if (st.days === null) {
+      push({ kind: "observation", summary: "Registry entry current — no expiry set", reason: "Perpetual or unspecified", confident: true, detail: { field: "expires_at" } });
+    } else if (st.due && st.days < 0) {
+      push({ kind: "observation", summary: "Registry entry lapsed " + Math.abs(st.days) + "d — " + exp, reason: "expires_at passed", confident: true, detail: { field: "expires_at" } });
+      push({ kind: "suggestion", summary: "Renew " + nameTag + " now", reason: "Expired " + Math.abs(st.days) + "d ago — renewal before next deployment", confident: false, detail: { field: "renewal" } });
+    } else if (st.due) {
+      push({ kind: "observation", summary: "Registry entry expires " + exp + " (" + st.days + "d)", reason: "within 60-day renewal window", confident: true, detail: { field: "expires_at", days: st.days } });
+      push({ kind: "suggestion", summary: "Renew " + nameTag + " by " + exp, reason: "avoid lapse and listing-disclosure gaps", confident: false, detail: { field: "renewal" } });
+    } else {
+      push({ kind: "observation", summary: "Registry entry current — renew " + exp, reason: "outside the 60-day window", confident: true, detail: { field: "expires_at" } });
+    }
+    return { steps, recheck: st.due ? agentRecheckDate(1) : null };
+  }
+  async function complianceRunNow(id, quiet) {
+    const r = (state.compliance || []).find(x => x.id === id);
+    if (!r) return 0;
+    const res = complianceLadder(r);
+    const steps = res.steps.map(s => Object.assign({ _tmp: "cc-" + Date.now() + "-" + Math.floor(Math.random() * 99999), state: s.kind === "suggestion" ? "open" : "done" }, s));
+    r.agentSteps = (r.agentSteps || []).slice(0, 60).concat(steps);
+    r.agent = { lastRun: new Date().toISOString(), nextRecheck: res.recheck || "" };
+    r.updatedAt = new Date().toISOString();
+    save();
+    if (!quiet) toast("Renewer agent ran on <b>" + esc(r.name || "entry") + "</b> — " + (res.recheck ? "next recheck " + new Date(res.recheck).toLocaleDateString() : "agent paused"));
+    return steps.length;
+  }
+  async function complianceRunAll(quiet) {
+    const targets = complianceDue().slice(0, 20);
+    let n = 0, steps = 0;
+    state.compLastAgentRun = Date.now();
+    for (const r of targets) {
+      if ((r.agentSteps || []).some(s => s.kind === "suggestion" && s.state === "open")) continue;
+      steps += await complianceRunNow(r.id, true); n++;
+    }
+    complianceScheduleRenewals();
+    if (!quiet) toast("Renewal agent ticked <b>" + n + "</b> " + (n === 1 ? "registry entry" : "registry entries") + " (" + steps + " steps)");
+    if (state.view === "admin" && state.adminTab === "compliance") render();
+  }
+  function complianceStepAt(_tmp) {
+    for (const r of (state.compliance || [])) {
+      const hit = (r.agentSteps || []).find(s => s._tmp === _tmp);
+      if (hit) return { r: r, step: hit };
+    }
+    return null;
+  }
+  async function complianceResolveStep(r, step, st2) {
+    const idx = (r.agentSteps || []).findIndex(x => x._tmp === step._tmp);
+    if (idx >= 0) { r.agentSteps[idx].state = st2; r.agentSteps[idx].resolvedBy = (currentUser && currentUser.name) || "renewer"; }
+    if (st2 === "approved") {
+      const ev = (r.evidence || []).slice();
+      ev.unshift({ id: "cev-" + Date.now() + "-" + Math.floor(Math.random() * 99999), field: "renewal", value: String((step.detail && step.detail.suggestion) || step.summary || "").slice(0, 120), src: "observed", confidence: 0.8, by: "renewer:" + ((currentUser && currentUser.name) || "agent"), ts: new Date().toISOString() });
+      r.evidence = ev.slice(0, 60);
+      const enq = await complianceScheduleRenewals();
+      toast(enq ? "Renewal approved — renewer task queued" : "Renewal approved — recorded", "ok");
+    } else {
+      toast("Renewal suggestion rejected", "ok");
+    }
+    save();
+    if (state.view === "admin" && state.adminTab === "compliance") render();
+  }
+  async function complianceScheduleRenewals() {
+    if (!SB) return false;
+    try {
+      const { error } = await SB.rpc("compliance_schedule_renewals", { p_window_days: 60 });
+      if (error) {
+        if (String(error.message || "").match(/does not exist|schema cache|querying schema|relation "public.agent_tasks"/i)) agentCloudReady = "missing";
+        return false;
+      }
+      return true;
+    } catch (e) { return false; }
+  }
+  function complianceAgentChips(r) {
+    const open = (r.agentSteps || []).filter(s => s.kind === "suggestion" && !s.confident && s.state === "open").length;
+    const out = [];
+    if (r.agent && r.agent.lastRun) out.push('<span class="badge blue">last run ' + esc(new Date(r.agent.lastRun).toLocaleString()) + "</span>");
+    if (r.agent && r.agent.nextRecheck) out.push('<span class="badge purple">recheck ' + esc(new Date(r.agent.nextRecheck).toLocaleDateString()) + "</span>");
+    if (open) out.push('<span class="badge gold">' + open + " renewal suggestion" + (open > 1 ? "s" : "") + "</span>");
+    return out.join(" ");
+  }
+  function complianceStepHtml(s) {
+    const kindChip = s.kind === "observation"
+      ? '<span class="badge blue">Observed</span>'
+      : '<span class="badge gold">Suggestion</span>';
+    let actions = "";
+    if (s.kind === "suggestion" && !s.confident && s.state === "open") {
+      actions = '<div class="row mt-8" style="gap:8px">' +
+        '<button class="btn btn-ghost btn-sm" data-comp-approve="' + esc(s._tmp) + '">' + icon("check", 12) + " Approve</button>" +
+        '<button class="btn btn-ghost btn-sm" data-comp-reject="' + esc(s._tmp) + '">' + icon("x", 12) + " Reject</button></div>";
+    } else if (s.state === "approved") { actions = '<div class="row mt-8"><span class="badge green">Approved</span></div>'; }
+    else if (s.state === "rejected") { actions = '<div class="row mt-8"><span class="badge">Rejected</span></div>'; }
+    return '<div class="lead-act"><div class="lead-act-dot"></div><div class="grow"><div class="lead-act-text">' + esc(s.summary || "") + " " + kindChip + "</div>" +
+      '<div class="lead-act-date dim tiny">' + (s.reason ? esc(s.reason) + " · " : "") + esc(new Date(s.ts).toLocaleString()) + " · registry</div>" + actions + "</div></div>";
+  }
+  function complianceAgentHtml(r) {
+    const stepsHtml = (r.agentSteps || []).map(complianceStepHtml).join("") || '<div class="dim tiny">Renewer agent has not run on this entry yet.</div>';
+    let ev = "";
+    if ((r.evidence || []).length) {
+      ev = '<div class="mt-8"><b class="tiny">Evidence</b><div class="table-wrap mt-4"><table class="data"><thead><tr><th>Field</th><th>Value</th><th>Source</th><th>Conf</th><th>By</th></tr></thead><tbody>' + agentEvidenceRows(r) + "</tbody></table></div></div>";
+    }
+    return '<div class="mt-8">' + stepsHtml + ev + "</div>";
   }
 
   /* ================= ADS REPOSITORY + SOURCE FUNNEL ================= */
@@ -15801,9 +15916,16 @@ const ccBtn = e.target.closest("[data-cc-calc]");
         if (cc) { const m = $("#cmp-modal"); if (m) m.remove(); return; }
         const ccs = e.target.closest("[data-comp-save]");
         if (ccs) { saveComplianceRecord(); return; }
+        const crarn = e.target.closest("[data-comp-run-all]");
+        if (crarn) { complianceRunAll(false); return; }
+        const capr = e.target.closest("[data-comp-approve]");
+        if (capr) { const hit = complianceStepAt(capr.getAttribute("data-comp-approve")); if (hit) complianceResolveStep(hit.r, hit.step, "approved"); return; }
+        const crej = e.target.closest("[data-comp-reject]");
+        if (crej) { const hit = complianceStepAt(crej.getAttribute("data-comp-reject")); if (hit) complianceResolveStep(hit.r, hit.step, "rejected"); return; }
       });
     }
     if (state.view === "admin" && state.adminTab === "inventory" && Date.now() - (state.invLastSynced || 0) > 10000) refreshAdminInventory();
+    if (state.view === "admin" && state.adminTab === "compliance" && Date.now() - (state.compLastAgentRun || 0) > 10000) complianceRunAll(true);
   }
 
   /* ================= SETTINGS ================= */

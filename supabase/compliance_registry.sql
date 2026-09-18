@@ -83,6 +83,8 @@ create policy "compliance_write_own_chain"
 
 -- Convenience scheduler used by the client (js/app.js) when the dispatch
 -- worker is not configured: enqueue one `compliance` task per expiring record.
+-- Idempotent: skips records that already have an active (due/working) task, and
+-- no-ops entirely if agent_tasks is not deployed yet.
 create or replace function public.compliance_schedule_renewals(p_window_days int default 60)
 returns int
 language plpgsql
@@ -92,11 +94,20 @@ declare
   n int := 0;
   r record;
 begin
+  if to_regclass('public.agent_tasks') is null then
+    return 0;
+  end if;
   for r in
-    select * from public.compliance_records
-    where status <> 'revoked'
-      and expires_at is not null
-      and expires_at between current_date and current_date + (p_window_days || ' days')::interval
+    select c.* from public.compliance_records c
+    where c.status <> 'revoked'
+      and c.expires_at is not null
+      and c.expires_at between current_date and current_date + (p_window_days || ' days')::interval
+      and not exists (
+        select 1 from public.agent_tasks t
+        where t.kind = 'compliance'
+          and t.payload ->> 'record_id' = c.id
+          and t.state in ('due', 'working')
+      )
   loop
     insert into public.agent_tasks (lead_id, kind, reason, payload, task_meta, due_at, state)
     values (
@@ -105,10 +116,9 @@ begin
       format('Compliance record expiring: %s (%s) — %s', r.name, r.number, r.expires_at),
       jsonb_build_object('record_id', r.id, 'type', r.type, 'name', r.name, 'expires_at', r.expires_at),
       jsonb_build_object('compliance', true, 'record', r.name, 'expires_at', r.expires_at),
-      now(),
+      case when r.expires_at <= current_date then now() else (r.expires_at || 'T00:00:00')::timestamptz end,
       'due'
-    )
-    on conflict do nothing;
+    );
     n := n + 1;
   end loop;
   return n;

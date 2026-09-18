@@ -25,6 +25,25 @@
     var rowsBefore = document.querySelectorAll("#admin-body tbody tr").length;
     log.push("rowsBefore=" + rowsBefore);
     checks.push({ name: "registry table has rows", ok: rowsBefore >= 5, detail: "rows=" + rowsBefore });
+    var runBtn = document.querySelector("[data-comp-run-all]");
+    checks.push({ name: "run renewer button present", ok: !!runBtn, detail: runBtn ? "found" : "missing" });
+    if (runBtn) {
+      runBtn.click(); await wait(800);
+      var agentTxt = txt("#admin-body");
+      log.push("agentArea=" + agentTxt.slice(0, 400).replace(/\s+/g, " "));
+      checks.push({ name: "renewer suggestion (60d ahead)", ok: /Renew PRC Real Estate Broker License \(#L-000123\) by /.test(agentTxt), detail: "suggestion rendered" });
+      checks.push({ name: "lapsed renewal suggestion", ok: /Renew Buyer Protection Bond \(#BOND-88310\) now/.test(agentTxt), detail: "lapsed entry suggestion" });
+      checks.push({ name: "agent chips (last run badge)", ok: /last run/.test(agentTxt), detail: "chips shown" });
+      var approveBtn = Array.prototype.slice.call(document.querySelectorAll("[data-comp-approve]")).filter(b => { const act = b.closest(".lead-act"); return act && act.textContent.indexOf("L-000123") >= 0; })[0];
+      log.push("approveTarget=" + (approveBtn ? "found" : "missing"));
+      checks.push({ name: "approve button on broker suggestion", ok: !!approveBtn, detail: approveBtn ? "found" : "missing" });
+      if (approveBtn) {
+        approveBtn.click(); await wait(900);
+        var afterApprove = txt("#admin-body");
+        checks.push({ name: "approved step marks evidence observed", ok: /Approved/.test(afterApprove) && /Observed/.test(afterApprove), detail: "step approved + evidence row" });
+        checks.push({ name: "evidence row value (renewal summary)", ok: /Renew PRC Real Estate Broker License \(#L-000123\)/.test(afterApprove), detail: "observed evidence value" });
+      }
+    }
     document.querySelector("[data-comp-add]").click(); await wait(500);
     checks.push({ name: "add modal opens", ok: has("#cmp-modal") && has("#cmp-name"), detail: "modal" });
     document.querySelector("#cmp-type").value = "bir_reg";
@@ -44,7 +63,9 @@
       document.querySelector("#cmp-expires").value = "2027-09-30";
       document.querySelector("[data-comp-save]").click(); await wait(900);
       var afterEdit = txt("#admin-body");
-      checks.push({ name: "renewed record turns active", ok: !/Expired \d+d/.test(afterEdit) && /2027/.test(afterEdit), detail: "bond renewed" });
+      var afterEditBond = Array.prototype.slice.call(document.querySelectorAll("#admin-body tbody tr")).filter(tr => tr.textContent.indexOf("Buyer Protection Bond") >= 0)[0];
+      log.push("bondRow=" + (afterEditBond ? afterEditBond.textContent.replace(/\s+/g, " ").slice(0, 140) : "missing"));
+      checks.push({ name: "renewed record turns active", ok: !!afterEditBond && !/Expired \d+d/.test(afterEditBond.textContent) && /2027/.test(afterEditBond.textContent), detail: "bond row renews to active" });
     }
     var delRow = Array.prototype.slice.call(document.querySelectorAll("[data-comp-del]")).filter(b => { const tr = b.closest("tr"); return tr && tr.textContent.indexOf("DHSUD License-to-Sell") >= 0; })[0];
     log.push("delTarget=" + (delRow ? "found" : "missing"));
