@@ -330,63 +330,84 @@ where broker_id in (
 --   * agent_tasks kind='compliance' tied to those records or marked Test
 -- Ads are client-side only (localStorage state.ads) until the ad_posts table is
 -- shipped, so there is nothing to clean for Ads here.
--- NOTE: if you have NOT run supabase/agent_tasks.sql yet, skip the agent_tasks
--- PREVIEW/DELETE/VERIFY blocks (item 11) — the table will not exist.
+-- GUARDED: every block checks to_regclass first, so this section is a no-op
+-- (NOTICES only) until you deploy supabase/compliance_registry.sql and
+-- supabase/agent_tasks.sql. It can never abort with "relation does not exist".
 
--- PREVIEW:
-select id, type, name, number, holder, expires_at
-from public.compliance_records
-where id like 'cmp-seed-%'
-   or number = 'COR-9999'
-   or name ilike '%test%'
-   or notes ilike '%test%';
+-- PREVIEW (guarded):
+do $$
+declare n int;
+begin
+  if to_regclass('public.compliance_records') is not null then
+    select count(*) into n from public.compliance_records
+      where id like 'cmp-seed-%' or number = 'COR-9999'
+         or name ilike '%test%' or notes ilike '%test%';
+    raise notice 'Phase0-1 preview: % seed/test compliance record(s) exist', n;
+  else
+    raise notice 'Phase0-1 preview: compliance_records not deployed yet — nothing to clean';
+  end if;
 
-select id, kind, reason, payload, state, due_at
-from public.agent_tasks
-where kind = 'compliance'
-  and (
-    payload ->> 'record_id' like 'cmp-seed-%'
-    or payload ->> 'name' ilike '%test%'
-    or reason ilike '%test%'
-    or reason ilike '%BIR COR%'
-  );
+  if to_regclass('public.agent_tasks') is not null then
+    select count(*) into n from public.agent_tasks
+      where kind = 'compliance'
+        and (payload ->> 'record_id' like 'cmp-seed-%'
+             or payload ->> 'name' ilike '%test%'
+             or reason ilike '%test%'
+             or reason ilike '%BIR COR%');
+    raise notice 'Phase0-1 preview: % compliance autopilot task(s) queued for cleanup', n;
+  else
+    raise notice 'Phase0-1 preview: agent_tasks not deployed yet — nothing to clean';
+  end if;
+end $$;
 
 begin;
 
--- 10) Remove bootstrap-seed and e2e-created compliance records (skip if you have
---     NOT deployed compliance_registry.sql — the table will not exist).
-delete from public.compliance_records
-where id like 'cmp-seed-%'
-   or number = 'COR-9999'
-   or name ilike '%test%'
-   or notes ilike '%test%';
+-- 10) Remove bootstrap-seed and e2e-created compliance records.
+do $$
+begin
+  if to_regclass('public.compliance_records') is not null then
+    delete from public.compliance_records
+      where id like 'cmp-seed-%'
+         or number = 'COR-9999'
+         or name ilike '%test%'
+         or notes ilike '%test%';
+    raise notice 'Phase0-1 cleanup: compliance seed/test records deleted';
+  end if;
+end $$;
 
 -- 11) Remove autopilot compliance tasks queued from those records (also deletes
 --     any helper rows the edge-function ladder may have created for tests).
-delete from public.agent_tasks
-where kind = 'compliance'
-  and (
-    payload ->> 'record_id' like 'cmp-seed-%'
-    or payload ->> 'name' ilike '%test%'
-    or reason ilike '%test%'
-    or reason ilike '%BIR COR%'
-  );
+do $$
+begin
+  if to_regclass('public.agent_tasks') is not null then
+    delete from public.agent_tasks
+      where kind = 'compliance'
+        and (payload ->> 'record_id' like 'cmp-seed-%'
+             or payload ->> 'name' ilike '%test%'
+             or reason ilike '%test%'
+             or reason ilike '%BIR COR%');
+    raise notice 'Phase0-1 cleanup: compliance test tasks deleted';
+  end if;
+end $$;
 
 commit;
 
--- VERIFY (run each block only if you ran its matching cleanup block):
-select count(*) as remaining_seed_or_test_compliance
-from public.compliance_records
-where id like 'cmp-seed-%'
-   or number = 'COR-9999'
-   or name ilike '%test%';
-
-select count(*) as remaining_test_compliance_tasks
-from public.agent_tasks
-where kind = 'compliance'
-  and (
-    payload ->> 'record_id' like 'cmp-seed-%'
-    or payload ->> 'name' ilike '%test%'
-    or reason ilike '%test%'
-    or reason ilike '%BIR COR%'
-  );
+-- VERIFY (guarded):
+do $$
+declare n int;
+begin
+  if to_regclass('public.compliance_records') is not null then
+    select count(*) into n from public.compliance_records
+      where id like 'cmp-seed-%' or number = 'COR-9999' or name ilike '%test%';
+    raise notice 'Phase0-1 verify: remaining seed/test compliance records = %', n;
+  end if;
+  if to_regclass('public.agent_tasks') is not null then
+    select count(*) into n from public.agent_tasks
+      where kind = 'compliance'
+        and (payload ->> 'record_id' like 'cmp-seed-%'
+             or payload ->> 'name' ilike '%test%'
+             or reason ilike '%test%'
+             or reason ilike '%BIR COR%');
+    raise notice 'Phase0-1 verify: remaining compliance test tasks = %', n;
+  end if;
+end $$;
