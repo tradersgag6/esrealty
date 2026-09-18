@@ -35,6 +35,7 @@ function nextRecheck(task: any): { due: Date; reason: string } | null {
     case "site-visit": return { due: addDays(new Date(), 1), reason: "Upcoming site visit — recheck booking status" };
     case "negotiation": return { due: addDays(new Date(), 2), reason: "Offer in play — recheck for movement" };
     case "dormant": return { due: addDays(new Date(), 7), reason: "Dormant control — no artificial work, hold" };
+    case "compliance": return { due: addDays(new Date(), 1), reason: "Compliance record expiring — renew or update the registry" };
     default: return { due: addDays(new Date(), 2), reason: "Follow-up scheduled on completion" };
   }
 }

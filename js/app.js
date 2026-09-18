@@ -2811,11 +2811,26 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
     fillIcons();
     bindNumFormatting();
     // Listings bulk selection: capture-phase so card-open click never fires
-    document.addEventListener("click", function (e) {
-      const pgPrev = e.target.closest("[data-pag-prev]");
+document.addEventListener("change", e => {
+        if (e.target && e.target.id === "ad-tone") regenAdPreview();
+      });
+      document.addEventListener("click", function (e) {
+        const pgPrev = e.target.closest("[data-pag-prev]");
       if (pgPrev) { e.preventDefault(); e.stopPropagation(); pagPageGo(pgPrev.getAttribute("data-pag-prev"), -1); return; }
       const pgNext = e.target.closest("[data-pag-next]");
       if (pgNext) { e.preventDefault(); e.stopPropagation(); pagPageGo(pgNext.getAttribute("data-pag-next"), 1); return; }
+      const adPick = e.target.closest("[data-ad-pick]");
+      if (adPick) { e.preventDefault(); e.stopPropagation(); adPickListing(); return; }
+      const adFrom = e.target.closest("[data-ad-from-list]");
+      if (adFrom) { e.preventDefault(); e.stopPropagation(); const sel = $("#ad-listing"); const v = sel && sel.value; const m = $("#ad-pick-modal"); if (m) m.remove(); if (v) openAdEditor(v); return; }
+      const adSav = e.target.closest("[data-ad-save]");
+      if (adSav) { e.preventDefault(); e.stopPropagation(); saveAdDraft(); return; }
+      const adPub = e.target.closest("[data-ad-pub]");
+      if (adPub) { e.preventDefault(); e.stopPropagation(); publishAd(adPub.getAttribute("data-ad-pub")); return; }
+      const adDel = e.target.closest("[data-ad-del]");
+      if (adDel) { e.preventDefault(); e.stopPropagation(); delAd(adDel.getAttribute("data-ad-del")); return; }
+      const adCan = e.target.closest("[data-ad-cancel], [data-ad-pick-cancel]");
+      if (adCan) { e.preventDefault(); e.stopPropagation(); const m = $("#ad-modal") || $("#ad-pick-modal"); if (m) m.remove(); return; }
       const blk = e.target.closest("[data-ls-bulk]");
       if (blk) {
         e.preventDefault(); e.stopPropagation();
@@ -10939,7 +10954,8 @@ premise: "Fee Simple / As Improved",
       '<div class="field"><label>Balcony</label><select class="input" id="ls-balcony">' + opt([["yes", "Yes"], ["no", "No"]], f.balcony) + "</select></div>" +
       '<div class="field" style="justify-content:flex-end"><label>&nbsp;</label><label class="ms-chk"><input type="checkbox" id="ls-drop"' + (f.dropOnly ? " checked" : "") + "> Price drops only</label></div>" +
       "</div></div>";
-    html += '<div id="ls-results">' + lsResultsHTML() + "</div>";
+    html += '<div class="tabs-row mb-16">' + [["catalog", "Listings"], ["ads", "Ads &amp; Funnel"]].map(x => '<button class="tab-btn' + (state.lsTab === x[0] ? " on" : "") + '" data-ls-tab="' + x[0] + '">' + x[1] + "</button>").join("") + "</div>";
+    html += state.lsTab === "ads" ? renderAds() : '<div id="ls-results">' + lsResultsHTML() + "</div>";
     return html;
   }
   function lsStat(label, val) { return '<div class="ls-stat"><div class="ls-stat-v">' + esc(String(val == null || val === "" ? "—" : val)) + '</div><div class="ls-stat-l dim">' + esc(label) + "</div></div>"; }
@@ -11009,6 +11025,7 @@ premise: "Fee Simple / As Improved",
     if (fin.length) html += '<div class="mt-16"><label class="ls-sublabel">Financing accepted</label><div class="chip-row">' + fin.map(x => '<span class="chip">' + esc((LISTING_FINANCING.find(z => z[0] === x) || [x, x])[1]) + "</span>").join("") + "</div></div>";
     if (l.developer) html += '<div class="mt-8"><label class="ls-sublabel">Developer / Broker</label><div>' + esc(l.developer) + "</div></div>";
     if (l.hoaDues || l.condoDues) html += '<div class="mt-8"><label class="ls-sublabel">Association / Condo dues</label><div>' + (l.hoaDues ? "HOA " + C.money(l.hoaDues) + "/mo" : "") + (l.condoDues ? (l.hoaDues ? " · " : "") + "Condo " + C.money(l.condoDues) + "/mo" : "") + "</div></div>";
+    html += listingContactHtml(l);
     html += "</div></div>";
     html += '<div class="grid grid-3 mb-24">';
     html += '<div class="card card-pad" style="grid-column:span 2">' +
@@ -11038,6 +11055,7 @@ premise: "Fee Simple / As Improved",
       ? '<div class="notice-banner mt-16">This is a private draft preview. Publish the listing to enable public inquiries.</div>'
       : listingInquiryForm(l);
     html += '<div class="notice-banner">' + icon("shield", 14) + ' <span>Prices and monthly dues are marketing estimates for reference only. Verify title, zoning, and association dues with the developer or Registry of Deeds before transacting. This system does not provide legal or tax advice.</span></div>';
+    html += '<div class="notice-banner" style="border-left:3px solid var(--accent)">' + icon("doc", 14) + ' <span><b>Disclosure:</b> ' + esc(listingDisclosure(l)) + "</span></div>";
     return html;
   }
   function initListingStaticMap(id, lat, lng) {
@@ -11414,6 +11432,26 @@ premise: "Fee Simple / As Improved",
           if (l) copyListingText(listingMarketCopy(l), "Marketplace post copied");
           return;
         }
+        const adCopy = e.target.closest("[data-ls-ad-copy]");
+        if (adCopy) { copyListingAd(adCopy.getAttribute("data-ls-ad-copy")); return; }
+        const ltap = e.target.closest("[data-listing-contact]");
+        if (ltap) {
+          const lid = ltap.getAttribute("data-listing-id");
+          const via = ltap.getAttribute("data-listing-contact");
+          if (lid) {
+            lsStatBump(lid, via === "whatsapp" ? "waTaps" : "callTaps");
+            const ad = (state.ads || []).find(a => a.listingId === lid && a.status !== "draft");
+            if (ad) { ad.perfInquiries = Number(ad.perfInquiries || 0) + 1; save(); }
+          }
+          return;
+        }
+        const lsTab = e.target.closest("[data-ls-tab]");
+        if (lsTab) {
+          state.lsTab = lsTab.getAttribute("data-ls-tab");
+          state.listingDetail = null;
+          save(); render();
+          return;
+        }
       });
       document.addEventListener("change", e => {
         const rg = e.target.closest("#ls-m-region");
@@ -11590,7 +11628,14 @@ premise: "Fee Simple / As Improved",
   const LEAD_TYPES = [["buyer", "Buyer"], ["seller", "Seller"], ["renter", "Renter"], ["investor", "Investor"]];
   const LEAD_STATUSES = [["new", "New", "blue"], ["contacted", "Contacted", "gold"], ["site-visit", "Site Visit", "cyan"], ["offer", "Offer Submitted", "purple"], ["negotiation", "Negotiating", "gold"], ["closed", "Closed / Won", "green"], ["lost", "Lost", "red"]];
   const CAL_EVENT_TYPES = [["showing", "Property showing", "cyan"], ["follow-up", "Lead follow-up", "blue"], ["meeting", "Client meeting", "purple"], ["offer", "Offer deadline", "gold"], ["closing", "Closing / turnover", "green"], ["documents", "Document deadline", "red"]];
-  const LEAD_SOURCES = [["listing", "Listing Inquiry"], ["referral", "Referral"], ["walk-in", "Walk-in"], ["facebook", "Facebook"], ["website", "Website"], ["market", "Market Scan"], ["other", "Other"], ["lamudi", "Lamudi"], ["dotproperty", "DotProperty"], ["property24", "Property24"], ["carousell", "Carousell"], ["fb-marketplace", "FB Marketplace / Groups"], ["tiktok", "TikTok / YouTube Tour"], ["pagibig", "Pag-IBIG Project"], ["bank-leans", "Bank Foreclosed (LEANS)"]];
+  const LEAD_SOURCES = [["listing", "Listing Inquiry"], ["referral", "Referral"], ["walk-in", "Walk-in"], ["facebook", "Facebook"], ["website", "Website"], ["market", "Market Scan"], ["other", "Other"], ["lamudi", "Lamudi"], ["dotproperty", "DotProperty"], ["property24", "Property24"], ["carousell", "Carousell"], ["fb-marketplace", "FB Marketplace / Groups"], ["tiktok", "TikTok / YouTube Tour"], ["pagibig", "Pag-IBIG Project"], ["bank-leans", "Bank Foreclosed (LEANS)"], ["myproperty", "MyProperty.ph"], ["google", "Google"], ["whatsapp", "WhatsApp"], ["viber", "Viber"], ["site", "Website / Portal"]];
+  const COMPLIANCE_TYPES = [["broker_license", "Broker License (PRC)"], ["entity_reg", "Entity Registration (SEC/DTI)"], ["mayors_permit", "Mayor's Permit"], ["bir_reg", "BIR Registration"], ["dhsud_lts", "DHSUD License-to-Sell"], ["buyer_bond", "Buyer Protection Bond"], ["bank_acc", "Corporate Bank Account"]];
+  const ADS_CHANNELS = [["lamudi", "Lamudi"], ["property24", "Property24"], ["myproperty", "MyProperty.ph"], ["dotproperty", "DotProperty"], ["fb", "Facebook Marketplace / Groups"], ["tiktok", "TikTok / Reels"]];
+  const BIZ_BROKER_NAME = "";
+  const BIZ_BROKER_LICENSE = "";
+  const BIZ_FIRM = "";
+  const BIZ_WHATSAPP = "";
+  const BIZ_PHONE = "";
   const LEAD_PIPELINE = ["new", "contacted", "site-visit", "offer", "negotiation", "closed"];
   function leadStatusCfg(v) { return LEAD_STATUSES.find(x => x[0] === v); }
   function leadTypeLabel(v) { const f = LEAD_TYPES.find(x => x[0] === v); return f ? f[1] : (v || "—"); }
@@ -12586,7 +12631,7 @@ premise: "Fee Simple / As Improved",
         leadFld("Email", leadTxt("ld-email", l.email, "name@email.com")) +
         leadFld("Phone", leadTxt("ld-phone", l.phone, "+63 9xx xxx xxxx")) +
         leadFld("Status", '<select class="input" id="ld-status">' + leadSelOpt(LEAD_STATUSES, l.status || "new") + "</select>") +
-        leadFld("Source", '<select class="input" id="ld-source">' + leadSelOpt(LEAD_SOURCES, l.source || "listing") + "</select>") +
+        leadFld("Source", '<select class="input" id="ld-source">' + leadSelOpt(LEAD_SOURCES, l.source || (state.utmLanded && state.utmLanded.source) || "listing") + "</select>" + (state.utmLanded && state.utmLanded.source ? '<div class="field-hint">UTM source "' + esc(state.utmLanded.source) + '" from "' + esc(state.utmLanded.campaign || "campaign") + '" — keep to attribute accurately.</div>' : "")) +
         leadFld("Assigned agent", '<select class="input" id="ld-agent">' + agentOpts + "</select>") +
         leadFld("Interested in", leadTxt("ld-interest", l.propertyInterest, "e.g. 3BR house & lot, Cavite")) +
         leadFld("Financing mode", '<select class="input" id="ld-finmode">' + leadSelOpt([["", "— Select —"], ["pagibig", "Pag-IBIG"], ["bank", "Bank Loan"], ["inhouse", "In-house"], ["cash", "Cash"]], l.finMode || "") + "</select>") +
@@ -13026,6 +13071,264 @@ premise: "Fee Simple / As Improved",
     ];
   }
 
+  /* ================= COMPLIANCE REGISTRY ================= */
+  function complianceStatusOf(r) {
+    const t = r.expiresAt ? new Date(String(r.expiresAt).slice(0, 10) + "T00:00:00").getTime() : null;
+    if (!t) return { label: "Active", cls: "green", due: false, days: null };
+    const d = Math.round((t - Date.now()) / 86400000);
+    if (d < 0) return { label: "Expired " + Math.abs(d) + "d", cls: "red", due: true, days: d };
+    if (d <= 60) return { label: "Expiring in " + d + "d", cls: "gold", due: true, days: d };
+    return { label: "Active · " + d + "d", cls: "green", due: false, days: d };
+  }
+  function complianceDue() {
+    return (state.compliance || []).filter(r => r.status !== "revoked" && complianceStatusOf(r).due);
+  }
+  function seedCompliance() {
+    const d = ms => new Date(Date.now() + ms * 86400000).toISOString().slice(0, 10);
+    return [
+      { id: "cmp-seed-1", type: "broker_license", name: "PRC Real Estate Broker License", number: "L-000123", holder: "Broker Name", issuedAt: d(-800), expiresAt: d(38), status: "active", notes: "CPE hours current through renewal window." },
+      { id: "cmp-seed-2", type: "entity_reg", name: "SEC Corporation Registration", number: "CS2019-012345", holder: "ES Realty Brokerage", issuedAt: d(-2000), expiresAt: "", status: "active", notes: "Amended Corporate name filed 2025." },
+      { id: "cmp-seed-3", type: "mayors_permit", name: "Business / Mayor's Permit", number: "MP-2026-8841", holder: "ES Realty Brokerage", issuedAt: d(-320), expiresAt: d(45), status: "active", notes: "Renew before year-end deadline." },
+      { id: "cmp-seed-4", type: "bir_reg", name: "BIR Registration (Non-VAT)", number: "ORN 234-5678", holder: "ES Realty Brokerage", issuedAt: d(-1500), expiresAt: "", status: "active", notes: "1601-E and 1702Q filing deadlines tracked." },
+      { id: "cmp-seed-5", type: "dhsud_lts", name: "DHSUD License-to-Sell — Pre-selling Project", number: "LTS-6622-01", holder: "Developer (Pre-Selling)", issuedAt: d(-120), expiresAt: d(90), status: "active", notes: "Pre-selling of the project halts if this lapses." },
+      { id: "cmp-seed-6", type: "buyer_bond", name: "Buyer Protection Bond", number: "BOND-88310", holder: "Surety Co.", issuedAt: d(-110), expiresAt: d(-4), status: "expired", notes: "Bond lapsed — renew before next project launch." }
+    ];
+  }
+  function complianceTypeLabel(t) { const x = COMPLIANCE_TYPES.find(z => z[0] === t); return x ? x[1] : t; }
+  function adminCompliance() {
+    const rows = (state.compliance || []).slice().sort((a, b) => String(a.expiresAt || "9999-12-31").localeCompare(String(b.expiresAt || "9999-12-31")));
+    const due = complianceDue();
+    const expired = due.filter(r => complianceStatusOf(r).days < 0).length;
+    const expiring = due.filter(r => complianceStatusOf(r).days >= 0).length;
+    const nextRec = due[0];
+    let html = '<div class="ls-stat-row">' +
+      lsStat("Registry items", rows.length) +
+      lsStat("Due in 60 days", expiring) +
+      lsStat("Expired / lapsed", expired) +
+      lsStat("Next to renew", due.length ? esc(due[0].name) : "Nothing due") + "</div>";
+    html += '<div class="notice-banner">' + icon("zap", 14) + " <span><b>Autopilot:</b> " + (due.length
+      ? "Supervisor renewer queued — " + esc(nextRec.name) + " " + (complianceStatusOf(nextRec).days < 0 ? "has lapsed and needs renewal NOW." : "expires " + new Date(nextRec.expiresAt).toLocaleDateString() + " (" + complianceStatusOf(nextRec).days + " days).")
+      : "all licenses, permits, and bonds are current — nothing to renew.") + "</span></div>";
+    if (!rows.length) {
+      html += '<div class="card card-pad empty mt-16">' + icon("shield", 40) + "<h3>No compliance records yet</h3><p>Add your licenses, permits, and bonds — the Autopilot will remind you 60 days before expiry.</p>" +
+        '<button class="btn btn-primary mt-16" data-comp-add>' + icon("plus", 14) + " Add first record</button></div>";
+      return html;
+    }
+    html += '<div class="card card-pad mt-16"><div class="row spread"><h3>Licenses, Permits, Bonds &amp; Registrations</h3>' +
+      '<button class="btn btn-primary btn-sm" data-comp-add>' + icon("plus", 14) + " Add record</button></div>" +
+      '<div class="table-wrap mt-8"><table class="data"><thead><tr><th>Record</th><th>Type</th><th>Number</th><th>Holder</th><th>Expires</th><th>Status</th><th></th></tr></thead><tbody>' +
+      rows.map(r => {
+        const st = complianceStatusOf(r);
+        return "<tr><td><b>" + esc(r.name) + "</b>" + (r.notes ? '<div class="dim tiny">' + esc(r.notes) + "</div>" : "") + "</td><td>" + esc(complianceTypeLabel(r.type)) + "</td><td class='mono'>" + esc(r.number || "—") + "</td><td>" + esc(r.holder || "—") + "</td><td>" + (r.expiresAt ? esc(new Date(r.expiresAt).toLocaleDateString()) : "No expiry") + "</td><td><span class='badge " + st.cls + "'>" + st.label + "</span></td>" +
+          '<td class="lnk"><button class="btn btn-ghost btn-sm" data-comp-edit="' + esc(r.id) + '">' + icon("edit", 13) + " Edit</button>" +
+          '<button class="btn btn-ghost btn-sm" data-comp-del="' + esc(r.id) + '">' + icon("trash", 13) + " Delete</button></td></tr>";
+      }).join("") +
+      "</tbody></table></div></div>";
+    return html;
+  }
+  function openComplianceModal(id) {
+    const ov = document.createElement("div");
+    ov.className = "modal-overlay"; ov.id = "cmp-modal";
+    ov.setAttribute("data-edit-id", id || "");
+    const r = id ? (state.compliance || []).find(x => x.id === id) || {} : {};
+    const typeSel = '<select class="input" id="cmp-type">' + leadSelOpt(COMPLIANCE_TYPES, r.type || COMPLIANCE_TYPES[0][0]) + "</select>";
+    const body =
+      '<div class="grid grid-2">' +
+        leadFld("Record type", typeSel) +
+        leadFld("Display name *", leadTxt("cmp-name", r.name, "e.g. PRC Broker License")) +
+        leadFld("Reference / license number", leadTxt("cmp-number", r.number, "e.g. L-000123")) +
+        leadFld("Holder", leadTxt("cmp-holder", r.holder, "Person or firm")) +
+        leadFld("Issue date", leadTxt("cmp-issued", r.issuedAt || "", "YYYY-MM-DD")) +
+        leadFld("Expiry date", leadTxt("cmp-expires", r.expiresAt || "", "YYYY-MM-DD — blank if perpetual")) +
+      "</div>" +
+      '<div class="field col-full mt-8"><label>Notes</label><textarea class="input" id="cmp-notes" rows="2">' + esc(r.notes || "") + "</textarea></div>";
+    ov.innerHTML = '<div class="modal-card"><div class="modal-head"><h3>' + (id ? "Edit Compliance Record" : "Add Compliance Record") + '</h3><button class="icon-btn" data-comp-cancel title="Close">&times;</button></div>' +
+      '<div class="modal-body" style="max-height:70vh;overflow:auto">' + body + "</div>" +
+      '<div class="modal-foot"><button class="btn btn-ghost" data-comp-cancel>Cancel</button><button class="btn btn-primary" data-comp-save>' + icon("check", 15) + " Save Record</button></div></div>";
+    document.body.appendChild(ov);
+    ov.addEventListener("click", e => { if (e.target === ov) ov.remove(); });
+  }
+  function saveComplianceRecord() {
+    const ov = $("#cmp-modal"); if (!ov) return;
+    const id = ov.getAttribute("data-edit-id") || "";
+    const name = String(($("#cmp-name") || { value: "" }).value || "").trim();
+    if (!name) { toast("Record name is required", "err"); return; }
+    const rec = (state.compliance || []).find(x => x.id === id) || { id: "cmp-" + Date.now() + "-" + Math.floor(Math.random() * 99999) };
+    rec.type = $("#cmp-type").value;
+    rec.name = name;
+    rec.number = String(($("#cmp-number") || { value: "" }).value || "").trim();
+    rec.holder = String(($("#cmp-holder") || { value: "" }).value || "").trim();
+    rec.issuedAt = String(($("#cmp-issued") || { value: "" }).value || "").trim();
+    rec.expiresAt = String(($("#cmp-expires") || { value: "" }).value || "").trim();
+    rec.notes = String(($("#cmp-notes") || { value: "" }).value || "").trim();
+    rec.status = complianceStatusOf(rec).days === null ? "active" : (complianceStatusOf(rec).days < 0 ? "expired" : "active");
+    rec.updatedAt = new Date().toISOString();
+    if (!state.compliance) state.compliance = [];
+    if (!state.compliance.find(x => x.id === rec.id)) state.compliance.push(rec);
+    save();
+    ov.remove();
+    render();
+    toast("Compliance record saved", "ok");
+  }
+  function delCompliance(id) {
+    if (!state.compliance) return;
+    state.compliance = state.compliance.filter(x => x.id !== id);
+    save(); render();
+    toast("Compliance record deleted", "ok");
+  }
+
+  /* ================= ADS REPOSITORY + SOURCE FUNNEL ================= */
+  function listingDisclosure(l) {
+    const firm = BIZ_FIRM || "ES Realty Brokerage";
+    const brokerName = l.brokerName || BIZ_BROKER_NAME || firm;
+    const brokerLic = l.brokerLicense || BIZ_BROKER_LICENSE || "";
+    const presell = l.status === "pre-selling" || l.rfo === "pre-selling" || l.rfo === "preselling" || l.rfo === "pre-sell";
+    let s = "Listed by " + firm + " · " + brokerName + (brokerLic ? " · Licensed Real Estate Broker (PRC " + brokerLic + ")" : "");
+    if (l.licenseToSell || presell) s += " · DHSUD License-to-Sell " + (l.licenseToSell || "(pending)");
+    s += ". Pre-selling shown for information only; not an offer to sell. Verify zoning, title, and financing with your broker before transacting.";
+    return s;
+  }
+  function listingAdCaption(l, style) {
+    const loc = [l.barangay, l.city, l.province].filter(Boolean).join(", ").trim();
+    const price = listingDisplayPrice(l);
+    const beds = C.num(l.bedrooms, 0) > 0 ? l.bedrooms + "BR " : "";
+    const type = listTypeLabel(l.propertyType);
+    const head = esc((l.title || "For sale").slice(0, 60));
+    if (style === "hook") return "Looking for " + beds + type + " in " + (loc || "the Philippines") + "? " + price + " — " + head + ". Message us on WhatsApp for a virtual tour.";
+    if (style === "taglish") return "Baka ito na nga! " + head + " — " + beds + type + " in " + (loc || "") + " for " + price + ". DM niyo kami or send a WhatsApp message.";
+    return head + " — " + beds + type + " in " + (loc || "Philippines") + " for " + price + ".";
+  }
+  function listingContactHtml(l) {
+    const wa = l.businessWhatsApp || BIZ_WHATSAPP || state.businessWhatsApp || (IS_LOCAL_DEV ? "639171234567" : "") || "";
+    const tel = l.businessPhone || BIZ_PHONE || state.businessPhone || (IS_LOCAL_DEV ? "+63 917 123 4567" : "") || "";
+    const prefill = encodeURIComponent("Hi! I'm interested in " + (l.title || "this listing") + " (" + (l.ref || "") + "). Please send me details.");
+    return '<div class="mt-16" style="display:flex;gap:8px;flex-wrap:wrap">' +
+      (wa ? '<a class="btn btn-primary btn-sm" target="_blank" rel="noopener" href="https://wa.me/' + esc(String(wa).replace(/\D/g, "")) + '?text=' + prefill + '" data-listing-contact="whatsapp" data-listing-id="' + esc(l.id) + '">' + icon("chat", 13) + " WhatsApp</a>" : "") +
+      (tel ? '<a class="btn btn-ghost btn-sm" href="tel:' + esc(String(tel).replace(/[^\d+]/g, "")) + '" data-listing-contact="call" data-listing-id="' + esc(l.id) + '">' + icon("phone", 13) + " Call " + esc(tel) + "</a>" : "") +
+      '<button class="btn btn-ghost btn-sm" data-ls-ad-copy="' + esc(l.id) + '" title="Copy a caption plus the legally required disclosure">' + icon("doc", 13) + " Copy ad</button></div>"
+  }
+  function copyListingAd(id) {
+    const l = (state.listings || []).find(x => x.id === id);
+    if (!l) { toast("Listing not found", "err"); return; }
+    const caption = listingAdCaption(l, "standard") + "\n\n" + listingDisclosure(l);
+    const done = () => toast("Ad caption + disclosure copied — paste into Lamudi / FB / TikTok", "ok");
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(caption).then(done).catch(() => { toast(caption, "info"); });
+    else { const ta = document.createElement("textarea"); ta.value = caption; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
+  }
+  function adCaptionsHtml(l) {
+    return ["standard", "hook", "taglish"].map(st => '<div class="card card-pad mb-8"><div class="dim tiny">' + st.toUpperCase() + " caption</div><p class='mt-4'>" + listingAdCaption(l, st) + "</p></div>").join("");
+  }
+  function openAdEditor(listingId) {
+    const l = (state.listings || []).find(x => x.id === listingId);
+    if (!l) { toast("Pick a listing first", "err"); return; }
+    state.adDraftListingId = listingId;
+    const ov = document.createElement("div");
+    ov.className = "modal-overlay"; ov.id = "ad-modal";
+    ov.innerHTML = '<div class="modal-card modal-card-wide"><div class="modal-head"><h3>' + icon("target", 16) + " Ad for " + esc((l.title || "").slice(0, 34)) + '</h3><button class="icon-btn" data-ad-cancel title="Close">&times;</button></div>' +
+      '<div class="modal-body" style="max-height:70vh;overflow:auto"><div class="grid grid-2">' +
+      '<div class="field"><label>Channel</label><select class="input" id="ad-channel">' + leadSelOpt(ADS_CHANNELS, "lamudi") + "</select></div>" +
+      '<div class="field"><label>Caption tone</label><select class="input" id="ad-tone">' + ["standard", "hook", "taglish"].map(st => '<option value="' + st + '">' + st.toUpperCase() + "</option>").join("") + "</select></div></div>" +
+      '<div class="field col-full mt-8"><label>Caption (editable — disclosure is appended automatically when publishing)</label><textarea class="input" id="ad-preview" rows="5">' + esc(listingAdCaption(l, "standard")) + "</textarea></div></div>" +
+      '<div class="modal-foot"><button class="btn btn-ghost" data-ad-cancel>Cancel</button><button class="btn btn-primary" data-ad-save>' + icon("check", 15) + " Save draft →</button></div></div>";
+    document.body.appendChild(ov);
+    ov.addEventListener("click", e => { if (e.target === ov) ov.remove(); });
+  }
+  function regenAdPreview() {
+    const tone = ($("#ad-tone") || {}).value || "standard";
+    const id = state.adDraftListingId;
+    const l = (state.listings || []).find(x => x.id === id);
+    if (l && $("#ad-preview")) $("#ad-preview").value = listingAdCaption(l, tone);
+  }
+  function saveAdDraft() {
+    const ov = $("#ad-modal"); if (!ov) return;
+    const listingId = state.adDraftListingId || "";
+    const channel = $("#ad-channel").value;
+    const caption = String(($("#ad-preview") || { value: "" }).value || "").trim();
+    if (!caption) { toast("Caption is required", "err"); return; }
+    const l = (state.listings || []).find(x => x.id === listingId) || {};
+    const rec = { id: "ad-" + Date.now() + "-" + Math.floor(Math.random() * 99999), listingId: listingId, listingTitle: l.title || "", channel: channel, caption: caption, status: "draft", url: "", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), perfViews: 0, perfInquiries: 0, owner: (currentUser && currentUser.name) || "" };
+    if (!state.ads) state.ads = [];
+    state.ads.unshift(rec);
+    save(); ov.remove(); render();
+    toast("Ad draft saved — publish it to go live", "ok");
+  }
+  function publishAd(id) {
+    const a = (state.ads || []).find(x => x.id === id);
+    if (!a) { toast("Ad not found", "err"); return; }
+    const l = (state.listings || []).find(x => x.id === a.listingId) || {};
+    a.status = "posted";
+    a.postedAt = new Date().toISOString();
+    a.updatedAt = new Date().toISOString();
+    if (a.caption && a.caption.indexOf("Listed by") === -1) a.caption = a.caption + "\n\n" + listingDisclosure(l);
+    save(); render();
+    toast("Ad published — disclosure appended", "ok");
+  }
+  function delAd(id) {
+    if (!state.ads) return;
+    state.ads = state.ads.filter(x => x.id !== id);
+    save(); render();
+    toast("Ad deleted", "ok");
+  }
+  function renderAds() {
+    const ads = (state.ads || []).slice();
+    const live = ads.filter(a => a.status !== "draft");
+    const views = ads.reduce((s, a) => s + Number(a.perfViews || 0), 0);
+    const inq = ads.reduce((s, a) => s + Number(a.perfInquiries || 0), 0);
+    let html = '<div class="card card-pad mb-24"><div class="row spread"><h3>Ads &amp; Attribution</h3>' +
+      '<button class="btn btn-primary btn-sm" data-ad-pick>' + icon("plus", 14) + " New ad</button></div>" +
+      '<p class="dim tiny mt-8">Each ad is tied to a listing and channel. Inquiries that quote the same listing get attributed to the ad; the funnel below rolls up by lead source.</p>' +
+      '<div class="row mt-8" style="gap:10px;flex-wrap:wrap">' + lsStat("Draft ads", ads.filter(a => a.status === "draft").length) + lsStat("Live ads", live.length) + lsStat("Tracked views", views) + lsStat("Ad inquiries", inq) + "</div></div>";
+    if (!ads.length) html += '<div class="card card-pad empty">' + icon("target", 40) + "<h3>No ads yet</h3><p>Open any listing and press <b>Copy ad</b> for a disclosure-ready caption, or create a tracked ad here.</p>" +
+      '<button class="btn btn-primary mt-16" data-ad-pick>' + icon("plus", 15) + " Create from listing</button></div>";
+    else html += '<div class="card card-pad"><div class="row spread"><h3>Ad posts</h3><button class="btn btn-primary btn-sm" data-ad-pick>' + icon("plus", 14) + " New ad</button></div>" +
+      '<div class="table-wrap mt-8"><table class="data"><thead><tr><th>Ad</th><th>Listing</th><th>Channel</th><th>Status</th><th class="num">Views</th><th class="num">Inquiries</th><th></th></tr></thead><tbody>' +
+      ads.map(a => {
+        const ch = (ADS_CHANNELS.find(c => c[0] === a.channel) || [a.channel, a.channel])[1];
+        return "<tr><td>" + esc((a.listingTitle || "").slice(0, 36)) + "<div class='dim tiny'>" + esc(String(a.caption || "").replace(/\n/g, " ").slice(0, 60)) + "</div></td><td>" + esc((a.listingTitle || "—").slice(0, 30)) + "</td><td>" + esc(ch) + "</td><td>" + (a.status === "draft" ? '<span class="badge gold">Draft</span>' : '<span class="badge green">Live</span>') + "</td><td class='num'>" + Number(a.perfViews || 0) + "</td><td class='num'>" + Number(a.perfInquiries || 0) + "</td>" +
+          "<td>" + (a.status === "draft" ? '<button class="btn btn-primary btn-sm" data-ad-pub="' + esc(a.id) + '">Publish</button>' : '<span class="dim tiny">' + (a.url ? esc(String(a.url).slice(0, 24)) : "posted " + new Date(a.postedAt || a.createdAt).toLocaleDateString()) + "</span>") +
+          ' <button class="btn btn-ghost btn-sm" data-ad-del="' + esc(a.id) + '" title="Delete">' + icon("trash", 13) + "</button></td></tr>";
+      }).join("") +
+      "</tbody></table></div></div>";
+    html += '<div class="card card-pad mt-24"><h3>Source Funnel</h3><div class="table-wrap mt-8">' + stackFunnelHtml() + "</div></div>";
+    return html;
+  }
+  function adPickListing() {
+    const opts = (state.listings || []).map(l => '<option value="' + esc(l.id) + '">' + esc((l.title || "").slice(0, 46)) + "</option>").join("");
+    const ov = document.createElement("div");
+    ov.className = "modal-overlay"; ov.id = "ad-pick-modal";
+    ov.innerHTML = '<div class="modal-card"><div class="modal-head"><h3>Pick a listing to advertise</h3><button class="icon-btn" data-ad-pick-cancel title="Close">&times;</button></div>' +
+      '<div class="modal-body"><div class="field"><label>Listing</label><select class="input" id="ad-listing">' + opts + "</select></div></div>" +
+      '<div class="modal-foot"><button class="btn btn-ghost" data-ad-pick-cancel>Cancel</button><button class="btn btn-primary" data-ad-from-list>' + icon("target", 14) + " Continue →</button></div></div>";
+    document.body.appendChild(ov);
+    ov.addEventListener("click", e => { if (e.target === ov) ov.remove(); });
+  }
+  function stackFunnelHtml() {
+    const rows = {};
+    (state.leads || []).forEach(l => {
+      const k = l.source || "other";
+      const r = rows[k] = rows[k] || { total: 0, qualified: 0, reservations: 0, closed: 0 };
+      r.total++;
+      if (l.status !== "new" && l.status !== "lost") r.qualified++;
+      if (l.status === "offer" || l.status === "negotiation") r.reservations++;
+      if (l.status === "closed") r.closed++;
+    });
+    const order = Object.keys(rows).sort((a, b) => rows[b].total - rows[a].total);
+    if (!order.length) return '<div class="dim">No leads yet — the funnel fills as leads flow in.</div>';
+    const label = k => { const x = LEAD_SOURCES.find(z => z[0] === k); return x ? x[1] : k; };
+    const head = '<tr><th>Source</th><th class="num">Leads</th><th class="num">Qualified</th><th class="num">Reservations</th><th class="num">Closed</th><th class="num">Qualify %</th></tr>';
+    const body = order.map(k => { const r = rows[k]; const pct = r.total ? Math.round(100 * r.qualified / r.total) : 0; return "<tr><td>" + esc(label(k)) + "</td><td class='num'>" + r.total + "</td><td class='num'>" + r.qualified + "</td><td class='num'>" + r.reservations + "</td><td class='num'>" + r.closed + '</td><td class="num">' + pct + "%</td></tr>"; }).join("");
+    return '<table class="data"><thead>' + head + "</thead><tbody>" + body + "</tbody></table>";
+  }
+  function captureUtm(force) {
+    try {
+      const q = new URLSearchParams(window.location.search || "");
+      const src = (q.get("utm_source") || "").trim();
+      if ((!state.utmLanded || force) && src) {
+        state.utmLanded = { source: src, medium: (q.get("utm_medium") || "").trim(), campaign: (q.get("utm_campaign") || "").trim(), ref: src + "-" + Date.now(), ts: new Date().toISOString() };
+      }
+    } catch (e) { /* ignore malformed URLs */ }
+  }
+
   /* ================= SALES PLAYBOOK ================= */
   const PLAYBOOK_STAGES = ["Lead Generation", "Initial Consultation", "Property Matching", "Site Viewing", "Price Negotiation", "Reservation", "Contract to Sell", "Financing", "Turnover", "Post-Sale"];
   const PLAYBOOK_CATEGORIES = ["OFW Buyer", "First-Time Homebuyer", "End-User", "Investor", "Balikbayan", "Relocating Expat", "Corporate Lease", "Developer Bulk"];
@@ -13386,6 +13689,9 @@ premise: "Fee Simple / As Improved",
     ensureDeals();
     ensurePortfolio();
     if (!state.transactions.length && (!currentUser || currentUser.demo || (IS_LOCAL_DEV && !currentUser.id))) state.transactions = seedTransactions();
+    if (!state.compliance) state.compliance = [];
+    if (!state.compliance.length) state.compliance = seedCompliance();
+    if (!state.ads) state.ads = [];
     if (!state.adminTab) state.adminTab = "overview";
     if ((currentUser && currentUser.demo) || (IS_LOCAL_DEV && (!currentUser || !currentUser.id))) seedPmsSample();
   }
@@ -15118,7 +15424,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     save(); render(); toast("Generated pending payouts for " + missings.length + " closed deal(s)", "ok");
   }
   function adminTabAllowed(tab) {
-    const capability = { overview: "brokerage.view", commission: "commission.manage", payouts: "payout.approve", analytics: "brokerage.view", cobroke: "brokerage.view", inventory: "inventory.view" };
+    const capability = { overview: "brokerage.view", commission: "commission.manage", payouts: "payout.approve", analytics: "brokerage.view", cobroke: "brokerage.view", inventory: "inventory.view", compliance: "brokerage.view", ads: "brokerage.view" };
     return can(capability[tab] || "brokerage.view");
   }
   function adminCobroke() {
@@ -15281,14 +15587,14 @@ const ccBtn = e.target.closest("[data-cc-calc]");
 
   function renderAdmin() {
     if (!canBroker()) return '<div class="hero"><div><h1>Brokerage</h1></div></div><div class="card card-pad empty">' + icon("shield", 40) + "<h3>Brokers / admins only</h3><p>Commission, payouts, analytics, and inventory are restricted to brokerage roles.</p></div>";
-    const tabs = [["overview", "Overview"], ["commission", "Commission"], ["payouts", "Payouts"], ["analytics", "Analytics"], ["cobroke", "Co-Broke"], ["inventory", "Inventory"]].filter(x => adminTabAllowed(x[0]));
+    const tabs = [["overview", "Overview"], ["commission", "Commission"], ["payouts", "Payouts"], ["analytics", "Analytics"], ["cobroke", "Co-Broke"], ["inventory", "Inventory"], ["compliance", "Compliance"], ["ads", "Ads"]].filter(x => adminTabAllowed(x[0]));
     const tab = adminTabAllowed(state.adminTab) ? state.adminTab : "overview";
     if (state.adminTab !== tab) state.adminTab = tab;
     let html = '<div class="hero"><div><h1>Brokerage</h1><p>Commission management, payouts, team performance, and developer inventory.</p></div>' +
       '<div class="actions"><button class="btn btn-ghost btn-sm" data-tl-toggle>' + icon("moon", 14) + (lang === "fil" ? " English" : " Filipino") + "</button></div></div>";
     if (roleIs("broker")) html += '<div class="notice-banner">' + icon("shield", 14) + '<span><b>Private brokerage workspace:</b> transactions, commissions, payouts, and team leads belong to ' + esc((currentUser && currentUser.name) || "this broker") + '. Listings and Inventory use the shared catalog.</span></div>';
     html += '<div class="tabs-row mb-16">' + tabs.map(x => '<button class="tab-btn' + (tab === x[0] ? " on" : "") + '" data-admin-tab="' + x[0] + '">' + x[1] + "</button>").join("") + "</div>";
-    html += '<div id="admin-body">' + (tab === "overview" ? adminOverview() : tab === "commission" ? adminCommission() : tab === "payouts" ? adminPayouts() : tab === "cobroke" ? adminCobroke() : tab === "analytics" ? adminAnalytics() : tab === "inventory" ? adminInventory() : "") + "</div>";
+    html += '<div id="admin-body">' + (tab === "overview" ? adminOverview() : tab === "commission" ? adminCommission() : tab === "payouts" ? adminPayouts() : tab === "cobroke" ? adminCobroke() : tab === "analytics" ? adminAnalytics() : tab === "inventory" ? adminInventory() : tab === "compliance" ? adminCompliance() : tab === "ads" ? renderAds() : "") + "</div>";
     return html;
   }
   function adminOverview() {
@@ -15485,6 +15791,16 @@ const ccBtn = e.target.closest("[data-cc-calc]");
           navigate("listings");
           return;
         }
+        const ca = e.target.closest("[data-comp-add]");
+        if (ca) { openComplianceModal(""); return; }
+        const ce = e.target.closest("[data-comp-edit]");
+        if (ce) { openComplianceModal(ce.getAttribute("data-comp-edit")); return; }
+        const cd = e.target.closest("[data-comp-del]");
+        if (cd) { delCompliance(cd.getAttribute("data-comp-del")); return; }
+        const cc = e.target.closest("[data-comp-cancel]");
+        if (cc) { const m = $("#cmp-modal"); if (m) m.remove(); return; }
+        const ccs = e.target.closest("[data-comp-save]");
+        if (ccs) { saveComplianceRecord(); return; }
       });
     }
     if (state.view === "admin" && state.adminTab === "inventory" && Date.now() - (state.invLastSynced || 0) > 10000) refreshAdminInventory();
@@ -15921,6 +16237,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     ensureListings();
     ensureLeads();
     ensureBrokerage();
+    captureUtm(true);
     bindGlobal();
     bindAuth();
     bindAuthState();
