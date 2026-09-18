@@ -321,3 +321,72 @@ where broker_id in (
     'newagent.admin@esrealty.ph', 'broker.noprc@esrealty.ph', 'sample2.1@gmail.com'
   )
 );
+
+-- ================ PHASE 0-1 TEST DATA (compliance registry + autopilot) ================
+-- Removes ONLY verification/bootstrap rows created by compliance_registry_e2e
+-- or app seeding. Real brokerage records are retained:
+--   * compliance_records with ids 'cmp-seed-*' (the app's bootstrap seed set)
+--   * records created by the e2e test: number 'COR-9999' / 'BIR COR — Test Branch'
+--   * agent_tasks kind='compliance' tied to those records or marked Test
+-- Ads are client-side only (localStorage state.ads) until the ad_posts table is
+-- shipped, so there is nothing to clean for Ads here.
+-- NOTE: if you have NOT run supabase/agent_tasks.sql yet, skip the agent_tasks
+-- PREVIEW/DELETE/VERIFY blocks (item 11) — the table will not exist.
+
+-- PREVIEW:
+select id, type, name, number, holder, expires_at
+from public.compliance_records
+where id like 'cmp-seed-%'
+   or number = 'COR-9999'
+   or name ilike '%test%'
+   or notes ilike '%test%';
+
+select id, kind, reason, payload, state, due_at
+from public.agent_tasks
+where kind = 'compliance'
+  and (
+    payload ->> 'record_id' like 'cmp-seed-%'
+    or payload ->> 'name' ilike '%test%'
+    or reason ilike '%test%'
+    or reason ilike '%BIR COR%'
+  );
+
+begin;
+
+-- 10) Remove bootstrap-seed and e2e-created compliance records (skip if you have
+--     NOT deployed compliance_registry.sql — the table will not exist).
+delete from public.compliance_records
+where id like 'cmp-seed-%'
+   or number = 'COR-9999'
+   or name ilike '%test%'
+   or notes ilike '%test%';
+
+-- 11) Remove autopilot compliance tasks queued from those records (also deletes
+--     any helper rows the edge-function ladder may have created for tests).
+delete from public.agent_tasks
+where kind = 'compliance'
+  and (
+    payload ->> 'record_id' like 'cmp-seed-%'
+    or payload ->> 'name' ilike '%test%'
+    or reason ilike '%test%'
+    or reason ilike '%BIR COR%'
+  );
+
+commit;
+
+-- VERIFY (run each block only if you ran its matching cleanup block):
+select count(*) as remaining_seed_or_test_compliance
+from public.compliance_records
+where id like 'cmp-seed-%'
+   or number = 'COR-9999'
+   or name ilike '%test%';
+
+select count(*) as remaining_test_compliance_tasks
+from public.agent_tasks
+where kind = 'compliance'
+  and (
+    payload ->> 'record_id' like 'cmp-seed-%'
+    or payload ->> 'name' ilike '%test%'
+    or reason ilike '%test%'
+    or reason ilike '%BIR COR%'
+  );

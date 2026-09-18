@@ -72,7 +72,7 @@ build the minimum that carries them natively.
   concrete steps with the same ladder rules as the client, `agent_complete`.
   It is a plain observer: it never fabricates; steps cite task payload + reason.
 - `market-scan/vercel/vercel.json`: add `"crons": [{ "path": "/api/agent-dispatch",
-  "schedule": "*/5 * * * *" }]`.
+  "schedule": "0 * * * *" }]`.
 - `market-scan/vercel/api/agent-dispatch.js`: if `AGENT_EDGE_URL`+
   `AGENT_EDGE_TOKEN` set, warm + `POST` the edge function; else returns
   `{ok:true, skipped:"no edge env"}` so local/cold deploys are harmless.

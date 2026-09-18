@@ -58,10 +58,12 @@ vercel --prod   # re-deploy so envs are baked in
 
 `vercel.json` already defines the schedule:
 ```json
-"crons": [{ "path": "/api/agent-dispatch", "schedule": "*/5 * * * *" }]
+"crons": [{ "path": "/api/agent-dispatch", "schedule": "0 * * * *" }]
 ```
-Every 5 minutes the cron calls `api/agent-dispatch`, which claims due tasks and
-runs the recheck ladder. **Known behavior:** if `AGENT_EDGE_URL`/`AGENT_EDGE_TOKEN`
+Once an hour the cron calls `api/agent-dispatch`, which claims due tasks and
+runs the recheck ladder. (Thinned from 5-minute to hourly in the quota-reduction
+cleanup to cut edge-function invocations and DB compute ~12x; if you need faster
+Autopilot picks, revert to `*/5`.) **Known behavior:** if `AGENT_EDGE_URL`/`AGENT_EDGE_TOKEN`
 are unset, the shim no-ops silently (so it is safe to deploy before wiring envs).
 Cron jobs require a paid plan on Vercel; on a free plan the scheduler will not fire
 — in that case add a manual trigger (GitHub Actions scheduled call, or uptime-robot
@@ -82,7 +84,7 @@ the chip live in production, the parity test + adapter must be changed together
 
 ## Expected production behavior after steps 1–4
 
-- Leads in the app: each Run/Recheck pushes `agent_tasks` rows; the 5-minute cron
+- Leads in the app: each Run/Recheck pushes `agent_tasks` rows; the hourly cron
   leases and executes them; steps + evidence sync back into OSM-rendered Agent tab.
 - Offline degrade: no Supabase/Vercel connectivity → the app's local engine still
   ticks, and steps render as "missing cloud" until connectivity returns.
