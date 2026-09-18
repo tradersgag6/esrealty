@@ -54,6 +54,23 @@ create trigger compliance_records_upsert_trg
   before insert or update on public.compliance_records
   for each row execute function public.compliance_upsert();
 
+-- True when the current viewer may see another profile's compliance entries via
+-- the brokerage address book: the viewer is the owner, or supervises the owner.
+-- Mirrors crm_leads' chain-of-command visibility so compliance stays as private
+-- as the leads themselves.
+create or replace function public.address_book_profile_accessible(p_owner text, p_viewer uuid)
+returns boolean
+language sql
+stable
+security definer set search_path = public
+as $$
+  select exists (
+       select 1 from public.profiles o
+       where o.id = nullif(p_owner, '')::uuid
+         and (o.broker = p_viewer or o.id = p_viewer)
+     );
+$$;
+
 -- RLS: the brokerage (creator chain) and Super Admin only. Team access is
 -- derived the same way as crm_leads: creator, assigned broker, and admin.
 create policy "compliance_read_own_chain"
