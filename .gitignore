@@ -7,3 +7,11 @@ market-scan/worker/store/
 
 .vercel
 .env*
+
+# scratch / analysis / media (kept locally, not committed)
+APPLE_DESIGN_ANALYSIS_PROMPT.md
+APPLE_DESIGN_FEASIBILITY_REPORT.md
+BACKEND_UX_FLOW_REPORT.md
+assets/listings/bt*.png
+screenshots/
+tests/zz_*.js
