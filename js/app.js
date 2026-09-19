@@ -16,6 +16,9 @@
   /* Compliance expiry-window math (js/compliance_due.js) — falls back inline
    * so the raw harness and cold loads never depend on the script. */
   const DUE = window.ESREALTY_DUE || null;
+  /* CRM Autopilot "What next" reasoning (js/agent_next.js) — falls back inline
+   * so the raw harness and cold loads never depend on the script. */
+  const NEXT = window.ESREALTY_NEXT || null;
   var pfPendingCollectProof = null;
   let sbReadyResolve = null;
   const sbReadyPromise = new Promise(function (resolve) { sbReadyResolve = resolve; });
@@ -12494,7 +12497,9 @@ premise: "Fee Simple / As Improved",
     return { steps, kind, recheck: kind === "closed" ? null : agentRecheckDate(AGENT_RECHECK_DAYS[kind] != null ? AGENT_RECHECK_DAYS[kind] : 7) };
   }
   function agentWhatNext(l) {
-    switch (agentClassify(l)) {
+    const kind = agentClassify(l);
+    if (NEXT && NEXT.dueReason) return NEXT.dueReason(kind);
+    switch (kind) {
       case "stale-new": return "No qualification call yet";
       case "contacted": return "A promised follow-up is due";
       case "site-visit": return "Keep the booked viewing warm";
@@ -12502,6 +12507,27 @@ premise: "Fee Simple / As Improved",
       case "closed": return "Lead finished — agent paused";
       default: return "Holding — nothing fabricated";
     }
+  }
+  const AGENT_TOUCH_FALLBACK = { "stale-new": "Call to qualify", contacted: "WhatsApp / Viber check-in", "site-visit": "Confirm the site visit", negotiation: "Call to re-engage on the offer", dormant: "Light WhatsApp nudge", closed: "" };
+  function agentWhatNextBox(l) {
+    const kind = agentClassify(l);
+    const listing = (state.listings || []).find(x => x.id === l.listingId);
+    const res = NEXT && NEXT.whatNext ? NEXT.whatNext(l, kind, state.salesPlaybooks || [], listing) : null;
+    const reason = res ? res.reason : agentWhatNext(l);
+    const touchLabel = res && res.touchLabel ? res.touchLabel : (AGENT_TOUCH_FALLBACK[kind] || "");
+    const recheck = (l.agent && l.agent.nextRecheck) || l.agentNextRecheck || "";
+    let html = '<div class="card card-pad mt-16" id="agent-what-next"><div class="row spread" style="flex-wrap:wrap;gap:8px;align-items:center"><h4 class="mt-0">' + icon("target", 15) + ' What next</h4>' +
+      (touchLabel ? '<span class="badge purple">' + esc(touchLabel) + "</span>" : "") + "</div>" +
+      '<div class="dim tiny mt-8">' + esc(reason) + (recheck ? " · next recheck <b>" + esc(new Date(recheck).toLocaleDateString()) + "</b>" : "") + "</div>";
+    if (res && res.draft) {
+      html += '<div class="field mt-8"><label>' + esc(res.draftSectionLabel ? res.draftSectionLabel + " — " : "Draft message — ") + esc(res.playbookTitle || "No playbook") + "</label>" +
+        '<textarea class="input mt-8" id="agent-draft" readonly rows="4" style="white-space:pre-wrap;font:inherit;resize:vertical">' + esc(res.draft) + "</textarea></div>" +
+        '<div class="row mt-8"><button class="btn btn-ghost btn-sm" data-agent-copy-draft="' + esc(l.id) + '">' + icon("copy", 12) + " Copy draft</button></div>";
+    } else {
+      html += '<div class="dim tiny mt-8">No matching sales playbook draft yet — load starter playbooks or add one in Sales Playbook.</div>';
+    }
+    html += "</div>";
+    return html;
   }
   async function agentRunLeadNow(id, quiet) {
     const l = (state.leads || []).find(x => x.id === id);
@@ -12661,7 +12687,7 @@ premise: "Fee Simple / As Improved",
       (can ? '<button class="btn btn-primary btn-sm" data-agent-run="' + esc(l.id) + '">' + icon("play", 13) + ' Run now</button>' : "") + "</div>" +
       '<div class="row" style="gap:10px;flex-wrap:wrap">' + agentMetaChips(l) + "</div>" +
       '<div class="lead-acts mt-16" id="agent-steps">' + ((l.agentSteps || []).length ? l.agentSteps.slice().reverse().map(agentStepHtml).join("") : '<div class="dim tiny">No steps yet — run the agent on this lead to see its reasoning.</div>') + "</div>" +
-      (l.agent && l.agent.nextRecheck ? '<div class="ai-banner mt-16">' + icon("clock", 13) + ' <span>Next recheck <b>' + new Date(l.agent.nextRecheck).toLocaleDateString() + "</b> — " + esc(agentWhatNext(l)) + "</span></div>" : "") +
+      agentWhatNextBox(l) +
       "</div>";
     html += '<div class="card card-pad mb-24"><div class="row spread"><div><h3>' + icon("shield", 15) + ' Evidence Ledger</h3><div class="dim tiny mt-8">Every fact tagged with its source — <b>observed</b> by the system or <b>claimed</b> by a human. Approving a suggestion writes it here as observed.</div></div></div>' +
       ((l.evidence || []).length ? '<div class="table-wrap mt-8"><table class="data"><thead><tr><th>Field</th><th>Value</th><th>Source</th><th class="num">Confidence</th><th>By</th></tr></thead><tbody>' + agentEvidenceRows(l) + "</tbody></table></div>" : '<p class="dim tiny mt-8">No evidence yet. Approve a suggestion to record it.</p>') + "</div>";
@@ -13098,6 +13124,8 @@ premise: "Fee Simple / As Improved",
         if (agApp) { const st = agentStepAt(agApp.getAttribute("data-agent-approve")); if (st) agentResolveStep(st.l, st.step, "approved"); return; }
         const agRej = e.target.closest("[data-agent-reject]");
         if (agRej) { const st = agentStepAt(agRej.getAttribute("data-agent-reject")); if (st) agentResolveStep(st.l, st.step, "rejected"); return; }
+        const agCopy = e.target.closest("[data-agent-copy-draft]");
+        if (agCopy) { const ta = document.getElementById("agent-draft"); if (ta) copyListingText(ta.value, "Draft message copied"); return; }
       });
     }
     const f = state.leadFilters = state.leadFilters || {};
@@ -13601,6 +13629,21 @@ premise: "Fee Simple / As Improved",
     PLAYBOOK_SECTION_FIELDS.forEach(x => { result[x[0]] = ""; });
     return result;
   }
+  const PLAYBOOK_LEGACY_SECTIONS = { opening: "openingScript", qualification: "qualificationChecklist", propertyDetails: "valueProposition", objections: "objectionResponses", followUp: "followUpSequence", closing: "closingScript", coaching: "coachingNotes" };
+  function stringifyPlaybookSection(value) {
+    if (value == null) return "";
+    if (typeof value === "string") return value;
+    if (Array.isArray(value)) return value.map(item => (item && typeof item === "object") ? ((item.trigger ? item.trigger + " — " : "") + (item.response || "")) : String(item)).join("\n");
+    return String(value);
+  }
+  function normalizePlaybookSections(raw) {
+    const out = Object.assign(blankPlaybookSections(), raw || {});
+    Object.keys(PLAYBOOK_LEGACY_SECTIONS).forEach(legacy => {
+      const canon = PLAYBOOK_LEGACY_SECTIONS[legacy];
+      if (!out[canon] && out[legacy]) out[canon] = stringifyPlaybookSection(out[legacy]);
+    });
+    return out;
+  }
   function normalizePlaybook(raw) {
     raw = raw || {};
     return {
@@ -13612,7 +13655,7 @@ premise: "Fee Simple / As Improved",
       propertyType: raw.propertyType || raw.property_type || "All Properties",
       targetCustomer: raw.targetCustomer || raw.target_customer || "",
       status: ["draft", "active", "archived"].indexOf(raw.status) >= 0 ? raw.status : "draft",
-      sections: Object.assign(blankPlaybookSections(), raw.sections || {}),
+      sections: normalizePlaybookSections(raw.sections),
       sortOrder: Number(raw.sortOrder != null ? raw.sortOrder : raw.sort_order) || 0,
       createdBy: raw.createdBy || raw.created_by || "",
       createdAt: raw.createdAt || raw.created_at || new Date().toISOString(),

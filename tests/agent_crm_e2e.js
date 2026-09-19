@@ -23,11 +23,17 @@
       else {
         nina.click(); await wait(1000);
         checks.push({ name: "agent section in detail", ok: has("#agent-steps") && has("[data-agent-run]"), detail: "steps + run button" });
+        var wnBox = document.querySelector("#agent-what-next");
+        var wnTxt = wnBox ? wnBox.textContent : "";
+        log.push("whatNext=" + wnTxt.replace(/\s+/g, " ").slice(0, 110));
+        checks.push({ name: "what-next box renders due reason + recommended touch", ok: !!wnBox && /Call to qualify|WhatsApp|site visit|Light WhatsApp/i.test(wnTxt) && /No qualification call yet|promised follow-up|booked viewing|Offer momentum|nothing fabricated/i.test(wnTxt), detail: wnTxt.replace(/\s+/g, " ").slice(0, 90) });
+        checks.push({ name: "what-next degrades gracefully without playbooks", ok: !!document.querySelector("#agent-draft") || /No matching sales playbook/i.test(wnTxt), detail: document.querySelector("#agent-draft") ? "draft rendered" : "fallback copy" });
         document.querySelector("[data-agent-run]").click(); await wait(900);
         var stepsTxt = txt("#agent-steps");
         log.push("stepsTxt=" + stepsTxt.slice(0, 160).replace(/\s+/g, " "));
         checks.push({ name: "run now produces observation + suggestion", ok: /Observed/.test(stepsTxt) && /Suggestion/.test(stepsTxt) && has("[data-agent-approve]"), detail: "obs + sugg + approve btn" });
         checks.push({ name: "agent meta chips show recheck", ok: /recheck/i.test(document.querySelector('#content').textContent), detail: "view level" });
+        checks.push({ name: "what-next box shows next recheck after run", ok: /next recheck/i.test((document.querySelector("#agent-what-next") || {}).textContent || ""), detail: "box recheck" });
         var approve = document.querySelector("[data-agent-approve]");
         approve.click(); await wait(800);
         var afterApprove = document.querySelector("#content").textContent;
