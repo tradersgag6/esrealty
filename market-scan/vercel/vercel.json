@@ -7,7 +7,7 @@
   "crons": [
     {
       "path": "/api/agent-dispatch",
-      "schedule": "0 * * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }

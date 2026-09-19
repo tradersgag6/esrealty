@@ -9,18 +9,21 @@
 const AGENT_EDGE_URL = process.env.AGENT_EDGE_URL || "";
 const AGENT_EDGE_TOKEN = process.env.AGENT_EDGE_TOKEN || "";
 
-module.exports = async function handler(req) {
+module.exports = async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") {
+    res.status(204).end();
+    return;
+  }
   if (req.method !== "GET" && req.method !== "POST") {
-    return new Response(JSON.stringify({ ok: false, error: "Method not allowed" }), {
-      status: 405,
-      headers: { "Content-Type": "application/json" },
-    });
+    res.status(405).json({ ok: false, error: "Method not allowed" });
+    return;
   }
   if (!AGENT_EDGE_URL || !AGENT_EDGE_TOKEN) {
-    return new Response(JSON.stringify({ ok: true, skipped: "agent edge not configured" }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    res.status(200).json({ ok: true, skipped: "agent edge not configured" });
+    return;
   }
   try {
     const r = await fetch(AGENT_EDGE_URL, {
@@ -32,14 +35,9 @@ module.exports = async function handler(req) {
       body: JSON.stringify({ max: 25 }),
     });
     const text = await r.text();
-    return new Response(text, {
-      status: r.status,
-      headers: { "Content-Type": "application/json" },
-    });
+    res.setHeader("Content-Type", "application/json");
+    res.status(r.status).end(text);
   } catch (e) {
-    return new Response(JSON.stringify({ ok: false, error: String(e && e.message || e) }), {
-      status: 502,
-      headers: { "Content-Type": "application/json" },
-    });
+    res.status(502).json({ ok: false, error: String((e && e.message) || e) });
   }
 };
