@@ -18,9 +18,9 @@
     checks.push({name:"export btn", ok:!!document.querySelector("[data-ls-export]"), detail:""});
     // CREATE with attrs
     document.querySelector("[data-ls-new]").click(); await wait(400);
-    setv("#ls-title","Condo Makati Ave"); setv("#ls-city","Makati");
+    setv("#ls-title","Condo Makati Ave");
     setv("#ls-price","8000000"); setv("#ls-lot","60"); setv("#ls-floor","45");
-    setv("#ls-furnishing","semi"); setv("#ls-pet","yes"); setv("#ls-balcony","yes"); setv("#ls-facing","east");
+    setv("#ls-ed-furnishing","semi"); setv("#ls-ed-pet","yes"); setv("#ls-ed-balcony","yes"); setv("#ls-facing","east");
     setv("#ls-access","12m concrete road, titled RROW");
     saveModal(); await wait(750);
     html=document.querySelector("#content").innerHTML;
