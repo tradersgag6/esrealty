@@ -10,6 +10,9 @@
   /* Supabase loads lazily (async) so it may not exist yet at parse time.
    * SB stays live-bound: picked up immediately or as soon as the client lands. */
   let SB = window.ESREALTY_SUPABASE || null;
+  /* Attribution/dedupe helpers (js/attribution.js) may be missing in the raw
+   * test harness — every consumer falls back to a local equivalent. */
+  const AT = window.ESREALTY_ATTR || null;
   var pfPendingCollectProof = null;
   let sbReadyResolve = null;
   const sbReadyPromise = new Promise(function (resolve) { sbReadyResolve = resolve; });
@@ -254,7 +257,7 @@
   }
 
   function defaultState() {
-    return { deals: [], current: null, view: "dashboard", wizardStep: 1, theme: "light", dealTab: "overview", appraisal: null, appraisalTab: "setup", appraisals: [], market: null, pms: { properties: [], units: [], owners: [], tenants: [], leases: [], payments: [], maintenance: [], expenses: [], documents: [] }, pmsTab: "properties", listings: [], favorites: [], listingFilters: {}, listingDetail: null, leads: [], leadFilters: {}, leadDetail: null, leadMode: "pipeline", leadCalendarMonth: "", lang: "en", users: [], transactions: [], financingScenarios: [], financingDraft: null, salesPlaybooks: [], playbookFilters: { q: "", stage: "", category: "", propertyType: "", status: "" }, commission: { settings: { grossPct: 3, brokerShare: 40, agentShare: 50, referralShare: 10 }, payouts: [] }, docVault: [], siteVisits: [], campaigns: [], listingStats: {}, siteContact: { eyebrow: "TALK TO A SHOPHOUSE SPECIALIST", title: "Ready to put the ground floor to work?", description: "Tell us your province, budget, and business plan. A shophouse specialist from ES Realty will reply within one business day with listings and next steps.", phone: "+63 900 000 0000", email: "hello@esrealty.ph", address: "Batangas, Philippines", hours: "Monday–Saturday, 9:00 AM–6:00 PM" }, adminTab: "overview", txDetail: null, usersTab: "pending",
+    return { deals: [], current: null, view: "dashboard", wizardStep: 1, theme: "light", dealTab: "overview", appraisal: null, appraisalTab: "setup", appraisals: [], market: null, pms: { properties: [], units: [], owners: [], tenants: [], leases: [], payments: [], maintenance: [], expenses: [], documents: [] }, pmsTab: "properties", listings: [], favorites: [], listingFilters: {}, listingDetail: null, lsTab: "catalog", leads: [], leadFilters: {}, leadDetail: null, leadMode: "pipeline", leadCalendarMonth: "", lang: "en", users: [], transactions: [], financingScenarios: [], financingDraft: null, salesPlaybooks: [], playbookFilters: { q: "", stage: "", category: "", propertyType: "", status: "" }, commission: { settings: { grossPct: 3, brokerShare: 40, agentShare: 50, referralShare: 10 }, payouts: [] }, docVault: [], siteVisits: [], campaigns: [], listingStats: {}, siteContact: { eyebrow: "TALK TO A SHOPHOUSE SPECIALIST", title: "Ready to put the ground floor to work?", description: "Tell us your province, budget, and business plan. A shophouse specialist from ES Realty will reply within one business day with listings and next steps.", phone: "+63 900 000 0000", email: "hello@esrealty.ph", address: "Batangas, Philippines", hours: "Monday–Saturday, 9:00 AM–6:00 PM" }, adminTab: "overview", txDetail: null, usersTab: "pending",
       portfolioAccounts: [], cashEntries: [], constructionProjects: [], constructionPhases: [], constructionVendors: [], constructionInvoices: [], changeOrders: [], portfolioTab: "overview", portfolioAuditEvents: [] };
   }
   function loadState() {
@@ -1295,6 +1298,7 @@
     await loadCloudListings();
     await completePostAuthIntent();
     await loadCloudLeads();
+    await loadCloudAds();
     await loadCloudTransactions();
     await loadCloudPlaybooks();
     try { await migrateVaultToCloud(); } catch (vaultMigrateErr) {}
@@ -2658,6 +2662,7 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
             await loadCloudListings();
             await completePostAuthIntent();
             await loadCloudLeads();
+            await loadCloudAds();
             await loadCloudTransactions();
             await loadCloudPlaybooks();
             pfLoadFromCloud();
@@ -11441,7 +11446,7 @@ premise: "Fee Simple / As Improved",
           if (lid) {
             lsStatBump(lid, via === "whatsapp" ? "waTaps" : "callTaps");
             const ad = (state.ads || []).find(a => a.listingId === lid && a.status !== "draft");
-            if (ad) { ad.perfInquiries = Number(ad.perfInquiries || 0) + 1; save(); }
+            if (ad) { ad.perfInquiries = Number(ad.perfInquiries || 0) + 1; save(); persistAdToCloud(ad); }
           }
           return;
         }
@@ -11574,11 +11579,14 @@ premise: "Fee Simple / As Improved",
       const owner = (state.users || []).find(u => u.id === l.createdBy);
       lead.assignedTo = owner ? (owner.name || owner.email || "") : "";
     }
+    const inquiryAd = (state.ads || []).find(a => a.listingId === x.listingId && a.status !== "draft");
+    if (inquiryAd) { lead.adId = inquiryAd.id; inquiryAd.perfInquiries = Number(inquiryAd.perfInquiries || 0) + 1; }
     if (!state.leads) state.leads = [];
     state.leads.unshift(lead);
     state.inquiryMeta = state.inquiryMeta || {};
     state.inquiryMeta[id] = { status: "converted", leadRef: lead.ref };
     save(); syncLead(lead);
+    if (inquiryAd) persistAdToCloud(inquiryAd);
     toast("Lead <b>" + esc(lead.ref + " " + name) + "</b> created", "ok");
     closeListingInquiries(); render();
   }
@@ -11945,6 +11953,58 @@ premise: "Fee Simple / As Improved",
       const { error } = await SB.from("crm_leads").delete().eq("id", id);
       if (error && !String(error.message || "").match(/does not exist|schema cache|querying schema|relation "public.crm_leads"/i)) {
         toast("Could not delete lead: " + esc(friendlyErr(error.message)), "err");
+      }
+    } catch (e) {}
+  }
+  let cloudAdsReady = null;
+  async function loadCloudAds() {
+    if (!SB || !currentUser || !currentUser.id) return;
+    try {
+      const { data, error } = await SB.from("ad_posts").select("id,payload").order("updated_at", { ascending: false });
+      if (error) {
+        if (String(error.message || "").match(/does not exist|schema cache|querying schema|relation "public.ad_posts"/i)) {
+          cloudAdsReady = "missing";
+        } else {
+          throw error;
+        }
+        return;
+      }
+      cloudAdsReady = "ok";
+      state.ads = Array.isArray(data) ? data.map(r => Object.assign({}, r.payload, { id: r.id })) : [];
+    } catch (e) {
+      cloudAdsReady = "error";
+    }
+  }
+  async function persistAdToCloud(rec) {
+    if (!SB || !currentUser || !currentUser.id) return;
+    try {
+      const row = {
+        id: rec.id,
+        listing_id: rec.listingId || "",
+        caption: rec.caption || "",
+        channel: rec.channel || "",
+        status: rec.status || "draft",
+        url: rec.url || "",
+        payload: rec,
+        created_by: rec.createdBy || currentUser.id,
+        updated_at: rec.updatedAt || new Date().toISOString()
+      };
+      const { error } = await SB.from("ad_posts").upsert(row, { onConflict: "id" });
+      if (error) {
+        if (String(error.message || "").match(/does not exist|schema cache|querying schema|relation "public.ad_posts"/i)) {
+          toast("Ads sync needs the ad_posts table — run supabase/ad_posts.sql in the SQL Editor.", "err");
+        } else {
+          toast("Could not sync ad: " + esc(friendlyErr(error.message)), "err");
+        }
+      }
+    } catch (e) {}
+  }
+  async function deleteAdFromCloud(id) {
+    if (!SB || !currentUser || !currentUser.id) return;
+    try {
+      const { error } = await SB.from("ad_posts").delete().eq("id", id);
+      if (error && !String(error.message || "").match(/does not exist|schema cache|querying schema|relation "public.ad_posts"/i)) {
+        toast("Could not delete ad: " + esc(friendlyErr(error.message)), "err");
       }
     } catch (e) {}
   }
@@ -12705,11 +12765,21 @@ premise: "Fee Simple / As Improved",
     if (!rec.createdAt) { rec.createdAt = rec.updatedAt; rec.activity = rec.activity || []; rec.activity.unshift({ date: rec.createdAt, text: "Lead created" }); }
     if (!state.leads) state.leads = [];
     const idx = state.leads.findIndex(x => x.id === rec.id);
-    if (!editId && idx < 0) {
-      const dup = (state.leads || []).find(l => l.id !== rec.id && (
-        (rec.phone && l.phone && phNormalizeMobile(l.phone) === rec.phone) ||
-        (rec.email && l.email && String(l.email).trim().toLowerCase() === String(rec.email).trim().toLowerCase())));
-      if (dup) toast("Possible duplicate: <b>" + esc(dup.ref + " " + (dup.name || "")) + "</b> shares this " + (rec.email && dup.email ? "email" : "mobile") + " — review after saving", "err");
+    if (!editId) {
+      const liveAds = (state.ads || []).filter(a => a.status !== "draft" && a.listingId === rec.listingId);
+      if (rec.listingId && liveAds.length && !rec.adId) rec.adId = liveAds[0].id;
+      const fr = AT && AT.firstResponseMinutes ? AT.firstResponseMinutes(rec) : null;
+      if (fr !== null) rec.firstResponseMinutes = fr; else delete rec.firstResponseMinutes;
+      const dup = AT && AT.findDuplicateLead
+        ? AT.findDuplicateLead(state.leads, rec, rec.id)
+        : (rec.email || rec.phone) ? (state.leads || []).find(l => l.id !== rec.id && (
+            (rec.phone && l.phone && phNormalizeMobile(l.phone) === rec.phone) ||
+            (rec.email && l.email && String(l.email).trim().toLowerCase() === String(rec.email).trim().toLowerCase()))) : null;
+      if (dup) {
+        closeLeadModal();
+        toast("Duplicate contact: <b>" + esc(dup.ref + " " + (dup.name || "")) + "</b> already has this " + (rec.email && dup.email ? "email" : "mobile") + " — open that lead instead.", "err");
+        return;
+      }
     }
     if (idx >= 0) state.leads[idx] = rec; else state.leads.unshift(rec);
     if (!rec.createdBy) rec.createdBy = currentUser && currentUser.id;
@@ -13365,6 +13435,7 @@ premise: "Fee Simple / As Improved",
     if (!state.ads) state.ads = [];
     state.ads.unshift(rec);
     save(); ov.remove(); render();
+    persistAdToCloud(rec);
     toast("Ad draft saved — publish it to go live", "ok");
   }
   function publishAd(id) {
@@ -13376,12 +13447,14 @@ premise: "Fee Simple / As Improved",
     a.updatedAt = new Date().toISOString();
     if (a.caption && a.caption.indexOf("Listed by") === -1) a.caption = a.caption + "\n\n" + listingDisclosure(l);
     save(); render();
+    persistAdToCloud(a);
     toast("Ad published — disclosure appended", "ok");
   }
   function delAd(id) {
     if (!state.ads) return;
     state.ads = state.ads.filter(x => x.id !== id);
     save(); render();
+    deleteAdFromCloud(id);
     toast("Ad deleted", "ok");
   }
   function renderAds() {
@@ -13417,7 +13490,25 @@ premise: "Fee Simple / As Improved",
     document.body.appendChild(ov);
     ov.addEventListener("click", e => { if (e.target === ov) ov.remove(); });
   }
+  function adChannelOf(adId) {
+    if (!adId) return "";
+    const a = (state.ads || []).find(x => x.id === adId);
+    if (!a) return "";
+    return (ADS_CHANNELS.find(c => c[0] === a.channel) || [a.channel, a.channel])[1];
+  }
+  function funnelSourceCell(r) {
+    const label = k => { const x = LEAD_SOURCES.find(z => z[0] === k); return x ? x[1] : k; };
+    if (r.adId) return '<span class="badge blue">' + esc(adChannelOf(r.adId)) + "</span> " + esc(label(r.source));
+    return esc(label(r.source));
+  }
+  function funnelTableHtml(rows) {
+    if (!rows || !rows.length) return '<div class="dim">No leads yet — the funnel fills as leads flow in.</div>';
+    const head = '<tr><th>Source</th><th class="num">Leads</th><th class="num">Qualified</th><th class="num">Reservations</th><th class="num">Closed</th><th class="num">Qualify %</th><th class="num">⌀ First resp</th></tr>';
+    const body = rows.map(r => "<tr><td>" + funnelSourceCell(r) + "</td><td class='num'>" + r.total + "</td><td class='num'>" + r.qualified + "</td><td class='num'>" + r.reservations + "</td><td class='num'>" + r.closed + '</td><td class="num">' + r.pct + "%</td><td class='num'>" + (r.avgFirstResponse != null ? r.avgFirstResponse + "m" : "—") + "</td></tr>").join("");
+    return '<table class="data"><thead>' + head + "</thead><tbody>" + body + "</tbody></table>";
+  }
   function stackFunnelHtml() {
+    if (AT && AT.sourceFunnel) return funnelTableHtml(AT.sourceFunnel(state.leads || [], { perAd: true }));
     const rows = {};
     (state.leads || []).forEach(l => {
       const k = l.source || "other";
@@ -13428,11 +13519,7 @@ premise: "Fee Simple / As Improved",
       if (l.status === "closed") r.closed++;
     });
     const order = Object.keys(rows).sort((a, b) => rows[b].total - rows[a].total);
-    if (!order.length) return '<div class="dim">No leads yet — the funnel fills as leads flow in.</div>';
-    const label = k => { const x = LEAD_SOURCES.find(z => z[0] === k); return x ? x[1] : k; };
-    const head = '<tr><th>Source</th><th class="num">Leads</th><th class="num">Qualified</th><th class="num">Reservations</th><th class="num">Closed</th><th class="num">Qualify %</th></tr>';
-    const body = order.map(k => { const r = rows[k]; const pct = r.total ? Math.round(100 * r.qualified / r.total) : 0; return "<tr><td>" + esc(label(k)) + "</td><td class='num'>" + r.total + "</td><td class='num'>" + r.qualified + "</td><td class='num'>" + r.reservations + "</td><td class='num'>" + r.closed + '</td><td class="num">' + pct + "%</td></tr>"; }).join("");
-    return '<table class="data"><thead>' + head + "</thead><tbody>" + body + "</tbody></table>";
+    return funnelTableHtml(order.map(k => { const r = rows[k]; return { key: k, source: k, adId: "", total: r.total, qualified: r.qualified, reservations: r.reservations, closed: r.closed, pct: r.total ? Math.round(100 * r.qualified / r.total) : 0, avgFirstResponse: null }; }));
   }
   function captureUtm(force) {
     try {
@@ -13807,6 +13894,7 @@ premise: "Fee Simple / As Improved",
     if (!state.compliance) state.compliance = [];
     if (!state.compliance.length) state.compliance = seedCompliance();
     if (!state.ads) state.ads = [];
+    if (!state.lsTab) state.lsTab = "catalog";
     if (!state.adminTab) state.adminTab = "overview";
     if ((currentUser && currentUser.demo) || (IS_LOCAL_DEV && (!currentUser || !currentUser.id))) seedPmsSample();
   }
@@ -15817,8 +15905,14 @@ const ccBtn = e.target.closest("[data-cc-calc]");
       topListings.map(l => "<tr><td>" + esc(l.title) + "</td><td>" + (stats[l.id] ? stats[l.id].views || 0 : 0) + "</td><td>" + (stats[l.id] ? stats[l.id].inquiries || 0 : 0) + "</td></tr>").join("") +
       "</tbody></table></div>" : '<div class="dim mt-8">No views recorded yet.</div>') + "</div>";
     html += "</div>";
+    html += adminSourceFunnel();
     html = teamPerfCard() + html;
     return html;
+  }
+  function adminSourceFunnel() {
+    const rows = AT && AT.sourceFunnel ? AT.sourceFunnel(brokerageLeads(), { perAd: true }) : [];
+    if (!rows.length) return '<div class="card card-pad mt-16"><h3>Source Funnel</h3><p class="dim mt-8">No leads yet — the funnel fills as leads flow in.</p></div>';
+    return '<div class="card card-pad mt-16"><h3>Source Funnel</h3><p class="dim mt-8">Per-ad rows sit under their parent source; ⌀ First resp = average minutes from lead creation to first reply. Ad-attributed leads are counted once under their ad.</p><div class="table-wrap mt-8">' + funnelTableHtml(rows) + "</div></div>";
   }
   function adminInventory() {
     const byDev = {};

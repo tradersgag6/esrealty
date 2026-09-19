@@ -35,6 +35,7 @@
     if (adsFresh) adsFresh.click(); await wait(900);
     checks.push({ name: "ads empty state renders", ok: /No ads yet/.test(txt("#content")) && has("[data-ad-pick]"), detail: "empty + create button" });
     checks.push({ name: "source funnel table renders", ok: /Source Funnel/.test(txt("#content")) && !!document.querySelector("#content table.data"), detail: "funnel with seeded leads" });
+    checks.push({ name: "source funnel shows avg first response column", ok: /First resp/.test(txt("#content")), detail: "Avg first-response column present" });
     document.querySelector("[data-ad-pick]").click(); await wait(500);
     checks.push({ name: "ad picker modal opens", ok: has("#ad-pick-modal") && has("#ad-listing"), detail: "picker" });
     var pickOpts = Array.prototype.slice.call(document.querySelectorAll("#ad-listing option")).length;
@@ -77,6 +78,45 @@
       var liveAd = (st.ads || []).find(a => a.listingId === wid && a.status !== "draft");
       log.push("waTaps=" + taps + " adInquiries=" + (liveAd ? liveAd.perfInquiries : "no-ad"));
       checks.push({ name: "whatsapp tap records funnel attribution", ok: taps === 1 && !!liveAd && Number(liveAd.perfInquiries) === 1, detail: "waTaps=" + taps + " adInquiries=" + (liveAd ? liveAd.perfInquiries : "-") });
+    }
+    var leadCountBefore = (stored().leads || []).length;
+    document.querySelector('#nav [data-view="leads"]').click(); await wait(900);
+    var leadNew = document.querySelector("[data-lead-new]");
+    checks.push({ name: "add lead button available in CRM", ok: !!leadNew, detail: leadNew ? "button" : "missing" });
+    if (leadNew) {
+      leadNew.click(); await wait(600);
+      checks.push({ name: "lead editor opens", ok: has("#ld-modal") && has("#ld-name"), detail: "editor" });
+      document.querySelector("#ld-name").value = "Duplicate Prospect";
+      document.querySelector("#ld-email").value = "maria.santos@gmail.com";
+      document.querySelector("[data-lead-save]").click(); await wait(900);
+      var afterDup = stored();
+      var dupCount = (afterDup.leads || []).length;
+      log.push("dedupe count before=" + leadCountBefore + " after=" + dupCount + " toast=" + /Duplicate contact/.test(document.body.textContent));
+      checks.push({ name: "duplicate email blocked", ok: /Duplicate contact/.test(document.body.textContent) && dupCount === leadCountBefore, detail: "blocked, count=" + dupCount });
+      checks.push({ name: "dedupe leaves lead count unchanged", ok: dupCount === leadCountBefore, detail: "count=" + dupCount });
+      leadNew = document.querySelector("[data-lead-new]");
+      if (leadNew) leadNew.click(); await wait(600);
+      document.querySelector("#ld-name").value = "Ad Prospect";
+      document.querySelector("#ld-email").value = "ad.prospect@esrealty.ph";
+      document.querySelector("#ld-phone").value = "+63 900 111 2222";
+      var lsSel = document.querySelector("#ld-listing");
+      if (lsSel) lsSel.value = wid;
+      document.querySelector("[data-lead-save]").click(); await wait(900);
+      var stProspect = stored();
+      var newLead = (stProspect.leads || [])[0] || {};
+      var prosLiveAd = (stProspect.ads || []).find(a => a.listingId === wid && a.status !== "draft");
+      log.push("adProspect adId=" + newLead.adId + " liveAd=" + (prosLiveAd ? prosLiveAd.id : "none"));
+      checks.push({ name: "new lead stamped with matching adId", ok: !!newLead.adId && !!prosLiveAd && newLead.adId === prosLiveAd.id, detail: "adId=" + (newLead.adId || "-") });
+      document.querySelector('#nav [data-view="listings"]').click(); await wait(800);
+      var backBtn = document.querySelector("[data-ls-back]");
+      if (backBtn) backBtn.click(); await wait(600);
+      var adsTab2 = lsAdsTab();
+      if (adsTab2) adsTab2.click(); await wait(900);
+      var funnelTxt = txt("#content");
+      var badg2 = Array.prototype.slice.call(document.querySelectorAll("#content td .badge.blue")).map(b => b.textContent);
+      log.push("funnelBadges=" + badg2.join("|") + " leads=" + (stored().leads || []).length);
+      checks.push({ name: "funnel shows per-ad channel row", ok: badg2.indexOf("Lamudi") >= 0, detail: "badge=" + badg2.join("|") });
+      checks.push({ name: "funnel avg first response persists", ok: /First resp/.test(funnelTxt), detail: "column header present" });
     }
     document.querySelector('#nav [data-view="admin"]').click(); await wait(900);
     var adminAds = Array.prototype.slice.call(document.querySelectorAll("[data-admin-tab]")).find(t => t.getAttribute("data-admin-tab") === "ads");

@@ -102,6 +102,7 @@ const REST_TABLES = [
   { table: "listing_inquiries", note: "inquiry submissions" },
   { table: "storefront_inquiries", note: "contact/inquiry fallback" },
   { table: "crm_leads", note: "CRM leads" },
+  { table: "ad_posts", note: "shared ad posts + attribution" },
   { table: "profiles", note: "user profiles" },
   { table: "app_state", note: "site settings live here" },
   { table: "presell_projects", note: "presell projects" },
