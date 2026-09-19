@@ -111,6 +111,27 @@ https://esrealty-market-scan.vercel.app/api/agent-dispatch
 Expect `{"ok":true,"claimed":0,"done":0}` (or `skipped: "no edge env"` if not
 wired).
 
+## 3b. Ad performance sync (optional) — `api/ad-perf`
+
+The CRM "Ad ROI" card reads `perfViews`/`perfInquiries` off each `ad_posts`
+record. Agents can always type those totals with **Log perf**; to pull them from
+a marketplace feed instead, point the sync seam at an upstream URL:
+
+```
+echo "https://<vendor-or-broker-feed>/ad-performance" | vercel env add AD_PERF_SOURCE_URL production
+echo "<optional bearer token>"                         | vercel env add AD_PERF_SOURCE_TOKEN production
+```
+
+The upstream must return either a bare array or `{ "ads": [...] }` of
+`{ id, views|perfViews, inquiries|perfInquiries, url? }`; `id` matches the
+`ad_posts.id`. **If `AD_PERF_SOURCE_URL` is unset the endpoint no-ops**
+(`{"ok":true,"skipped":"ad perf source not configured"}`) and the browser shows
+an "isn't configured yet" toast — nothing is fabricated. Channel partners
+(Lamudi / Property24 / Facebook / TikTok) gate these metrics behind credentials,
+so there is nothing to sync until a feed is provisioned.
+
+Verify: `https://esrealty-market-scan.vercel.app/api/ad-perf`
+
 ## 4. Store locator — dev-only route (already applied)
 
 `market-scan/vercel/server.js` now serves `/api/market-scan/stores` locally with

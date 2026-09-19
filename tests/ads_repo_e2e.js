@@ -79,6 +79,25 @@
       log.push("waTaps=" + taps + " adInquiries=" + (liveAd ? liveAd.perfInquiries : "no-ad"));
       checks.push({ name: "whatsapp tap records funnel attribution", ok: taps === 1 && !!liveAd && Number(liveAd.perfInquiries) === 1, detail: "waTaps=" + taps + " adInquiries=" + (liveAd ? liveAd.perfInquiries : "-") });
     }
+    document.querySelector('#nav [data-view="listings"]').click(); await wait(700);
+    var backPerf = document.querySelector("[data-ls-back]");
+    if (backPerf) { backPerf.click(); await wait(600); }
+    var perfTab = lsAdsTab();
+    if (perfTab) perfTab.click(); await wait(800);
+    checks.push({ name: "ad perf button present", ok: has("[data-ad-perf]"), detail: "log perf" });
+    checks.push({ name: "ad sync button present", ok: has("[data-ad-sync]"), detail: "sync seam" });
+    if (has("[data-ad-perf]")) {
+      document.querySelector("[data-ad-perf]").click(); await wait(500);
+      checks.push({ name: "ad perf modal opens", ok: has("#ad-perf-modal") && has("#ad-perf-views"), detail: "modal" });
+      document.querySelector("#ad-perf-views").value = "120";
+      document.querySelector("#ad-perf-inquiries").value = "6";
+      document.querySelector("[data-ad-perf-save]").click(); await wait(700);
+      var stPerf = stored();
+      var perfAd = (stPerf.ads || []).find(a => a.listingId === wid && a.status !== "draft") || {};
+      log.push("perfViews=" + perfAd.perfViews + " perfInquiries=" + perfAd.perfInquiries);
+      checks.push({ name: "ad perf saved to repo", ok: Number(perfAd.perfViews) === 120 && Number(perfAd.perfInquiries) === 6, detail: "views=" + perfAd.perfViews + " inq=" + perfAd.perfInquiries });
+      checks.push({ name: "Ad ROI card renders in ads tab", ok: /Ad ROI/.test(txt("#content")) && /CRM leads/.test(txt("#content")), detail: "roi card" });
+    }
     var leadCountBefore = (stored().leads || []).length;
     document.querySelector('#nav [data-view="leads"]').click(); await wait(900);
     var leadNew = document.querySelector("[data-lead-new]");
@@ -165,7 +184,9 @@
     document.querySelector('#nav [data-view="admin"]').click(); await wait(900);
     var adminAds = Array.prototype.slice.call(document.querySelectorAll("[data-admin-tab]")).find(t => t.getAttribute("data-admin-tab") === "ads");
     checks.push({ name: "admin ads tab present", ok: !!adminAds, detail: adminAds ? "tab" : "missing" });
-    if (adminAds) { adminAds.click(); await wait(900); checks.push({ name: "admin ads tab renders funnel", ok: /Source Funnel/.test(txt("#admin-body")), detail: "admin ads body" }); }
+    if (adminAds) { adminAds.click(); await wait(900); checks.push({ name: "admin ads tab renders funnel", ok: /Source Funnel/.test(txt("#admin-body")), detail: "admin ads body" });
+      var admBody = txt("#admin-body");
+      checks.push({ name: "admin ads tab renders Ad ROI", ok: /Ad ROI/.test(admBody) && /CRM leads/.test(admBody) && /Cost\/Inq/.test(admBody), detail: "roi card" }); }
     ok = checks.every(c => c.ok) && checks.length > 8;
   } catch (e) { log.push("ERR:" + e.message); ok = false; }
   window.__msChecks = checks; window.__msOk = ok; window.__msDone = true;

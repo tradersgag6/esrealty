@@ -2840,6 +2840,14 @@ document.addEventListener("change", e => {
       if (adPub) { e.preventDefault(); e.stopPropagation(); publishAd(adPub.getAttribute("data-ad-pub")); return; }
       const adDel = e.target.closest("[data-ad-del]");
       if (adDel) { e.preventDefault(); e.stopPropagation(); delAd(adDel.getAttribute("data-ad-del")); return; }
+      const adPerf = e.target.closest("[data-ad-perf]");
+      if (adPerf) { e.preventDefault(); e.stopPropagation(); openAdPerfModal(adPerf.getAttribute("data-ad-perf")); return; }
+      const adPerfSave = e.target.closest("[data-ad-perf-save]");
+      if (adPerfSave) { e.preventDefault(); e.stopPropagation(); saveAdPerf(adPerfSave.getAttribute("data-ad-perf-save")); return; }
+      const adPerfCan = e.target.closest("[data-ad-perf-cancel]");
+      if (adPerfCan) { e.preventDefault(); e.stopPropagation(); const m = $("#ad-perf-modal"); if (m) m.remove(); return; }
+      const adSync = e.target.closest("[data-ad-sync]");
+      if (adSync) { e.preventDefault(); e.stopPropagation(); syncAdPerformance(); return; }
       const adCan = e.target.closest("[data-ad-cancel], [data-ad-pick-cancel]");
       if (adCan) { e.preventDefault(); e.stopPropagation(); const m = $("#ad-modal") || $("#ad-pick-modal"); if (m) m.remove(); return; }
       const blk = e.target.closest("[data-ls-bulk]");
@@ -13504,8 +13512,9 @@ premise: "Fee Simple / As Improved",
     const views = ads.reduce((s, a) => s + Number(a.perfViews || 0), 0);
     const inq = ads.reduce((s, a) => s + Number(a.perfInquiries || 0), 0);
     let html = '<div class="card card-pad mb-24"><div class="row spread"><h3>Ads &amp; Attribution</h3>' +
-      '<button class="btn btn-primary btn-sm" data-ad-pick>' + icon("plus", 14) + " New ad</button></div>" +
-      '<p class="dim tiny mt-8">Each ad is tied to a listing and channel. Inquiries that quote the same listing get attributed to the ad; the funnel below rolls up by lead source.</p>' +
+      '<div class="row" style="gap:8px"><button class="btn btn-ghost btn-sm" data-ad-sync title="Pull views/inquiries from the market-scan ad-performance feed">' + icon("chart", 14) + " Sync performance</button>" +
+      '<button class="btn btn-primary btn-sm" data-ad-pick>' + icon("plus", 14) + " New ad</button></div></div>" +
+      '<p class="dim tiny mt-8">Each ad is tied to a listing and channel. Inquiries that quote the same listing get attributed to the ad; the funnel below rolls up by lead source. Track views and inquiries with <b>Log perf</b>, or sync them from the market-scan backend when a channel feed is connected.</p>' +
       '<div class="row mt-8" style="gap:10px;flex-wrap:wrap">' + lsStat("Draft ads", ads.filter(a => a.status === "draft").length) + lsStat("Live ads", live.length) + lsStat("Tracked views", views) + lsStat("Ad inquiries", inq) + "</div></div>";
     if (!ads.length) html += '<div class="card card-pad empty">' + icon("target", 40) + "<h3>No ads yet</h3><p>Open any listing and press <b>Copy ad</b> for a disclosure-ready caption, or create a tracked ad here.</p>" +
       '<button class="btn btn-primary mt-16" data-ad-pick>' + icon("plus", 15) + " Create from listing</button></div>";
@@ -13515,11 +13524,88 @@ premise: "Fee Simple / As Improved",
         const ch = (ADS_CHANNELS.find(c => c[0] === a.channel) || [a.channel, a.channel])[1];
         return "<tr><td>" + esc((a.listingTitle || "").slice(0, 36)) + "<div class='dim tiny'>" + esc(String(a.caption || "").replace(/\n/g, " ").slice(0, 60)) + "</div></td><td>" + esc((a.listingTitle || "—").slice(0, 30)) + "</td><td>" + esc(ch) + "</td><td>" + (a.status === "draft" ? '<span class="badge gold">Draft</span>' : '<span class="badge green">Live</span>') + "</td><td class='num'>" + Number(a.perfViews || 0) + "</td><td class='num'>" + Number(a.perfInquiries || 0) + "</td>" +
           "<td>" + (a.status === "draft" ? '<button class="btn btn-primary btn-sm" data-ad-pub="' + esc(a.id) + '">Publish</button>' : '<span class="dim tiny">' + (a.url ? esc(String(a.url).slice(0, 24)) : "posted " + new Date(a.postedAt || a.createdAt).toLocaleDateString()) + "</span>") +
+          ' <button class="btn btn-ghost btn-sm" data-ad-perf="' + esc(a.id) + '" title="Log tracked views and inquiries">' + icon("chart", 13) + " Perf</button>" +
           ' <button class="btn btn-ghost btn-sm" data-ad-del="' + esc(a.id) + '" title="Delete">' + icon("trash", 13) + "</button></td></tr>";
       }).join("") +
       "</tbody></table></div></div>";
     html += '<div class="card card-pad mt-24"><h3>Source Funnel</h3><div class="table-wrap mt-8">' + stackFunnelHtml() + "</div></div>";
+    html += adRoiCardHtml();
     return html;
+  }
+  function adRoiCardHtml() {
+    const ads = state.ads || [];
+    let rows = [];
+    try { rows = (AT && AT.adRoi) ? AT.adRoi(ads, brokerageLeads(), { visits: state.siteVisits || [] }) : []; } catch (e) { rows = []; }
+    if (!rows.length) return '<div class="card card-pad mt-24"><h3>Ad ROI</h3><p class="dim mt-8">No ad performance yet — create an ad, then log its views and inquiries (or connect a channel sync) to see cost-free conversion rates here.</p></div>';
+    const chLabel = ch => (ADS_CHANNELS.find(c => c[0] === ch) || [ch, ch])[1];
+    const pct = v => (v == null ? '<span class="dim">—</span>' : v + "%");
+    return '<div class="card card-pad mt-24"><h3>Ad ROI</h3><p class="dim tiny mt-8">Views and inquiries come from the ad record (manual log or channel sync). Leads, visits, reservations, and closed deals roll up from CRM leads stamped with that ad.</p>' +
+      '<div class="table-wrap mt-8"><table class="data"><thead><tr><th>Ad</th><th class="num">Views</th><th class="num">Inquiries</th><th class="num">View&rarr;Inq</th><th class="num">CRM leads</th><th class="num">Visits</th><th class="num">Reservations</th><th class="num">Closed</th><th class="num">Inq&rarr;Res</th><th class="num">Cost/Inq</th></tr></thead><tbody>' +
+      rows.map(r => "<tr><td>" + esc((r.title || "—").slice(0, 34)) + ' <span class="badge blue">' + esc(chLabel(r.channel)) + "</span></td>" +
+        "<td class='num'>" + r.views + "</td><td class='num'>" + r.inquiries + "</td><td class='num'>" + pct(r.viewToInquiry) + "</td>" +
+        "<td class='num'>" + r.leads + "</td><td class='num'>" + r.visits + "</td><td class='num'>" + r.reservations + "</td><td class='num'>" + r.closed + "</td>" +
+        "<td class='num'>" + pct(r.inquiryToReservation) + "</td><td class='num'>" + (r.costPerInquiry == null ? '<span class="dim">—</span>' : C.money(r.costPerInquiry)) + "</td></tr>").join("") +
+      "</tbody></table></div></div>";
+  }
+  function openAdPerfModal(id) {
+    const a = (state.ads || []).find(x => x.id === id);
+    if (!a) { toast("Ad not found", "err"); return; }
+    const old = $("#ad-perf-modal"); if (old) old.remove();
+    const ov = document.createElement("div");
+    ov.className = "modal-overlay"; ov.id = "ad-perf-modal";
+    ov.innerHTML = '<div class="modal-card"><div class="modal-head"><h3>' + icon("chart", 16) + " Ad performance</h3><button class=\"icon-btn\" data-ad-perf-cancel title=\"Close\">&times;</button></div>" +
+      '<div class="modal-body"><p class="dim tiny">Enter the totals reported by the channel for this ad. Leave blank to keep the current value.</p><div class="grid grid-2">' +
+      '<div class="field"><label>Tracked views</label><input class="input input-num" id="ad-perf-views" type="text" inputmode="numeric" value="' + Number(a.perfViews || 0) + '"></div>' +
+      '<div class="field"><label>Tracked inquiries</label><input class="input input-num" id="ad-perf-inquiries" type="text" inputmode="numeric" value="' + Number(a.perfInquiries || 0) + '"></div>' +
+      '<div class="field"><label>Ad spend (₱, optional)</label><input class="input input-num" id="ad-perf-cost" type="text" inputmode="decimal" value="' + (a.cost != null ? a.cost : "") + '"></div></div></div>' +
+      '<div class="modal-foot"><button class="btn btn-ghost" data-ad-perf-cancel>Cancel</button><button class="btn btn-primary" data-ad-perf-save="' + esc(a.id) + '">' + icon("check", 15) + " Save</button></div></div>";
+    document.body.appendChild(ov);
+    ov.addEventListener("click", e => { if (e.target === ov) ov.remove(); });
+  }
+  function saveAdPerf(id) {
+    const a = (state.ads || []).find(x => x.id === id);
+    if (!a) { toast("Ad not found", "err"); return; }
+    const views = C.num(($("#ad-perf-views") || {}).value, 0);
+    const inquiries = C.num(($("#ad-perf-inquiries") || {}).value, 0);
+    const costRaw = String(($("#ad-perf-cost") || {}).value || "").trim();
+    a.perfViews = Math.max(0, Math.round(views));
+    a.perfInquiries = Math.max(0, Math.round(inquiries));
+    if (costRaw === "") delete a.cost; else a.cost = C.num(costRaw, 0);
+    a.perfLoggedAt = new Date().toISOString();
+    a.updatedAt = a.perfLoggedAt;
+    const m = $("#ad-perf-modal"); if (m) m.remove();
+    save(); render();
+    persistAdToCloud(a);
+    toast("Ad performance updated", "ok");
+  }
+  async function syncAdPerformance() {
+    const btn = document.querySelector("[data-ad-sync]");
+    if (btn) { btn.disabled = true; }
+    try {
+      const r = await fetch(MS_CLOUD + "/api/ad-perf", { headers: { "Content-Type": "application/json" } });
+      const body = await r.json().catch(() => ({}));
+      if (!body || !body.ok) throw new Error((body && (body.error || body.skipped)) || ("HTTP " + r.status));
+      if (body.skipped) { toast("Ad sync isn't configured yet — log views and inquiries with Log perf.", "info"); return; }
+      const list = Array.isArray(body.ads) ? body.ads : [];
+      let n = 0;
+      list.forEach(u => {
+        const a = (state.ads || []).find(x => x.id === u.id);
+        if (!a) return;
+        if (isFinite(Number(u.perfViews))) a.perfViews = Math.max(0, Math.round(Number(u.perfViews)));
+        if (isFinite(Number(u.perfInquiries))) a.perfInquiries = Math.max(0, Math.round(Number(u.perfInquiries)));
+        if (u.url) a.url = u.url;
+        a.perfSyncedAt = new Date().toISOString();
+        a.updatedAt = a.perfSyncedAt;
+        persistAdToCloud(a);
+        n++;
+      });
+      if (n) { save(); render(); }
+      toast(n ? "Synced performance for " + n + " ad(s)" : "No matching ads in the sync feed", n ? "ok" : "info");
+    } catch (e) {
+      toast("Could not sync ad performance: " + esc(friendlyErr(e.message)), "err");
+    } finally {
+      if (btn) btn.disabled = false;
+    }
   }
   function adPickListing() {
     const opts = (state.listings || []).map(l => '<option value="' + esc(l.id) + '">' + esc((l.title || "").slice(0, 46)) + "</option>").join("");
@@ -15962,6 +16048,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
       "</tbody></table></div>" : '<div class="dim mt-8">No views recorded yet.</div>') + "</div>";
     html += "</div>";
     html += adminSourceFunnel();
+    html += adRoiCardHtml();
     html = teamPerfCard() + html;
     return html;
   }

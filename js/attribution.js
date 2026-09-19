@@ -87,6 +87,52 @@
   function isQualified(status) { return status !== "new" && status !== "lost"; }
   function isReservation(status) { return status === "offer" || status === "negotiation"; }
 
+  function num(v) {
+    var n = Number(v);
+    return isFinite(n) ? n : 0;
+  }
+
+  // Per-ad return on investment. Views/inquiries are the channel-reported ad
+  // figures (populated by a sync or a manual log); leads/qualified/visits/
+  // reservations/closed roll up from CRM leads stamped with that adId. Visits
+  // are completed viewings (status "done") matched through opts.visits.
+  function adRoi(ads, leads, opts) {
+    opts = opts || {};
+    var visits = opts.visits || [];
+    leads = leads || [];
+    return (ads || []).map(function (ad) {
+      ad = ad || {};
+      var linked = leads.filter(function (l) { return ad.id && l && l.adId === ad.id; });
+      var leadIds = {};
+      linked.forEach(function (l) { leadIds[l.id] = true; });
+      var qualified = linked.filter(function (l) { return isQualified(l.status); }).length;
+      var reservations = linked.filter(function (l) { return isReservation(l.status); }).length;
+      var closed = linked.filter(function (l) { return l.status === "closed"; }).length;
+      var visitsDone = visits.filter(function (v) { return v && leadIds[v.leadId] && v.status === "done"; }).length;
+      var views = num(ad.perfViews);
+      var inquiries = num(ad.perfInquiries);
+      var cost = num(ad.cost != null ? ad.cost : ad.perfCost);
+      return {
+        id: ad.id || "",
+        title: ad.listingTitle || ad.title || "",
+        channel: ad.channel || "",
+        status: ad.status || "",
+        views: views,
+        inquiries: inquiries,
+        leads: linked.length,
+        qualified: qualified,
+        visits: visitsDone,
+        reservations: reservations,
+        closed: closed,
+        viewToInquiry: views ? Math.round(100 * inquiries / views) : null,
+        inquiryToReservation: inquiries ? Math.round(100 * reservations / inquiries) : null,
+        leadToReservation: linked.length ? Math.round(100 * reservations / linked.length) : null,
+        cost: cost,
+        costPerInquiry: cost && inquiries ? Math.round(cost / inquiries) : null
+      };
+    });
+  }
+
   // Roll leads up by source. With perAd, leads carrying adId are grouped under
   // their own ad row (key ad:<id>); each ad row remembers its parent source's
   // rollup via sourceTotal/sourceQualified so the funnel shows both. Every row
@@ -154,6 +200,7 @@
     firstResponseMinutes: firstResponseMinutes,
     isQualified: isQualified,
     isReservation: isReservation,
+    adRoi: adRoi,
     sourceFunnel: sourceFunnel,
     attributedAd: attributedAd
   };
