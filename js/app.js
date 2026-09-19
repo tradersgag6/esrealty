@@ -12571,9 +12571,14 @@ premise: "Fee Simple / As Improved",
     return out.join(" ") || '<span class="dim tiny">Never run</span>';
   }
   function agentEvidenceRows(l) {
-    return (l.evidence || []).map(e => "<tr><td>" + esc(e.field) + "</td><td>" + esc(String(e.value).slice(0, 90)) + "</td><td>" +
-      (e.src === "observed" ? '<span class="badge green">Observed</span>' : '<span class="badge gold">Claimed</span>') +
-      '</td><td class="num">' + Math.round((e.confidence || 0) * 100) + '%</td><td>' + esc(e.by || "—") + "</td></tr>").join("");
+    return (l.evidence || []).map(e => {
+      const pct = Math.max(0, Math.min(100, Math.round((e.confidence || 0) * 100)));
+      const col = e.src === "observed" ? "var(--green, #22c55e)" : "var(--gold, #F5B940)";
+      const meter = '<span title="' + pct + '% confidence" style="display:inline-block;width:46px;height:6px;border-radius:3px;background:rgba(148,163,184,.35);overflow:hidden;vertical-align:middle;margin-right:6px"><span style="display:block;height:100%;width:' + pct + '%;background:' + col + '"></span></span>';
+      return "<tr><td>" + esc(e.field) + "</td><td>" + esc(String(e.value).slice(0, 90)) + "</td><td>" +
+        (e.src === "observed" ? '<span class="badge green">Observed</span>' : '<span class="badge gold">Claimed</span>') +
+        '</td><td class="num">' + meter + pct + '%</td><td>' + esc(e.by || "—") + "</td></tr>";
+    }).join("");
   }
   async function agentFetchCloudSteps(leadId) {
     if (!SB || !currentUser || !currentUser.id || agentCloudFetched[leadId]) return;

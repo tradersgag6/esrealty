@@ -37,6 +37,24 @@
         var reject = document.querySelector("[data-agent-reject]");
         checks.push({ name: "second run appends fresh step to reject", ok: !!reject, detail: reject ? "reject btn present" : "missing" });
         if (reject) { reject.click(); await wait(700); checks.push({ name: "reject records rejected", ok: /Rejected/.test(document.querySelector("#content").textContent), detail: "rejected" }); }
+        var editEv = document.querySelector("[data-lead-edit]");
+        checks.push({ name: "lead editor opens for evidence", ok: !!editEv, detail: editEv ? "edit button" : "missing" });
+        if (editEv) {
+          editEv.click(); await wait(600);
+          var bf = document.querySelector("#ld-budget"); if (bf) bf.value = "3500000";
+          var inc = document.querySelector("#ld-income"); if (inc) inc.value = "30-60k";
+          var spa = document.querySelector("#ld-spa"); if (spa) spa.value = "yes";
+          document.querySelector("[data-lead-save]").click(); await wait(900);
+          var ledTxt = document.querySelector("#content").textContent;
+          var claimedBefore = (ledTxt.match(/Claimed/g) || []).length;
+          log.push("claimedBefore=" + claimedBefore + " budgetRow=" + /incomeBand/i.test(ledTxt));
+          checks.push({ name: "typed facts recorded as claimed evidence", ok: /Evidence Ledger/.test(ledTxt) && /Claimed/.test(ledTxt) && /budget/i.test(ledTxt) && /incomeBand/i.test(ledTxt), detail: "claimed rows for budget+income" });
+          checks.push({ name: "confidence meter rendered", ok: /confidence/.test(document.querySelector("#content").innerHTML), detail: "meter title on ledger cells" });
+          var edit2 = document.querySelector("[data-lead-edit]");
+          if (edit2) { edit2.click(); await wait(500); document.querySelector("[data-lead-save]").click(); await wait(800); }
+          var claimedAfter = (document.querySelector("#content").textContent.match(/Claimed/g) || []).length;
+          checks.push({ name: "unchanged re-save does not duplicate claims", ok: claimedAfter === claimedBefore, detail: "before=" + claimedBefore + " after=" + claimedAfter });
+        }
         document.querySelector("[data-lead-back]").click(); await wait(900);
         var cards2 = Array.prototype.slice.call(document.querySelectorAll("[data-lead-open]"));
         var nina2 = cards2.find(c => c.textContent.indexOf("Nina Reyes") >= 0);
