@@ -6,15 +6,22 @@ was just added.
 
 ## 1. Supabase — schema (run once)
 
-Run `supabase/agent_tasks.sql` in your Supabase project's **SQL Editor**
-(Project → SQL Editor → New query → paste file → Run).
+Run these in the Supabase **SQL Editor** (Project → SQL Editor → New query →
+paste file → Run), in order. All are safe to re-run any number of times:
+1. `supabase/crm_leads.sql` — CRM + RLS helpers (`crm_lead_broker_of` etc.)
+2. `supabase/compliance_registry.sql` — `compliance_records` (self-contained: it
+   now defines `address_book_profile_accessible`, its RLS helper).
+3. `supabase/agent_tasks.sql` — `agent_tasks` + `agent_steps` + the four
+   service-role worker RPCs (`agent_claim_due` / `agent_complete` /
+   `agent_cancel` / `agent_snooze_lead`) and `agent_set_step` (invoker-rights,
+   RLS-gated so reps can only resolve steps on leads they own/supervise).
 
-What it creates:
-- `agent_tasks` (queued follow-ups) + `agent_steps` (evidence ledger rows)
-- Indexes + `agent_claim_due` / `agent_complete` / `agent_cancel` /
-  `agent_snooze_lead` (service_role-only, lease via `FOR UPDATE SKIP LOCKED`)
-- `agent_set_step` (invoker-rights, RLS-gated so reps can only resolve steps on
-  leads they own/supervise)
+> **Gotcha (fixed 2026-09-19):** `compliance_registry.sql` originally referenced
+> `address_book_profile_accessible(text, uuid)` in its RLS policies without ever
+> defining it, so `create policy` failed with
+> `ERROR: 42883 ... function address_book_profile_accessible(text, uuid) does
+> not exist`. The file now ships with the definition. If you deployed an older
+> copy, re-run the current file.
 
 CLI alternative:
 ```
@@ -25,49 +32,76 @@ supabase db push   # or: psql "$DATABASE_URL" -f agent_tasks.sql
 
 ## 2. Supabase — deploy the `agent-dispatch` edge function
 
+The function needs `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` and
+`AGENT_DISPATCH_SECRET`. `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` are **default
+secrets** (always available); only the dispatcher secret is custom:
+
 ```
 cd supabase
 supabase functions deploy agent-dispatch
 supabase secrets set AGENT_DISPATCH_SECRET="<long-random-token>"
 ```
 
-The function needs `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`; on a linked
-project these are injected automatically. If you deployed without linking:
-```
-supabase secrets set SUPABASE_URL="https://<ref>.supabase.co"
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY="<service-role-key>"
-```
+Manual alternative (match the deployed ref `mrngaqtbaseewzcsogqi`):
+- Dashboard → **Project Settings → Secrets → Custom secrets** → add
+  `AGENT_DISPATCH_SECRET` (default secrets already cover URL + service role).
+
+> **JWT verification must be OFF** for this function (Edge Functions →
+> agent-dispatch → Settings → "Verify JWT" toggle → **off** → Save). The
+> function checks `x-agent-dispatch-secret` itself; the platform JWT gate
+> otherwise rejects the cron's no-`Authorization` calls with
+> `UNAUTHORIZED_NO_AUTH_HEADER` before the code runs.
 
 Verify it answers (claim tick + auth both ways work):
 ```
 curl -X POST "https://<ref>.supabase.co/functions/v1/agent-dispatch" \
-  -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H "Content-Type: application/json" \
+  -H "Content-Type: application/json" -H "x-agent-dispatch-secret: <token>" \
   -d '{}'
 ```
+A `401 Unauthorized` on a wrong secret is actually a good sign — it proves the
+function is alive and reachable.
 
 ## 3. Vercel — cron tick + env
 
-With the project linked and `market-scan/vercel` as the framework root:
+This project deploys via the **CLI from the repo root**, not Git integration —
+pushing to GitHub does *not* trigger Vercel deploys. The `.vercel` link lives at
+the repo root; the project's Root Directory is `market-scan/vercel`.
+
 ```
-cd market-scan/vercel
-vercel --prod
-vercel env add AGENT_EDGE_URL      # https://<ref>.supabase.co/functions/v1/agent-dispatch
-vercel env add AGENT_EDGE_TOKEN    # same value as AGENT_DISPATCH_SECRET
-vercel --prod   # re-deploy so envs are baked in
+npm i -g vercel; vercel login          # once
+# from the REPO ROOT (never from market-scan/vercel — the CLI doubles the path):
+vercel deploy --prod --yes
 ```
 
-`vercel.json` already defines the schedule:
-```json
-"crons": [{ "path": "/api/agent-dispatch", "schedule": "0 * * * *" }]
+Env vars (add via CLI — stored as hidden Secrets):
 ```
-Once an hour the cron calls `api/agent-dispatch`, which claims due tasks and
-runs the recheck ladder. (Thinned from 5-minute to hourly in the quota-reduction
-cleanup to cut edge-function invocations and DB compute ~12x; if you need faster
-Autopilot picks, revert to `*/5`.) **Known behavior:** if `AGENT_EDGE_URL`/`AGENT_EDGE_TOKEN`
-are unset, the shim no-ops silently (so it is safe to deploy before wiring envs).
-Cron jobs require a paid plan on Vercel; on a free plan the scheduler will not fire
-— in that case add a manual trigger (GitHub Actions scheduled call, or uptime-robot
-ping to `/api/agent-dispatch`) instead.
+echo "https://<ref>.supabase.co/functions/v1/agent-dispatch" | vercel env add AGENT_EDGE_URL production
+echo "<same token as AGENT_DISPATCH_SECRET>"                  | vercel env add AGENT_EDGE_TOKEN production
+vercel deploy --prod --yes     # re-deploy so envs are baked in
+```
+
+`vercel.json` defines the schedule — **daily** because the Vercel Hobby plan
+only allows one cron run per day (an hourly `0 * * * *` fails the deploy with an
+explicit plan error). Upgrade to Pro for hourly:
+```json
+"crons": [{ "path": "/api/agent-dispatch", "schedule": "0 6 * * *" }]
+```
+The cron calls `api/agent-dispatch`, which claims due tasks and runs the recheck
+ladder. **Known behavior:** if `AGENT_EDGE_URL`/`AGENT_EDGE_TOKEN` are unset, the
+shim no-ops silently (`{"ok":true,"skipped":"agent edge not configured"}`).
+
+> **Gotcha (fixed 2026-09-19):** `api/agent-dispatch.js` originally returned a
+> Web `Response` from a `module.exports = async (req, res)` handler. Vercel's
+> Node runtime ignores that return value, so the request sat until the 300s
+> timeout. It now writes through `res` using the same `(req, res)` style as
+> `api/ping.js`.
+
+Verify end-to-end:
+```
+https://esrealty-market-scan.vercel.app/api/agent-dispatch
+```
+Expect `{"ok":true,"claimed":0,"done":0}` (or `skipped: "no edge env"` if not
+wired).
 
 ## 4. Store locator — dev-only route (already applied)
 

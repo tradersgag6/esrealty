@@ -71,11 +71,14 @@ build the minimum that carries them natively.
   `SERVICE_ROLE_KEY` + `SUPABASE_URL` env): runs `agent_claim_due`, builds the
   concrete steps with the same ladder rules as the client, `agent_complete`.
   It is a plain observer: it never fabricates; steps cite task payload + reason.
-- `market-scan/vercel/vercel.json`: add `"crons": [{ "path": "/api/agent-dispatch",
-  "schedule": "0 * * * *" }]`.
+- `market-scan/vercel/vercel.json`: `"crons": [{ "path": "/api/agent-dispatch",
+  "schedule": "0 6 * * *" }]` (daily — Hobby plan ceiling; Pro allows hourly).
 - `market-scan/vercel/api/agent-dispatch.js`: if `AGENT_EDGE_URL`+
   `AGENT_EDGE_TOKEN` set, warm + `POST` the edge function; else returns
   `{ok:true, skipped:"no edge env"}` so local/cold deploys are harmless.
+  Deploys are CLI-based from the repo root (`vercel deploy --prod --yes`),
+  not Git-triggered; the edge function's "Verify JWT" toggle must be OFF
+  (the shim authenticates via `x-agent-dispatch-secret`).
 - `market-scan/vercel/package.json`: no new dependencies (fetch is global).
 
 ### Phase 2 — Evidence ledger on leads
