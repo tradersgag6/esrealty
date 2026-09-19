@@ -11268,10 +11268,10 @@ premise: "Fee Simple / As Improved",
         lsFld("Bathrooms", lsNum("ls-baths", l.bathrooms)) +
         lsFld("Parking slots", lsNum("ls-park", l.parking)) +
         lsFld("Floors", lsNum("ls-floors", l.floors)) +
-        lsFld("Balcony", '<select class="input" id="ls-balcony">' + lsSelOpt([["", "—"], ["yes", "Yes"], ["no", "No"]], l.balcony || "") + "</select>") +
+        lsFld("Balcony", '<select class="input" id="ls-ed-balcony">' + lsSelOpt([["", "—"], ["yes", "Yes"], ["no", "No"]], l.balcony || "") + "</select>") +
         lsFld("Facing / Orientation", '<select class="input" id="ls-facing">' + lsSelOpt([["", "—"], ["north", "North"], ["south", "South"], ["east", "East"], ["west", "West"], ["ne", "Northeast"], ["nw", "Northwest"], ["se", "Southeast"], ["sw", "Southwest"]], l.facing || "") + "</select>") +
-        lsFld("Furnishing", '<select class="input" id="ls-furnishing">' + lsSelOpt([["", "—"], ["bare", "Bare"], ["semi", "Semi-Furnished"], ["full", "Fully Furnished"]], l.furnishing || "") + "</select>") +
-        lsFld("Pet-friendly", '<select class="input" id="ls-pet">' + lsSelOpt([["", "—"], ["yes", "Yes"], ["no", "No"]], l.petFriendly || "") + "</select>") +
+        lsFld("Furnishing", '<select class="input" id="ls-ed-furnishing">' + lsSelOpt([["", "—"], ["bare", "Bare"], ["semi", "Semi-Furnished"], ["full", "Fully Furnished"]], l.furnishing || "") + "</select>") +
+        lsFld("Pet-friendly", '<select class="input" id="ls-ed-pet">' + lsSelOpt([["", "—"], ["yes", "Yes"], ["no", "No"]], l.petFriendly || "") + "</select>") +
         lsFld("Access / Road RROW", lsTxt("ls-access", l.accessNote, "e.g. 12m asphalt road, titled RROW")) +
         lsFld("Region", '<select class="input" id="ls-m-region">' + lsGeoOpts(Object.keys(PH_GEO), gReg) + "</select>") +
         lsFld("Province", '<select class="input" id="ls-m-province">' + lsGeoOpts(lsGeoProvinces(gReg), gProv) + "</select>") +
@@ -11351,8 +11351,8 @@ premise: "Fee Simple / As Improved",
     rec.titleType = $v("ls-titletype"); rec.titleNo = $v("ls-title-no"); rec.taxDecNo = $v("ls-taxdec"); rec.zoning = $v("ls-zoning");
     rec.turnoverDate = $v("ls-turnover"); rec.developer = $v("ls-developer"); rec.licenseToSell = $v("ls-lts");
     rec.hoaDues = $n("ls-hoa"); rec.condoDues = $n("ls-condo");
-    rec.balcony = $v("ls-balcony"); rec.facing = $v("ls-facing");
-    rec.furnishing = $v("ls-furnishing"); rec.petFriendly = $v("ls-pet");
+    rec.balcony = $v("ls-ed-balcony"); rec.facing = $v("ls-facing");
+    rec.furnishing = $v("ls-ed-furnishing"); rec.petFriendly = $v("ls-ed-pet");
     rec.accessNote = $v("ls-access");
     rec.financing = fin;
     rec.description = $v("ls-desc");

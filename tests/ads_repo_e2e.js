@@ -131,12 +131,17 @@
       if (stPs) stPs.value = "pre-selling";
       var ltsPs = document.querySelector("#ls-lts");
       if (ltsPs) ltsPs.value = "LTS-6622-01";
+      var furnPs = document.querySelector("#ls-ed-furnishing");
+      if (furnPs) furnPs.value = "full";
+      var petPs = document.querySelector("#ls-ed-pet");
+      if (petPs) petPs.value = "yes";
       document.querySelector("[data-ls-save]").click(); await wait(1200);
     }
     var psCard = document.querySelector("[data-ls-open]");
     var psRec = (stored().listings || []).find(l => /Vista Verde Townhouse/.test(l.title || ""));
     var psWid = psCard ? psCard.getAttribute("data-ls-open") : (psRec ? psRec.id : "");
-    log.push("presellWid=" + psWid + " stored=" + JSON.stringify(psRec ? { status: psRec.status, rfo: psRec.rfo, licenseToSell: psRec.licenseToSell, id: psRec.id } : null));
+    log.push("presellWid=" + psWid + " stored=" + JSON.stringify(psRec ? { status: psRec.status, furnishing: psRec.furnishing, petFriendly: psRec.petFriendly, licenseToSell: psRec.licenseToSell } : null));
+    checks.push({ name: "listing editor fields save (no filter-id shadow)", ok: !!psRec && psRec.status === "pre-selling" && psRec.licenseToSell === "LTS-6622-01" && psRec.furnishing === "full" && psRec.petFriendly === "yes", detail: psRec ? "status/furnishing/pet/LTS persisted" : "listing missing" });
     if (psWid) {
       var psOpen = document.querySelector('[data-ls-open="' + psWid + '"]') || psCard;
       if (psOpen) { psOpen.click(); await wait(1000); }

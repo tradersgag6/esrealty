@@ -15,6 +15,14 @@ paste file → Run), in order. All are safe to re-run any number of times:
    service-role worker RPCs (`agent_claim_due` / `agent_complete` /
    `agent_cancel` / `agent_snooze_lead`) and `agent_set_step` (invoker-rights,
    RLS-gated so reps can only resolve steps on leads they own/supervise).
+4. `supabase/ad_posts.sql` — `ad_posts`: the shared Ads repository (one row per
+   posted listing ad: listing, channel, status, url, `perfViews`/`perfInquiries`,
+   owner). Self-contained like the rest — it defines its own RLS helpers
+   (`ad_posts_keep_creator` / `ad_posts_broker_of(uuid)` /
+   `ad_posts_user_is_approved`), an **idempotent migration** that seeds existing
+   rows from `app_state.payload->'ads'` (existing rows win on any re-run), and
+   issues `notify pgrst` so REST enumerates the table immediately. Run it after
+   the app has been used so historical ads migrate too.
 
 > **Gotcha (fixed 2026-09-19):** `compliance_registry.sql` originally referenced
 > `address_book_profile_accessible(text, uuid)` in its RLS policies without ever
@@ -123,3 +131,9 @@ the chip live in production, the parity test + adapter must be changed together
 - Offline degrade: no Supabase/Vercel connectivity → the app's local engine still
   ticks, and steps render as "missing cloud" until connectivity returns.
 - The `Cached · observed` chip on store results appears on local dev only.
+- Advertising: the Ads tab, source funnel, and lead dedupe run fully offline;
+  when Supabase is up, ad save/publish/delete sync rows to `ad_posts` (via the
+  live-bound client) and `supabase/check-backend.js` should report the table OK.
+  `js/attribution.js` (source funnel + PH contact dedupe + first-response math)
+  and `js/compliance_due.js` (expiry-window math) are plain static assets — no
+  deploy step beyond a normal push.

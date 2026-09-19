@@ -147,3 +147,15 @@ For a lead `l` with status `s`, `createdAt`, `updatedAt`, `nextFollowUp`,
 - `js/app.js` (agent engine + evidence + tabs + bindings; app.min.js rebuilt)
 - `tests/agent_crm_e2e.js` (new)
 - `AGENT_PROMPT.md` (this file)
+
+### Adjacent feature masters (Phase 0/1, built and gated)
+- `PHASE_0_1_BUILD.md` — the build spec for compliance foundation + lead-gen
+  automation whose acceptance is now green.
+- `supabase/ad_posts.sql` — shared Ads repository + RLS (deploy step #4 in
+  `DEPLOY_GUIDE.md`).
+- `js/attribution.js` / `js/compliance_due.js` — UMD helpers shared by the app
+  and node tests (`window.ESREALTY_ATTR` / `window.ESREALTY_DUE`; app.js falls
+  back inline when they are absent).
+- Tests: `tests/ads_repo_e2e.js` (ads repo + per-ad attribution + pre-selling
+  DHSUD footer), `tests/source_attribution_node.js`, `tests/compliance_registry_
+  e2e.js`, `tests/compliance_registry_node.js`.
