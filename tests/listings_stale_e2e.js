@@ -12,7 +12,7 @@
     document.querySelector('[data-view="listings"]').click(); await wait(650);
     // CREATE aged listing (createdAt 100 days ago)
     document.querySelector("[data-ls-new]").click(); await wait(400);
-    setv("#ls-title","Aged House QC"); setv("#ls-city","Quezon City"); setv("#ls-price","10000000"); setv("#ls-lot","200"); setv("#ls-floor","150"); setv("#ls-status","available");
+    setv("#ls-title","Aged House QC"); setv("#ls-m-city","Quezon City"); setv("#ls-price","10000000"); setv("#ls-lot","200"); setv("#ls-floor","150"); setv("#ls-ed-status","available");
     document.querySelector("#ls-published").click(); await wait(100);
     saveModal(); await wait(750);
     // Use test helper to set createdAt and ensure published

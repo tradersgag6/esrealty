@@ -30,7 +30,7 @@
     document.querySelector("[data-ls-new]").click();
     await wait(400);
     setv("#ls-title", "Backup Test Condo");
-    setv("#ls-city", "Makati");
+    setv("#ls-m-city", "Makati");
     setv("#ls-price", "8000000");
     setv("#ls-lot", "60");
     setv("#ls-floor", "45");
