@@ -118,6 +118,45 @@
       checks.push({ name: "funnel shows per-ad channel row", ok: badg2.indexOf("Lamudi") >= 0, detail: "badge=" + badg2.join("|") });
       checks.push({ name: "funnel avg first response persists", ok: /First resp/.test(funnelTxt), detail: "column header present" });
     }
+    // Phase 0.3 acceptance: pre-selling listings always carry the DHSUD footer on copy/publish
+    document.querySelector('#nav [data-view="listings"]').click(); await wait(800);
+    var catPs = lsCatTab();
+    if (catPs) catPs.click(); await wait(800);
+    var lsNewPs = document.querySelector("[data-ls-new]");
+    if (lsNewPs) {
+      lsNewPs.click(); await wait(600);
+      document.querySelector("#ls-title").value = "Vista Verde Townhouse - Pre-Selling (Tagaytay)";
+      document.querySelector("#ls-price").value = "4800000";
+      var stPs = document.querySelector("#ls-ed-status");
+      if (stPs) stPs.value = "pre-selling";
+      var ltsPs = document.querySelector("#ls-lts");
+      if (ltsPs) ltsPs.value = "LTS-6622-01";
+      document.querySelector("[data-ls-save]").click(); await wait(1200);
+    }
+    var psCard = document.querySelector("[data-ls-open]");
+    var psRec = (stored().listings || []).find(l => /Vista Verde Townhouse/.test(l.title || ""));
+    var psWid = psCard ? psCard.getAttribute("data-ls-open") : (psRec ? psRec.id : "");
+    log.push("presellWid=" + psWid + " stored=" + JSON.stringify(psRec ? { status: psRec.status, rfo: psRec.rfo, licenseToSell: psRec.licenseToSell, id: psRec.id } : null));
+    if (psWid) {
+      var psOpen = document.querySelector('[data-ls-open="' + psWid + '"]') || psCard;
+      if (psOpen) { psOpen.click(); await wait(1000); }
+      var psDet = txt("#content");
+      checks.push({ name: "pre-selling detail shows DHSUD LTS row", ok: /DHSUD License to Sell/i.test(psDet) && /LTS-6622-01/.test(psDet), detail: "LTS row on detail" });
+      checks.push({ name: "pre-selling disclosure carries DHSUD footer", ok: /Disclosure:/.test(psDet) && /DHSUD License-to-Sell LTS-6622-01/.test(psDet) && /Pre-selling shown for information only; not an offer to sell/.test(psDet), detail: "DHSUD + disclaimer in disclosure" });
+      var backPs2 = document.querySelector("[data-ls-back]");
+      if (backPs2) backPs2.click(); await wait(600);
+      var adsPsTab = lsAdsTab();
+      if (adsPsTab) adsPsTab.click(); await wait(800);
+      if (has("[data-ad-pick]")) { document.querySelector("[data-ad-pick]").click(); await wait(500); }
+      var pickPs = document.querySelector("#ad-listing");
+      if (pickPs) { pickPs.value = psWid; document.querySelector("[data-ad-from-list]").click(); await wait(700); }
+      if (has("#ad-channel")) document.querySelector("#ad-channel").value = "facebook";
+      if (has("[data-ad-save]")) { document.querySelector("[data-ad-save]").click(); await wait(800); }
+      if (has("[data-ad-pub]")) { document.querySelector("[data-ad-pub]").click(); await wait(900); }
+      var psAd = (stored().ads || []).find(a => String(a.listingId) === String(psWid) && a.status === "posted");
+      log.push("presellAdPosted=" + (psAd ? psAd.caption.slice(0, 120) : "none"));
+      checks.push({ name: "pre-selling publish appends DHSUD footer", ok: !!psAd && /DHSUD License-to-Sell LTS-6622-01/.test(String(psAd.caption || "")) && /not an offer to sell/.test(String(psAd.caption || "")), detail: psAd ? "published caption carries DHSUD footer" : "no posted ad" });
+    }
     document.querySelector('#nav [data-view="admin"]').click(); await wait(900);
     var adminAds = Array.prototype.slice.call(document.querySelectorAll("[data-admin-tab]")).find(t => t.getAttribute("data-admin-tab") === "ads");
     checks.push({ name: "admin ads tab present", ok: !!adminAds, detail: adminAds ? "tab" : "missing" });

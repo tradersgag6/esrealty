@@ -13,6 +13,9 @@
   /* Attribution/dedupe helpers (js/attribution.js) may be missing in the raw
    * test harness — every consumer falls back to a local equivalent. */
   const AT = window.ESREALTY_ATTR || null;
+  /* Compliance expiry-window math (js/compliance_due.js) — falls back inline
+   * so the raw harness and cold loads never depend on the script. */
+  const DUE = window.ESREALTY_DUE || null;
   var pfPendingCollectProof = null;
   let sbReadyResolve = null;
   const sbReadyPromise = new Promise(function (resolve) { sbReadyResolve = resolve; });
@@ -10967,7 +10970,7 @@ premise: "Fee Simple / As Improved",
   function lsDetailRow(k, v) { return "<tr><td>" + esc(k) + "</td><td>" + (v ? esc(String(v)) : "—") + "</td></tr>"; }
   function lsCarouselHTML(l) {
     const photos = (l.photos || []).filter(Boolean);
-    const presell = l.status === "pre-selling";
+    const presell = listingIsPresell(l);
     const badge = listStatusBadge(l.status) + (presell && l.licenseToSell ? '<span class="badge blue">LTS ' + esc(l.licenseToSell) + "</span>" : "");
     if (photos.length < 2) {
       const img = photos[0] || "";
@@ -11011,7 +11014,7 @@ premise: "Fee Simple / As Improved",
     const can = listingCanEdit(l);
     const ppsm = listingPriceSqm(l);
     const fin = (l.financing || []);
-    const presell = l.status === "pre-selling";
+    const presell = listingIsPresell(l);
     lsCarIndex = Math.max(0, Math.min(lsCarIndex, (l.photos || []).filter(Boolean).length - 1 || 0));
     let html = '<div class="hero"><div><button class="btn btn-ghost btn-sm" data-ls-back>' + icon("back", 13) + ' Back to listings</button><h1 class="mt-8">' + esc(l.title || "Listing") + "</h1>" +
       '<div class="ls-loc dim">' + icon("pin", 13) + " " + esc([l.barangay, l.city, l.province].filter(Boolean).join(", ") || "Philippines") + "</div></div>" +
@@ -11254,9 +11257,9 @@ premise: "Fee Simple / As Improved",
     const body =
       '<div class="grid grid-2">' +
         lsFld("Listing title *", lsTxt("ls-title", l.title, "e.g. 3BR House & Lot in Imus")) +
-        lsFld("Property type", '<select class="input" id="ls-type">' + lsSelOpt(LISTING_TYPES, l.propertyType || "house-and-lot") + "</select>") +
+        lsFld("Property type", '<select class="input" id="ls-ed-type">' + lsSelOpt(LISTING_TYPES, l.propertyType || "house-and-lot") + "</select>") +
         lsFld("Deal type", '<select class="input" id="ls-deal">' + lsSelOpt([["sale", "For Sale"], ["rent", "For Rent"]], l.dealType || "sale") + "</select>") +
-        lsFld("Status", '<select class="input" id="ls-status">' + lsSelOpt(LISTING_STATUSES, l.status || "available") + "</select>") +
+        lsFld("Status", '<select class="input" id="ls-ed-status">' + lsSelOpt(LISTING_STATUSES, l.status || "available") + "</select>") +
         lsFld("Price (₱)", lsNum("ls-price", l.price)) +
         lsFld("Monthly rent (₱)", lsNum("ls-rent", l.rent)) +
         lsFld("Lot area (sqm)", lsNum("ls-lot", l.lotArea)) +
@@ -11330,9 +11333,9 @@ premise: "Fee Simple / As Improved",
     rec.id = rec.id || ("lst-" + Date.now() + "-" + Math.floor(Math.random() * 1000));
     rec.ref = rec.ref || "";
     rec.title = title;
-    rec.propertyType = $v("ls-type") || "house-and-lot";
+    rec.propertyType = $v("ls-ed-type") || "house-and-lot";
     rec.dealType = $v("ls-deal") || "sale";
-    rec.status = $v("ls-status") || "available";
+    rec.status = $v("ls-ed-status") || "available";
     const _prevPrice = editId ? C.num(rec.price, 0) : 0;
     rec.price = $n("ls-price");
     if (_prevPrice > 0 && rec.price > 0 && rec.price < _prevPrice) { rec.previousPrice = _prevPrice; rec.priceDroppedAt = new Date().toISOString(); }
@@ -13143,7 +13146,9 @@ premise: "Fee Simple / As Improved",
 
   /* ================= COMPLIANCE REGISTRY ================= */
   function complianceStatusOf(r) {
-    const t = r.expiresAt ? new Date(String(r.expiresAt).slice(0, 10) + "T00:00:00").getTime() : null;
+    const expiresStr = r.expiresAt ? String(r.expiresAt).slice(0, 10) : "";
+    if (DUE) return DUE.complianceWindowDays(expiresStr);
+    const t = expiresStr ? new Date(expiresStr + "T00:00:00").getTime() : null;
     if (!t) return { label: "Active", cls: "green", due: false, days: null };
     const d = Math.round((t - Date.now()) / 86400000);
     if (d < 0) return { label: "Expired " + Math.abs(d) + "d", cls: "red", due: true, days: d };
@@ -13363,11 +13368,14 @@ premise: "Fee Simple / As Improved",
   }
 
   /* ================= ADS REPOSITORY + SOURCE FUNNEL ================= */
+  function listingIsPresell(l) {
+    return l.status === "pre-selling" || l.rfo === "pre-selling" || l.rfo === "preselling" || l.rfo === "pre-sell";
+  }
   function listingDisclosure(l) {
     const firm = BIZ_FIRM || "ES Realty Brokerage";
     const brokerName = l.brokerName || BIZ_BROKER_NAME || firm;
     const brokerLic = l.brokerLicense || BIZ_BROKER_LICENSE || "";
-    const presell = l.status === "pre-selling" || l.rfo === "pre-selling" || l.rfo === "preselling" || l.rfo === "pre-sell";
+    const presell = listingIsPresell(l);
     let s = "Listed by " + firm + " · " + brokerName + (brokerLic ? " · Licensed Real Estate Broker (PRC " + brokerLic + ")" : "");
     if (l.licenseToSell || presell) s += " · DHSUD License-to-Sell " + (l.licenseToSell || "(pending)");
     s += ". Pre-selling shown for information only; not an offer to sell. Verify zoning, title, and financing with your broker before transacting.";
