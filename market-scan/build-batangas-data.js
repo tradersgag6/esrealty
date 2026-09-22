@@ -34,7 +34,7 @@ function check(cond, msg) { if (!cond) errors.push(msg); }
 
 const CONFIG = {
   version: 2,
-  calculationVersion: "2026.09.3",
+  calculationVersion: "2026.09.4",
   dataVersion: "bir-2022-rdo58-59",
   asOf: "2022-07-23",
   note: "Engine + data versions stamped on every estimate output. Deterministic and reconcilable.",

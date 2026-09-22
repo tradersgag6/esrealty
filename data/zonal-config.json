@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "calculationVersion": "2026.09.3",
+  "calculationVersion": "2026.09.4",
   "dataVersion": "bir-2022-rdo58-59",
   "asOf": "2022-07-23",
   "note": "Engine + data versions stamped on every estimate output. Deterministic and reconcilable.",
@@ -174,6 +174,7 @@
     "sourceType": "ES Realty approved factors",
     "comparablePolicy": "Use ES Realty listings first; external asking-price evidence only when internal data is unavailable.",
     "factorApproval": "Admin approval required",
+    "noComparableMaxMultiple": 2.5,
     "status": "assumption-backed",
     "note": "Market guide factors are not official BIR values and are not a certified appraisal."
   },

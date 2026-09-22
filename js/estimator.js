@@ -203,10 +203,20 @@
     var base = hit.value;
     var birZonalRatePerSqm = Math.round(base);
     var birZonalValue = Math.round(birZonalRatePerSqm * area);
-    var landPerSqm = Math.round(base * (1 + cornerPct) * proxy * band * adj);
+    var typeKey = opts.type === "house_lot" ? "house_lot" : "vacant_lot";
+    var comps = comparableSummary(opts && opts.comparables, {
+      municipality: opts && opts.municipality,
+      barangay: opts && opts.barangay,
+      propertyType: typeKey,
+      sourceType: opts && opts.comparableSource
+    });
+    var rawLandPerSqm = Math.round(base * (1 + cornerPct) * proxy * band * adj);
+    var capMultiple = Number(cfg.marketGuide && cfg.marketGuide.noComparableMaxMultiple) > 0
+      ? Number(cfg.marketGuide.noComparableMaxMultiple) : 2.5;
+    var noComparableCap = comps.count === 0 && rawLandPerSqm > base * capMultiple;
+    var landPerSqm = noComparableCap ? Math.round(base * capMultiple) : rawLandPerSqm;
     var landValue = Math.round(landPerSqm * area);
 
-    var typeKey = opts.type === "house_lot" ? "house_lot" : "vacant_lot";
     var typeDef = (cfg.propertyTypes && cfg.propertyTypes[typeKey]) || { label: typeKey, kind: "land" };
     var kind = typeDef.kind === "built" ? "built" : "land";
 
@@ -248,12 +258,6 @@
 
     var salePrice = Number(opts && opts.salePrice);
     salePrice = salePrice > 0 ? Math.round(salePrice) : 0;
-    var comps = comparableSummary(opts && opts.comparables, {
-      municipality: opts && opts.municipality,
-      barangay: opts && opts.barangay,
-      propertyType: typeKey,
-      sourceType: opts && opts.comparableSource
-    });
     return {
       available: true,
       reason: "",
@@ -289,7 +293,10 @@
         sourceType: comps.count ? comps.sourceType : ((config.marketGuide && config.marketGuide.sourceType) || "ES Realty approved factors"),
         comparableCount: comps.count,
         comparableMedianPricePerSqm: comps.medianPricePerSqm,
-        status: "assumption-backed"
+        status: noComparableCap ? "assumption-backed-capped" : "assumption-backed",
+        rawRatePerSqm: rawLandPerSqm,
+        capApplied: noComparableCap,
+        capMultiple: noComparableCap ? capMultiple : 0
       },
       birZonalRatePerSqm: birZonalRatePerSqm,
       birZonalValue: birZonalValue,
@@ -774,15 +781,16 @@
     });
     var comparableNote = r.marketGuide && r.marketGuide.comparableCount
       ? " Comparable evidence attached: " + r.marketGuide.comparableCount + " record(s) from " + r.marketGuide.sourceType + "."
-      : " No comparable listing evidence is attached to this estimate yet.";
+      : " No comparable listing evidence is attached to this estimate yet." + (r.marketGuide && r.marketGuide.capApplied ? " The market land guide is capped at " + r.marketGuide.capMultiple.toFixed(2) + "× the BIR rate until comparable evidence is available." : "");
     var s = [];
 
     s.push({ t: "Estimate at a glance", h:
+      '<div class="sf-est-bir-primary"><span>Official BIR zonal value</span><b>' + money(r.birZonalValue) + '</b><small>' + money(r.birZonalRatePerSqm) + '/sqm tax-floor reference</small></div>' +
       '<div class="sf-est-total">' + money(r.marketGuideEstimate) + "</div>" +
-      '<p class="sf-est-total-label">ES Realty Market Guide Estimate</p>' +
+      '<p class="sf-est-total-label">ES Realty Market Guide Estimate' + (r.marketGuide && r.marketGuide.capApplied ? ' · capped without comparables' : '') + '</p>' +
       '<p class="sf-est-range">Indicative range <b>' + money(r.low) + " – " + money(r.high) + "</b></p>" +
       '<p class="sf-est-per">≈ ' + money(r.perSqm) + " /sqm of lot on " + fmt(r.area) + " sqm" + (r.kind && r.type === "house_lot" ? " · " + fmt(r.floorArea) + " sqm floor area" : "") + "</p>" +
-      '<p class="sf-est-rdp"><b>BIR zonal value:</b> ' + money(r.birZonalValue) + " (" + money(r.birZonalRatePerSqm) + "/sqm). This is separate from the ES Realty guide estimate.</p>" });
+      '<p class="sf-est-rdp">The BIR figure is official reference data. The ES Realty guide is an indicative market estimate and is not a certified appraisal.</p>' });
 
     s.push({ t: "The property", h:
       "<ul class=\"sf-est-rdl\">" +
@@ -814,7 +822,8 @@
       "<span>Region " + r.factors.regionalAdj.toFixed(2) + "</span>" +
       "</div>" +
       '<p class="sf-est-coverage">Effective land rate <b>' + money(r.landPerSqm) + " /sqm</b> × " + fmt(r.area) +
-      " sqm = <b>" + money(r.landValue) + "</b> land value.</p>" });
+      " sqm = <b>" + money(r.landValue) + "</b> land value.</p>" +
+      (r.marketGuide && r.marketGuide.capApplied ? '<p class="sf-est-rdp"><b>No-comparable safeguard:</b> the approved market factors would exceed the 2.5× BIR guide ceiling, so the land guide is capped until usable comparable evidence is available.</p>' : "") });
 
     if (r.type === "house_lot") {
       s.push({ t: "House value (replacement cost approach)", h:

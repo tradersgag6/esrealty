@@ -34,13 +34,14 @@ eq(r.source.level, "street", "cr level street");
 eq(r.reference.value, 3500, "cr reference 3500");
 eq(r.birZonalRatePerSqm, 3500, "cr BIR zonal rate remains official base");
 eq(r.birZonalValue, 700000, "cr BIR zonal value stays separate");
-eq(r.landPerSqm, 14875, "cr landPerSqm = 3500 x 1.7 x 2.5 x 1.0");
-eq(r.landValue, 2975000, "cr landValue");
-eq(r.low, 2826250, "cr low ±5%");
-eq(r.high, 3123750, "cr high ±5%");
-eq(r.perSqm, 14875, "cr perSqm");
+eq(r.landPerSqm, 8750, "cr landPerSqm capped at 2.5x BIR without comparables");
+eq(r.landValue, 1750000, "cr landValue capped");
+eq(r.low, 1662500, "cr low ±5%");
+eq(r.high, 1837500, "cr high ±5%");
+eq(r.perSqm, 8750, "cr perSqm");
 eq(r.marketGuideEstimate, r.total, "market guide estimate equals guide total");
-eq(r.marketGuide.status, "assumption-backed", "market guide source status");
+eq(r.marketGuide.status, "assumption-backed-capped", "market guide source status");
+eq(r.marketGuide.capApplied, true, "market guide cap applied without comparables");
 eq(core.integrityCheck(r).ok, true, "cr reconciles");
 eq(r.calculationVersion, config.calculationVersion, "cr calc version stamped");
 eq(r.dataVersion, index.dataVersion, "cr data version stamped");
@@ -66,7 +67,7 @@ let rc = core.computeEstimate(config, index, balayan, {
   municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "CR", area: 200, corner: true
 });
 eq(rc.corner.applied, true, "corner applied");
-eq(rc.landPerSqm, Math.round(3500 * 1.025 * 1.7 * 2.5 * 1.0), "corner landPerSqm 15247");
+eq(rc.landPerSqm, 8750, "corner landPerSqm remains capped at 2.5x BIR");
 
 /* ---- residential RR (proxy 1.0, band 2.5) ---- */
 let rr = core.computeEstimate(config, index, balayan, {

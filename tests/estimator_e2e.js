@@ -103,7 +103,7 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     chk("corner-note-shown", /corner lot \(\+2.5%\)/.test(document.body.innerText), "");
     chk("range-shown", !!q('.sf-est-range') && /–/.test(q('.sf-est-range').textContent), "txt=" + ((q('.sf-est-range') || { textContent: "" }).textContent));
     chk("per-sqm-shown", !!q('.sf-est-per') && /sqm/.test(q('.sf-est-per').textContent), "");
-    chk("bir-value-shown-separately", /BIR zonal value/.test(document.body.innerText), "");
+    chk("bir-value-shown-separately", !!q('.sf-est-bir-primary') && /Official BIR zonal value/.test(q('.sf-est-bir-primary').textContent), "");
     chk("market-guide-labeled", !!q('.sf-est-total-label') && /Market Guide Estimate/.test(q('.sf-est-total-label').textContent), "");
     chk("tax-base-disclosed", /Illustrative tax base/.test(document.body.innerText), "");
     chk("coverage-good-tag", !!q('.sf-est-tag-good') && /BIR street data/.test(q('.sf-est-tag-good').textContent), "");

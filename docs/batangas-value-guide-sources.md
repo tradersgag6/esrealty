@@ -14,6 +14,7 @@ The current market guide uses ES Realty-approved factors. These are internal ass
 
 - Residential, commercial, agricultural, and industrial proxy factors are stored in `data/zonal-config.json`.
 - Market-band midpoints are stored in `data/zonal-config.json`.
+- Without usable comparable evidence, the market land guide is capped at 2.5x the BIR rate.
 - Changes require super-admin approval in the Brokerage > Value Guide panel.
 - Approved changes are versioned and exposed to the public estimator through sanitized site settings.
 

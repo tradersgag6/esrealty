@@ -470,7 +470,7 @@ const getSiteSettings = async (admin: SupabaseClient) => {
     .maybeSingle();
   if (profileError) throw new Error(profileError.message);
   if (!adminProfile) return json({ data: { ...DEFAULT_SITE_CONTACT, valueGuide: {
-    version: "2026.09.3", approvedBy: "", approvedAt: "",
+    version: "2026.09.4", approvedBy: "", approvedAt: "",
     proxyFactors: { residential: 1, commercial: 1.7, agricultural: 0.5, industrial: 1.35 },
     marketBandMid: { residential: 2.5, commercial: 2.5, agricultural: 1.5, industrial: 2 },
     construction: { wood_prefab: 16000, mixed_chb: 25000, rca_steel: 32000 },
@@ -498,7 +498,7 @@ const getSiteSettings = async (admin: SupabaseClient) => {
     return Number.isFinite(n) && n >= min && n <= max ? n : fallback;
   };
   const valueGuide = {
-    version: stringValue(guide.version || "2026.09.3", 40, "valueGuide.version"),
+    version: stringValue(guide.version || "2026.09.4", 40, "valueGuide.version"),
     approvedBy: stringValue(guide.approvedBy || "", 160, "valueGuide.approvedBy"),
     approvedAt: stringValue(guide.approvedAt || "", 40, "valueGuide.approvedAt"),
     proxyFactors: {
