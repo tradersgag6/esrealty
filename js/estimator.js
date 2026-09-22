@@ -928,8 +928,9 @@
     out += '<div class="sf-est-cov-row">' + coverageTag(r.coverage) + '<span class="sf-est-asof">BIR schedule effective ' + esc(r.effectivityDate) + " · data " + esc(r.dataVersion) + "</span></div>";
     out += '<div class="sf-est-report">';
     reportSections(r).forEach(function (sec, i) {
-      out += '<section class="sf-est-rsec">' +
-        '<div class="sf-est-rsec-head"><b>' + zeroPad(i + 1) + "</b><h4>" + esc(sec.t) + "</h4></div>" + sec.h + "</section>";
+      out += '<details class="sf-est-rsec"' + (i < 3 ? " open" : "") + '>' +
+        '<summary class="sf-est-rsec-head"><b>' + zeroPad(i + 1) + "</b><h4>" + esc(sec.t) + "</h4><span class=\"sf-est-rsec-toggle\" aria-hidden=\"true\"></span></summary>" +
+        '<div class="sf-est-rsec-body">' + sec.h + "</div></details>";
     });
     out += "</div>";
     out += '<div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-prev>← Adjust inputs</button></div>';

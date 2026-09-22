@@ -398,14 +398,15 @@ body .grid-4 { grid-template-columns: repeat(4, 1fr); }
 
 /* ============ TABLES ============ */
 .table-wrap { overflow-x: auto; }
-table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.data { width: 100%; border-collapse: collapse; font-size: 14px; }
 table.data th {
-  text-align: left; font-size: 12px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
-  color: var(--text-dim); padding: 10px 10px; border-bottom: 1px solid var(--stroke);
+  text-align: left; font-size: 13px; font-weight: 750; letter-spacing: .4px; text-transform: uppercase;
+  color: var(--text); padding: 13px 12px; border-bottom: 2px solid var(--stroke-strong);
   white-space: nowrap; background: var(--surface-2);
 }
 table.data th.num { text-align: right; }
-table.data td { padding: 9px 10px; border-bottom: 1px solid var(--stroke); color: var(--text); }
+table.data td { padding: 13px 12px; border-bottom: 1px solid var(--stroke); color: var(--text); }
+table.data tbody tr:nth-child(even) td { background: var(--surface-2); }
 table.data tr:hover td { background: var(--surface-2); }
 table.data .num { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
 
@@ -1341,27 +1342,27 @@ body .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding:
 .bt-tier-card h3 { margin: 25px 0 5px; color: #2a2b26; font-family: Georgia, serif; font-size: 38px; font-weight: 400; letter-spacing: -.04em; }
 .bt-tier-price { color: #a2724f; font-family: Georgia, serif; font-size: 25px; }
 .bt-tier-price small { font-size: 15px; }
-.bt-tier-position { min-height: 64px; margin: 17px 0 0; color: #687068; font-size: 11px; line-height: 1.65; }
+.bt-tier-position { min-height: 64px; margin: 17px 0 0; color: #4f5b52; font-size: 12px; line-height: 1.65; }
 .bt-tier-rule { height: 1px; margin: 20px 0; background: #ded8cf; }
-.bt-tier-ideal { min-height: 55px; margin: 8px 0 17px; color: #5d665e; font-size: 10px; line-height: 1.6; }
-.bt-tier-card ul { min-height: 126px; margin: 0; padding: 0 0 0 15px; color: #4c574f; font-size: 10px; line-height: 1.8; }
+.bt-tier-ideal { min-height: 55px; margin: 8px 0 17px; color: #465249; font-size: 12px; line-height: 1.6; }
+.bt-tier-card ul { min-height: 126px; margin: 0; padding: 0 0 0 15px; color: #3e4b42; font-size: 12px; line-height: 1.8; }
 .bt-tier-card li::marker { color: #a2724f; }
-.bt-tier-best { min-height: 51px; margin: 18px 0 0; color: #687068; font-size: 10px; line-height: 1.6; }
+.bt-tier-best { min-height: 51px; margin: 18px 0 0; color: #4f5b52; font-size: 12px; line-height: 1.6; }
 .bt-tier-best b { color: #30342d; }
 .bt-tier-ratings { display: flex; flex-direction: column; gap: 7px; margin: 20px 0; padding: 14px 0; border-top: 1px solid #ded8cf; border-bottom: 1px solid #ded8cf; }
-.bt-tier-ratings > span { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #717971; font-size: 9px; }
+.bt-tier-ratings > span { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #4f5b52; font-size: 12px; }
 .bt-stars { color: #a2724f; letter-spacing: .08em; white-space: nowrap; }
 .bt-stars i { color: #d5cbc0; font-style: normal; }
-.bt-tier-cta { display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding: 0; border: 0; background: transparent; color: #373b34; cursor: pointer; font: inherit; font-size: 10px; font-weight: 800; text-align: left; }
+.bt-tier-cta { display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; padding: 0; border: 0; background: transparent; color: #303a33; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; text-align: left; }
 .bt-tier-cta:hover { color: #a2724f; }
 .bt-compare { background: #fbfaf7; }
-.bt-table-wrap { overflow-x: auto; border: 1px solid #dedbd3; background: #fff; }
-.bt-table { width: 100%; min-width: 760px; border-collapse: collapse; color: #555f57; font-size: 11px; }
-.bt-table th, .bt-table td { padding: 17px 19px; border-bottom: 1px solid #e8e5df; text-align: left; vertical-align: middle; }
+.bt-table-wrap { position: relative; overflow-x: auto; border: 1px solid #c8c9c3; background: #fff; }
+.bt-table { width: 100%; min-width: 760px; border-collapse: collapse; color: #3e4941; font-size: 13px; }
+.bt-table th, .bt-table td { padding: 17px 19px; border-bottom: 1px solid #d9dcd7; text-align: left; vertical-align: middle; line-height: 1.55; }
 .bt-table thead th { color: #2e322b; font-family: Georgia, serif; font-size: 17px; font-weight: 400; }
-.bt-table thead th small { display: block; margin-top: 5px; color: #a2724f; font-family: Inter, Arial, sans-serif; font-size: 8px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.bt-table thead th small { display: block; margin-top: 5px; color: #805b3d; font-family: Inter, Arial, sans-serif; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .bt-table thead th:first-child { width: 23%; }
-.bt-table tbody th { color: #4b554d; font-size: 10px; font-weight: 800; }
+.bt-table tbody th { color: #303a33; font-size: 13px; font-weight: 800; }
 .bt-table tbody tr:last-child th, .bt-table tbody tr:last-child td { border-bottom: 0; }
 .bt-table-featured { background: #f2e9df; }
 .bt-table .bt-stars { font-size: 12px; }
@@ -1375,10 +1376,10 @@ body .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding:
 .bt-financial-card { padding: 28px; border: 1px solid rgba(255, 255, 255, .2); background: #3a4038; }
 .bt-financial-card > span { color: #d2a47a; }
 .bt-financial-card > div { display: flex; align-items: baseline; justify-content: space-between; gap: 15px; padding: 19px 0; border-bottom: 1px solid rgba(255, 255, 255, .14); }
-.bt-financial-card small { color: #aeb8ae; font-size: 9px; letter-spacing: .1em; }
+.bt-financial-card > span, .bt-financial-card small { color: #d0d8d0; font-size: 12px; letter-spacing: .08em; }
 .bt-financial-card b { color: #fff; font-family: Georgia, serif; font-size: 22px; font-weight: 400; text-align: right; }
 .bt-financial-card b em { color: #c8a786; font-size: 12px; font-style: normal; }
-.bt-financial-card p { margin: 19px 0 0; color: #aeb8ae; font-size: 9px; line-height: 1.6; }
+.bt-financial-card p { margin: 19px 0 0; color: #c5cec5; font-size: 12px; line-height: 1.7; }
 .bt-site { background: #fff; }
 .bt-site-grid { display: grid; grid-template-columns: minmax(330px, .95fr) minmax(0, 1.05fr); gap: clamp(35px, 7vw, 100px); align-items: center; }
 .bt-map-card { position: relative; min-height: 405px; overflow: hidden; border: 1px solid #d8ded6; background: #edf0e9; }
@@ -1387,7 +1388,7 @@ body .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding:
 .bt-road-a { width: 130%; left: -15%; top: 46%; }
 .bt-road-b { width: 105%; left: -3%; top: 70%; transform: rotate(29deg); }
 .bt-map-pin { position: absolute; left: 49%; top: 43%; display: grid; place-items: center; width: 64px; height: 64px; border: 5px solid rgba(162, 114, 79, .22); border-radius: 50%; background: #a2724f; color: #fff; font-family: Georgia, serif; font-size: 20px; box-shadow: 0 7px 15px rgba(103, 74, 52, .3); }
-.bt-map-label { position: absolute; left: 20px; bottom: 18px; padding: 9px 12px; background: #2e332d; color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.bt-map-label { position: absolute; left: 20px; bottom: 18px; padding: 9px 12px; background: #2e332d; color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .bt-checklist { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .bt-checklist > div { display: grid; grid-template-columns: 33px 1fr; column-gap: 10px; padding: 19px 0; border-top: 1px solid #e1e5df; }
 .bt-checklist > div:last-child { grid-column: 1 / -1; }
@@ -1410,7 +1411,7 @@ body .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding:
 .bt-highlight-grid article { min-height: 240px; padding: 24px; background: #fff; }
 .bt-highlight-grid article > span { color: #a2724f; font-family: Georgia, serif; font-size: 18px; }
 .bt-highlight-grid h3 { margin: 56px 0 12px; color: #30352e; font-family: Georgia, serif; font-size: 24px; font-weight: 400; }
-.bt-highlight-grid p { margin: 0; color: #6b746c; font-size: 10px; line-height: 1.7; }
+.bt-highlight-grid p { margin: 0; color: #4d5a51; font-size: 12px; line-height: 1.7; }
 .bt-contact { display: grid; grid-template-columns: 90px minmax(0, 1fr) minmax(300px, .75fr); gap: clamp(30px, 5vw, 80px); align-items: start; padding-top: 95px; padding-bottom: 95px; background: #2e332d; color: #fff; }
 .bt-contact .bt-section-label { color: #d2a47a; }
 .bt-contact h2 { color: #fff; }
@@ -1498,7 +1499,10 @@ body .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding:
   .bt-concept-copy { padding: 24px 20px; }
   .bt-specs { gap: 5px; }
   .bt-tier-card ul, .bt-tier-position, .bt-tier-ideal, .bt-tier-best { min-height: 0; }
+  .bt-table-wrap { padding-bottom: 30px; }
+  .bt-table-wrap::after { position: absolute; right: 12px; bottom: 7px; content: "Swipe horizontally to compare"; color: #536057; font-size: 12px; font-weight: 700; }
   .bt-table { min-width: 700px; }
+  .bt-table th, .bt-table td { padding: 15px 14px; }
   .bt-financial-card { padding: 22px; }
   .bt-financial-card b { font-size: 18px; }
   .bt-map-card { min-height: 300px; }
@@ -2191,8 +2195,9 @@ body.preload .topbar { visibility: hidden !important; }
   .modal-foot .btn { flex: 1 1 auto; min-width: 140px; }
   
   /* Tables - wrap in scroll container, prevent page overflow */
-  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
-  .table-wrap table { min-width: 600px; }
+  .table-wrap { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; padding-bottom: 26px; }
+  .table-wrap::after { position: absolute; right: 10px; bottom: 5px; content: "Swipe horizontally to view"; color: var(--text-dim); font-size: 12px; font-weight: 700; }
+  .table-wrap table { min-width: 560px; }
   
   /* Cards and grids - single column */
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }

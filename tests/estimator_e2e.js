@@ -110,12 +110,15 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     chk("bir-value-shown-separately", !!q('.sf-est-bir-primary') && /Official BIR zonal value/.test(q('.sf-est-bir-primary').textContent), "");
     chk("market-guide-evidence-gated", !!q('.sf-est-guide-unavailable') && /pending comparable evidence/i.test(q('.sf-est-guide-unavailable').textContent), "");
     chk("asking-price-value-shown", !!q('.sf-est-asking') && !/Pending comparables/.test(q('.sf-est-asking').textContent) && /₱/.test(q('.sf-est-asking').textContent), "");
+    const reportText = (q('.sf-est-report') || { textContent: "" }).textContent;
     chk("full-property-report-label", /Full Property Report/.test(document.body.innerText), "");
-    chk("pricing-strategy-shown", /Negotiation floor/.test(document.body.innerText) && /Buyer sweet spot/.test(document.body.innerText), "");
-    chk("taxes-fees-commissions-shown", /Taxes, fees & commissions/.test(document.body.innerText) && /Broker commission/.test(document.body.innerText), "");
-    chk("tax-base-disclosed", /Illustrative tax base/.test(document.body.innerText), "");
+    chk("pricing-strategy-shown", /Negotiation floor/.test(reportText) && /Buyer sweet spot/.test(reportText), "");
+    chk("taxes-fees-commissions-shown", /Taxes, fees & commissions/.test(reportText) && /Broker commission/.test(reportText), "");
+    chk("tax-base-disclosed", /Illustrative tax base/.test(reportText), "");
     chk("coverage-good-tag", !!q('.sf-est-tag-good') && /BIR street data/.test(q('.sf-est-tag-good').textContent), "");
     chk("report-15-sections", qa('.sf-est-rsec').length === 15, "n=" + qa('.sf-est-rsec').length);
+    chk("report-sections-are-accessible", qa('.sf-est-rsec details').length === 0 && qa('.sf-est-rsec > summary').length === 15, "summaries=" + qa('.sf-est-rsec > summary').length);
+    chk("report-summary-priority", qa('.sf-est-rsec[open]').length >= 3, "open=" + qa('.sf-est-rsec[open]').length);
 
     // lead block + submit (fallback to contact stub, no email -> "saved")
     chk("lead-block-present", !!q('[data-est-lead]'), "");
@@ -173,7 +176,7 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     chk("house-total-matches-core", MONEY(rH.total) === MONEY(eH.total), "dom=" + MONEY(rH.total) + " core=" + MONEY(eH.total));
     chk("house-improvement-included", rH && rH.improvement === eH.improvement && rH.improvement > 0, "imp=" + (rH && rH.improvement));
     chk("house-report-shows-house-value", /House value/.test(document.body.innerText), "");
-    chk("seller-net-proceeds-shown", /estimated net proceeds/.test(document.body.innerText), "");
+    chk("seller-net-proceeds-shown", /estimated net proceeds/.test((q('.sf-est-report') || { textContent: "" }).textContent), "");
 
     window.__msOk = window.__msChecks.every(c => c.ok) && window.__msChecks.length > 0;
     window.__msDone = true;
