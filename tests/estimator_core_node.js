@@ -171,7 +171,8 @@ let saleTax = core.taxMath(config, 1000000, {
 eq(saleTax.base, 2000000, "tax base uses highest selling price");
 eq(saleTax.baseBasis, "Selling price", "tax basis identifies selling price");
 eq(saleTax.cgt, 120000, "selling-price CGT");
-eq(saleTax.sellerNetProceeds, 1880000, "seller net proceeds after CGT");
+eq(saleTax.broker, 60000, "illustrative broker commission");
+eq(saleTax.sellerNetProceeds, 1820000, "seller net proceeds after CGT and broker");
 
 /* ---- determinism ---- */
 let r2 = core.computeEstimate(config, index, balayan, {

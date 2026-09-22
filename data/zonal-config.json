@@ -182,7 +182,8 @@
     "cgtPct": 0.06,
     "dstPct": 0.015,
     "transferPct": 0.005,
-    "registrationPct": 0.001
+    "registrationPct": 0.001,
+    "brokerPct": 0.03
   },
   "disclaimer": "ES Realty Market Guide Estimate — an indicative, non-certified estimate based on official BIR reference values, approved ES Realty market factors, and available comparable listings. Land figures follow the imported BIR zonal schedule for your municipality, barangay, street and classification; improvements use provisional replacement construction costs less straight-line age depreciation. Confirm the current schedule and verify on the ground before any transaction.",
   "labels": {

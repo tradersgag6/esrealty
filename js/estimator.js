@@ -355,7 +355,9 @@
     var dst = Math.round(base * (t.dstPct || 0.015));
     var transfer = Math.round(base * (t.transferPct || 0.005));
     var reg = Math.round(base * (t.registrationPct || 0.001));
-    var sellerCosts = cgt;
+    var transactionPrice = sale > 0 ? sale : (Number(opts.transactionPrice) > 0 ? Number(opts.transactionPrice) : 0);
+    var broker = Math.round(transactionPrice * (t.brokerPct || 0.03));
+    var sellerCosts = cgt + broker;
     var buyerCosts = dst + transfer + reg;
     return {
       base: base,
@@ -364,9 +366,13 @@
       dst: dst,
       transfer: transfer,
       registration: reg,
+      broker: broker,
+      brokerPct: t.brokerPct || 0.03,
       sellerCosts: sellerCosts,
       buyerCosts: buyerCosts,
       sellerNetProceeds: sale > 0 ? sale - sellerCosts : null,
+      projectedTransactionPrice: transactionPrice,
+      projectedNetProceeds: transactionPrice > 0 ? transactionPrice - sellerCosts : null,
       total: cgt + dst + transfer + reg
     };
   }
@@ -781,7 +787,8 @@
     var tax = taxMath(DATA.config, r.total, {
       salePrice: r.salePrice,
       birZonalValue: r.birZonalValue,
-      marketGuideEstimate: r.marketGuideAvailable ? r.marketGuideEstimate : 0
+      marketGuideEstimate: r.marketGuideAvailable ? r.marketGuideEstimate : 0,
+      transactionPrice: r.recommendedAskingPrice
     });
     var comparableNote = r.marketGuide && r.marketGuide.comparableCount
       ? " Comparable evidence attached: " + r.marketGuide.comparableCount + " record(s) from " + r.marketGuide.sourceType + "."
@@ -796,12 +803,20 @@
       : '<p class="sf-est-range">Official BIR reference rate: <b>' + money(r.birZonalRatePerSqm) + ' /sqm</b></p>';
     var displayPerSqm = r.marketGuideAvailable ? r.perSqm : r.birZonalRatePerSqm;
     var askingPriceBlock = '<div class="sf-est-asking' + (r.marketGuideAvailable ? '' : ' sf-est-asking-provisional') + '"><span>' + (r.marketGuideAvailable ? 'Recommended Asking Price' : 'Provisional Recommended Asking Price') + '</span><b>' + money(r.recommendedAskingPrice) + '</b><small>' + (r.marketGuideAvailable ? 'High enough to protect your value, credible enough to attract offers.' : 'Based on the capped BIR guide range. Comparable evidence is still needed for a market-backed recommendation.') + '</small></div>';
+    var priceQualifier = r.marketGuideAvailable ? "" : '<p class="sf-est-rdp"><b>Provisional pricing guidance:</b> comparable evidence is still needed before relying on these negotiation figures.</p>';
     s.push({ t: "Estimate at a glance", h:
       '<div class="sf-est-bir-primary"><span>Official BIR zonal value</span><b>' + money(r.birZonalValue) + '</b><small>' + money(r.birZonalRatePerSqm) + '/sqm tax-floor reference</small></div>' +
       guideValue + displayRange +
       '<p class="sf-est-per">≈ ' + money(displayPerSqm) + " /sqm of lot on " + fmt(r.area) + " sqm" + (r.kind && r.type === "house_lot" ? " · " + fmt(r.floorArea) + " sqm floor area" : "") + "</p>" +
-      askingPriceBlock +
-      '<p class="sf-est-rdp">The BIR figure is official reference data. The ES Realty guide is an indicative market estimate and is not a certified appraisal.</p>' });
+       askingPriceBlock +
+       '<p class="sf-est-rdp">The BIR figure is official reference data. The ES Realty guide is an indicative market estimate and is not a certified appraisal.</p>' });
+
+    s.push({ t: "Pricing strategy", h:
+      '<div class="sf-est-pricing-grid">' +
+      '<div class="sf-est-price-card sf-est-price-floor"><span>Negotiation floor</span><b>' + money(r.low) + '</b><small>Don’t accept below this without a deliberate reason.</small></div>' +
+      '<div class="sf-est-price-card sf-est-price-sweet"><span>Buyer sweet spot</span><b>' + money(Math.round((r.low + r.high) / 2)) + '</b><small>Where serious buyers are most likely to negotiate.</small></div>' +
+      '<div class="sf-est-price-card sf-est-price-ask"><span>' + (r.marketGuideAvailable ? 'Recommended asking price' : 'Provisional asking price') + '</span><b>' + money(r.recommendedAskingPrice) + '</b><small>Protects your value while leaving room for a credible offer.</small></div>' +
+      '</div>' + priceQualifier });
 
     s.push({ t: "The property", h:
       "<ul class=\"sf-est-rdl\">" +
@@ -856,12 +871,12 @@
     s.push({ t: "Coverage and limitations", h:
       "<p class=\"sf-est-rdp\">The BIR figure is matched street-by-street; where a street has no listed rate for a classification the engine falls back to the barangay all-other-streets rate, then municipality and province medians. The market guide currently uses approved ES Realty factors." + comparableNote + " Rows the BIR masked as “same as above” were resolved only when a municipality-wide rate existed — never guessed.</p>" });
 
-    s.push({ t: "Estimated transfer costs and seller proceeds", h:
+    s.push({ t: "Taxes, fees & commissions", h:
       '<div class="sf-est-tax"><span>Illustrative tax base: <b>' + money(tax.base) + "</b> · " + esc(tax.baseBasis) + "</span>" +
       "<b>CGT 6% ≈ " + money(tax.cgt) + "</b><b>DST 1.5% ≈ " + money(tax.dst) + "</b>" +
-      "<b>Transfer ~0.5% ≈ " + money(tax.transfer) + "</b><b>Registration ~0.1% ≈ " + money(tax.registration) + "</b></div>" +
-      '<p class="sf-est-rdp"><b>Illustrative seller costs:</b> ' + money(tax.sellerCosts) + (tax.sellerNetProceeds != null ? " · estimated net proceeds: " + money(tax.sellerNetProceeds) : " · enter an expected selling price to estimate net proceeds") + "</p>" +
-      "<p class=\"sf-est-rdp\">Illustrative only — not tax or legal advice; confirm with the BIR and your counsel.</p>" });
+      "<b>Broker commission 3% ≈ " + money(tax.broker) + "</b><b>Transfer ~0.5% ≈ " + money(tax.transfer) + "</b><b>Registration ~0.1% ≈ " + money(tax.registration) + "</b></div>" +
+      '<p class="sf-est-rdp"><b>Estimated seller costs:</b> ' + money(tax.sellerCosts) + ' · based on ' + money(tax.projectedTransactionPrice) + ' transaction price · <b>estimated net proceeds:</b> ' + money(tax.projectedNetProceeds) + '</p>' +
+      "<p class=\"sf-est-rdp\">DST, transfer and registration fees are commonly buyer-side costs but may be negotiated. Broker commission is an illustrative 3% assumption. Confirm current rates, tax base and cost allocation with the BIR, LGU, Registry of Deeds, broker and counsel.</p>" });
 
     s.push({ t: "Site review factors you recorded", h:
       "<ul class=\"sf-est-rdl\">" +
@@ -889,6 +904,7 @@
     var out = '<div class="sf-est-step" data-est-screen="4">';
     out += locSummary();
     out += '<div class="sf-est-step-head"><span class="sf-est-step-no">03</span><h3 id="sf-est-result-heading" tabindex="-1">Your property value guide</h3></div>';
+    out += '<p class="sf-est-report-label">Full Property Report · valuation, pricing and transaction planning</p>';
     out += '<div class="sf-est-cov-row">' + coverageTag(r.coverage) + '<span class="sf-est-asof">BIR schedule effective ' + esc(r.effectivityDate) + " · data " + esc(r.dataVersion) + "</span></div>";
     out += '<div class="sf-est-report">';
     reportSections(r).forEach(function (sec, i) {

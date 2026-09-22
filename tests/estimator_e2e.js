@@ -108,9 +108,12 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     chk("bir-value-shown-separately", !!q('.sf-est-bir-primary') && /Official BIR zonal value/.test(q('.sf-est-bir-primary').textContent), "");
     chk("market-guide-evidence-gated", !!q('.sf-est-guide-unavailable') && /pending comparable evidence/i.test(q('.sf-est-guide-unavailable').textContent), "");
     chk("asking-price-value-shown", !!q('.sf-est-asking') && !/Pending comparables/.test(q('.sf-est-asking').textContent) && /₱/.test(q('.sf-est-asking').textContent), "");
+    chk("full-property-report-label", /Full Property Report/.test(document.body.innerText), "");
+    chk("pricing-strategy-shown", /Negotiation floor/.test(document.body.innerText) && /Buyer sweet spot/.test(document.body.innerText), "");
+    chk("taxes-fees-commissions-shown", /Taxes, fees & commissions/.test(document.body.innerText) && /Broker commission/.test(document.body.innerText), "");
     chk("tax-base-disclosed", /Illustrative tax base/.test(document.body.innerText), "");
     chk("coverage-good-tag", !!q('.sf-est-tag-good') && /BIR street data/.test(q('.sf-est-tag-good').textContent), "");
-    chk("report-14-sections", qa('.sf-est-rsec').length === 14, "n=" + qa('.sf-est-rsec').length);
+    chk("report-15-sections", qa('.sf-est-rsec').length === 15, "n=" + qa('.sf-est-rsec').length);
 
     // lead block + submit (fallback to contact stub, no email -> "saved")
     chk("lead-block-present", !!q('[data-est-lead]'), "");
