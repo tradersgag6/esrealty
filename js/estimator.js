@@ -646,7 +646,7 @@
     var list = classCandidates();
     if (!list.length) return '<option value="">— no classifications available —</option>';
     var labels = (DATA && DATA.index.classifications) || {};
-    return list.map(function (c) {
+    return '<option value="">— choose a BIR classification —</option>' + list.map(function (c) {
       var l = labels[c] ? " — " + labels[c] : "";
       return '<option value="' + esc(c) + '"' + (c === est.classification ? " selected" : "") + ">" + esc(c + l) + "</option>";
     }).join("");
@@ -772,9 +772,9 @@
   }
 
   function screen3Html() {
-    return '<div class="sf-est-step sf-est-anim" data-est-screen="3">' +
+    return '<div class="sf-est-step sf-est-anim" data-est-screen="3" role="status" aria-live="polite">' +
        '<div class="sf-est-anim-ring spin" data-est-spin><b data-est-anim-total>₱0</b><span>calculating…</span></div>' +
-      '<p class="sf-est-anim-note" data-est-anim-note>Matching your barangay, street and BIR classification…</p></div>';
+      '<h3 class="sf-est-anim-title">Calculating your property value…</h3><p class="sf-est-anim-note" data-est-anim-note>Matching your barangay, street and BIR classification…</p></div>';
   }
 
   function reportSections(r) {
@@ -888,7 +888,7 @@
     if (!r || !r.available) return unavailableHtml();
     var out = '<div class="sf-est-step" data-est-screen="4">';
     out += locSummary();
-    out += '<div class="sf-est-step-head"><span class="sf-est-step-no">03–04</span><h3>Your guide estimate</h3></div>';
+    out += '<div class="sf-est-step-head"><span class="sf-est-step-no">03</span><h3 id="sf-est-result-heading" tabindex="-1">Your property value guide</h3></div>';
     out += '<div class="sf-est-cov-row">' + coverageTag(r.coverage) + '<span class="sf-est-asof">BIR schedule effective ' + esc(r.effectivityDate) + " · data " + esc(r.dataVersion) + "</span></div>";
     out += '<div class="sf-est-report">';
     reportSections(r).forEach(function (sec, i) {
@@ -976,9 +976,9 @@
       return String(t.name).toLowerCase().indexOf(f) !== -1;
     }).slice(0, 50).forEach(function (t) {
       var active = t.key === est.streetKey && !est.allOther;
-      out += '<button type="button" class="sf-est-street-opt' + (active ? " active" : "") + '" data-est-street="' + esc(t.key) + '">' + esc(t.name) + "</button>";
+       out += '<button type="button" class="sf-est-street-opt' + (active ? " active" : "") + '" aria-selected="' + (active ? "true" : "false") + '" data-est-street="' + esc(t.key) + '">' + esc(t.name) + "</button>";
     });
-    out += '<button type="button" class="sf-est-street-opt sf-est-street-all' + (est.allOther ? " active" : "") + '" data-est-street-all>Street not listed — use ALL OTHER STREETS rate →</button>';
+    out += '<button type="button" class="sf-est-street-opt sf-est-street-all' + (est.allOther ? " active" : "") + '" aria-selected="' + (est.allOther ? "true" : "false") + '" data-est-street-all>Street not listed — use ALL OTHER STREETS rate →</button>';
     return out;
   }
 
@@ -1058,22 +1058,23 @@
       if (listEl) listEl.innerHTML = streetListHtml("");
     }
 
-    // Street / "street not listed" clicks are delegated at the document level
-    // and bound exactly once. The search-results list (streetListHtml) is
-    // re-injected via innerHTML on every keystroke, creating fresh button nodes
-    // that bindCard() never sees — per-node handlers would silently die there.
-    if (!streetDelegationBound) {
-      streetDelegationBound = true;
+    // Keep the delegated handler on the estimator card. Search results are
+    // replaced while typing, so per-button handlers would be lost.
+    if (!card.dataset.estStreetDelegationBound) {
+      card.dataset.estStreetDelegationBound = "1";
       var keepClassAfterStreetChange = function () {
         // A street switch changes which classifications apply. Keep the user's
         // selection only if it is still offered — silently wiping it was the
         // main reason "click estimate again" kept re-failing the gate.
         var keep = est.classification;
-        var list = classCandidates();
+        var br = currentBarangay();
+        var source = est.allOther ? (br && br.other) : (br && br.streets && br.streets[est.streetKey] && br.streets[est.streetKey].classes);
+        var list = source ? Object.keys(source) : [];
         est.classification = list.indexOf(keep) !== -1 ? keep : "";
       };
-      document.addEventListener("click", function (e) {
+      card.addEventListener("click", function (e) {
         var st = e.target.closest ? e.target.closest("[data-est-street]") : null;
+        if (st && !card.contains(st)) st = null;
         if (st) {
           est.streetKey = st.getAttribute("data-est-street");
           var t = currentBarangay();
@@ -1082,9 +1083,12 @@
           keepClassAfterStreetChange();
           est.result = null;
           renderLayout();
+          var selectedInput = $q(getCard(), "[data-est-street-q]");
+          if (selectedInput) { selectedInput.focus(); selectedInput.select(); }
           return;
         }
         var all = e.target.closest ? e.target.closest("[data-est-street-all]") : null;
+        if (all && !card.contains(all)) all = null;
         if (all) {
           est.allOther = true;
           est.streetKey = "";
@@ -1092,6 +1096,8 @@
           keepClassAfterStreetChange();
           est.result = null;
           renderLayout();
+          var allInput = $q(getCard(), "[data-est-street-q]");
+          if (allInput) { allInput.focus(); allInput.select(); }
         }
       });
     }
@@ -1300,7 +1306,12 @@
       if (p < 1) requestAnimationFrame(frame);
       else {
         if (totalEl) totalEl.innerHTML = money(target);
-        setTimeout(function () { est.screen = 4; renderLayout(); }, 420);
+         setTimeout(function () {
+           est.screen = 4;
+           renderLayout();
+           var heading = getCard() && getCard().querySelector("#sf-est-result-heading");
+           if (heading && heading.focus) heading.focus();
+         }, 420);
       }
     }
     requestAnimationFrame(frame);

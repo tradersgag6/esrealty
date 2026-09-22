@@ -197,21 +197,7 @@
     return out.join("");
   }
 
-    var sfCities = ["Batangas City", "Lipa", "Tanauan", "Santo Tomas", "Imus", "Bacoor", "Dasmariñas", "General Trias", "Santa Rosa", "Calamba", "Biñan", "Angeles", "San Fernando", "Antipolo", "Taytay", "Iloilo City", "Cebu City", "Lapu-Lapu", "Cagayan de Oro", "Davao City", "General Santos"];
-
   function home() {
-    var listings = viewState.result && viewState.result.data || [];
-    // Frontend-only filter: hide obvious placeholder/test listings (numeric titles like 321321, sample)
-    var displayListings = listings.filter(function (l) {
-      var t = String(l.title || "").trim().toLowerCase();
-      if (!t) return false;
-      if (/^\d+$/.test(t)) return false;
-      if (/^sample\d*$/i.test(t)) return false;
-      return true;
-    });
-    if (!displayListings.length && listings.length) displayListings = listings;
-    var cards = viewState.loading ? skeletons(3) : displayListings.length ? displayListings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
-    var chips = sfCities.map(function (city, i) { return '<a class="sf-reveal sf-reveal-zoom" style="--d:' + (Math.min(i, 11) * 0.05).toFixed(2) + 's" href="#/search?city=' + encodeURIComponent(city) + '">' + esc(city) + '</a>'; }).join("");
     return shell(
       '<section class="sf-est-hero" id="sf-intro">' +
       '<div class="sf-est-hero-copy sf-reveal">' +
@@ -224,20 +210,12 @@
       (typeof window.ESREALTY_EST === "object" && window.ESREALTY_EST.cardSection ? window.ESREALTY_EST.cardSection() : '<section class="sf-section sf-est" id="sf-estimator" data-est-root><div class="sf-est-card" data-est-card><p class="sf-est-empty">Loading the value guide…</p></div></section>') +
       '</section>' +
 
-      '<section class="sf-section"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">BATANGAS PROPERTIES</p><h2>Find your next property with local context</h2></div><a href="#/search?state=Batangas">Browse all Batangas properties →</a></div>' +
-      '<div class="sf-featured-filter sf-reveal sf-reveal-zoom">' + searchFields(new URLSearchParams(), true) + '</div>' +
-      '<div class="sf-property-grid">' + cards + '</div></section>' +
-      '<section class="sf-locations"><div class="sf-locations-wrap"><div class="sf-reveal"><p class="sf-eyebrow">BATANGAS COVERAGE</p><h2>Local context for every property decision.</h2><p>Start with a Batangas BIR reference, compare available properties, and ask a local specialist what to verify next.</p></div>' +
-      '<div class="sf-loc-chips">' + chips + '</div></div></section>' +
+      '<section class="sf-section sf-guide-summary"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">WHAT YOU RECEIVE</p><h2>A clearer answer before your next property step.</h2></div><p>Start with the official reference. Ask for a provisional asking-price guide or professional review when the decision needs more evidence.</p></div>' +
+      '<div class="sf-guide-summary-grid"><article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>01</b><h3>Official BIR reference</h3><p>The published zonal rate for your selected Batangas location and classification.</p></article>' +
+      '<article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>02</b><h3>Asking-price guidance</h3><p>A provisional guide without comparables, or an evidence-backed recommendation when listings are available.</p></article>' +
+      '<article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>03</b><h3>Professional next step</h3><p>Request ES Realty guidance or a licensed-appraiser consultation when you need a defensible opinion.</p></article></div></section>' +
+      '<section class="sf-process sf-process-compact" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">HOW IT WORKS</p><h2>Three simple steps to a <em>better decision.</em></h2></div><p>No account is needed to start the guide.</p></div><div class="sf-process-steps"><article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Choose the property</h3><p>Select the municipality, barangay, street, classification, and lot area.</p></article><article class="sf-process-step sf-reveal sf-reveal-up"><b>02</b><h3>Read the reference</h3><p>See the official BIR rate, provisional asking-price guidance, and evidence status.</p></article><article class="sf-process-step sf-reveal sf-reveal-up"><b>03</b><h3>Choose your next step</h3><p>Email the report, browse properties, or request professional appraisal help.</p></article></div></section>' +
 
-      
-      '<section class="sf-process" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">HOW ES REALTY HELPS</p><h2>One local guide for the next <em>property step.</em></h2></div><p>Start with the information you need, then involve a specialist when the decision becomes real.</p></div><div class="sf-process-steps">' +
-      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Buy or invest</h3><p>Browse Batangas properties, compare the location, and review purchase, financing, and feasibility questions before you commit.</p><a class="sf-est-service-link" href="#/search?state=Batangas">Browse properties &#8250;</a></article>' +
-      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>02</b><h3>Sell or value</h3><p>Start with the BIR reference and ES Realty market guide, then request a professional appraisal consultation when you need a defensible opinion.</p><a class="sf-est-service-link" href="#sf-estimator" data-est-services>Value your property &#8250;</a></article>' +
-      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>03</b><h3>Verify and move forward</h3><p>Coordinate due diligence, documents, financing, leasing, or property support with a specialist who can explain the next check.</p><a class="sf-est-service-link" href="#sf-contact">Talk to a specialist &#8250;</a></article>' +
-      '</div></section>' +
-
-      
       '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div class="sf-reveal"><p class="sf-eyebrow">LOCAL BATANGAS GUIDANCE</p><h2>Ready for the <em>next check?</em></h2><p>Tell us whether you are buying, selling, valuing, or reviewing a property. We will help you identify the next practical step.</p><div class="sf-contact-details">' + contactDetails() + '</div></div>' +
       '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="Mobile number"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Tell us the property location and what you need..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about this request.</span></label><button type="submit">Talk to a specialist →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>'
     );

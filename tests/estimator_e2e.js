@@ -52,12 +52,13 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     chk("funnel-brand-eyebrow", /BATANGAS VALUE GUIDE/.test(document.body.innerText), "");
     chk("homepage-primary-estimate-cta", !!q('.sf-est-hero-actions [data-est-services]') && /Get My Free Estimate/.test(q('.sf-est-hero-actions [data-est-services]').textContent), "");
     chk("homepage-secondary-batangas-cta", !!q('.sf-est-hero-actions a[href*="state=Batangas"]'), "");
-    chk("homepage-batangas-listings-heading", /Find your next property with local context/.test(document.body.innerText), "");
+    chk("homepage-guide-summary-heading", /A clearer answer before your next property step/.test(document.body.innerText), "");
     chk("screen1-rendered", !!q('[data-est-screen="1"]'), "");
     chk("region-fixed-batangas", !!q('.sf-est-loc-fixed') && /CALABARZON.*Batangas/.test(q('.sf-est-loc-fixed').textContent), "txt=" + (q('.sf-est-loc-fixed') && q('.sf-est-loc-fixed').textContent));
     chk("mn-options-gte34", pt >= 34, "mn=" + pt);
     chk("legacy-map-removed", !document.getElementById("est-map") && !q('[data-est-step]'), "");
     chk("street-search-input", !!q('[data-est-street-q]'), "");
+    chk("classification-starts-empty", !!q('[data-est-class]') && q('[data-est-class]').value === "", "value=" + (q('[data-est-class]') && q('[data-est-class]').value));
 
     q('[data-est-next]').click();
     await wait(60);
@@ -93,6 +94,7 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     await waitFor(() => q('[data-est-screen="3"]'), 30, ESP);
     chk("screen3-animation", !!q('[data-est-screen="3"] [data-est-spin]') && /spin/.test(q('[data-est-screen="3"] [data-est-spin]').className), "");
     await waitFor(() => q('[data-est-screen="4"]'), 90, ESP);
+    chk("result-heading-is-clear", !!q('#sf-est-result-heading') && /Your property value guide/.test(q('#sf-est-result-heading').textContent), "");
 
     const rD1 = estApi()._state().result;
     chk("depth1-available", rD1 && rD1.available, "");

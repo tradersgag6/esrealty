@@ -8,19 +8,21 @@
 .sf-est-step { display: grid; gap: 22px; }
 .sf-est-step-head { display: flex; align-items: center; gap: 14px; }
 .sf-est-step-no { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #d8c39a; border-radius: 6px; color: #7d531d; font-family: Georgia, serif; font-size: 14px; font-weight: 500; }
-.sf-est-step-head h3 { margin: 0; font-family: Georgia, serif; font-size: 22px; font-weight: 500; letter-spacing: -.02em; }
+.sf-est-step-head h3 { margin: 0; font-family: Georgia, serif; font-size: 25px; font-weight: 500; letter-spacing: -.02em; }
 
 /* fields */
 .sf-est-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .sf-est-field { display: grid; gap: 7px; color: #3f464e; font-size: 11px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
 .sf-est-field > span { color: #5f6771; font-size: 12px; font-weight: 450; letter-spacing: .01em; text-transform: none; }
-.sf-est-field select, .sf-est-field input { width: 100%; height: 46px; padding: 0 13px; border: 1px solid #d8dbdc; border-radius: 6px; background: #fff; color: #1b2027; font-size: 14px; }
+.sf-est-field select, .sf-est-field input { width: 100%; height: 48px; min-height: 48px; padding: 0 13px; border: 1px solid #d8dbdc; border-radius: 6px; background: #fff; color: #1b2027; font-size: 16px; }
+.sf-est-field { font-size: 13px; }
+.sf-est-field > span { font-size: 14px; }
 .sf-est-field select:focus, .sf-est-field input:focus { border-color: #a87942; outline: none; box-shadow: 0 0 0 3px rgba(168, 121, 66, .14); }
 .sf-est-field input::placeholder { color: #9aa1a8; }
 .sf-est-hint { margin: 0; color: #5f6771; font-size: 12px; line-height: 1.6; }
 
 .sf-est-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.sf-est-chip { border: 1px solid #d3d5d7; border-radius: 999px; padding: 8px 14px; background: #fff; color: #3f464e; font-size: 12px; font-weight: 700; cursor: pointer; }
+.sf-est-chip { min-height: 44px; border: 1px solid #d3d5d7; border-radius: 999px; padding: 9px 16px; background: #fff; color: #3f464e; font-size: 14px; font-weight: 700; cursor: pointer; }
 .sf-est-chip:hover { border-color: #a87942; color: #7d531d; }
 .sf-est-chip.active { border-color: #1e2a3a; background: #1e2a3a; color: #fff; }
 
@@ -126,11 +128,21 @@
 /* services connector link */
 .sf-est-service-link { display: inline-block; margin-top: 14px; color: #7d531d; font-size: 12px; font-weight: 800; text-decoration: none; }
 .sf-est-service-link:hover { text-decoration: underline; }
+.sf-guide-summary { padding-top: 68px; padding-bottom: 68px; background: #fff; }
+.sf-guide-summary .sf-section-head > p { max-width: 430px; color: #5f6771; font-size: 15px; line-height: 1.65; }
+.sf-guide-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 34px; }
+.sf-guide-summary-card { padding: 24px; border: 1px solid #e4e6e7; border-radius: 8px; background: #fbfaf7; }
+.sf-guide-summary-card b { color: #a87942; font-family: Georgia, serif; font-size: 15px; }
+.sf-guide-summary-card h3 { margin: 14px 0 8px; color: #1e2a3a; font-family: Georgia, serif; font-size: 21px; font-weight: 500; }
+.sf-guide-summary-card p { margin: 0; color: #5f6771; font-size: 14px; line-height: 1.65; }
+.sf-process-compact { padding-top: 68px; padding-bottom: 68px; }
+.sf-process-compact .sf-process-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
 @media (max-width: 900px) {
   .sf-est-fields { grid-template-columns: 1fr; }
   .sf-est-proj { flex-direction: column; align-items: stretch; }
   .sf-est-proj-ask { width: 100%; }
+  .sf-guide-summary-grid, .sf-process-compact .sf-process-steps { grid-template-columns: 1fr; }
 }
 
 /* home hero (Batangas Value Guide) */
@@ -315,6 +327,11 @@
 .sf-est-anim-ring b { font-family: Georgia, serif; font-size: 30px; font-weight: 500; color: #1e2a3a; letter-spacing: -.02em; }
 .sf-est-anim-ring span { color: #5f6771; font-size: 11px; }
 .sf-est-anim-note { margin: 0; color: #5f6771; font-size: 12px; line-height: 1.6; }
+.sf-est-anim-title { margin: 0; color: #1e2a3a; font-family: Georgia, serif; font-size: 24px; font-weight: 500; }
+.sf-est-step-head h3:focus { outline: 3px solid rgba(168, 121, 66, .35); outline-offset: 5px; border-radius: 4px; }
+.sf-est-rsec { padding: 22px 0; border-top: 1px solid #e4e6e7; }
+.sf-est-rsec h4 { font-size: 17px; }
+.sf-est-rsec p, .sf-est-rsec li { font-size: 14px; line-height: 1.7; }
 @keyframes sfEstSpin { to { transform: rotate(360deg); } }
 
 .sf-est-report { display: grid; gap: 18px; margin-top: 18px; }
