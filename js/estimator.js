@@ -302,6 +302,7 @@
       birZonalValue: birZonalValue,
       marketGuideEstimate: comps.count ? total : null,
       marketGuideAvailable: comps.count > 0,
+      recommendedAskingPrice: comps.count ? high : null,
       marketGuideRatePerSqm: perSqm,
       landPerSqm: landPerSqm,
       landValue: landValue,
@@ -794,10 +795,14 @@
       ? '<p class="sf-est-range">Indicative range <b>' + money(r.low) + " – " + money(r.high) + "</b></p>"
       : '<p class="sf-est-range">Official BIR reference rate: <b>' + money(r.birZonalRatePerSqm) + ' /sqm</b></p>';
     var displayPerSqm = r.marketGuideAvailable ? r.perSqm : r.birZonalRatePerSqm;
+    var askingPriceBlock = r.marketGuideAvailable
+      ? '<div class="sf-est-asking"><span>Recommended Asking Price</span><b>' + money(r.recommendedAskingPrice) + '</b><small>High enough to protect your value, credible enough to attract offers.</small></div>'
+      : '<div class="sf-est-asking sf-est-asking-muted"><span>Recommended Asking Price</span><b>Pending comparables</b><small>We need usable comparable evidence before recommending a market asking price.</small></div>';
     s.push({ t: "Estimate at a glance", h:
       '<div class="sf-est-bir-primary"><span>Official BIR zonal value</span><b>' + money(r.birZonalValue) + '</b><small>' + money(r.birZonalRatePerSqm) + '/sqm tax-floor reference</small></div>' +
       guideValue + displayRange +
       '<p class="sf-est-per">≈ ' + money(displayPerSqm) + " /sqm of lot on " + fmt(r.area) + " sqm" + (r.kind && r.type === "house_lot" ? " · " + fmt(r.floorArea) + " sqm floor area" : "") + "</p>" +
+      askingPriceBlock +
       '<p class="sf-est-rdp">The BIR figure is official reference data. The ES Realty guide is an indicative market estimate and is not a certified appraisal.</p>' });
 
     s.push({ t: "The property", h:
@@ -1312,7 +1317,7 @@
       municipality: r.municipality, barangay: r.barangay, street: r.streetName || "Street not listed",
       classification: r.classification, classificationLabel: r.classificationLabel,
       use: r.use, coverage: r.coverage, sourceLevel: r.source.level, dataCoveragePct: r.source.pct,
-      total: r.total, marketGuideEstimate: r.marketGuideEstimate, marketGuideAvailable: r.marketGuideAvailable, low: r.low, high: r.high, perSqm: r.perSqm,
+      total: r.total, marketGuideEstimate: r.marketGuideEstimate, marketGuideAvailable: r.marketGuideAvailable, recommendedAskingPrice: r.recommendedAskingPrice, low: r.low, high: r.high, perSqm: r.perSqm,
       birZonalRatePerSqm: r.birZonalRatePerSqm, birZonalValue: r.birZonalValue,
       landValue: r.landValue, improvement: r.improvement, area: r.area, salePrice: r.salePrice,
       marketGuide: r.marketGuide,

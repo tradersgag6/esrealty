@@ -41,6 +41,7 @@ eq(r.high, 1837500, "cr high ±5%");
 eq(r.perSqm, 8750, "cr perSqm");
 eq(r.marketGuideEstimate, null, "market guide stays unavailable without comparables");
 eq(r.marketGuideAvailable, false, "market guide availability requires comparables");
+eq(r.recommendedAskingPrice, null, "asking price stays unavailable without comparables");
 eq(r.marketGuide.status, "assumption-backed-capped", "market guide source status");
 eq(r.marketGuide.capApplied, true, "market guide cap applied without comparables");
 eq(core.integrityCheck(r).ok, true, "cr reconciles");
@@ -62,6 +63,13 @@ const comps = core.comparableSummary([comp, {
 eq(comps.count, 2, "comparable summary keeps matching internal records");
 eq(comps.medianPricePerSqm, 20000, "comparable summary median is deterministic");
 eq(comps.status, "evidence-available", "comparable summary status");
+const compEstimate = core.computeEstimate(config, index, balayan, {
+  municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "CR", area: 100,
+  comparables: [{ city: "BALAYAN", barangay: "BACLARAN", property_type: "lot-only", offer_type: "sale", price: 1500000, lotArea: 100 }],
+  comparableSource: "ES Realty listing"
+});
+eq(compEstimate.marketGuideAvailable, true, "market guide available with comparable evidence");
+eq(compEstimate.recommendedAskingPrice, compEstimate.high, "recommended asking price uses guide upper range");
 
 /* ---- corner lot toggle ---- */
 let rc = core.computeEstimate(config, index, balayan, {

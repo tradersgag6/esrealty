@@ -114,7 +114,7 @@ const SCORE_KEYS = [
 function sanitizeEstimate(raw: any): any {
   if (!raw || typeof raw !== "object") return null;
   const out: Record<string, unknown> = {};
-  const numberKeys = ["total", "marketGuideEstimate", "low", "high", "perSqm", "birZonalRatePerSqm", "birZonalValue", "landValue", "improvement", "area", "floorArea", "landPerSqm", "salePrice"];
+  const numberKeys = ["total", "marketGuideEstimate", "recommendedAskingPrice", "low", "high", "perSqm", "birZonalRatePerSqm", "birZonalValue", "landValue", "improvement", "area", "floorArea", "landPerSqm", "salePrice"];
   for (const k of numberKeys) {
     if (k in raw) { const n = Number(raw[k]); if (isFinite(n)) out[k] = Math.round(n * 100) / 100; }
   }
@@ -297,8 +297,10 @@ async function buildPdf(p: any) {
     if (hasMarketGuide) {
       line("ES Realty market guide", moneyPdf(estimate.marketGuideEstimate));
       line("Indicative range", moneyPdf(estimate.low) + " - " + moneyPdf(estimate.high));
+      line("Recommended asking price", moneyPdf(estimate.recommendedAskingPrice || estimate.high));
     } else {
       line("Market guide", "Pending comparable evidence");
+      line("Recommended asking price", "Pending comparable evidence");
     }
     line("BIR rate per sqm", moneyPdf(estimate.birZonalRatePerSqm || estimate.perSqm) + " on " + num(estimate.area) + " sqm");
     line("Land component", moneyPdf(estimate.landValue || estimate.birZonalValue));
@@ -348,7 +350,7 @@ function emailHtml(p: any) {
     ["Property type", esc(property.typeLabel || property.type || "—")],
     ["Area", esc((num(property.area) || "—") + " sqm") + (property.kind === "built" ? " · " + esc((num(property.floorArea) || "auto") + " sqm floor") : "")],
     ["Location", esc([location.town, location.barangay, location.address].filter(Boolean).join(" · ") || "Pinned location")],
-    ["Official BIR / market guide", hasMarketGuide ? esc(money(estimate.marketGuideEstimate)) + " (" + esc(money(estimate.low)) + "–" + esc(money(estimate.high)) + ")" : (estimate.birZonalValue ? esc(money(estimate.birZonalValue)) + " · market guide pending comparables" : "Not estimated")],
+    ["Official BIR / market guide", hasMarketGuide ? esc(money(estimate.marketGuideEstimate)) + " (" + esc(money(estimate.low)) + "–" + esc(money(estimate.high)) + ") · asking " + esc(money(estimate.recommendedAskingPrice || estimate.high)) : (estimate.birZonalValue ? esc(money(estimate.birZonalValue)) + " · market guide and asking price pending comparables" : "Not estimated")],
   ].map((r) => "<tr><td style='padding:6px 12px;font-size:13px;color:#5f6771'>" + r[0] + "</td><td style='padding:6px 12px;font-size:13px;font-weight:700;color:#1e2a3a'>" + r[1] + "</td></tr>").join("");
   return [
     '<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px">',

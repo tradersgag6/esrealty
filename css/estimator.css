@@ -292,6 +292,13 @@
 .sf-est-total-label { margin: -10px 0 10px; color: #5f6771; font-size: 12px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
 .sf-est-guide-unavailable { display: grid; gap: 5px; margin: 2px 0 12px; padding: 14px 16px; border: 1px dashed #c9ccce; border-radius: 8px; background: #fafafa8f; color: #4f5963; font-size: 12px; line-height: 1.5; }
 .sf-est-guide-unavailable b { color: #1e2a3a; font-size: 13px; }
+.sf-est-asking { display: grid; gap: 3px; margin: 16px 0; padding: 15px 16px; border: 1px solid #e3d4bb; border-radius: 8px; background: #fff9ef; color: #76501f; }
+.sf-est-asking span { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.sf-est-asking b { color: #5c3d17; font-family: Georgia, serif; font-size: 25px; font-weight: 500; }
+.sf-est-asking small { color: #896c45; font-size: 11px; line-height: 1.45; }
+.sf-est-asking-muted { border-style: dashed; background: #fafafa; color: #5f6771; }
+.sf-est-asking-muted b { color: #4f5963; font-family: inherit; font-size: 15px; font-weight: 750; }
+.sf-est-asking-muted small { color: #6a737d; }
 .sf-est-bir-primary { display: grid; gap: 3px; margin-bottom: 18px; padding: 14px 16px; border: 1px solid #d8e5dc; border-radius: 8px; background: #f3faf4; color: #1f5d35; }
 .sf-est-bir-primary span { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .sf-est-bir-primary b { color: #174b2b; font-family: Georgia, serif; font-size: 26px; font-weight: 500; }
