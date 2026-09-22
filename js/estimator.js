@@ -843,6 +843,14 @@
     // that bindCard() never sees — per-node handlers would silently die there.
     if (!streetDelegationBound) {
       streetDelegationBound = true;
+      var keepClassAfterStreetChange = function () {
+        // A street switch changes which classifications apply. Keep the user's
+        // selection only if it is still offered — silently wiping it was the
+        // main reason "click estimate again" kept re-failing the gate.
+        var keep = est.classification;
+        var list = classCandidates();
+        est.classification = list.indexOf(keep) !== -1 ? keep : "";
+      };
       document.addEventListener("click", function (e) {
         var st = e.target.closest ? e.target.closest("[data-est-street]") : null;
         if (st) {
@@ -850,7 +858,7 @@
           var t = currentBarangay();
           est.streetLabel = t && t.streets && t.streets[est.streetKey] ? (t.streets[est.streetKey].name || est.streetKey) : est.streetKey;
           est.allOther = false;
-          est.classification = "";
+          keepClassAfterStreetChange();
           est.result = null;
           renderLayout();
           return;
@@ -860,11 +868,21 @@
           est.allOther = true;
           est.streetKey = "";
           est.streetLabel = "Street not listed";
-          est.classification = "";
+          keepClassAfterStreetChange();
           est.result = null;
           renderLayout();
         }
       });
+    }
+
+    if (!card.dataset.estInvalidBound) {
+      card.dataset.estInvalidBound = "1";
+      var clearInvalid = function () {
+        $qa(card, ".sf-est-invalid").forEach(function (el) { el.classList.remove("sf-est-invalid"); });
+        $qa(card, "[aria-invalid]").forEach(function (el) { el.removeAttribute("aria-invalid"); });
+      };
+      card.addEventListener("change", clearInvalid, true);
+      card.addEventListener("input", clearInvalid, true);
     }
 
     var classSel = $q(card, "[data-est-class]");
@@ -948,13 +966,23 @@
     });
   }
 
+  function missingScreen1Field() {
+    if (!est.municipality) return { field: "[data-est-muni]", msg: "Choose a municipality to continue." };
+    if (!est.barangay) return { field: "[data-est-barangay]", msg: "Choose a barangay to continue." };
+    if (!est.streetKey && !est.allOther) return { field: "[data-est-street-q]", msg: "Pick a street from the list, or choose “Street not listed” to continue." };
+    if (!est.classification) return { field: "[data-est-class]", msg: "Choose a BIR classification to continue." };
+    if (!(est.area > 0)) return { field: "[data-est-area]", msg: "Enter the lot area in sqm to continue." };
+    return null;
+  }
+
   function validScreen1() {
-    return est.municipality && est.barangay && est.classification && est.area > 0;
+    return !missingScreen1Field();
   }
 
   function showErr(card) {
     var btn = $q(card, "[data-est-next]");
     if (!btn) return;
+    var missing = missingScreen1Field();
     var msg = $q(card, "[data-est-next-hint]");
     if (!msg) {
       var p = document.createElement("p");
@@ -963,7 +991,19 @@
       btn.parentNode.insertBefore(p, btn);
       msg = p;
     }
-    msg.textContent = "Choose municipality, barangay, a street (or Street not listed), a classification and a lot area to continue.";
+    msg.textContent = missing ? missing.msg : "Complete all fields to continue.";
+    msg.classList.add("sf-est-err");
+    $qa(card, ".sf-est-invalid").forEach(function (el) { el.classList.remove("sf-est-invalid"); });
+    $qa(card, "[aria-invalid]").forEach(function (el) { el.removeAttribute("aria-invalid"); });
+    if (missing) {
+      var field = $q(card, missing.field);
+      var wrap = field ? field.closest(".sf-est-field") : null;
+      if (wrap) {
+        wrap.classList.add("sf-est-invalid");
+        if (field) field.setAttribute("aria-invalid", "true");
+        try { if (wrap.scrollIntoView) wrap.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {}
+      }
+    }
   }
 
   function runEstimate() {

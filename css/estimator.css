@@ -289,6 +289,9 @@
 
 .sf-est-next-hint.sf-est-err { color: #b03a2e; font-weight: 750; }
 
+.sf-est-field.sf-est-invalid select, .sf-est-field.sf-est-invalid input { border-color: #b03a2e; background: #fff7f6; }
+.sf-est-field.sf-est-invalid select:focus, .sf-est-field.sf-est-invalid input:focus { border-color: #b03a2e; box-shadow: 0 0 0 3px rgba(176, 58, 46, .15); }
+
 .sf-est-anim { display: grid; justify-items: center; gap: 18px; padding: 30px 10px; text-align: center; }
 .sf-est-anim-ring { display: grid; place-items: center; width: 190px; height: 190px; border: 3px solid #d8c39a; border-top-color: #a87942; border-radius: 50%; }
 .sf-est-anim-ring.spin { animation: sfEstSpin 1.1s linear infinite; }

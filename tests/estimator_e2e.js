@@ -58,7 +58,9 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
 
     q('[data-est-next]').click();
     await wait(60);
-    chk("gating-error-on-empty", !!q('[data-est-next-hint].sf-est-err') && /Choose municipality/.test(q('[data-est-next-hint]').textContent), "txt=" + ((q('[data-est-next-hint]') || { textContent: "" }).textContent));
+    const err0 = q('[data-est-next-hint]');
+    chk("gating-error-on-empty", !!err0 && /municipality/.test(err0.textContent), "txt=" + (err0 && err0.textContent));
+    chk("error-highlights-muni", !!q('[data-est-muni]') && q('[data-est-muni]').closest(".sf-est-field").classList.contains("sf-est-invalid"), "invalid-class");
 
     // --- depth 1: Balayan / BACLARAN / all street / CR / 200 / corner ---
     setValue('[data-est-muni]', "BALAYAN");
