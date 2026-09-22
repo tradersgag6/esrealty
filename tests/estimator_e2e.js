@@ -101,10 +101,10 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     const e1 = await estimateExpected(stateOpts());
     chk("total-matches-core", MONEY(rD1.total) === MONEY(e1.total), "dom=" + MONEY(rD1.total) + " core=" + MONEY(e1.total));
     chk("corner-note-shown", /corner lot \(\+2.5%\)/.test(document.body.innerText), "");
-    chk("range-shown", !!q('.sf-est-range') && /–/.test(q('.sf-est-range').textContent), "txt=" + ((q('.sf-est-range') || { textContent: "" }).textContent));
+    chk("range-or-bir-reference-shown", !!q('.sf-est-range') && (/–/.test(q('.sf-est-range').textContent) || /BIR reference/.test(q('.sf-est-range').textContent)), "txt=" + ((q('.sf-est-range') || { textContent: "" }).textContent));
     chk("per-sqm-shown", !!q('.sf-est-per') && /sqm/.test(q('.sf-est-per').textContent), "");
     chk("bir-value-shown-separately", !!q('.sf-est-bir-primary') && /Official BIR zonal value/.test(q('.sf-est-bir-primary').textContent), "");
-    chk("market-guide-labeled", !!q('.sf-est-total-label') && /Market Guide Estimate/.test(q('.sf-est-total-label').textContent), "");
+    chk("market-guide-evidence-gated", !!q('.sf-est-guide-unavailable') && /pending comparable evidence/i.test(q('.sf-est-guide-unavailable').textContent), "");
     chk("tax-base-disclosed", /Illustrative tax base/.test(document.body.innerText), "");
     chk("coverage-good-tag", !!q('.sf-est-tag-good') && /BIR street data/.test(q('.sf-est-tag-good').textContent), "");
     chk("report-14-sections", qa('.sf-est-rsec').length === 14, "n=" + qa('.sf-est-rsec').length);

@@ -290,6 +290,8 @@
 
 .sf-est-next-hint.sf-est-err { color: #b03a2e; font-weight: 750; }
 .sf-est-total-label { margin: -10px 0 10px; color: #5f6771; font-size: 12px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
+.sf-est-guide-unavailable { display: grid; gap: 5px; margin: 2px 0 12px; padding: 14px 16px; border: 1px dashed #c9ccce; border-radius: 8px; background: #fafafa8f; color: #4f5963; font-size: 12px; line-height: 1.5; }
+.sf-est-guide-unavailable b { color: #1e2a3a; font-size: 13px; }
 .sf-est-bir-primary { display: grid; gap: 3px; margin-bottom: 18px; padding: 14px 16px; border: 1px solid #d8e5dc; border-radius: 8px; background: #f3faf4; color: #1f5d35; }
 .sf-est-bir-primary span { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .sf-est-bir-primary b { color: #174b2b; font-family: Georgia, serif; font-size: 26px; font-weight: 500; }

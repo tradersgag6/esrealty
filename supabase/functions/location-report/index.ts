@@ -124,6 +124,7 @@ function sanitizeEstimate(raw: any): any {
   for (const k of stringKeys) {
     if (raw[k] != null) out[k] = str(raw[k], 120);
   }
+  if (raw.marketGuideAvailable != null) out.marketGuideAvailable = raw.marketGuideAvailable === true;
   if (raw.confidencePct != null) { const n = Number(raw.confidencePct); if (isFinite(n)) out.confidencePct = n; }
   if (raw.source && typeof raw.source === "object") {
     const s = raw.source as Record<string, unknown>;
@@ -290,11 +291,17 @@ async function buildPdf(p: any) {
   for (const [k, v] of scoreRows) line(k, String(v));
 
   heading("Estimated value");
-  if (estimate && estimate.total) {
-    line("Indicative total", moneyPdf(estimate.total));
-    line("Indicative range", moneyPdf(estimate.low) + " - " + moneyPdf(estimate.high));
-    line("Per sqm of lot", moneyPdf(estimate.perSqm) + " on " + num(estimate.area) + " sqm");
-    line("Land component", moneyPdf(estimate.landValue));
+  const hasMarketGuide = estimate.marketGuideAvailable !== false && Number(estimate.marketGuideEstimate) > 0;
+  if (estimate && (estimate.birZonalValue || estimate.total)) {
+    line("Official BIR zonal value", moneyPdf(estimate.birZonalValue || estimate.total));
+    if (hasMarketGuide) {
+      line("ES Realty market guide", moneyPdf(estimate.marketGuideEstimate));
+      line("Indicative range", moneyPdf(estimate.low) + " - " + moneyPdf(estimate.high));
+    } else {
+      line("Market guide", "Pending comparable evidence");
+    }
+    line("BIR rate per sqm", moneyPdf(estimate.birZonalRatePerSqm || estimate.perSqm) + " on " + num(estimate.area) + " sqm");
+    line("Land component", moneyPdf(estimate.landValue || estimate.birZonalValue));
     if (property.kind === "built") {
       line("Improvement component", moneyPdf(estimate.improvement) + " (" + num(estimate.depreciatedPct) + "% age-depreciated)");
     }
@@ -305,9 +312,9 @@ async function buildPdf(p: any) {
 
   y -= 10;
   ensure(40);
-  page.drawText("Tax context on the indicative total (guide only)", { x: 48, y, size: 10, font: bold, color: navy });
+  page.drawText("Tax context on the available reference (guide only)", { x: 48, y, size: 10, font: bold, color: navy });
   y -= 18;
-  const t = estimate && estimate.total;
+  const t = estimate && (hasMarketGuide ? estimate.marketGuideEstimate : estimate.birZonalValue);
   if (t && t > 0) {
     const cgt = Math.round(t * 0.06), dst = Math.round(t * 0.015), trans = Math.round(t * 0.005);
     line("Capital gains tax 6%", moneyPdf(cgt));
@@ -336,11 +343,12 @@ function emailHtml(p: any) {
   const property = report.property || {};
   const location = report.location || {};
   const estimate = report.estimate || {};
+  const hasMarketGuide = estimate.marketGuideAvailable !== false && Number(estimate.marketGuideEstimate) > 0;
   const rows = [
     ["Property type", esc(property.typeLabel || property.type || "—")],
     ["Area", esc((num(property.area) || "—") + " sqm") + (property.kind === "built" ? " · " + esc((num(property.floorArea) || "auto") + " sqm floor") : "")],
     ["Location", esc([location.town, location.barangay, location.address].filter(Boolean).join(" · ") || "Pinned location")],
-    ["Indicative value", estimate.total ? esc(money(estimate.total)) + " (" + esc(money(estimate.low)) + "–" + esc(money(estimate.high)) + ")" : "Not estimated"],
+    ["Official BIR / market guide", hasMarketGuide ? esc(money(estimate.marketGuideEstimate)) + " (" + esc(money(estimate.low)) + "–" + esc(money(estimate.high)) + ")" : (estimate.birZonalValue ? esc(money(estimate.birZonalValue)) + " · market guide pending comparables" : "Not estimated")],
   ].map((r) => "<tr><td style='padding:6px 12px;font-size:13px;color:#5f6771'>" + r[0] + "</td><td style='padding:6px 12px;font-size:13px;font-weight:700;color:#1e2a3a'>" + r[1] + "</td></tr>").join("");
   return [
     '<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px">',
@@ -423,7 +431,7 @@ Deno.serve(async (req) => {
     inquiryType === "professional-appraisal-request" ? "Professional appraisal consultation request" : "Location analysis full report request",
     location.town ? "Town: " + location.town + (location.barangay ? " · " + location.barangay : "") : "",
     location.address ? "Address: " + location.address : "",
-    estimate.marketGuideEstimate ? "Market guide: " + money(estimate.marketGuideEstimate) + " (" + money(estimate.low) + "–" + money(estimate.high) + ")" : (estimate.total ? "Indicative value: " + money(estimate.total) : "Not estimated"),
+    estimate.marketGuideAvailable !== false && estimate.marketGuideEstimate ? "Market guide: " + money(estimate.marketGuideEstimate) + " (" + money(estimate.low) + "–" + money(estimate.high) + ")" : (estimate.birZonalValue ? "BIR zonal: " + money(estimate.birZonalValue) + " · market guide pending comparable evidence" : "Not estimated"),
     estimate.birZonalValue ? "BIR zonal: " + money(estimate.birZonalValue) : "",
     body.purpose ? "Purpose: " + str(body.purpose, 80) : "",
     body.budget ? "Budget: " + str(body.budget, 80) : "",

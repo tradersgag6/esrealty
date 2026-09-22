@@ -287,7 +287,7 @@
       },
       factors: { proxyFactor: proxy, bandMid: band, regionalAdj: adj },
       marketGuide: {
-        value: total,
+        value: comps.count ? total : null,
         landValue: landValue,
         ratePerSqm: landPerSqm,
         sourceType: comps.count ? comps.sourceType : ((config.marketGuide && config.marketGuide.sourceType) || "ES Realty approved factors"),
@@ -300,7 +300,8 @@
       },
       birZonalRatePerSqm: birZonalRatePerSqm,
       birZonalValue: birZonalValue,
-      marketGuideEstimate: total,
+      marketGuideEstimate: comps.count ? total : null,
+      marketGuideAvailable: comps.count > 0,
       marketGuideRatePerSqm: perSqm,
       landPerSqm: landPerSqm,
       landValue: landValue,
@@ -332,7 +333,9 @@
   function taxMath(config, total, opts) {
     var t = (config && config.tax) || {};
     opts = opts || {};
-    var guide = Number(opts.marketGuideEstimate) > 0 ? Number(opts.marketGuideEstimate) : Number(total) || 0;
+    var guide = Object.prototype.hasOwnProperty.call(opts, "marketGuideEstimate")
+      ? (Number(opts.marketGuideEstimate) > 0 ? Number(opts.marketGuideEstimate) : 0)
+      : (Number(total) || 0);
     var zonal = Number(opts.birZonalValue) > 0 ? Number(opts.birZonalValue) : 0;
     var fair = Number(opts.fairMarketValue) > 0 ? Number(opts.fairMarketValue) : 0;
     var sale = Number(opts.salePrice) > 0 ? Number(opts.salePrice) : 0;
@@ -777,19 +780,24 @@
     var tax = taxMath(DATA.config, r.total, {
       salePrice: r.salePrice,
       birZonalValue: r.birZonalValue,
-      marketGuideEstimate: r.marketGuideEstimate
+      marketGuideEstimate: r.marketGuideAvailable ? r.marketGuideEstimate : 0
     });
     var comparableNote = r.marketGuide && r.marketGuide.comparableCount
       ? " Comparable evidence attached: " + r.marketGuide.comparableCount + " record(s) from " + r.marketGuide.sourceType + "."
-      : " No comparable listing evidence is attached to this estimate yet." + (r.marketGuide && r.marketGuide.capApplied ? " The market land guide is capped at " + r.marketGuide.capMultiple.toFixed(2) + "× the BIR rate until comparable evidence is available." : "");
+      : " No comparable listing evidence is attached to this estimate yet. No market guide amount is displayed until usable comparable evidence is available.";
     var s = [];
 
+    var guideValue = r.marketGuideAvailable ? '<div class="sf-est-total">' + money(r.marketGuideEstimate) + "</div>" +
+      '<p class="sf-est-total-label">ES Realty Market Guide Estimate</p>' :
+      '<div class="sf-est-guide-unavailable"><b>Market guide pending comparable evidence</b><span>We will not present an assumption-only figure as a market value. Request a professional appraisal or add comparable evidence when available.</span></div>';
+    var displayRange = r.marketGuideAvailable
+      ? '<p class="sf-est-range">Indicative range <b>' + money(r.low) + " – " + money(r.high) + "</b></p>"
+      : '<p class="sf-est-range">Official BIR reference rate: <b>' + money(r.birZonalRatePerSqm) + ' /sqm</b></p>';
+    var displayPerSqm = r.marketGuideAvailable ? r.perSqm : r.birZonalRatePerSqm;
     s.push({ t: "Estimate at a glance", h:
       '<div class="sf-est-bir-primary"><span>Official BIR zonal value</span><b>' + money(r.birZonalValue) + '</b><small>' + money(r.birZonalRatePerSqm) + '/sqm tax-floor reference</small></div>' +
-      '<div class="sf-est-total">' + money(r.marketGuideEstimate) + "</div>" +
-      '<p class="sf-est-total-label">ES Realty Market Guide Estimate' + (r.marketGuide && r.marketGuide.capApplied ? ' · capped without comparables' : '') + '</p>' +
-      '<p class="sf-est-range">Indicative range <b>' + money(r.low) + " – " + money(r.high) + "</b></p>" +
-      '<p class="sf-est-per">≈ ' + money(r.perSqm) + " /sqm of lot on " + fmt(r.area) + " sqm" + (r.kind && r.type === "house_lot" ? " · " + fmt(r.floorArea) + " sqm floor area" : "") + "</p>" +
+      guideValue + displayRange +
+      '<p class="sf-est-per">≈ ' + money(displayPerSqm) + " /sqm of lot on " + fmt(r.area) + " sqm" + (r.kind && r.type === "house_lot" ? " · " + fmt(r.floorArea) + " sqm floor area" : "") + "</p>" +
       '<p class="sf-est-rdp">The BIR figure is official reference data. The ES Realty guide is an indicative market estimate and is not a certified appraisal.</p>' });
 
     s.push({ t: "The property", h:
@@ -837,9 +845,10 @@
       s.push({ t: "House value", h: "<p class=\"sf-est-rdp\">Vacant lot — valued on land only; no improvement included in this estimate.</p>" });
     }
 
-    s.push({ t: "Total estimate and range", h:
-      "<p class=\"sf-est-rdp\"><b>" + money(r.marketGuideEstimate) + "</b> · range <b>" + money(r.low) + " – " + money(r.high) +
-      "</b> (" + Math.round(r.rangePct * 100) + "% guide range based on BIR data coverage). ≈ <b>" + money(r.perSqm) + "</b>/sqm.</p>" });
+    s.push({ t: "Total estimate and range", h: r.marketGuideAvailable
+      ? "<p class=\"sf-est-rdp\"><b>" + money(r.marketGuideEstimate) + "</b> · range <b>" + money(r.low) + " – " + money(r.high) +
+        "</b> (" + Math.round(r.rangePct * 100) + "% guide range based on BIR data coverage). ≈ <b>" + money(r.perSqm) + "</b>/sqm.</p>"
+      : '<p class="sf-est-rdp"><b>' + money(r.birZonalValue) + '</b> official BIR land reference. A market guide amount will be shown only after usable comparable evidence is attached.</p>' });
 
     s.push({ t: "Coverage and limitations", h:
       "<p class=\"sf-est-rdp\">The BIR figure is matched street-by-street; where a street has no listed rate for a classification the engine falls back to the barangay all-other-streets rate, then municipality and province medians. The market guide currently uses approved ES Realty factors." + comparableNote + " Rows the BIR masked as “same as above” were resolved only when a municipality-wide rate existed — never guessed.</p>" });
@@ -915,13 +924,14 @@
 
   function leadBlock(r) {
     var out = '<div class="sf-est-lead" data-est-lead>';
+    var leadValue = r.marketGuideAvailable ? "market guide " + money(r.marketGuideEstimate) : "BIR reference " + money(r.birZonalValue);
     out += '<div class="sf-est-lead-ctas">' +
       '<button type="button" class="sf-est-lead-cta" data-est-lead-open>Email me this report →</button>' +
       '<button type="button" class="sf-est-lead-cta sf-est-lead-secondary" data-est-appraisal-open>Request professional appraisal →</button></div>';
     if (est.leadOpen) {
       out += '<form class="sf-est-lead-form" data-est-lead-form>' +
         "<h3>" + (est.appraisalRequested ? "Request a professional appraisal consultation" : "Get your report, verified") + "</h3>" +
-        '<p class="sf-est-lead-ctx">For: <b>' + esc(est.municipality + " · " + est.barangay + (est.streetLabel && !est.allOther ? " · " + est.streetLabel : "")) + "</b> · market guide " + money(r.marketGuideEstimate) + ".</p>" +
+        '<p class="sf-est-lead-ctx">For: <b>' + esc(est.municipality + " · " + est.barangay + (est.streetLabel && !est.allOther ? " · " + est.streetLabel : "")) + "</b> · " + leadValue + ".</p>" +
         '<div class="sf-est-lead-grid">' +
         '<label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label>' +
         '<label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label>' +
@@ -1274,7 +1284,7 @@
       setTimeout(function () { est.screen = 4; renderLayout(); }, 900);
       return;
     }
-    var target = est.result.total;
+    var target = est.result.marketGuideAvailable ? est.result.marketGuideEstimate : est.result.birZonalValue;
     var t0 = performance ? performance.now() : Date.now();
     var dur = 1500;
     function frame(t) {
@@ -1302,7 +1312,7 @@
       municipality: r.municipality, barangay: r.barangay, street: r.streetName || "Street not listed",
       classification: r.classification, classificationLabel: r.classificationLabel,
       use: r.use, coverage: r.coverage, sourceLevel: r.source.level, dataCoveragePct: r.source.pct,
-      total: r.total, marketGuideEstimate: r.marketGuideEstimate, low: r.low, high: r.high, perSqm: r.perSqm,
+      total: r.total, marketGuideEstimate: r.marketGuideEstimate, marketGuideAvailable: r.marketGuideAvailable, low: r.low, high: r.high, perSqm: r.perSqm,
       birZonalRatePerSqm: r.birZonalRatePerSqm, birZonalValue: r.birZonalValue,
       landValue: r.landValue, improvement: r.improvement, area: r.area, salePrice: r.salePrice,
       marketGuide: r.marketGuide,
@@ -1327,7 +1337,7 @@
     var message = ["Official BIR schedule estimate request"];
     message.push("Location: " + est.municipality + (est.barangay ? " · " + est.barangay : ""));
     message.push("Street: " + (est.streetLabel && !est.allOther ? est.streetLabel : "Street not listed"));
-    if (snap) message.push("Market guide: " + money(snap.marketGuideEstimate) + " (" + money(snap.low) + "–" + money(snap.high) + ") · BIR zonal " + money(snap.birZonalValue) + " · " + (snap.typeLabel || snap.type) + " · " + fmt(snap.area) + " sqm · data coverage " + Math.round(snap.dataCoveragePct * 100) + "%");
+    if (snap) message.push((snap.marketGuideAvailable ? "Market guide: " + money(snap.marketGuideEstimate) + " (" + money(snap.low) + "–" + money(snap.high) + ")" : "Market guide pending comparable evidence") + " · BIR zonal " + money(snap.birZonalValue) + " · " + (snap.typeLabel || snap.type) + " · " + fmt(snap.area) + " sqm · data coverage " + Math.round(snap.dataCoveragePct * 100) + "%");
     var notes = data.get("message");
     if (notes) message.push("Notes: " + notes);
     var payload = {
