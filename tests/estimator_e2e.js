@@ -105,7 +105,7 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     chk("per-sqm-shown", !!q('.sf-est-per') && /sqm/.test(q('.sf-est-per').textContent), "");
     chk("bir-value-shown-separately", !!q('.sf-est-bir-primary') && /Official BIR zonal value/.test(q('.sf-est-bir-primary').textContent), "");
     chk("market-guide-evidence-gated", !!q('.sf-est-guide-unavailable') && /pending comparable evidence/i.test(q('.sf-est-guide-unavailable').textContent), "");
-    chk("asking-price-evidence-gated", !!q('.sf-est-asking-muted') && /Pending comparables/.test(q('.sf-est-asking-muted').textContent), "");
+    chk("asking-price-value-shown", !!q('.sf-est-asking') && !/Pending comparables/.test(q('.sf-est-asking').textContent) && /₱/.test(q('.sf-est-asking').textContent), "");
     chk("tax-base-disclosed", /Illustrative tax base/.test(document.body.innerText), "");
     chk("coverage-good-tag", !!q('.sf-est-tag-good') && /BIR street data/.test(q('.sf-est-tag-good').textContent), "");
     chk("report-14-sections", qa('.sf-est-rsec').length === 14, "n=" + qa('.sf-est-rsec').length);

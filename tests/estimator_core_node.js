@@ -41,7 +41,7 @@ eq(r.high, 1837500, "cr high ±5%");
 eq(r.perSqm, 8750, "cr perSqm");
 eq(r.marketGuideEstimate, null, "market guide stays unavailable without comparables");
 eq(r.marketGuideAvailable, false, "market guide availability requires comparables");
-eq(r.recommendedAskingPrice, null, "asking price stays unavailable without comparables");
+eq(r.recommendedAskingPrice, r.high, "asking price uses capped guide upper range without comparables");
 eq(r.marketGuide.status, "assumption-backed-capped", "market guide source status");
 eq(r.marketGuide.capApplied, true, "market guide cap applied without comparables");
 eq(core.integrityCheck(r).ok, true, "cr reconciles");
