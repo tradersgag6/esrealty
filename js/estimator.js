@@ -681,10 +681,10 @@
         ], "stage") + "</label>";
     }
 
-    out += '<label class="sf-est-field sf-est-span2">Property type<span>Vacant land, or land with a house?</span>' +
+    out += '<label class="sf-est-field sf-est-span2">Property type<span>Vacant lot, or house &amp; lot?</span>' +
       chipRow([
         { label: "Vacant lot", value: "vacant_lot", active: est.type === "vacant_lot" },
-        { label: "House &amp; lot", value: "house_lot", active: est.type === "house_lot" }
+        { label: "House & lot", value: "house_lot", active: est.type === "house_lot" }
       ], "type") + "</label>";
 
     out += '<label class="sf-est-field">Municipality<span>Which municipality in Batangas?</span>' +
