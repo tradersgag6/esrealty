@@ -743,8 +743,8 @@
       '<select data-est-barangay>' + barangayOptions() + "</select></label>";
 
     out += '<div class="sf-est-field sf-est-span2">Street<span>Search the BIR street list, or choose “Street not listed”.</span>' +
-      '<input data-est-street-q type="search" placeholder="Type to search streets…" autocomplete="off" aria-label="Search the BIR street list" value="' + esc(est.allOther ? "" : est.streetLabel) + '">' +
-      '<div class="sf-est-street-list" data-est-street-list></div></div>';
+      '<input data-est-street-q type="search" placeholder="Type to search streets…" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="sf-est-street-options" aria-expanded="false" aria-label="Search the BIR street list" value="' + esc(est.allOther ? "" : est.streetLabel) + '">' +
+      '<div id="sf-est-street-options" class="sf-est-street-list" data-est-street-list role="listbox" aria-label="BIR streets"></div></div>';
 
     out += '<label class="sf-est-field sf-est-span2">BIR classification<span>Choose a land-use category, then the exact BIR code</span>' +
       '<select data-est-class-use aria-label="BIR classification category">' + classUseOptions() + "</select>" +
@@ -1075,9 +1075,9 @@
       return String(t.name).toLowerCase().indexOf(f) !== -1;
     }).slice(0, 50).forEach(function (t) {
       var active = t.key === est.streetKey && !est.allOther;
-       out += '<button type="button" class="sf-est-street-opt' + (active ? " active" : "") + '" aria-selected="' + (active ? "true" : "false") + '" data-est-street="' + esc(t.key) + '">' + esc(t.name) + "</button>";
+       out += '<button id="sf-est-street-option-' + esc(t.key).replace(/[^A-Za-z0-9_-]/g, "-") + '" type="button" role="option" class="sf-est-street-opt' + (active ? " active" : "") + '" aria-selected="' + (active ? "true" : "false") + '" data-est-street="' + esc(t.key) + '">' + esc(t.name) + "</button>";
     });
-    out += '<button type="button" class="sf-est-street-opt sf-est-street-all' + (est.allOther ? " active" : "") + '" aria-selected="' + (est.allOther ? "true" : "false") + '" data-est-street-all>Street not listed — use ALL OTHER STREETS rate →</button>';
+    out += '<button id="sf-est-street-option-all-other" type="button" role="option" class="sf-est-street-opt sf-est-street-all' + (est.allOther ? " active" : "") + '" aria-selected="' + (est.allOther ? "true" : "false") + '" data-est-street-all>Street not listed — use ALL OTHER STREETS rate →</button>';
     return out;
   }
 
@@ -1149,12 +1149,48 @@
     if (sq) {
       var listEl = $q(card, "[data-est-street-list]");
       var refreshList = function () {
-        if (listEl) listEl.innerHTML = streetListHtml(sq.value);
+        if (listEl) {
+          listEl.innerHTML = streetListHtml(sq.value);
+          sq.setAttribute("aria-expanded", "true");
+        }
       };
       sq.addEventListener("input", refreshList);
-      sq.addEventListener("focus", refreshList);
+      sq.addEventListener("focus", function () {
+        if (sq.hasAttribute("data-street-selection-focus")) {
+          sq.removeAttribute("data-street-selection-focus");
+          return;
+        }
+        refreshList();
+      });
       sq.addEventListener("blur", function () {
-        setTimeout(function () { if (listEl) listEl.innerHTML = ""; }, 150);
+        setTimeout(function () {
+          if (listEl) listEl.innerHTML = "";
+          sq.setAttribute("aria-expanded", "false");
+          sq.removeAttribute("aria-activedescendant");
+        }, 150);
+      });
+      sq.addEventListener("keydown", function (e) {
+        var options = listEl ? $qa(listEl, '[role="option"]') : [];
+        if (e.key === "Escape") {
+          if (listEl) listEl.innerHTML = "";
+          sq.setAttribute("aria-expanded", "false");
+          sq.removeAttribute("aria-activedescendant");
+          return;
+        }
+        if (!options.length || (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "Enter")) return;
+        var active = options.findIndex(function (option) { return option.classList.contains("keyboard-focus"); });
+        if (e.key === "Enter") {
+          if (active < 0 && options.length === 1) active = 0;
+          if (active >= 0) { e.preventDefault(); options[active].click(); }
+          return;
+        }
+        e.preventDefault();
+        active = e.key === "ArrowDown" ? active + 1 : active - 1;
+        if (active < 0) active = options.length - 1;
+        if (active >= options.length) active = 0;
+        options.forEach(function (option, index) { option.classList.toggle("keyboard-focus", index === active); });
+        sq.setAttribute("aria-activedescendant", options[active].id);
+        try { options[active].scrollIntoView({ block: "nearest" }); } catch (err) {}
       });
       // Keep the street picker closed until the user focuses or searches it.
       if (listEl) listEl.innerHTML = "";
@@ -1185,9 +1221,9 @@
           est.allOther = false;
           keepClassAfterStreetChange();
           est.result = null;
-          renderLayout();
-          var selectedInput = $q(getCard(), "[data-est-street-q]");
-          if (selectedInput) { selectedInput.focus(); selectedInput.select(); }
+           renderLayout();
+           var selectedInput = $q(getCard(), "[data-est-street-q]");
+           if (selectedInput) { selectedInput.setAttribute("data-street-selection-focus", ""); selectedInput.focus(); selectedInput.select(); }
           return;
         }
         var all = e.target.closest ? e.target.closest("[data-est-street-all]") : null;
@@ -1198,9 +1234,9 @@
           est.streetLabel = "Street not listed";
           keepClassAfterStreetChange();
           est.result = null;
-          renderLayout();
-          var allInput = $q(getCard(), "[data-est-street-q]");
-          if (allInput) { allInput.focus(); allInput.select(); }
+           renderLayout();
+           var allInput = $q(getCard(), "[data-est-street-q]");
+           if (allInput) { allInput.setAttribute("data-street-selection-focus", ""); allInput.focus(); allInput.select(); }
         }
       });
     }

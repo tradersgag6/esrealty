@@ -78,7 +78,7 @@ function chooseOwnershipNotSure() {
     await waitFor(() => qa('[data-est-barangay] option').some(o => o.value === "BACLARAN"), 60, ESP);
     chk("barangay-options-loaded", qa('[data-est-barangay] option').length >= 2, "n=" + qa('[data-est-barangay] option').length);
     setValue('[data-est-barangay]', "BACLARAN");
-    q('[data-est-street-q]').focus();
+    setInput('[data-est-street-q]', "all street");
     await waitFor(() => qa('[data-est-street]').length > 0, 30, ESP);
     chk("street-list-populated", qa('[data-est-street]').length > 0, "n=" + qa('[data-est-street]').length);
     chk("street-not-listed-button", !!q('[data-est-screen="1"] [data-est-street-all]'), "");
@@ -92,6 +92,13 @@ function chooseOwnershipNotSure() {
     (filtered.find(b => b.getAttribute("data-est-street") === streetKey) || qa('[data-est-street]')[0]).click();
     await wait(120);
     chk("street-clicked-from-search-selects", !!q('[data-est-street-q]') && String(q('[data-est-street-q]').value).toLowerCase() === "all street" && !!estApi()._state().streetKey && !estApi()._state().allOther, "value=" + ((q('[data-est-street-q]') || {}).value || ""));
+    setInput('[data-est-street-q]', "all street");
+    chk("street-list-has-combobox-semantics", q('[data-est-street-q]').getAttribute("aria-controls") === "sf-est-street-options", "");
+    q('[data-est-street-q]').dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    chk("street-keyboard-highlight", !!q('.sf-est-street-opt.keyboard-focus') && !!q('[data-est-street-q]').getAttribute("aria-activedescendant"), "");
+    q('[data-est-street-q]').dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    await wait(80);
+    chk("street-keyboard-selects", !!estApi()._state().streetKey && !estApi()._state().allOther, "");
     setValue('[data-est-class-use]', "commercial");
     chk("class-options-from-street", Array.from(q('[data-est-class]').options).some(o => o.value === "CR"), "opts=" + q('[data-est-class]').options.length);
     setValue('[data-est-class]', "CR");

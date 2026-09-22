@@ -283,6 +283,7 @@
 .sf-est-street-list { display: grid; gap: 6px; max-height: 220px; overflow: auto; padding: 10px; border: 1px solid #d8dbdc; border-radius: 6px; background: #fff; }
 .sf-est-street-opt { width: 100%; text-align: left; border: 0; background: transparent; border-radius: 5px; padding: 8px 10px; color: #1b2027; font-size: 12px; cursor: pointer; }
 .sf-est-street-opt:hover { background: #f4f2eb; }
+.sf-est-street-opt:focus-visible, .sf-est-street-opt.keyboard-focus { background: #e8eef2; color: #1e2a3a; outline: 3px solid rgba(44, 60, 80, .3); outline-offset: -2px; }
 .sf-est-street-opt.active { background: #1e2a3a; color: #fff; }
 .sf-est-street-all { border-top: 1px dashed #d8c39a; border-radius: 0; margin-top: 4px; padding-top: 10px; color: #7d531d; font-weight: 750; }
 .sf-est-street-empty { margin: 0; padding: 8px 2px; color: #5f6771; font-size: 12px; }
