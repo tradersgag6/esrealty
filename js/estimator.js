@@ -762,7 +762,7 @@
 
     out += '<div class="sf-est-actions">' +
       '<span class="sf-est-next-hint">We use the official BIR zonal schedule for ' + (est.municipality || "your municipality") + ".</span>" +
-      '<button type="button" class="sf-est-next" data-est-next>' + (est.type === "house_lot" ? "Continue to the house →" : "See my estimate →") + "</button></div>";
+      '<button type="button" class="sf-est-next" data-est-next>' + (est.type === "house_lot" ? "Continue to the house →" : "Continue to property details →") + "</button></div>";
     return out + "</div>";
   }
 
@@ -847,8 +847,8 @@
     out += ownershipQuestions();
     out += '<div class="sf-est-subhead">Site review factors</div>';
     out += reviewFactorBlock();
-    out += '<div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-prev>← Back</button>' +
-      '<button type="button" class="sf-est-next" data-est-next>See my estimate →</button></div>';
+    out += '<div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-prev>← Back to property details</button>' +
+      '<button type="button" class="sf-est-next" data-est-next>Calculate my estimate →</button></div>';
     return out + "</div>";
   }
 
@@ -1006,7 +1006,7 @@
       '<span class="sf-est-tag sf-est-tag-unavailable">Unavailable</span>' +
       "<h3>No estimate available yet" + (est.municipality ? " for " + esc(est.municipality) : "") + "</h3>" +
       "<p>" + esc(unavailableReason(r.reason)) + "</p>" +
-      '<div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-prev>← Back to inputs</button></div>' +
+      '<div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-prev>← Back to property details</button></div>' +
       "</div>";
   }
 
@@ -1066,6 +1066,15 @@
     if (!card || !card.scrollIntoView) return;
     var screen = card.querySelector('[data-est-screen="' + est.screen + '"]') || card;
     screen.scrollIntoView({ behavior: "auto", block: "center" });
+  }
+
+  function revealLeadForm() {
+    var card = getCard();
+    var form = card && card.querySelector("[data-est-lead-form]");
+    if (!form) return;
+    form.scrollIntoView({ behavior: "auto", block: "center" });
+    var first = form.querySelector("input, textarea, select");
+    if (first && first.focus) first.focus();
   }
 
   function $q(card, sel) { return card ? card.querySelector(sel) : null; }
@@ -1336,8 +1345,9 @@
 
     var prev = $q(card, "[data-est-prev]");
     if (prev) prev.addEventListener("click", function () {
-      est.screen = 2;
+      est.screen = 1;
       renderLayout();
+      revealEstimatorScreen();
     });
 
     var next = $q(card, "[data-est-next]");
@@ -1360,12 +1370,14 @@
     if (leadBtn) leadBtn.addEventListener("click", function () {
       est.leadOpen = true;
       renderLayout();
+      revealLeadForm();
     });
     var appraisalBtn = $q(card, "[data-est-appraisal-open]");
     if (appraisalBtn) appraisalBtn.addEventListener("click", function () {
       est.leadOpen = true;
       est.appraisalRequested = true;
       renderLayout();
+      revealLeadForm();
     });
     var leadForm = $q(card, "[data-est-lead-form]");
     if (leadForm) leadForm.addEventListener("submit", function (e) {

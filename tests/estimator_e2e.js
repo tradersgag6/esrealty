@@ -140,12 +140,18 @@ function chooseOwnershipNotSure() {
     chk("report-16-sections", qa('.sf-est-rsec').length === 16, "n=" + qa('.sf-est-rsec').length);
     chk("report-sections-are-accessible", qa('.sf-est-rsec details').length === 0 && qa('.sf-est-rsec > summary').length === 16, "summaries=" + qa('.sf-est-rsec > summary').length);
     chk("report-summary-priority", qa('.sf-est-rsec[open]').length >= 3, "open=" + qa('.sf-est-rsec[open]').length);
+    q('[data-est-prev]').click();
+    await wait(40);
+    chk("report-adjust-inputs-returns-to-start", !!q('[data-est-screen="1"]'), "");
+    estApi().debug.render(4);
+    await wait(40);
 
     // lead block + submit (fallback to contact stub, no email -> "saved")
     chk("lead-block-present", !!q('[data-est-lead]'), "");
     q('[data-est-appraisal-open]').click();
     await wait(40);
     chk("appraisal-lead-form-opens", !!q('[data-est-lead-form]') && /professional appraisal/i.test(q('[data-est-lead-form] h3').textContent), "");
+    chk("appraisal-lead-form-focuses", !!q('[data-est-lead-form] input:focus'), "");
     const form = q('[data-est-lead-form]');
     form.querySelector('[name=name]').value = "E2E Tester";
     form.querySelector('[name=email]').value = "e2e@example.com";
