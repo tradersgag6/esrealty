@@ -16,7 +16,7 @@
     "barangays": 1085,
     "streets": 3710,
     "classifications": 38,
-    "calculationVersion": "2026.09.1",
+    "calculationVersion": "2026.09.2",
     "dataVersion": "bir-2022-rdo58-59"
   },
   "note": "BIR-backed Batangas dataset valid; deterministic and reconcilable."

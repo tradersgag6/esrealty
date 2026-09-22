@@ -114,7 +114,7 @@ const SCORE_KEYS = [
 function sanitizeEstimate(raw: any): any {
   if (!raw || typeof raw !== "object") return null;
   const out: Record<string, unknown> = {};
-  const numberKeys = ["total", "low", "high", "perSqm", "landValue", "improvement", "area", "floorArea", "landPerSqm"];
+  const numberKeys = ["total", "marketGuideEstimate", "low", "high", "perSqm", "birZonalRatePerSqm", "birZonalValue", "landValue", "improvement", "area", "floorArea", "landPerSqm", "salePrice"];
   for (const k of numberKeys) {
     if (k in raw) { const n = Number(raw[k]); if (isFinite(n)) out[k] = Math.round(n * 100) / 100; }
   }
@@ -133,6 +133,14 @@ function sanitizeEstimate(raw: any): any {
       pct: Number.isFinite(Number(s.pct)) ? Number(s.pct) : null,
       label: str(s.label, 160),
       count: Number.isFinite(Number(s.count)) ? Number(s.count) : null,
+    };
+  }
+  if (raw.marketGuide && typeof raw.marketGuide === "object") {
+    const m = raw.marketGuide as Record<string, unknown>;
+    out.marketGuide = {
+      sourceType: str(m.sourceType, 120),
+      comparableCount: Number.isFinite(Number(m.comparableCount)) ? Number(m.comparableCount) : 0,
+      status: str(m.status, 80),
     };
   }
   return out;
@@ -408,11 +416,14 @@ Deno.serve(async (req) => {
   const report = sanitizeReport(body.report);
   const location = report.location || {};
   const estimate = report.estimate || {};
+  const inquiryType = str(body.inquiry_type, 80) === "professional-appraisal-request"
+    ? "professional-appraisal-request" : "location-analysis";
   const summary = [
-    "Location analysis full report request",
+    inquiryType === "professional-appraisal-request" ? "Professional appraisal consultation request" : "Location analysis full report request",
     location.town ? "Town: " + location.town + (location.barangay ? " · " + location.barangay : "") : "",
     location.address ? "Address: " + location.address : "",
-    estimate.total ? "Indicative value: " + money(estimate.total) + " (" + money(estimate.low) + "–" + money(estimate.high) + ")" : "Not estimated",
+    estimate.marketGuideEstimate ? "Market guide: " + money(estimate.marketGuideEstimate) + " (" + money(estimate.low) + "–" + money(estimate.high) + ")" : (estimate.total ? "Indicative value: " + money(estimate.total) : "Not estimated"),
+    estimate.birZonalValue ? "BIR zonal: " + money(estimate.birZonalValue) : "",
     body.purpose ? "Purpose: " + str(body.purpose, 80) : "",
     body.budget ? "Budget: " + str(body.budget, 80) : "",
     body.timeline ? "Timeline: " + str(body.timeline, 80) : "",
@@ -440,7 +451,7 @@ Deno.serve(async (req) => {
       status: "new",
       consent: true,
       origin: "storefront",
-      channel: "location-analysis",
+      channel: inquiryType,
       propertyInterest: report.property?.typeLabel || "Location analysis report",
       notes: summary,
       assignedTo: "",
@@ -448,7 +459,7 @@ Deno.serve(async (req) => {
       createdBy: null,
       createdAt: now,
       updatedAt: now,
-      activity: [{ date: now, text: "Full location analysis report requested from the website." }],
+      activity: [{ date: now, text: inquiryType === "professional-appraisal-request" ? "Professional appraisal consultation requested from the website." : "Full location analysis report requested from the website." }],
       fullReport: report,
       idempotencyKey,
     },
@@ -458,7 +469,7 @@ Deno.serve(async (req) => {
 
   try {
     await admin.from("storefront_inquiries").insert({
-      inquiry_type: "location-analysis",
+      inquiry_type: inquiryType,
       user_id: null,
       full_name: fullName,
       phone: str(body.phone, 50),

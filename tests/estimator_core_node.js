@@ -32,11 +32,15 @@ eq(r.use, "commercial", "cr use group");
 eq(r.source.depth, 1, "cr depth 1");
 eq(r.source.level, "street", "cr level street");
 eq(r.reference.value, 3500, "cr reference 3500");
+eq(r.birZonalRatePerSqm, 3500, "cr BIR zonal rate remains official base");
+eq(r.birZonalValue, 700000, "cr BIR zonal value stays separate");
 eq(r.landPerSqm, 14875, "cr landPerSqm = 3500 x 1.7 x 2.5 x 1.0");
 eq(r.landValue, 2975000, "cr landValue");
 eq(r.low, 2826250, "cr low ±5%");
 eq(r.high, 3123750, "cr high ±5%");
 eq(r.perSqm, 14875, "cr perSqm");
+eq(r.marketGuideEstimate, r.total, "market guide estimate equals guide total");
+eq(r.marketGuide.status, "assumption-backed", "market guide source status");
 eq(core.integrityCheck(r).ok, true, "cr reconciles");
 eq(r.calculationVersion, config.calculationVersion, "cr calc version stamped");
 eq(r.dataVersion, index.dataVersion, "cr data version stamped");
@@ -128,6 +132,20 @@ eq(tax.dst, 15000, "tax dst");
 eq(tax.transfer, 5000, "tax transfer");
 eq(tax.registration, 1000, "tax registration 0.1%");
 eq(tax.total, 81000, "tax total");
+eq(tax.base, 1000000, "tax fallback base uses guide total");
+eq(tax.baseBasis, "ES Realty market guide estimate (illustrative)", "tax fallback basis is disclosed");
+eq(tax.sellerCosts, 60000, "seller costs default to CGT");
+eq(tax.sellerNetProceeds, null, "seller net requires selling price");
+
+let saleTax = core.taxMath(config, 1000000, {
+  salePrice: 2000000,
+  birZonalValue: 700000,
+  marketGuideEstimate: 1000000
+});
+eq(saleTax.base, 2000000, "tax base uses highest selling price");
+eq(saleTax.baseBasis, "Selling price", "tax basis identifies selling price");
+eq(saleTax.cgt, 120000, "selling-price CGT");
+eq(saleTax.sellerNetProceeds, 1880000, "seller net proceeds after CGT");
 
 /* ---- determinism ---- */
 let r2 = core.computeEstimate(config, index, balayan, {

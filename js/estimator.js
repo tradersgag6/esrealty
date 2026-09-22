@@ -142,6 +142,8 @@
     var band = bandMid(cfg, use);
     var adj = regionalAdj(cfg);
     var base = hit.value;
+    var birZonalRatePerSqm = Math.round(base);
+    var birZonalValue = Math.round(birZonalRatePerSqm * area);
     var landPerSqm = Math.round(base * (1 + cornerPct) * proxy * band * adj);
     var landValue = Math.round(landPerSqm * area);
 
@@ -185,6 +187,8 @@
     var clsLabel = "";
     if (index.classifications && index.classifications[cls] != null) clsLabel = index.classifications[cls];
 
+    var salePrice = Number(opts && opts.salePrice);
+    salePrice = salePrice > 0 ? Math.round(salePrice) : 0;
     return {
       available: true,
       reason: "",
@@ -213,6 +217,18 @@
         rdo: muniRow.rdo
       },
       factors: { proxyFactor: proxy, bandMid: band, regionalAdj: adj },
+      marketGuide: {
+        value: total,
+        landValue: landValue,
+        ratePerSqm: landPerSqm,
+        sourceType: (config.marketGuide && config.marketGuide.sourceType) || "ES Realty approved factors",
+        comparableCount: 0,
+        status: "assumption-backed"
+      },
+      birZonalRatePerSqm: birZonalRatePerSqm,
+      birZonalValue: birZonalValue,
+      marketGuideEstimate: total,
+      marketGuideRatePerSqm: perSqm,
       landPerSqm: landPerSqm,
       landValue: landValue,
       area: area,
@@ -229,6 +245,7 @@
       rangePct: rangePct,
       low: low,
       high: high,
+      salePrice: salePrice,
       calculationVersion: cfgVersion(cfg),
       dataVersion: dataVersionOf(index),
       disclaimer: (cfg && cfg.disclaimer) || "",
@@ -238,13 +255,42 @@
     };
   }
 
-  function taxMath(config, total) {
+  function taxMath(config, total, opts) {
     var t = (config && config.tax) || {};
-    var cgt = Math.round((total || 0) * (t.cgtPct || 0.06));
-    var dst = Math.round((total || 0) * (t.dstPct || 0.015));
-    var transfer = Math.round((total || 0) * (t.transferPct || 0.005));
-    var reg = Math.round((total || 0) * (t.registrationPct || 0.001));
-    return { cgt: cgt, dst: dst, transfer: transfer, registration: reg, total: cgt + dst + transfer + reg };
+    opts = opts || {};
+    var guide = Number(opts.marketGuideEstimate) > 0 ? Number(opts.marketGuideEstimate) : Number(total) || 0;
+    var zonal = Number(opts.birZonalValue) > 0 ? Number(opts.birZonalValue) : 0;
+    var fair = Number(opts.fairMarketValue) > 0 ? Number(opts.fairMarketValue) : 0;
+    var sale = Number(opts.salePrice) > 0 ? Number(opts.salePrice) : 0;
+    var candidates = [
+      { value: sale, basis: "Selling price" },
+      { value: fair, basis: "Fair market value" },
+      { value: zonal, basis: "BIR zonal value" },
+      { value: guide, basis: "ES Realty market guide estimate (illustrative)" }
+    ].filter(function (x) { return x.value > 0; });
+    if (!candidates.length) candidates.push({ value: 0, basis: "No tax base available" });
+    var selected = candidates.reduce(function (best, item) {
+      return item.value > best.value ? item : best;
+    });
+    var base = Math.round(selected.value);
+    var cgt = Math.round(base * (t.cgtPct || 0.06));
+    var dst = Math.round(base * (t.dstPct || 0.015));
+    var transfer = Math.round(base * (t.transferPct || 0.005));
+    var reg = Math.round(base * (t.registrationPct || 0.001));
+    var sellerCosts = cgt;
+    var buyerCosts = dst + transfer + reg;
+    return {
+      base: base,
+      baseBasis: selected.basis,
+      cgt: cgt,
+      dst: dst,
+      transfer: transfer,
+      registration: reg,
+      sellerCosts: sellerCosts,
+      buyerCosts: buyerCosts,
+      sellerNetProceeds: sale > 0 ? sale - sellerCosts : null,
+      total: cgt + dst + transfer + reg
+    };
   }
 
   function integrityCheck(result) {
@@ -358,6 +404,7 @@
     allOther: false,
     classification: "",
     area: null,
+    salePrice: null,
     corner: false,
     floorArea: "",
     construction: "mixed_chb",
@@ -369,6 +416,7 @@
     roadAccess: "",
     frontage: "",
     result: null,
+    appraisalRequested: false,
     muniData: null,
     muniLoading: false
   };
@@ -507,6 +555,9 @@
     out += '<label class="sf-est-field">Lot area (sqm)<span>The total land area</span>' +
       '<input data-est-area type="number" min="20" max="100000" step="1" inputmode="decimal" placeholder="e.g. 200" value="' + esc(est.area != null ? est.area : "") + '"></label>';
 
+    out += '<label class="sf-est-field">Expected selling price <span>Optional — improves tax-base and net-proceeds estimates</span>' +
+      '<input data-est-sale-price type="number" min="0" max="1000000000" step="1000" inputmode="decimal" placeholder="e.g. 5000000" value="' + esc(est.salePrice != null ? est.salePrice : "") + '"></label>';
+
     out += '</div>';
     out += '<label class="sf-est-field sf-est-corner"><input type="checkbox" data-est-corner' + (est.corner ? " checked" : "") + ">" +
       '<span><b>Corner lot</b> — frontage on more than one road <small>(+2.5% value)</small></span></label>';
@@ -579,13 +630,19 @@
   }
 
   function reportSections(r) {
-    var tax = taxMath(DATA.config, r.total);
+    var tax = taxMath(DATA.config, r.total, {
+      salePrice: r.salePrice,
+      birZonalValue: r.birZonalValue,
+      marketGuideEstimate: r.marketGuideEstimate
+    });
     var s = [];
 
-    s.push({ t: "Estimate at a glance", h: 
-      '<div class="sf-est-total">' + money(r.total) + "</div>" +
+    s.push({ t: "Estimate at a glance", h:
+      '<div class="sf-est-total">' + money(r.marketGuideEstimate) + "</div>" +
+      '<p class="sf-est-total-label">ES Realty Market Guide Estimate</p>' +
       '<p class="sf-est-range">Indicative range <b>' + money(r.low) + " – " + money(r.high) + "</b></p>" +
-      '<p class="sf-est-per">≈ ' + money(r.perSqm) + " /sqm of lot on " + fmt(r.area) + " sqm" + (r.kind && r.type === "house_lot" ? " · " + fmt(r.floorArea) + " sqm floor area" : "") + "</p>" });
+      '<p class="sf-est-per">≈ ' + money(r.perSqm) + " /sqm of lot on " + fmt(r.area) + " sqm" + (r.kind && r.type === "house_lot" ? " · " + fmt(r.floorArea) + " sqm floor area" : "") + "</p>" +
+      '<p class="sf-est-rdp"><b>BIR zonal value:</b> ' + money(r.birZonalValue) + " (" + money(r.birZonalRatePerSqm) + "/sqm). This is separate from the ES Realty guide estimate.</p>" });
 
     s.push({ t: "The property", h:
       "<ul class=\"sf-est-rdl\">" +
@@ -605,7 +662,7 @@
       "<p class=\"sf-est-rdp\"><b>" + esc(r.classification + (r.classificationLabel ? " — " + r.classificationLabel : "")) + "</b>. Use group: " + esc(r.use) + ". Coverage: " + esc(r.coverage) + ".</p>" });
 
     s.push({ t: "How precise is this match?", h:
-      "<ul class=\"sf-est-rdl\"><li>Match confidence: <b>" + Math.round(r.source.pct * 100) + "%</b> — " + esc(r.source.label) + "</li>" +
+      "<ul class=\"sf-est-rdl\"><li>Data coverage: <b>" + Math.round(r.source.pct * 100) + "%</b> — " + esc(r.source.label) + "</li>" +
       (r.fallbackNote ? "<li>" + esc(r.fallbackNote) + "</li>" : "") + "</ul>" });
 
     s.push({ t: "Land value build-up", h:
@@ -632,16 +689,17 @@
     }
 
     s.push({ t: "Total estimate and range", h:
-      "<p class=\"sf-est-rdp\"><b>" + money(r.total) + "</b> · range <b>" + money(r.low) + " – " + money(r.high) +
-      "</b> (" + Math.round(r.rangePct * 100) + "% band by match confidence). ≈ <b>" + money(r.perSqm) + "</b>/sqm.</p>" });
+      "<p class=\"sf-est-rdp\"><b>" + money(r.marketGuideEstimate) + "</b> · range <b>" + money(r.low) + " – " + money(r.high) +
+      "</b> (" + Math.round(r.rangePct * 100) + "% guide range based on BIR data coverage). ≈ <b>" + money(r.perSqm) + "</b>/sqm.</p>" });
 
-    s.push({ t: "Confidence and limitations", h:
-      "<p class=\"sf-est-rdp\">The BIR figure is matched street-by-street; where a street has no listed rate for a classification the engine falls back to the barangay all-other-streets rate, then municipality and province medians, narrowing confidence accordingly. Rows the BIR masked as “same as above” were resolved only when a municipality-wide rate existed — never guessed.</p>" });
+    s.push({ t: "Coverage and limitations", h:
+      "<p class=\"sf-est-rdp\">The BIR figure is matched street-by-street; where a street has no listed rate for a classification the engine falls back to the barangay all-other-streets rate, then municipality and province medians. The market guide currently uses approved ES Realty factors; comparable listings are not yet attached to this estimate. Rows the BIR masked as “same as above” were resolved only when a municipality-wide rate existed — never guessed.</p>" });
 
-    s.push({ t: "Estimated transfer costs", h:
-      '<div class="sf-est-tax"><span>On a ' + money(r.total) + " sale you would roughly face:</span>" +
+    s.push({ t: "Estimated transfer costs and seller proceeds", h:
+      '<div class="sf-est-tax"><span>Illustrative tax base: <b>' + money(tax.base) + "</b> · " + esc(tax.baseBasis) + "</span>" +
       "<b>CGT 6% ≈ " + money(tax.cgt) + "</b><b>DST 1.5% ≈ " + money(tax.dst) + "</b>" +
       "<b>Transfer ~0.5% ≈ " + money(tax.transfer) + "</b><b>Registration ~0.1% ≈ " + money(tax.registration) + "</b></div>" +
+      '<p class="sf-est-rdp"><b>Illustrative seller costs:</b> ' + money(tax.sellerCosts) + (tax.sellerNetProceeds != null ? " · estimated net proceeds: " + money(tax.sellerNetProceeds) : " · enter an expected selling price to estimate net proceeds") + "</p>" +
       "<p class=\"sf-est-rdp\">Illustrative only — not tax or legal advice; confirm with the BIR and your counsel.</p>" });
 
     s.push({ t: "Site review factors you recorded", h:
@@ -709,11 +767,12 @@
   function leadBlock(r) {
     var out = '<div class="sf-est-lead" data-est-lead>';
     out += '<div class="sf-est-lead-ctas">' +
-      '<button type="button" class="sf-est-lead-cta" data-est-lead-open>Email me this report →</button></div>';
+      '<button type="button" class="sf-est-lead-cta" data-est-lead-open>Email me this report →</button>' +
+      '<button type="button" class="sf-est-lead-cta sf-est-lead-secondary" data-est-appraisal-open>Request professional appraisal →</button></div>';
     if (est.leadOpen) {
       out += '<form class="sf-est-lead-form" data-est-lead-form>' +
-        "<h3>Get your report, verified</h3>" +
-        '<p class="sf-est-lead-ctx">For: <b>' + esc(est.municipality + " · " + est.barangay + (est.streetLabel && !est.allOther ? " · " + est.streetLabel : "")) + "</b> · estimated " + money(r.total) + ".</p>" +
+        "<h3>" + (est.appraisalRequested ? "Request a professional appraisal consultation" : "Get your report, verified") + "</h3>" +
+        '<p class="sf-est-lead-ctx">For: <b>' + esc(est.municipality + " · " + est.barangay + (est.streetLabel && !est.allOther ? " · " + est.streetLabel : "")) + "</b> · market guide " + money(r.marketGuideEstimate) + ".</p>" +
         '<div class="sf-est-lead-grid">' +
         '<label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label>' +
         '<label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label>' +
@@ -721,7 +780,7 @@
         '<label>Message<textarea name="message" maxlength="600" rows="3">I’m interested in this Batangas property estimate.</textarea></label>' +
         "</div>" +
         '<label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty emailing this report to me and contacting me within one business day.</span></label>' +
-        '<button type="submit">Email me the report →</button>' +
+        '<button type="submit">' + (est.appraisalRequested ? "Request appraisal consultation →" : "Email me the report →") + '</button>' +
         '<p class="sf-form-status" data-est-lead-status aria-live="polite"></p></form>';
     }
     return out + "</div>";
@@ -896,6 +955,11 @@
       est.area = Number(areaIn.value) > 0 ? Number(areaIn.value) : null;
       est.result = null;
     });
+    var salePriceIn = $q(card, "[data-est-sale-price]");
+    if (salePriceIn) salePriceIn.addEventListener("input", function () {
+      est.salePrice = Number(salePriceIn.value) > 0 ? Number(salePriceIn.value) : null;
+      est.result = null;
+    });
 
     var corner = $q(card, "[data-est-corner]");
     if (corner) corner.addEventListener("change", function () {
@@ -959,6 +1023,12 @@
       est.leadOpen = true;
       renderLayout();
     });
+    var appraisalBtn = $q(card, "[data-est-appraisal-open]");
+    if (appraisalBtn) appraisalBtn.addEventListener("click", function () {
+      est.leadOpen = true;
+      est.appraisalRequested = true;
+      renderLayout();
+    });
     var leadForm = $q(card, "[data-est-lead-form]");
     if (leadForm) leadForm.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -1017,6 +1087,7 @@
       municipality: est.municipality, barangay: est.barangay,
       streetKey: est.allOther ? "" : est.streetKey,
       classification: est.classification, area: est.area,
+      salePrice: est.salePrice,
       corner: est.corner, purpose: est.purpose,
       type: est.type,
       floorArea: est.type === "house_lot" ? (Number(est.floorArea) > 0 ? Number(est.floorArea) : 0) : 0,
@@ -1072,9 +1143,11 @@
     return r && r.available ? {
       municipality: r.municipality, barangay: r.barangay, street: r.streetName || "Street not listed",
       classification: r.classification, classificationLabel: r.classificationLabel,
-      use: r.use, coverage: r.coverage, sourceLevel: r.source.level, confidencePct: r.source.pct,
-      total: r.total, low: r.low, high: r.high, perSqm: r.perSqm,
-      landValue: r.landValue, improvement: r.improvement, area: r.area,
+      use: r.use, coverage: r.coverage, sourceLevel: r.source.level, dataCoveragePct: r.source.pct,
+      total: r.total, marketGuideEstimate: r.marketGuideEstimate, low: r.low, high: r.high, perSqm: r.perSqm,
+      birZonalRatePerSqm: r.birZonalRatePerSqm, birZonalValue: r.birZonalValue,
+      landValue: r.landValue, improvement: r.improvement, area: r.area, salePrice: r.salePrice,
+      marketGuide: r.marketGuide,
       purpose: r.purpose, type: r.type, typeLabel: r.typeLabel,
       calculationVersion: r.calculationVersion, dataVersion: r.dataVersion,
       asOf: r.effectivityDate, schedule: r.reference.schedule
@@ -1096,16 +1169,17 @@
     var message = ["Official BIR schedule estimate request"];
     message.push("Location: " + est.municipality + (est.barangay ? " · " + est.barangay : ""));
     message.push("Street: " + (est.streetLabel && !est.allOther ? est.streetLabel : "Street not listed"));
-    if (snap) message.push("Estimate: " + money(snap.total) + " (" + money(snap.low) + "–" + money(snap.high) + ") · " + (snap.typeLabel || snap.type) + " · " + fmt(snap.area) + " sqm · confidence " + Math.round(snap.confidencePct * 100) + "%");
+    if (snap) message.push("Market guide: " + money(snap.marketGuideEstimate) + " (" + money(snap.low) + "–" + money(snap.high) + ") · BIR zonal " + money(snap.birZonalValue) + " · " + (snap.typeLabel || snap.type) + " · " + fmt(snap.area) + " sqm · data coverage " + Math.round(snap.dataCoveragePct * 100) + "%");
     var notes = data.get("message");
     if (notes) message.push("Notes: " + notes);
     var payload = {
-      inquiry_type: "location-analysis",
+      inquiry_type: est.appraisalRequested ? "professional-appraisal-request" : "location-analysis",
       full_name: data.get("name"),
       email: data.get("email"),
       phone: data.get("phone"),
       consent: data.get("consent") === "on",
       purpose: est.purpose,
+      service_requested: est.appraisalRequested ? "professional-appraisal-consultation" : "valuation-report",
       message: message.join(" | "),
       report: {
         property: {
@@ -1130,7 +1204,7 @@
     function fallback() {
       if (!api || !api.contact) throw new Error("Contact service unavailable");
       return api.contact({
-        inquiry_type: "location-analysis",
+         inquiry_type: payload.inquiry_type,
         full_name: payload.full_name,
         email: payload.email,
         phone: payload.phone,
@@ -1177,7 +1251,7 @@
         status.className = "sf-form-status error";
       }
     }).finally(function () {
-      if (button) { button.disabled = false; button.textContent = "Email me the report →"; }
+       if (button) { button.disabled = false; button.textContent = est.appraisalRequested ? "Request appraisal consultation →" : "Email me the report →"; }
     });
   }
 
@@ -1193,7 +1267,7 @@
   function markup() {
     return '<section class="sf-section sf-est" id="sf-estimator" data-est-root>' +
       '<div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">BATANGAS VALUE GUIDE</p><h2>What is your <em>property worth?</em></h2></div>' +
-      '<p>Official BIR zonal values for Batangas (RDO 58 &amp; 59) matched to your municipality, barangay, street and classification.</p></div>' +
+      '<p>Official BIR zonal values for Batangas (RDO 58 &amp; 59), shown separately from an ES Realty market guide estimate.</p></div>' +
       '<div class="sf-est-card" data-est-card></div></section>';
   }
 

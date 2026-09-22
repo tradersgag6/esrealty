@@ -288,6 +288,8 @@
 .sf-est-prev:hover:not(:disabled) { background: #f4f2eb !important; transform: none !important; }
 
 .sf-est-next-hint.sf-est-err { color: #b03a2e; font-weight: 750; }
+.sf-est-total-label { margin: -10px 0 10px; color: #5f6771; font-size: 12px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
+.sf-est-lead-secondary { margin-left: 8px; background: transparent !important; color: #1e2a3a !important; border: 1px solid #c9ccce !important; }
 
 .sf-est-field.sf-est-invalid select, .sf-est-field.sf-est-invalid input { border-color: #b03a2e; background: #fff7f6; }
 .sf-est-field.sf-est-invalid select:focus, .sf-est-field.sf-est-invalid input:focus { border-color: #b03a2e; box-shadow: 0 0 0 3px rgba(176, 58, 46, .15); }
@@ -317,4 +319,3 @@
   .sf-est-anim-ring { width: 150px; height: 150px; }
   .sf-est-anim-ring b { font-size: 24px; }
 }
-

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "calculationVersion": "2026.09.1",
+  "calculationVersion": "2026.09.2",
   "dataVersion": "bir-2022-rdo58-59",
   "asOf": "2022-07-23",
   "note": "Engine + data versions stamped on every estimate output. Deterministic and reconcilable.",
@@ -27,15 +27,21 @@
   "construction": {
     "wood_prefab": {
       "label": "Wood / Pre-fab",
-      "costPerSqm": 15000
+      "costPerSqm": 15000,
+      "sourceType": "ES Realty provisional assumption",
+      "sourceDate": "2026-09"
     },
     "mixed_chb": {
       "label": "Mixed / CHB",
-      "costPerSqm": 25000
+      "costPerSqm": 25000,
+      "sourceType": "ES Realty provisional assumption",
+      "sourceDate": "2026-09"
     },
     "rca_steel": {
       "label": "Reinforced Concrete / Steel",
-      "costPerSqm": 40000
+      "costPerSqm": 40000,
+      "sourceType": "ES Realty provisional assumption",
+      "sourceDate": "2026-09"
     }
   },
   "floors": [
@@ -163,13 +169,21 @@
       }
     }
   },
+  "marketGuide": {
+    "label": "ES Realty Market Guide Estimate",
+    "sourceType": "ES Realty approved factors",
+    "comparablePolicy": "Use ES Realty listings first; external asking-price evidence only when internal data is unavailable.",
+    "factorApproval": "Admin approval required",
+    "status": "assumption-backed",
+    "note": "Market guide factors are not official BIR values and are not a certified appraisal."
+  },
   "tax": {
     "cgtPct": 0.06,
     "dstPct": 0.015,
     "transferPct": 0.005,
     "registrationPct": 0.001
   },
-  "disclaimer": "Indicative guide estimate — not a certified appraisal (RA 9646). Land figures follow the official BIR zonal schedule for your municipality, barangay, street and classification; improvements use typical replacement construction cost less straight-line age depreciation. Confirm the current schedule and verify on the ground before any transaction.",
+  "disclaimer": "ES Realty Market Guide Estimate — an indicative, non-certified estimate based on official BIR reference values, approved ES Realty market factors, and available comparable listings. Land figures follow the imported BIR zonal schedule for your municipality, barangay, street and classification; improvements use provisional replacement construction costs less straight-line age depreciation. Confirm the current schedule and verify on the ground before any transaction.",
   "labels": {
     "reference": "BIR zonal reference",
     "locality": "Locality",

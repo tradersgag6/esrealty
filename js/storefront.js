@@ -217,8 +217,8 @@
       '<div class="sf-est-hero-copy sf-reveal">' +
       '<p class="sf-eyebrow">BATANGAS VALUE GUIDE</p>' +
       '<h1>What is your <em>property worth?</em></h1>' +
-      '<p class="sf-est-hero-lede">An instant, free guide estimate for any home, lot, shophouse, or condo in Batangas — published BIR zonal reference compounded with locality and current market movement. A starting point for a conversation, not a certified appraisal.</p>' +
-      '<div class="sf-est-proof"><span><b>BIR Zonal</b> reference schedules</span><span><b>Locality × market</b> adjustment</span><span><b>Free &amp; instant</b> estimate</span></div>' +
+      '<p class="sf-est-hero-lede">An instant, free Batangas guide estimate for vacant land and house-and-lot property — showing the official BIR zonal reference separately from an ES Realty market guide estimate. A starting point for a conversation, not a certified appraisal.</p>' +
+      '<div class="sf-est-proof"><span><b>BIR Zonal</b> reference schedules</span><span><b>ES Realty</b> market guide</span><span><b>Free &amp; instant</b> estimate</span></div>' +
       '</div>' +
       (typeof window.ESREALTY_EST === "object" && window.ESREALTY_EST.cardSection ? window.ESREALTY_EST.cardSection() : '<section class="sf-section sf-est" id="sf-estimator" data-est-root><div class="sf-est-card" data-est-card><p class="sf-est-empty">Loading the value guide…</p></div></section>') +
       '</section>' +

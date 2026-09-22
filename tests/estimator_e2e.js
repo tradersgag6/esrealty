@@ -100,14 +100,17 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     chk("corner-note-shown", /corner lot \(\+2.5%\)/.test(document.body.innerText), "");
     chk("range-shown", !!q('.sf-est-range') && /–/.test(q('.sf-est-range').textContent), "txt=" + ((q('.sf-est-range') || { textContent: "" }).textContent));
     chk("per-sqm-shown", !!q('.sf-est-per') && /sqm/.test(q('.sf-est-per').textContent), "");
+    chk("bir-value-shown-separately", /BIR zonal value/.test(document.body.innerText), "");
+    chk("market-guide-labeled", !!q('.sf-est-total-label') && /Market Guide Estimate/.test(q('.sf-est-total-label').textContent), "");
+    chk("tax-base-disclosed", /Illustrative tax base/.test(document.body.innerText), "");
     chk("coverage-good-tag", !!q('.sf-est-tag-good') && /BIR street data/.test(q('.sf-est-tag-good').textContent), "");
     chk("report-14-sections", qa('.sf-est-rsec').length === 14, "n=" + qa('.sf-est-rsec').length);
 
     // lead block + submit (fallback to contact stub, no email -> "saved")
     chk("lead-block-present", !!q('[data-est-lead]'), "");
-    q('[data-est-lead-open]').click();
+    q('[data-est-appraisal-open]').click();
     await wait(40);
-    chk("lead-form-opens", !!q('[data-est-lead-form]'), "");
+    chk("appraisal-lead-form-opens", !!q('[data-est-lead-form]') && /professional appraisal/i.test(q('[data-est-lead-form] h3').textContent), "");
     const form = q('[data-est-lead-form]');
     form.querySelector('[name=name]').value = "E2E Tester";
     form.querySelector('[name=email]').value = "e2e@example.com";
@@ -141,6 +144,7 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     const typeGroup = qa('[data-est-screen="1"] [data-chip-group]').find(g => g.getAttribute("data-t") === "type");
     typeGroup.querySelector('[data-val="house_lot"]').click();
     await wait(60);
+    setInput('[data-est-sale-price]', "5000000");
     chk("house-next-goes-to-screen2", /Continue to the house/.test(q('[data-est-next]').textContent), "label=" + q('[data-est-next]').textContent);
     q('[data-est-next]').click();
     await waitFor(() => q('[data-est-screen="2"]'), 30, ESP);
@@ -156,6 +160,7 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     chk("house-total-matches-core", MONEY(rH.total) === MONEY(eH.total), "dom=" + MONEY(rH.total) + " core=" + MONEY(eH.total));
     chk("house-improvement-included", rH && rH.improvement === eH.improvement && rH.improvement > 0, "imp=" + (rH && rH.improvement));
     chk("house-report-shows-house-value", /House value/.test(document.body.innerText), "");
+    chk("seller-net-proceeds-shown", /estimated net proceeds/.test(document.body.innerText), "");
 
     window.__msOk = window.__msChecks.every(c => c.ok) && window.__msChecks.length > 0;
     window.__msDone = true;
