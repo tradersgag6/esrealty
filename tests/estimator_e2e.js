@@ -29,7 +29,8 @@ function stateOpts() {
     corner: st.corner, purpose: st.purpose, type: st.type,
     floorArea: Number(st.floorArea) > 0 ? Number(st.floorArea) : 0,
     floors: st.floors, ageBand: st.ageBand,
-    construction: st.construction, features: st.features
+    construction: st.construction, features: st.features,
+    occupancy: st.occupancy, titleStatus: st.titleStatus, inheritanceStatus: st.inheritanceStatus
   };
 }
 async function estimateExpected(opts) {
@@ -40,6 +41,12 @@ async function estimateExpected(opts) {
 }
 function setValue(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new Event("change", { bubbles: true })); }
 function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new Event("input", { bubbles: true })); }
+function chooseOwnershipNotSure() {
+  ["occupancy", "titleStatus", "inheritanceStatus"].forEach(key => {
+    const button = q('[data-est-ownership="' + key + '"][data-val="not_sure"]');
+    if (button) button.click();
+  });
+}
 (async () => {
   try {
     window.__msLog.push("funnel-e2e start");
@@ -93,6 +100,11 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     if (corner && !corner.checked) { corner.checked = true; corner.dispatchEvent(new Event("change", { bubbles: true })); }
 
     q('[data-est-next]').click();
+    await waitFor(() => q('[data-est-screen="2"]'), 30, ESP);
+    chk("describe-property-screen-present", !!q('[data-est-screen="2"]') && /Describe your property/.test(q('[data-est-screen="2"] h3').textContent), "");
+    chk("ownership-title-questions-present", qa('[data-est-ownership]').length === 13, "options=" + qa('[data-est-ownership]').length);
+    chooseOwnershipNotSure();
+    q('[data-est-next]').click();
     await waitFor(() => q('[data-est-screen="3"]'), 30, ESP);
     chk("screen3-animation", !!q('[data-est-screen="3"] [data-est-spin]') && /spin/.test(q('[data-est-screen="3"] [data-est-spin]').className), "");
     await waitFor(() => q('[data-est-screen="4"]'), 90, ESP);
@@ -116,8 +128,8 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     chk("taxes-fees-commissions-shown", /Taxes, fees & commissions/.test(reportText) && /Broker commission/.test(reportText), "");
     chk("tax-base-disclosed", /Illustrative tax base/.test(reportText), "");
     chk("coverage-good-tag", !!q('.sf-est-tag-good') && /BIR street data/.test(q('.sf-est-tag-good').textContent), "");
-    chk("report-15-sections", qa('.sf-est-rsec').length === 15, "n=" + qa('.sf-est-rsec').length);
-    chk("report-sections-are-accessible", qa('.sf-est-rsec details').length === 0 && qa('.sf-est-rsec > summary').length === 15, "summaries=" + qa('.sf-est-rsec > summary').length);
+    chk("report-16-sections", qa('.sf-est-rsec').length === 16, "n=" + qa('.sf-est-rsec').length);
+    chk("report-sections-are-accessible", qa('.sf-est-rsec details').length === 0 && qa('.sf-est-rsec > summary').length === 16, "summaries=" + qa('.sf-est-rsec > summary').length);
     chk("report-summary-priority", qa('.sf-est-rsec[open]').length >= 3, "open=" + qa('.sf-est-rsec[open]').length);
 
     // lead block + submit (fallback to contact stub, no email -> "saved")
@@ -148,6 +160,9 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     setValue('[data-est-class]', "A40");
     setInput('[data-est-area]', "100");
     q('[data-est-next]').click();
+    await waitFor(() => q('[data-est-screen="2"]'), 30, ESP);
+    chooseOwnershipNotSure();
+    q('[data-est-next]').click();
     await waitFor(() => q('[data-est-screen="4"]'), 90, ESP);
     const rD2 = estApi()._state().result;
     chk("depth2-available", rD2 && rD2.available, "");
@@ -168,6 +183,7 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     setInput('[data-est-floor]', "160");
     const wg = qa('[data-est-feature]').find(cb => cb.getAttribute("data-est-feature") === "wall_gate");
     if (wg) { wg.checked = true; wg.dispatchEvent(new Event("change", { bubbles: true })); }
+    chooseOwnershipNotSure();
     q('[data-est-next]').click();
     await waitFor(() => q('[data-est-screen="4"]'), 90, ESP);
     const rH = estApi()._state().result;

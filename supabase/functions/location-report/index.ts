@@ -114,13 +114,13 @@ const SCORE_KEYS = [
 function sanitizeEstimate(raw: any): any {
   if (!raw || typeof raw !== "object") return null;
   const out: Record<string, unknown> = {};
-  const numberKeys = ["total", "marketGuideEstimate", "recommendedAskingPrice", "low", "high", "perSqm", "birZonalRatePerSqm", "birZonalValue", "landValue", "improvement", "area", "floorArea", "landPerSqm", "salePrice"];
+  const numberKeys = ["total", "marketGuideEstimate", "recommendedAskingPrice", "low", "high", "perSqm", "birZonalRatePerSqm", "birZonalValue", "landValue", "improvement", "area", "floorArea", "landPerSqm", "salePrice", "ownershipAdjustmentPct"];
   for (const k of numberKeys) {
     if (k in raw) { const n = Number(raw[k]); if (isFinite(n)) out[k] = Math.round(n * 100) / 100; }
   }
   const stringKeys = ["municipality", "barangay", "street", "classification",
     "classificationLabel", "use", "coverage", "sourceLevel", "purpose", "type",
-    "typeLabel", "calculationVersion", "dataVersion", "asOf", "schedule"];
+    "typeLabel", "calculationVersion", "dataVersion", "asOf", "schedule", "occupancy", "titleStatus", "inheritanceStatus"];
   for (const k of stringKeys) {
     if (raw[k] != null) out[k] = str(raw[k], 120);
   }
@@ -308,6 +308,10 @@ async function buildPdf(p: any) {
       line("Improvement component", moneyPdf(estimate.improvement) + " (" + num(estimate.depreciatedPct) + "% age-depreciated)");
     }
     line("Data coverage", str(estimate.coverage, 40) || "good");
+    if (estimate.occupancy || estimate.titleStatus || estimate.inheritanceStatus) {
+      line("Ownership/title review", "Occupancy: " + str(estimate.occupancy, 50) + " · title: " + str(estimate.titleStatus, 60) + " · inheritance: " + str(estimate.inheritanceStatus, 50));
+      line("Indicative marketability adjustment", estimate.ownershipAdjustmentPct ? "-" + num(estimate.ownershipAdjustmentPct) + "%" : "None recorded");
+    }
   } else {
     para("No estimate was produced for this location (not yet a covered Batangas town). Our team can check it on the ground.", 9, gray);
   }

@@ -180,5 +180,13 @@ let r2 = core.computeEstimate(config, index, balayan, {
 });
 eq(JSON.stringify(r) === JSON.stringify(r2), true, "deterministic same inputs");
 
+let risk = core.computeEstimate(config, index, balayan, {
+  municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "CR", area: 200,
+  occupancy: "informal_settlers", titleStatus: "tax_declaration", inheritanceStatus: "pending"
+});
+eq(risk.ownershipAdjustmentPct, 50, "ownership/title risk adjustment totals 50%");
+eq(risk.total, Math.round((risk.landValue + risk.improvement) * 0.5), "ownership/title adjustment reconciles");
+eq(core.integrityCheck(risk).ok, true, "risk-adjusted estimate reconciles");
+
 if (failures) { console.log(failures + " FAILURES"); process.exit(1); }
 console.log("ALL GREEN (" + checked + " checks)");

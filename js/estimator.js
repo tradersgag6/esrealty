@@ -243,7 +243,9 @@
       improvement = Math.round(buildCost * floorArea * floorsMult * (1 - depPct)) + featuresTotal;
     }
 
-    var total = landValue + improvement;
+    var ownershipAdjustmentPct = ownershipRiskPct(opts);
+    var unadjustedTotal = landValue + improvement;
+    var total = Math.round(unadjustedTotal * (1 - ownershipAdjustmentPct / 100));
     var rangePct = meta.rangePct;
     var low = Math.round(total * (1 - rangePct));
     var high = Math.round(total * (1 + rangePct));
@@ -298,6 +300,8 @@
         capApplied: noComparableCap,
         capMultiple: noComparableCap ? capMultiple : 0
       },
+      ownershipAdjustmentPct: ownershipAdjustmentPct,
+      unadjustedTotal: unadjustedTotal,
       birZonalRatePerSqm: birZonalRatePerSqm,
       birZonalValue: birZonalValue,
       marketGuideEstimate: comps.count ? total : null,
@@ -329,6 +333,23 @@
         ? "No exact BIR street rate for this classification here — used " + meta.label.toLowerCase() + (hit.depth > 2 ? " (median of " + hit.count + " values)" : "") + "."
         : ""
     };
+  }
+
+  function ownershipRiskPct(opts) {
+    opts = opts || {};
+    var occupancy = { caretaker: 5, tenants: 10, informal_settlers: 25 };
+    var title = { titled_previous: 8, tax_declaration: 15 };
+    var inheritance = { pending: 10 };
+    return (occupancy[opts.occupancy] || 0) + (title[opts.titleStatus] || 0) + (inheritance[opts.inheritanceStatus] || 0);
+  }
+
+  function ownershipLabel(key, value) {
+    var labels = {
+      occupancy: { empty: "No, it's empty", caretaker: "A caretaker or family member", tenants: "Tenants paying rent", informal_settlers: "Informal settlers", not_sure: "Not sure" },
+      titleStatus: { titled_self: "Yes, title is in my name", titled_previous: "Yes, title is in the previous owner's name", tax_declaration: "Tax declaration only", not_sure: "Not sure" },
+      inheritanceStatus: { not_inherited: "Not inherited", settled: "Inherited, settlement finished", pending: "Inherited, settlement pending", not_sure: "Not sure" }
+    };
+    return labels[key] && labels[key][value] ? labels[key][value] : "Not answered";
   }
 
   function taxMath(config, total, opts) {
@@ -379,9 +400,9 @@
 
   function integrityCheck(result) {
     if (!result || !result.available) return { ok: false, reason: "unavailable" };
-    var sums = result.improvement === 0
-      ? (result.landValue === result.total)
-      : (result.landValue + result.improvement === result.total);
+    var adjustedBase = result.landValue + result.improvement;
+    var expectedTotal = Math.round(adjustedBase * (1 - Number(result.ownershipAdjustmentPct || 0) / 100));
+    var sums = expectedTotal === result.total;
     var range = result.total * (1 - result.rangePct) === result.low &&
         result.total * (1 + result.rangePct) === result.high;
     return {
@@ -558,6 +579,9 @@
     allOther: false,
     classification: "",
     classificationUse: "",
+    occupancy: "",
+    titleStatus: "",
+    inheritanceStatus: "",
     area: null,
     salePrice: null,
     corner: false,
@@ -759,10 +783,40 @@
       "</div>";
   }
 
+  function ownershipQuestion(key, title, description, options) {
+    return '<fieldset class="sf-est-ownership-question"><legend>' + esc(title) + '</legend><p>' + esc(description) + '</p><div class="sf-est-ownership-options">' + options.map(function (o) {
+      var active = est[key] === o.value;
+      return '<button type="button" class="sf-est-ownership-option' + (active ? " active" : "") + '" data-est-ownership="' + key + '" data-val="' + esc(o.value) + '" aria-pressed="' + (active ? "true" : "false") + '"><b>' + esc(o.label) + '</b><small>' + esc(o.note) + '</small>' + (o.impact ? '<strong>' + esc(o.impact) + '</strong>' : "") + '</button>';
+    }).join("") + '</div></fieldset>';
+  }
+
+  function ownershipQuestions() {
+    return '<div class="sf-est-ownership-intro"><span>📋</span><div><h4>Ownership &amp; Title</h4><b>Biggest impact</b><p>Title status, occupancy, and inheritance can significantly affect market value and how quickly you can sell. Buyers will discover these during due diligence.</p></div></div>' +
+      ownershipQuestion("occupancy", "Is anyone living on the property?", "This affects how quickly and easily you can sell.", [
+        { value: "empty", label: "No, it's empty", note: "Ready for viewing", impact: "" },
+        { value: "caretaker", label: "A caretaker or family member", note: "There with permission", impact: "-5%" },
+        { value: "tenants", label: "Tenants paying rent", note: "With a lease or agreement", impact: "-10%" },
+        { value: "informal_settlers", label: "Informal settlers", note: "Occupying without permission", impact: "-25%" },
+        { value: "not_sure", label: "Not sure", note: "We'll skip this", impact: "" }
+      ]) +
+      ownershipQuestion("titleStatus", "Do you have a certificate of title?", "A Transfer Certificate of Title (TCT) or Condominium Certificate of Title (CCT).", [
+        { value: "titled_self", label: "Yes, and it's in my name", note: "Title matches the owner", impact: "" },
+        { value: "titled_previous", label: "Yes, but still in the previous owner's name", note: "Not yet transferred", impact: "-8%" },
+        { value: "tax_declaration", label: "No, only a tax declaration", note: "No certificate of title yet", impact: "-15%" },
+        { value: "not_sure", label: "Not sure", note: "We'll skip this", impact: "" }
+      ]) +
+      ownershipQuestion("inheritanceStatus", "Was this property inherited?", "Inherited properties need an Extrajudicial Settlement before they can be sold.", [
+        { value: "not_inherited", label: "No, I bought it or it's always been mine", note: "No inheritance process", impact: "" },
+        { value: "settled", label: "Yes, and the settlement is finished", note: "Annotated on the title", impact: "" },
+        { value: "pending", label: "Yes, but the settlement isn't done", note: "Extrajudicial Settlement still pending", impact: "-10%" },
+        { value: "not_sure", label: "Not sure", note: "We'll skip this", impact: "" }
+      ]);
+  }
+
   function screen2Html() {
     var out = '<div class="sf-est-step" data-est-screen="2">';
     out += locSummary();
-    out += '<div class="sf-est-step-head"><span class="sf-est-step-no">02</span><h3>About the house</h3></div>';
+    out += '<div class="sf-est-step-head"><span class="sf-est-step-no">02</span><h3>Describe your property</h3></div>';
     if (est.type === "house_lot") {
       out += '<div class="sf-est-fields">' +
         '<label class="sf-est-field sf-est-span2">Construction style<span>Main build type</span>' + chipRow(
@@ -790,6 +844,7 @@
     } else {
       out += '<p class="sf-est-hint">As a vacant lot there is no house to value — we only look at the land.</p>';
     }
+    out += ownershipQuestions();
     out += '<div class="sf-est-subhead">Site review factors</div>';
     out += reviewFactorBlock();
     out += '<div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-prev>← Back</button>' +
@@ -846,7 +901,14 @@
       "<li>Barangay: <b>" + esc(r.barangay) + "</b></li>" +
       "<li>Street: <b>" + esc(r.streetName ? r.streetName : "Street not listed") + "</b></li>" +
       "<li>Lot area: <b>" + fmt(r.area) + " sqm</b>" + (r.corner.applied ? " · corner lot (+2.5%)" : "") + "</li>" +
-      "</ul>" });
+       "</ul>" });
+
+    s.push({ t: "Ownership & title review", h:
+      '<ul class="sf-est-rdl"><li>Occupancy: <b>' + esc(ownershipLabel("occupancy", est.occupancy)) + '</b></li>' +
+      '<li>Title status: <b>' + esc(ownershipLabel("titleStatus", est.titleStatus)) + '</b></li>' +
+      '<li>Inheritance: <b>' + esc(ownershipLabel("inheritanceStatus", est.inheritanceStatus)) + '</b></li>' +
+      '<li>Indicative market adjustment: <b>' + (r.ownershipAdjustmentPct ? "-" + r.ownershipAdjustmentPct + "%" : "none recorded") + '</b></li></ul>' +
+      '<p class="sf-est-rdp">This is an indicative marketability adjustment, not a change to the official BIR zonal value. A broker, buyer, lawyer, and the Registry of Deeds should verify occupancy, title, and inheritance documents.</p>' });
 
     s.push({ t: "Source of land rates", h:
       "<p class=\"sf-est-rdp\">Official BIR zonal schedule <b>" + esc(r.reference.schedule) + "</b>, RDO " + esc(r.rdo) +
@@ -1217,6 +1279,18 @@
       });
     });
 
+    $qa(card, "[data-est-ownership]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var key = button.getAttribute("data-est-ownership");
+        est[key] = button.getAttribute("data-val");
+        $qa(card, '[data-est-ownership="' + key + '"]').forEach(function (b) {
+          var active = b === button;
+          b.classList.toggle("active", active);
+          b.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+      });
+    });
+
     var prev = $q(card, "[data-est-prev]");
     if (prev) prev.addEventListener("click", function () {
       est.screen = 2;
@@ -1228,11 +1302,13 @@
       next.addEventListener("click", function () {
         if (est.screen === 1) {
           if (validScreen1()) {
-            if (est.type === "house_lot") { est.screen = 2; renderLayout(); }
-            else runEstimate();
+             est.screen = 2;
+             renderLayout();
           } else showErr(card);
-        } else if (est.screen === 2) {
-          runEstimate();
+       } else if (est.screen === 2) {
+          var missingOwnership = missingScreen2Field();
+          if (missingOwnership) showErr(card, missingOwnership);
+          else runEstimate();
         }
       });
     }
@@ -1264,14 +1340,21 @@
     return null;
   }
 
+  function missingScreen2Field() {
+    if (!est.occupancy) return { field: '[data-est-ownership="occupancy"]', msg: "Choose the occupancy status to continue." };
+    if (!est.titleStatus) return { field: '[data-est-ownership="titleStatus"]', msg: "Choose the title status to continue." };
+    if (!est.inheritanceStatus) return { field: '[data-est-ownership="inheritanceStatus"]', msg: "Choose the inheritance status to continue." };
+    return null;
+  }
+
   function validScreen1() {
     return !missingScreen1Field();
   }
 
-  function showErr(card) {
+  function showErr(card, suppliedMissing) {
     var btn = $q(card, "[data-est-next]");
     if (!btn) return;
-    var missing = missingScreen1Field();
+    var missing = suppliedMissing || missingScreen1Field();
     var msg = $q(card, "[data-est-next-hint]");
     if (!msg) {
       var p = document.createElement("p");
@@ -1313,7 +1396,10 @@
       floors: est.type === "house_lot" ? est.floors : "1",
       ageBand: est.type === "house_lot" ? est.ageBand : "0-5",
       construction: est.type === "house_lot" ? est.construction : "mixed_chb",
-      features: est.type === "house_lot" ? est.features : []
+      features: est.type === "house_lot" ? est.features : [],
+      occupancy: est.occupancy,
+      titleStatus: est.titleStatus,
+      inheritanceStatus: est.inheritanceStatus
     };
     Promise.all([loadMunicipality(est.municipalitySlug), loadComparableListings(opts)]).then(function (parts) {
       var md = parts[0];
@@ -1380,6 +1466,8 @@
       total: r.total, marketGuideEstimate: r.marketGuideEstimate, marketGuideAvailable: r.marketGuideAvailable, recommendedAskingPrice: r.recommendedAskingPrice, low: r.low, high: r.high, perSqm: r.perSqm,
       birZonalRatePerSqm: r.birZonalRatePerSqm, birZonalValue: r.birZonalValue,
       landValue: r.landValue, improvement: r.improvement, area: r.area, salePrice: r.salePrice,
+      ownershipAdjustmentPct: r.ownershipAdjustmentPct, occupancy: est.occupancy,
+      titleStatus: est.titleStatus, inheritanceStatus: est.inheritanceStatus,
       marketGuide: r.marketGuide,
       purpose: r.purpose, type: r.type, typeLabel: r.typeLabel,
       calculationVersion: r.calculationVersion, dataVersion: r.dataVersion,
