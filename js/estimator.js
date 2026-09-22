@@ -857,7 +857,7 @@
       locSummary() +
       '<div class="sf-est-anim-head"><span class="sf-est-step-no">03</span><div><p>YOUR PROPERTY VALUE GUIDE</p><h3 class="sf-est-anim-title">Calculating your property value</h3></div></div>' +
       '<div class="sf-est-anim-panel">' +
-      '<div class="sf-est-anim-ring spin" data-est-spin aria-hidden="true"><b data-est-anim-total>₱0</b><span>calculating…</span></div>' +
+      '<div class="sf-est-anim-ring spin" data-est-spin aria-hidden="true"><b>VERIFYING</b><span>BIR + market data</span></div>' +
       '<div class="sf-est-anim-stages" aria-label="Calculation progress">' +
       '<div class="sf-est-anim-stage active" data-est-stage="0"><i>1</i><span>Reading the BIR schedule</span></div>' +
       '<div class="sf-est-anim-stage" data-est-stage="1"><i>2</i><span>Checking the property details</span></div>' +
@@ -1487,22 +1487,18 @@
 
   function animateThenReport() {
     var card = getCard();
-    var totalEl = card ? card.querySelector("[data-est-anim-total]") : null;
     var noteEl = card ? card.querySelector("[data-est-anim-note]") : null;
     var spinEl = card ? card.querySelector("[data-est-spin]") : null;
     var stageEls = card ? $qa(card, "[data-est-stage]") : [];
     if (spinEl) spinEl.classList.add("spin");
-    if (!totalEl || !est.result || !est.result.available) {
+    if (!est.result || !est.result.available) {
       setTimeout(function () { est.screen = 4; renderLayout(); }, 900);
       return;
     }
-    var target = est.result.marketGuideAvailable ? est.result.marketGuideEstimate : est.result.birZonalValue;
     var t0 = performance ? performance.now() : Date.now();
     var dur = 1500;
     function frame(t) {
       var p = Math.min(1, (t - t0) / dur);
-      var e = 1 - Math.pow(1 - p, 3);
-      if (totalEl) totalEl.innerHTML = money(Math.round(target * e));
       if (noteEl && est.result) {
         noteEl.textContent = p < 0.5 ? "Matching your barangay, street and BIR classification…" : "Reconciling the build-up and range…";
       }
@@ -1510,7 +1506,6 @@
       stageEls.forEach(function (el, index) { el.classList.toggle("active", index === stage); el.classList.toggle("complete", index < stage); });
       if (p < 1) requestAnimationFrame(frame);
       else {
-        if (totalEl) totalEl.innerHTML = money(target);
          setTimeout(function () {
            est.screen = 4;
            renderLayout();
