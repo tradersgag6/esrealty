@@ -41,18 +41,18 @@
 
   function header() {
     return '<header class="sf-header"><a class="sf-brand" href="#/home" aria-label="ES Realty home">' +
-      '<span class="sf-brand-mark">ES</span><span><b>ES Realty</b><small>Property, clearly.</small></span></a>' +
-      '<nav class="sf-nav"><a href="#/home">Home</a><a href="#/shophouse">Shophouse</a><a href="#/search">Properties</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>Services</a></nav>' +
+      '<span class="sf-brand-mark">ES</span><span><b>ES Realty</b><small>Batangas property guidance.</small></span></a>' +
+      '<nav class="sf-nav"><a href="#/home">Home</a><a href="#/search?state=Batangas">Batangas properties</a><a href="#/shophouse">Shophouse</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>How we help</a></nav>' +
       '<div class="sf-header-actions"><button class="sf-link-btn" data-sf-auth="signin">Sign in</button>' +
       '<button class="sf-primary-btn" data-sf-auth="signup">Create account</button>' +
       '<button class="sf-menu-btn" data-sf-menu aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button></div>' +
-      '<div class="sf-menu" data-sf-menu-panel><a href="#/home">Home</a><a href="#/shophouse">Shophouse</a><a href="#/search">Properties</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>Services</a><button data-sf-auth="signin">Sign in</button><button data-sf-auth="signup">Create account</button></div></header>';
+      '<div class="sf-menu" data-sf-menu-panel><a href="#/home">Home</a><a href="#/search?state=Batangas">Batangas properties</a><a href="#/shophouse">Shophouse</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>How we help</a><button data-sf-auth="signin">Sign in</button><button data-sf-auth="signup">Create account</button></div></header>';
   }
 
   function footer() {
-    return '<footer class="sf-footer"><div class="sf-brand"><span class="sf-brand-mark">ES</span><span><b>ES Realty</b><small>Philippine property intelligence</small></span></div>' +
-      '<p>Find, compare, and inquire about verified properties from one secure platform. <span class="sf-copyright">&copy; ES Realty ' + new Date().getFullYear() + '</span></p>' +
-      '<div><a href="#/search">Browse properties</a><button data-sf-auth="signin">Agent sign in</button></div></footer>';
+    return '<footer class="sf-footer"><div class="sf-brand"><span class="sf-brand-mark">ES</span><span><b>ES Realty</b><small>Batangas property guidance.</small></span></div>' +
+      '<p>Start with a BIR reference, compare local properties, and get practical guidance. <span class="sf-copyright">&copy; ES Realty ' + new Date().getFullYear() + '</span></p>' +
+      '<div><a href="#/search?state=Batangas">Browse Batangas properties</a><button data-sf-auth="signin">Agent sign in</button></div></footer>';
   }
 
   function shell(content) {
@@ -219,31 +219,27 @@
       '<h1>What is your <em>property worth?</em></h1>' +
       '<p class="sf-est-hero-lede">An instant, free Batangas guide estimate for vacant land and house-and-lot property — showing the official BIR zonal reference separately from an ES Realty market guide estimate. A starting point for a conversation, not a certified appraisal.</p>' +
       '<div class="sf-est-proof"><span><b>BIR Zonal</b> reference schedules</span><span><b>ES Realty</b> market guide</span><span><b>Free &amp; instant</b> estimate</span></div>' +
+      '<div class="sf-hero-actions sf-est-hero-actions"><a class="sf-hero-btn" href="#sf-estimator" data-est-services>Get My Free Estimate →</a><a class="sf-hero-link" href="#/search?state=Batangas">Browse Batangas Properties</a></div>' +
       '</div>' +
       (typeof window.ESREALTY_EST === "object" && window.ESREALTY_EST.cardSection ? window.ESREALTY_EST.cardSection() : '<section class="sf-section sf-est" id="sf-estimator" data-est-root><div class="sf-est-card" data-est-card><p class="sf-est-empty">Loading the value guide…</p></div></section>') +
       '</section>' +
 
-      '<section class="sf-section"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">FEATURED LISTINGS</p><h2>Shophouses &amp; live-work spaces, handpicked</h2></div><a href="#/search">View all properties →</a></div>' +
+      '<section class="sf-section"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">BATANGAS PROPERTIES</p><h2>Find your next property with local context</h2></div><a href="#/search?state=Batangas">Browse all Batangas properties →</a></div>' +
       '<div class="sf-featured-filter sf-reveal sf-reveal-zoom">' + searchFields(new URLSearchParams(), true) + '</div>' +
       '<div class="sf-property-grid">' + cards + '</div></section>' +
-      '<section class="sf-locations"><div class="sf-locations-wrap"><div class="sf-reveal"><p class="sf-eyebrow">LOCATIONS WE COVER</p><h2>Where shophouse demand is growing.</h2><p>From CALABARZON to Central Visayas, ES Realty tracks live-work listings in the provinces where daily commerce is on the rise. Tap a city to browse its current inventory.</p></div>' +
+      '<section class="sf-locations"><div class="sf-locations-wrap"><div class="sf-reveal"><p class="sf-eyebrow">BATANGAS COVERAGE</p><h2>Local context for every property decision.</h2><p>Start with a Batangas BIR reference, compare available properties, and ask a local specialist what to verify next.</p></div>' +
       '<div class="sf-loc-chips">' + chips + '</div></div></section>' +
 
       
-      '<section class="sf-process" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">REAL ESTATE SERVICES</p><h2>Local guidance for every <em>property decision.</em></h2></div><p>Practical real estate support for buyers, sellers, landlords, investors, and developers across the Philippines.</p></div><div class="sf-process-steps">' +
-      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Property Sales &amp; Acquisition</h3><p>Buy or sell residential, commercial, land, condominium, townhouse, and shophouse properties with transaction guidance.</p></article>' +
-      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>02</b><h3>Leasing &amp; Tenant Placement</h3><p>Find suitable spaces, screen tenant requirements, and structure leasing conversations for homes and businesses.</p></article>' +
-      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>03</b><h3>Investment &amp; Feasibility</h3><p>Review purchase costs, financing, rental potential, development options, cash flow, and expected returns.</p></article>' +
-      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>04</b><h3>Property Appraisal &amp; Valuation</h3><p>Prepare market-based valuation guidance using location, comparable properties, improvements, and current demand.</p><a class="sf-est-service-link" href="#sf-estimator" data-est-services>&#8250; Value your property</a></article>' +
-      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>05</b><h3>Property Management</h3><p>Support owners with tenant coordination, rent tracking, maintenance, property records, and day-to-day oversight.</p></article>' +
-      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>06</b><h3>Due Diligence Coordination</h3><p>Organize checks for title, zoning, taxes, permits, documents, site condition, and other closing requirements.</p></article>' +
-      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>07</b><h3>Project Development Advisory</h3><p>Assess sites, highest and best use, product positioning, unit economics, and development planning.</p></article>' +
-      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>08</b><h3>Commercial &amp; Shophouse Advisory</h3><p>Match business concepts with visible locations, flexible layouts, tenant demand, and practical operating plans.</p></article>' +
+      '<section class="sf-process" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">HOW ES REALTY HELPS</p><h2>One local guide for the next <em>property step.</em></h2></div><p>Start with the information you need, then involve a specialist when the decision becomes real.</p></div><div class="sf-process-steps">' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Buy or invest</h3><p>Browse Batangas properties, compare the location, and review purchase, financing, and feasibility questions before you commit.</p><a class="sf-est-service-link" href="#/search?state=Batangas">Browse properties &#8250;</a></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>02</b><h3>Sell or value</h3><p>Start with the BIR reference and ES Realty market guide, then request a professional appraisal consultation when you need a defensible opinion.</p><a class="sf-est-service-link" href="#sf-estimator" data-est-services>Value your property &#8250;</a></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>03</b><h3>Verify and move forward</h3><p>Coordinate due diligence, documents, financing, leasing, or property support with a specialist who can explain the next check.</p><a class="sf-est-service-link" href="#sf-contact">Talk to a specialist &#8250;</a></article>' +
       '</div></section>' +
 
       
-      '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div class="sf-reveal"><p class="sf-eyebrow">' + esc(siteContact.eyebrow) + '</p><h2>' + esc(siteContact.title) + '</h2><p>' + esc(siteContact.description) + '</p><div class="sf-contact-details">' + contactDetails() + '</div></div>' +
-      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="Mobile number"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Province, budget, and business idea..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about this request.</span></label><button type="submit">Request a call →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>'
+      '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div class="sf-reveal"><p class="sf-eyebrow">LOCAL BATANGAS GUIDANCE</p><h2>Ready for the <em>next check?</em></h2><p>Tell us whether you are buying, selling, valuing, or reviewing a property. We will help you identify the next practical step.</p><div class="sf-contact-details">' + contactDetails() + '</div></div>' +
+      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="Mobile number"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Tell us the property location and what you need..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about this request.</span></label><button type="submit">Talk to a specialist →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>'
     );
   }
 

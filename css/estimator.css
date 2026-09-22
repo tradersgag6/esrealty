@@ -141,6 +141,7 @@
 .sf-est-hero-lede { max-width: 660px; margin: 26px auto 0; color: #5f6771; font-size: 16px; line-height: 1.75; }
 .sf-est-proof { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 30px; margin-top: 26px; color: #5f6771; font-size: 12px; }
 .sf-est-proof b { color: #1e2a3a; }
+.sf-est-hero-actions { justify-content: center; margin-top: 28px; }
 .sf-est-hero #sf-estimator.sf-est { padding: 0; background: transparent; text-align: left; }
 .sf-est-hero #sf-estimator.sf-est .sf-est-card { max-width: 940px; margin: 0 auto; }
 

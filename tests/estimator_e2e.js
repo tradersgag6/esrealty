@@ -50,6 +50,9 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     const pt = q('[data-est-muni]') ? q('[data-est-muni]').options.length : 0;
     chk("sf-estimator-section-present", !!q('#sf-estimator') && !!q('[data-est-card]') && !!q('.sf-est'), "root ok");
     chk("funnel-brand-eyebrow", /BATANGAS VALUE GUIDE/.test(document.body.innerText), "");
+    chk("homepage-primary-estimate-cta", !!q('.sf-est-hero-actions [data-est-services]') && /Get My Free Estimate/.test(q('.sf-est-hero-actions [data-est-services]').textContent), "");
+    chk("homepage-secondary-batangas-cta", !!q('.sf-est-hero-actions a[href*="state=Batangas"]'), "");
+    chk("homepage-batangas-listings-heading", /Find your next property with local context/.test(document.body.innerText), "");
     chk("screen1-rendered", !!q('[data-est-screen="1"]'), "");
     chk("region-fixed-batangas", !!q('.sf-est-loc-fixed') && /CALABARZON.*Batangas/.test(q('.sf-est-loc-fixed').textContent), "txt=" + (q('.sf-est-loc-fixed') && q('.sf-est-loc-fixed').textContent));
     chk("mn-options-gte34", pt >= 34, "mn=" + pt);
