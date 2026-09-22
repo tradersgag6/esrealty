@@ -115,6 +115,7 @@ function chooseOwnershipNotSure() {
     await waitFor(() => q('[data-est-screen="3"]'), 30, ESP);
     const screen3 = q('[data-est-screen="3"]');
     chk("screen3-animation", !!q('[data-est-screen="3"] [data-est-spin]') && /spin/.test(q('[data-est-screen="3"] [data-est-spin]').className), "");
+    chk("screen3-progress-design", !!q('[data-est-screen="3"] .sf-est-anim-panel') && qa('[data-est-screen="3"] [data-est-stage]').length === 3 && /Calculating your property value/.test(q('[data-est-screen="3"] .sf-est-anim-title').textContent), "");
     chk("screen3-is-revealed", !!screen3 && screen3.getBoundingClientRect().bottom > 0 && screen3.getBoundingClientRect().top < window.innerHeight, "top=" + (screen3 && screen3.getBoundingClientRect().top));
     await waitFor(() => q('[data-est-screen="4"]'), 90, ESP);
     chk("result-heading-is-clear", !!q('#sf-est-result-heading') && /Your property value guide/.test(q('#sf-est-result-heading').textContent), "");

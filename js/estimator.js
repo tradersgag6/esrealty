@@ -853,9 +853,18 @@
   }
 
   function screen3Html() {
-    return '<div class="sf-est-step sf-est-anim" data-est-screen="3" role="status" aria-live="polite">' +
-       '<div class="sf-est-anim-ring spin" data-est-spin><b data-est-anim-total>₱0</b><span>calculating…</span></div>' +
-      '<h3 class="sf-est-anim-title">Calculating your property value…</h3><p class="sf-est-anim-note" data-est-anim-note>Matching your barangay, street and BIR classification…</p></div>';
+    return '<div class="sf-est-step sf-est-anim" data-est-screen="3" role="status" aria-live="polite" aria-busy="true">' +
+      locSummary() +
+      '<div class="sf-est-anim-head"><span class="sf-est-step-no">03</span><div><p>YOUR PROPERTY VALUE GUIDE</p><h3 class="sf-est-anim-title">Calculating your property value</h3></div></div>' +
+      '<div class="sf-est-anim-panel">' +
+      '<div class="sf-est-anim-ring spin" data-est-spin aria-hidden="true"><b data-est-anim-total>₱0</b><span>calculating…</span></div>' +
+      '<div class="sf-est-anim-stages" aria-label="Calculation progress">' +
+      '<div class="sf-est-anim-stage active" data-est-stage="0"><i>1</i><span>Reading the BIR schedule</span></div>' +
+      '<div class="sf-est-anim-stage" data-est-stage="1"><i>2</i><span>Checking the property details</span></div>' +
+      '<div class="sf-est-anim-stage" data-est-stage="2"><i>3</i><span>Preparing your value guide</span></div>' +
+      '</div></div>' +
+      '<p class="sf-est-anim-note" data-est-anim-note>Matching your barangay, street and BIR classification…</p>' +
+      '<p class="sf-est-anim-reassure">Your official BIR reference and indicative market guidance are kept separate.</p></div>';
   }
 
   function reportSections(r) {
@@ -1481,6 +1490,7 @@
     var totalEl = card ? card.querySelector("[data-est-anim-total]") : null;
     var noteEl = card ? card.querySelector("[data-est-anim-note]") : null;
     var spinEl = card ? card.querySelector("[data-est-spin]") : null;
+    var stageEls = card ? $qa(card, "[data-est-stage]") : [];
     if (spinEl) spinEl.classList.add("spin");
     if (!totalEl || !est.result || !est.result.available) {
       setTimeout(function () { est.screen = 4; renderLayout(); }, 900);
@@ -1496,6 +1506,8 @@
       if (noteEl && est.result) {
         noteEl.textContent = p < 0.5 ? "Matching your barangay, street and BIR classification…" : "Reconciling the build-up and range…";
       }
+      var stage = p < 0.35 ? 0 : p < 0.75 ? 1 : 2;
+      stageEls.forEach(function (el, index) { el.classList.toggle("active", index === stage); el.classList.toggle("complete", index < stage); });
       if (p < 1) requestAnimationFrame(frame);
       else {
         if (totalEl) totalEl.innerHTML = money(target);
