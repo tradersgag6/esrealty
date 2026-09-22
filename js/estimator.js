@@ -1061,6 +1061,13 @@
     if (card) { card.innerHTML = out; bindCard(card); }
   }
 
+  function revealEstimatorScreen() {
+    var card = getCard();
+    if (!card || !card.scrollIntoView) return;
+    var screen = card.querySelector('[data-est-screen="' + est.screen + '"]') || card;
+    screen.scrollIntoView({ behavior: "auto", block: "center" });
+  }
+
   function $q(card, sel) { return card ? card.querySelector(sel) : null; }
   function $qa(card, sel) { return card ? Array.prototype.slice.call(card.querySelectorAll(sel)) : []; }
 
@@ -1419,6 +1426,7 @@
     est.result = null;
     est.screen = 3;
     renderLayout();
+    revealEstimatorScreen();
     var config = DATA.config;
     var index = DATA.index;
     var opts = {
