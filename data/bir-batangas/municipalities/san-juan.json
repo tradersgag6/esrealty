@@ -1,0 +1,6892 @@
+{
+  "slug": "san-juan",
+  "name": "SAN JUAN",
+  "region": "Region IV-A (CALABARZON)",
+  "province": "Batangas",
+  "rdo": "59",
+  "departmentOrder": "034-2022",
+  "revision": "5th",
+  "effectivityDate": "2022-07-10",
+  "classifications": [
+    "A1",
+    "A2",
+    "A39",
+    "A40",
+    "A49",
+    "A50",
+    "CR",
+    "GP",
+    "I",
+    "RR",
+    "X"
+  ],
+  "rowCount": 1145,
+  "barangays": {
+    "ABUNG": {
+      "streets": {
+        "san juan-laiya road": {
+          "name": "SAN JUAN-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "I": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "pulang bato road": {
+          "name": "PULANG BATO ROAD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 1100,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "X": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "GP": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A39": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        },
+        "casa kalinaw beach house": {
+          "name": "CASA KALINAW BEACH HOUSE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "el jardin de zaida inc": {
+          "name": "EL JARDIN DE ZAIDA INC.",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 900,
+        "RR": 600,
+        "I": 800,
+        "GP": 300,
+        "A39": 1200,
+        "A50": 200,
+        "A40": 1500
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BALAGBAG": {
+      "streets": {
+        "san juan-laiya road": {
+          "name": "SAN JUAN-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "I": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1600
+                }
+              ]
+            },
+            "GP": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "balagbag-ticalan road": {
+          "name": "BALAGBAG-TICALAN ROAD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 1100,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "X": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 900,
+        "RR": 600,
+        "X": 800,
+        "GP": 400,
+        "A50": 200
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BARUALTE": {
+      "streets": {},
+      "other": {
+        "CR": 5000,
+        "RR": 3000,
+        "I": 4500,
+        "X": 3500,
+        "GP": 1500,
+        "A50": 300,
+        "A39": 2000,
+        "A40": 6000
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BATAAN": {
+      "streets": {
+        "san juan-laiya road": {
+          "name": "SAN JUAN-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "I": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "GP": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1800,
+        "RR": 1000,
+        "X": 1400,
+        "GP": 650,
+        "A50": 300,
+        "A39": 1500,
+        "A40": 2000
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BUHAY NA SAPA": {
+      "streets": {
+        "san juan-laiya road": {
+          "name": "SAN JUAN-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "I": {
+              "value": 1900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1900
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "GP": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "la vista homes": {
+          "name": "LA VISTA HOMES",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "kaunlaran homes subd": {
+          "name": "KAUNLARAN HOMES SUBD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "lotehan": {
+          "name": "LOTEHAN",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        },
+        "ancop relocation site": {
+          "name": "ANCOP RELOCATION SITE",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        },
+        "residencia de aracan private resort": {
+          "name": "RESIDENCIA DE ARACAN PRIVATE RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1500,
+        "RR": 1300,
+        "X": 1200,
+        "GP": 600,
+        "A50": 300,
+        "A40": 1000
+      },
+      "classifications": [
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BULSA": {
+      "streets": {},
+      "other": {
+        "CR": 1000,
+        "RR": 600,
+        "I": 900,
+        "X": 800,
+        "GP": 400,
+        "A50": 200,
+        "A49": 100
+      },
+      "classifications": [
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "CALICANTO": {
+      "streets": {
+        "gen luna st": {
+          "name": "GEN. LUNA ST.",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "I": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 2400
+                }
+              ]
+            },
+            "GP": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1200,
+        "X": 1500,
+        "GP": 500,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "CALIT-CALIT": {
+      "streets": {
+        "gen luna st": {
+          "name": "GEN. LUNA ST.",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "palingowak road": {
+          "name": "PALINGOWAK ROAD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "X": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        },
+        "camella homes": {
+          "name": "CAMELLA HOMES",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "villa soledad subd": {
+          "name": "VILLA SOLEDAD SUBD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 7000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "riverside subd": {
+          "name": "RIVERSIDE SUBD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "basilisa marasigan subd": {
+          "name": "BASILISA MARASIGAN SUBD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "san juan park subd": {
+          "name": "SAN JUAN PARK SUBD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3000,
+        "RR": 2000,
+        "X": 1000,
+        "GP": 500,
+        "A50": 200
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "CALUBCOB I": {
+      "streets": {
+        "san juan-laiya road": {
+          "name": "SAN JUAN-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "I": {
+              "value": 1900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1900
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "the seashore beach club inc": {
+          "name": "THE SEASHORE BEACH CLUB, INC.",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "cmdc agro-tourism resort & enterprises inc": {
+          "name": "CMDC AGRO-TOURISM RESORT & ENTERPRISES INC.",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "calubcub bay resort & recreation": {
+          "name": "CALUBCUB BAY RESORT & RECREATION",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1700,
+        "RR": 1000,
+        "X": 1300,
+        "GP": 500,
+        "A50": 300,
+        "A39": 1400,
+        "A49": 300,
+        "A40": 1500
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "CALUBCOB II": {
+      "streets": {
+        "san juan-laiya road": {
+          "name": "SAN JUAN-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "I": {
+              "value": 1900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "aboitiz subd": {
+          "name": "ABOITIZ SUBD.",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 12000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 12000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000
+                }
+              ]
+            }
+          }
+        },
+        "seafront residences": {
+          "name": "SEAFRONT RESIDENCES",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 7000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7000
+                }
+              ]
+            },
+            "RR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000
+                }
+              ]
+            }
+          }
+        },
+        "irene s beach house": {
+          "name": "IRENE'S BEACH HOUSE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "rbm beach resort": {
+          "name": "RBM BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "patio socorro resort": {
+          "name": "PATIO SOCORRO RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 5000,
+        "RR": 3000,
+        "X": 1300,
+        "GP": 500,
+        "A50": 300,
+        "A39": 1400,
+        "A49": 300,
+        "A40": 1500
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "CATMON": {
+      "streets": {},
+      "other": {
+        "CR": 1300,
+        "RR": 900,
+        "I": 1200,
+        "X": 1000,
+        "GP": 500,
+        "A50": 200,
+        "A39": 1200,
+        "A40": 2000
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "COLOCONTO": {
+      "streets": {},
+      "other": {
+        "CR": 900,
+        "RR": 600,
+        "I": 800,
+        "X": 700,
+        "GP": 400,
+        "A50": 200,
+        "A49": 200
+      },
+      "classifications": [
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "ESCRIBANO": {
+      "streets": {
+        "elizabeth aniciete": {
+          "name": "ELIZABETH ANICIETE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 900,
+        "RR": 600,
+        "I": 800,
+        "X": 700,
+        "GP": 400,
+        "A50": 200,
+        "A49": 200,
+        "A40": 700
+      },
+      "classifications": [
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "HUGOM": {
+      "streets": {
+        "lobo-malabrigo-laiya road": {
+          "name": "LOBO-MALABRIGO-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "I": {
+              "value": 2600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2600
+                },
+                {
+                  "value": 2400
+                }
+              ]
+            },
+            "X": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 250
+                }
+              ]
+            }
+          }
+        },
+        "campos relocation site": {
+          "name": "CAMPOS RELOCATION SITE",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "balai beach resort": {
+          "name": "BALAI BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "blue coral beach resort": {
+          "name": "BLUE CORAL BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "villa sulit beach resort": {
+          "name": "VILLA SULIT BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "agudo beach resort": {
+          "name": "AGUDO BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "les caraibes beach resort": {
+          "name": "LES CARAIBES BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "pipisik beach resort": {
+          "name": "PIPISIK BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "ala biga beach resort": {
+          "name": "ALA BIGA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "punto miguel beach resort": {
+          "name": "PUNTO MIGUEL BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "naambon beach resort": {
+          "name": "NAAMBON BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "casa dolores beach resort": {
+          "name": "CASA DOLORES BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "la luz beach resort": {
+          "name": "LA LUZ BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "sabangan beach resort": {
+          "name": "SABANGAN BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "acuatico beach resort": {
+          "name": "ACUATICO BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "sea utoy beach house": {
+          "name": "SEA UTOY BEACH HOUSE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "pipisik beach resort ii": {
+          "name": "PIPISIK BEACH RESORT II",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "palm beach resort": {
+          "name": "PALM BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "virgin beach resort": {
+          "name": "VIRGIN BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "san juan-ito s beach resort": {
+          "name": "SAN JUAN-ITO'S BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "mamay tino beach resort": {
+          "name": "MAMAY TINO BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "dakila beach resort": {
+          "name": "DAKILA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "allahbiga beach resort": {
+          "name": "ALLAHBIGA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "buracai de laiya inc": {
+          "name": "BURACAI DE LAIYA INC.",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "ganco resorts & recreation incorporated": {
+          "name": "GANCO RESORTS & RECREATION INCORPORATED",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "biba beach resort": {
+          "name": "BIBA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "ente s beach resort": {
+          "name": "ENTE'S BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "baliya garden resort": {
+          "name": "BALIYA GARDEN RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "katniss beach resort": {
+          "name": "KATNISS BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "marmel beach resort": {
+          "name": "MARMEL BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2500,
+        "RR": 1500,
+        "I": 1200,
+        "X": 1100,
+        "GP": 400,
+        "A50": 200,
+        "A39": 1300,
+        "A49": 300,
+        "A40": 1500
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "IMELDA": {
+      "streets": {
+        "porto gualberto": {
+          "name": "PORTO GUALBERTO",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "rpl island beach resort upper portion only": {
+          "name": "RPL ISLAND BEACH RESORT (UPPER PORTION ONLY)",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "yu and ai beach resort": {
+          "name": "YU AND AI BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "casa amara": {
+          "name": "CASA AMARA",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "thea minmar beach resort": {
+          "name": "THEA MINMAR BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "saltorino coastal view resort": {
+          "name": "SALTORINO COASTAL VIEW RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 6000,
+        "RR": 2500,
+        "I": 5500,
+        "X": 4000,
+        "GP": 1600,
+        "A50": 300,
+        "A39": 2500,
+        "A40": 4000
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "JANAO-JANAO": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1100,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "I": {
+              "value": 1100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A1": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A2": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        },
+        "ancop relocation site": {
+          "name": "ANCOP RELOCATION SITE",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 850,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 850
+                }
+              ]
+            },
+            "RR": {
+              "value": 550,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 550
+                }
+              ]
+            }
+          }
+        },
+        "dreamland inland resort": {
+          "name": "DREAMLAND INLAND RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 700,
+        "I": 900,
+        "X": 800,
+        "GP": 500,
+        "A1": 400,
+        "A2": 300,
+        "A50": 200,
+        "A40": 700
+      },
+      "classifications": [
+        "A1",
+        "A2",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "LAIYA APLAYA": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "A50": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "playa laiya phase 3f 4 near beachfront": {
+          "name": "PLAYA LAIYA PHASE 3F, 4 (NEAR BEACHFRONT)",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 27000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 27000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 25000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 25000
+                }
+              ]
+            }
+          }
+        },
+        "playa laiya phase 1 2 3a-3f with no sea view": {
+          "name": "PLAYA LAIYA PHASE 1,2,3A-3F WITH NO SEA VIEW",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 16000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 16000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 15000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 15000
+                }
+              ]
+            }
+          }
+        },
+        "campos relocation site": {
+          "name": "CAMPOS RELOCATION SITE",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "RR": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                }
+              ]
+            }
+          }
+        },
+        "laiya aplaya relocation site": {
+          "name": "LAIYA APLAYA RELOCATION SITE",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "RR": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                }
+              ]
+            }
+          }
+        },
+        "landco aplaya": {
+          "name": "LANDCO APLAYA",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "RR": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                }
+              ]
+            }
+          }
+        },
+        "j-moonlight beach resort": {
+          "name": "J-MOONLIGHT BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "investland properties inc": {
+          "name": "INVESTLAND PROPERTIES, INC.",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "millennial resorts corporation": {
+          "name": "MILLENNIAL RESORTS CORPORATION",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "netania de laiya inc": {
+          "name": "NETANIA DE LAIYA INC.",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "laiya coast grove resorts": {
+          "name": "LAIYA COAST GROVE RESORTS",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "severina s resort": {
+          "name": "SEVERINA'S RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "laiya riviera": {
+          "name": "LAIYA RIVIERA",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "lucky seven beach resort - extension": {
+          "name": "LUCKY SEVEN BEACH RESORT - EXTENSION",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "camp laiya beach resort": {
+          "name": "CAMP LAIYA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "chit s glamping beach resort": {
+          "name": "CHIT'S GLAMPING BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "cj beach resort": {
+          "name": "CJ BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "auroma rest house": {
+          "name": "AUROMA REST HOUSE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "burgis mangrove resort": {
+          "name": "BURGIS MANGROVE RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "llamar beach resort": {
+          "name": "LLAMAR BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "moon palace resort": {
+          "name": "MOON PALACE RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "laiya grande beach resort": {
+          "name": "LAIYA GRANDE BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "acuaverde beach resort and hotel inc": {
+          "name": "ACUAVERDE BEACH RESORT AND HOTEL, INC.",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "casa remo apartelle": {
+          "name": "CASA REMO APARTELLE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "paseo verde beach resort": {
+          "name": "PASEO VERDE BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "pahiyas beach resort": {
+          "name": "PAHIYAS BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "sigayan bay beach resort": {
+          "name": "SIGAYAN BAY BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "taramindu beach resort inc": {
+          "name": "TARAMINDU BEACH RESORT, INC.",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "punto miguel white sands": {
+          "name": "PUNTO MIGUEL WHITE SANDS",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "sabangan beach resort": {
+          "name": "SABANGAN BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "acuatico beach resort & hotel inc": {
+          "name": "ACUATICO BEACH RESORT & HOTEL, INC.",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "blue coral beach resort": {
+          "name": "BLUE CORAL BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "kabayan beach resort": {
+          "name": "KABAYAN BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        },
+        "lola beach resort": {
+          "name": "LOLA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 4500,
+        "RR": 3500,
+        "I": 2000,
+        "X": 1600,
+        "GP": 7500,
+        "A50": 350,
+        "A39": 2500,
+        "A49": 400,
+        "A40": 6000
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "LAIYA IBABAO": {
+      "streets": {
+        "san juan-laiya road": {
+          "name": "SAN JUAN-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "playa laiya phase 3f 4 near beachfront": {
+          "name": "PLAYA LAIYA PHASE 3F, 4 (NEAR BEACHFRONT)",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 27000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 27000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 25000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 25000
+                }
+              ]
+            }
+          }
+        },
+        "playa laiya phase 1 2 3a-3f with no sea view": {
+          "name": "PLAYA LAIYA PHASE 1,2,3A-3F WITH NO SEA VIEW",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 16000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 16000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 15000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 15000
+                }
+              ]
+            }
+          }
+        },
+        "porto laiya": {
+          "name": "PORTO LAIYA",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 13500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 13500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 11000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 11000
+                }
+              ]
+            }
+          }
+        },
+        "kota keluarga": {
+          "name": "KOTA KELUARGA",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 13500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 13500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 10000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 10000
+                }
+              ]
+            }
+          }
+        },
+        "doña nena beach resort": {
+          "name": "DOÑA NENA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "infinity white beach resort": {
+          "name": "INFINITY WHITE BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "first laiya ventures and management inc": {
+          "name": "FIRST LAIYA VENTURES AND MANAGEMENT INC.",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "klub keluarga": {
+          "name": "KLUB KELUARGA",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "one laiya beach resort": {
+          "name": "ONE LAIYA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "cala laiya": {
+          "name": "CALA LAIYA",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "kahidlaw resort": {
+          "name": "KAHIDLAW RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 6000,
+        "RR": 4000,
+        "I": 3000,
+        "X": 2500,
+        "GP": 7500,
+        "A50": 310,
+        "A39": 2500,
+        "A49": 300,
+        "A40": 7000
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "LIBATO": {
+      "streets": {
+        "rosario- san juan- candelaria road": {
+          "name": "ROSARIO- SAN JUAN- CANDELARIA ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1400
+                }
+              ]
+            },
+            "I": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "X": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1200,
+        "I": 1900,
+        "X": 1500,
+        "GP": 700,
+        "A50": 200,
+        "A49": 200
+      },
+      "classifications": [
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "LIPAHAN": {
+      "streets": {
+        "marcial c punzalan jr highway": {
+          "name": "MARCIAL C. PUNZALAN JR. HIGHWAY",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7000
+                }
+              ]
+            },
+            "X": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000
+                }
+              ]
+            },
+            "GP": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "A50": {
+              "value": 650,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 650
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "tiaong road": {
+          "name": "TIAONG ROAD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "I": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "X": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "GP": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            }
+          }
+        },
+        "family heaven subd": {
+          "name": "FAMILY HEAVEN SUBD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "sunshine subd": {
+          "name": "SUNSHINE SUBD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "bvm subd": {
+          "name": "BVM SUBD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "villa natividad subd": {
+          "name": "VILLA NATIVIDAD SUBD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "perez subd": {
+          "name": "PEREZ SUBD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "pablo robles subd": {
+          "name": "PABLO ROBLES SUBD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 4000,
+        "RR": 3000,
+        "I": 3000,
+        "X": 2500,
+        "GP": 1000,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "MABALANOY": {
+      "streets": {
+        "san juan- laiya road": {
+          "name": "SAN JUAN- LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "inay ate st": {
+          "name": "INAY/ATE ST.",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "I": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "X": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        },
+        "bragado homes": {
+          "name": "BRAGADO HOMES",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "family haven subd": {
+          "name": "FAMILY HAVEN SUBD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "las residencias": {
+          "name": "LAS RESIDENCIAS",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "villa de medina resort": {
+          "name": "VILLA DE MEDINA RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 4000,
+        "RR": 3000,
+        "I": 1800,
+        "X": 1500,
+        "GP": 500,
+        "A50": 200,
+        "A40": 1000
+      },
+      "classifications": [
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "MARAYKIT": {
+      "streets": {
+        "gen luna st": {
+          "name": "GEN. LUNA ST.",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "mabini st": {
+          "name": "MABINI ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "I": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "marasigan st": {
+          "name": "MARASIGAN ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "I": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "tiaong road": {
+          "name": "TIAONG ROAD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "I": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "X": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 250
+                }
+              ]
+            }
+          }
+        },
+        "family heaven subd - west orchard": {
+          "name": "FAMILY HEAVEN SUBD - WEST ORCHARD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "bahay marikit": {
+          "name": "BAHAY MARIKIT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        },
+        "village plaza": {
+          "name": "VILLAGE PLAZA",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        },
+        "marikit resort & leisure corporation": {
+          "name": "MARIKIT RESORT & LEISURE CORPORATION",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        },
+        "richbuon garden and resort": {
+          "name": "RICHBUON GARDEN AND RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 4000,
+        "RR": 2000,
+        "I": 1800,
+        "X": 1500,
+        "GP": 500,
+        "A50": 200,
+        "A40": 1000
+      },
+      "classifications": [
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "MUZON": {
+      "streets": {
+        "gen luna st": {
+          "name": "GEN. LUNA ST.",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "I": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2800
+                }
+              ]
+            },
+            "X": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1000,
+        "I": 1400,
+        "X": 1100,
+        "GP": 600,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "NAGSAULAY": {
+      "streets": {
+        "san juan-laiya road": {
+          "name": "SAN JUAN-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "I": {
+              "value": 1600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1600
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "X": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "delacion village": {
+          "name": "DELACION VILLAGE",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            }
+          }
+        },
+        "justo s beach resort and recreation": {
+          "name": "JUSTO'S BEACH RESORT AND RECREATION",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "punta aguila resort and hotel": {
+          "name": "PUNTA AGUILA RESORT AND HOTEL",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1400,
+        "RR": 1000,
+        "I": 1300,
+        "X": 1100,
+        "GP": 500,
+        "A50": 300,
+        "A39": 1100,
+        "A40": 1500
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "PALAHANAN I": {
+      "streets": {
+        "gen luna st": {
+          "name": "GEN. LUNA ST.",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1600
+                }
+              ]
+            },
+            "I": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2500,
+        "RR": 1500,
+        "I": 2300,
+        "X": 2000,
+        "GP": 800,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "PALAHANAN II": {
+      "streets": {
+        "gen luna st": {
+          "name": "GEN. LUNA ST.",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3200
+                }
+              ]
+            },
+            "X": {
+              "value": 2700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2700
+                }
+              ]
+            },
+            "GP": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "gamilla homes": {
+          "name": "GAMILLA HOMES",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 8000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 8000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2500,
+        "RR": 1500,
+        "I": 1600,
+        "GP": 700,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "PALINGOWAK": {
+      "streets": {
+        "palingowak road": {
+          "name": "PALINGOWAK ROAD",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 1100,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "I": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "X": {
+              "value": 1100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 700,
+        "I": 900,
+        "X": 800,
+        "GP": 400,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "PINAGBAYANAN": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "I": {
+              "value": 1700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1700
+                }
+              ]
+            },
+            "X": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 600,
+        "I": 900,
+        "X": 700,
+        "GP": 300,
+        "A50": 200
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION": {
+      "streets": {
+        "gen luna st": {
+          "name": "GEN. LUNA ST.",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 21500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 21500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 9000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 10000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 10000
+                },
+                {
+                  "value": 6000
+                }
+              ]
+            },
+            "I": {
+              "value": 17000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 17000
+                },
+                {
+                  "value": 8000
+                }
+              ]
+            },
+            "X": {
+              "value": 13000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 13000
+                }
+              ]
+            }
+          }
+        },
+        "dandan st": {
+          "name": "DANDAN ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "kalayaan st": {
+          "name": "KALAYAAN ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "mojica st": {
+          "name": "MOJICA ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "j p rizal st": {
+          "name": "J.P RIZAL ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "javier st": {
+          "name": "JAVIER ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "castillo st": {
+          "name": "CASTILLO ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "lopez st": {
+          "name": "LOPEZ ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "de villa st": {
+          "name": "DE VILLA ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "marasigan st": {
+          "name": "MARASIGAN ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "burgos st": {
+          "name": "BURGOS ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "perez st": {
+          "name": "PEREZ ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "mabini st": {
+          "name": "MABINI ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "ipil st": {
+          "name": "IPIL ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "bonifacio st": {
+          "name": "BONIFACIO ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 7500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 7500
+                }
+              ]
+            }
+          }
+        },
+        "villa angelica private resort and venue": {
+          "name": "VILLA ANGELICA PRIVATE RESORT AND VENUE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 7000,
+        "RR": 4500,
+        "I": 6500,
+        "A40": 3000
+      },
+      "classifications": [
+        "A40",
+        "CR",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "POCTOL": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "I": {
+              "value": 1900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "X": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1200,
+        "RR": 700,
+        "I": 1000,
+        "X": 800,
+        "GP": 400,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "PULANG BATO": {
+      "streets": {},
+      "other": {
+        "CR": 1200,
+        "RR": 700,
+        "I": 1000,
+        "X": 800,
+        "GP": 400,
+        "A50": 200,
+        "A49": 200
+      },
+      "classifications": [
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "PUTING BUHANGIN": {
+      "streets": {
+        "san juan-laiya road": {
+          "name": "SAN JUAN-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "I": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1600
+                }
+              ]
+            },
+            "X": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "GP": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "puting buhangin - quipot road": {
+          "name": "PUTING BUHANGIN - QUIPOT ROAD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 1400,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "I": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                }
+              ]
+            },
+            "X": {
+              "value": 1100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A39": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        },
+        "nsc private resort": {
+          "name": "NSC PRIVATE RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "ftbs seaside beach": {
+          "name": "FTBS SEASIDE BEACH",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1300,
+        "RR": 700,
+        "I": 1200,
+        "X": 900,
+        "GP": 500,
+        "A50": 200,
+        "A40": 1500
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "QUIPOT": {
+      "streets": {},
+      "other": {
+        "CR": 2000,
+        "RR": 1200,
+        "I": 1800,
+        "X": 1300,
+        "GP": 500,
+        "A50": 300,
+        "A49": 300
+      },
+      "classifications": [
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "SAMPIRO": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "I": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "X": {
+              "value": 1100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1100,
+        "RR": 800,
+        "I": 1000,
+        "X": 900,
+        "GP": 500,
+        "A50": 300,
+        "A49": 300
+      },
+      "classifications": [
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "SAPANGAN": {
+      "streets": {},
+      "other": {
+        "CR": 1100,
+        "RR": 700,
+        "I": 900,
+        "X": 800,
+        "GP": 500,
+        "A50": 300,
+        "A49": 300
+      },
+      "classifications": [
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "SICO I": {
+      "streets": {
+        "gen luna st": {
+          "name": "GEN. LUNA ST.",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 3800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3800
+                }
+              ]
+            },
+            "X": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 600
+                }
+              ]
+            }
+          }
+        },
+        "garcia-rosario-san juan road": {
+          "name": "GARCIA-ROSARIO-SAN JUAN ROAD",
+          "vicinity": "PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000,
+                  "vicinity": "PROVINCIAL ROAD"
+                },
+                {
+                  "value": 3100,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 2900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2900
+                }
+              ]
+            },
+            "GP": {
+              "value": 1100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1100
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "castillo real subd": {
+          "name": "CASTILLO REAL SUBD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 6500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6500,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "karangalan subd": {
+          "name": "KARANGALAN SUBD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "maria ramos subd": {
+          "name": "MARIA RAMOS SUBD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "gamilla homes": {
+          "name": "GAMILLA HOMES",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 2500,
+        "I": 1800,
+        "X": 1400,
+        "GP": 700,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "SICO II": {
+      "streets": {
+        "gen luna st": {
+          "name": "GEN. LUNA ST.",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1600
+                }
+              ]
+            },
+            "I": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1100
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1600,
+        "RR": 1000,
+        "I": 1500,
+        "X": 1200,
+        "GP": 600,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "SUBUKIN": {
+      "streets": {
+        "san juan-laiya road": {
+          "name": "SAN JUAN-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "I": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "X": {
+              "value": 1600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1600
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1400,
+        "RR": 900,
+        "I": 1300,
+        "X": 1000,
+        "GP": 500,
+        "A50": 300,
+        "A39": 2000,
+        "A40": 3000
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "TALAHIBAN I": {
+      "streets": {
+        "san juan-laiya road": {
+          "name": "SAN JUAN-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 3800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3800
+                }
+              ]
+            },
+            "X": {
+              "value": 3200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3200
+                }
+              ]
+            },
+            "GP": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "A50": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 700
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1400,
+        "I": 1800,
+        "X": 1500,
+        "GP": 600,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "TALAHIBAN II": {
+      "streets": {
+        "san juan-laiya road": {
+          "name": "SAN JUAN-LAIYA ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 3800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3800
+                }
+              ]
+            },
+            "X": {
+              "value": 3200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3200
+                }
+              ]
+            },
+            "GP": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "A50": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 700
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1400,
+        "I": 1800,
+        "X": 1500,
+        "GP": 600,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "TICALAN": {
+      "streets": {},
+      "other": {
+        "CR": 1300,
+        "RR": 900,
+        "I": 1200,
+        "X": 1000,
+        "GP": 500,
+        "A50": 400,
+        "A39": 1500,
+        "A40": 2000
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "TIPAZ": {
+      "streets": {
+        "gen luna st": {
+          "name": "GEN. LUNA ST.",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 1800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1900
+                },
+                {
+                  "value": 1400
+                }
+              ]
+            },
+            "I": {
+              "value": 2700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2700
+                }
+              ]
+            },
+            "X": {
+              "value": 2100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2100
+                }
+              ]
+            },
+            "GP": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "tipas-poctol-pinagbayanan road": {
+          "name": "TIPAS-POCTOL-PINAGBAYANAN ROAD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1700,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 1600,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "I": {
+              "value": 1600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1600
+                }
+              ]
+            },
+            "X": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                }
+              ]
+            },
+            "GP": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        },
+        "corazon magtibay subd": {
+          "name": "CORAZON MAGTIBAY SUBD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "villa reralla resort": {
+          "name": "VILLA RERALLA RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3000,
+        "RR": 2000,
+        "I": 1400,
+        "X": 1200,
+        "GP": 600,
+        "A50": 200,
+        "A40": 1000
+      },
+      "classifications": [
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    }
+  }
+}

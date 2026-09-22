@@ -1,0 +1,352 @@
+{
+  "region": "Region IV-A (CALABARZON)",
+  "province": "Batangas",
+  "classifications": {
+    "A39": "Seashore",
+    "A4": "Coco Land",
+    "A40": "Resort",
+    "A49": "Mountainous/Hilly Areas",
+    "A50": "Other Agricultural Lands",
+    "A6": "Fishpond",
+    "CR": "Commercial Regular",
+    "GP": "General Purposes",
+    "I": "Industrial",
+    "RR": "Residential Regular",
+    "X": "Institutional",
+    "A26": "Bamboo Land",
+    "CL": "Cemetery Lot",
+    "A1": "Riceland Irrigated",
+    "A17": "Sugar Land",
+    "A31": "Mineral Land",
+    "A36": "Forest Land/Timber Land",
+    "A41": "Sandy/Stony",
+    "A7": "Swamp",
+    "CC": "Commercial Condominium",
+    "GL": "Government Land",
+    "RC": "Residential Condominium",
+    "A12": "Orchard",
+    "A2": "Riceland Unirrigated",
+    "A24": "Mangrove",
+    "A42": "Prawn pond",
+    "A15": "Pasture Land",
+    "A14": "Banana Land",
+    "A16": "Corn Land",
+    "A23": "Mango",
+    "A48": "Coffee",
+    "A20": "Lanzones",
+    "A3": "Upland",
+    "A44": "Ipil-ipil",
+    "A47": "Vegetable Land",
+    "A27": "Peanut Land",
+    "A19": "Cacao",
+    "A25": "Camote/Cassava"
+  },
+  "municipalities": [
+    {
+      "slug": "agoncillo",
+      "name": "AGONCILLO",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 21,
+      "streetCount": 39
+    },
+    {
+      "slug": "alitagtag",
+      "name": "ALITAGTAG",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 19,
+      "streetCount": 39
+    },
+    {
+      "slug": "balayan",
+      "name": "BALAYAN",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "2022-07-23",
+      "barangayCount": 49,
+      "streetCount": 158
+    },
+    {
+      "slug": "balete",
+      "name": "BALETE",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 13,
+      "streetCount": 24
+    },
+    {
+      "slug": "batangas-city",
+      "name": "BATANGAS CITY",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "2022-07-23",
+      "barangayCount": 105,
+      "streetCount": 433
+    },
+    {
+      "slug": "bauan",
+      "name": "BAUAN",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "2022-07-23",
+      "barangayCount": 40,
+      "streetCount": 126
+    },
+    {
+      "slug": "calaca",
+      "name": "CALACA",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "",
+      "barangayCount": 41,
+      "streetCount": 103
+    },
+    {
+      "slug": "calatagan",
+      "name": "CALATAGAN",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "",
+      "barangayCount": 25,
+      "streetCount": 133
+    },
+    {
+      "slug": "cuenca",
+      "name": "CUENCA",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 21,
+      "streetCount": 67
+    },
+    {
+      "slug": "ibaan",
+      "name": "IBAAN",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 26,
+      "streetCount": 37
+    },
+    {
+      "slug": "laurel",
+      "name": "LAUREL",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 21,
+      "streetCount": 77
+    },
+    {
+      "slug": "lemery",
+      "name": "LEMERY",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "",
+      "barangayCount": 46,
+      "streetCount": 162
+    },
+    {
+      "slug": "lian",
+      "name": "LIAN",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "",
+      "barangayCount": 19,
+      "streetCount": 144
+    },
+    {
+      "slug": "lipa-city",
+      "name": "LIPA CITY",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 73,
+      "streetCount": 359
+    },
+    {
+      "slug": "lobo",
+      "name": "LOBO",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "",
+      "barangayCount": 26,
+      "streetCount": 71
+    },
+    {
+      "slug": "mabini",
+      "name": "MABINI",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "2022-07-23",
+      "barangayCount": 34,
+      "streetCount": 145
+    },
+    {
+      "slug": "malvar",
+      "name": "MALVAR",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 15,
+      "streetCount": 62
+    },
+    {
+      "slug": "mataas-na-kahoy",
+      "name": "MATAAS NA KAHOY",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 16,
+      "streetCount": 61
+    },
+    {
+      "slug": "nasugbu",
+      "name": "NASUGBU",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "2022-07-23",
+      "barangayCount": 42,
+      "streetCount": 209
+    },
+    {
+      "slug": "padre-garcia",
+      "name": "PADRE GARCIA",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 19,
+      "streetCount": 41
+    },
+    {
+      "slug": "rosario",
+      "name": "ROSARIO",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 48,
+      "streetCount": 108
+    },
+    {
+      "slug": "san-jose",
+      "name": "SAN JOSE",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 33,
+      "streetCount": 29
+    },
+    {
+      "slug": "san-juan",
+      "name": "SAN JUAN",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 42,
+      "streetCount": 187
+    },
+    {
+      "slug": "san-luis",
+      "name": "SAN LUIS",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "2022-07-23",
+      "barangayCount": 26,
+      "streetCount": 59
+    },
+    {
+      "slug": "san-nicolas",
+      "name": "SAN NICOLAS",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 16,
+      "streetCount": 26
+    },
+    {
+      "slug": "san-pascual",
+      "name": "SAN PASCUAL",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "2022-07-23",
+      "barangayCount": 31,
+      "streetCount": 91
+    },
+    {
+      "slug": "sta-teresita",
+      "name": "STA. TERESITA",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 17,
+      "streetCount": 30
+    },
+    {
+      "slug": "sto-tomas-city",
+      "name": "STO. TOMAS CITY",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 30,
+      "streetCount": 144
+    },
+    {
+      "slug": "taal",
+      "name": "TAAL",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "2022-07-23",
+      "barangayCount": 43,
+      "streetCount": 128
+    },
+    {
+      "slug": "talisay",
+      "name": "TALISAY",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 21,
+      "streetCount": 94
+    },
+    {
+      "slug": "tanauan-city",
+      "name": "TANAUAN CITY",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 49,
+      "streetCount": 184
+    },
+    {
+      "slug": "taysan",
+      "name": "TAYSAN",
+      "rdo": "59",
+      "departmentOrder": "034-2022",
+      "effectivityDate": "2022-07-10",
+      "barangayCount": 20,
+      "streetCount": 44
+    },
+    {
+      "slug": "tingloy",
+      "name": "TINGLOY",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "2022-07-23",
+      "barangayCount": 15,
+      "streetCount": 30
+    },
+    {
+      "slug": "tuy",
+      "name": "TUY",
+      "rdo": "58",
+      "departmentOrder": "035-2022",
+      "effectivityDate": "2022-07-23",
+      "barangayCount": 23,
+      "streetCount": 66
+    }
+  ]
+}

@@ -174,6 +174,34 @@
     await wait(800);
 
     auditPage("public home", allowedOverflow);
+    var estApi = window.ESREALTY_EST;
+    var estimatorAudited = false;
+    if (estApi && estApi.debug) {
+      try {
+        var row = estApi._data().index.municipalities.find(function (m) { return m.name === "BALAYAN"; });
+        var md = await estApi.loadMunicipality(row.slug);
+        var rr = estApi.core.computeEstimate(estApi._data().config, estApi._data().index, md, {
+          municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "all street",
+          classification: "CR", area: 200, purpose: "Selling", type: "vacant_lot"
+        });
+        var st = estApi._state();
+        st.result = rr;
+        estApi.debug.render(4);
+        await wait(500);
+        auditPage("estimator report", allowedOverflow.concat([".sf-est-street-list"]));
+        var leadOpen = document.querySelector("[data-est-lead-open]");
+        if (leadOpen) { leadOpen.click(); await wait(200); auditPage("estimator lead form", allowedOverflow.concat([".sf-est-street-list"])); }
+        estimatorAudited = true;
+      } catch (e) {
+        log.push("estimator audit failed: " + e.message);
+      }
+      estApi.debug.render(1);
+      await wait(250);
+    }
+    checks.push({ name: "estimator audit executed", ok: estimatorAudited, detail: estimatorAudited ? "report + lead form audited" : (estApi ? "audit threw" : "ESREALTY_EST not exposed on public home") });
+    location.hash = "#/shophouse";
+    await wait(900);
+    auditPage("public shophouse", allowedOverflow);
     location.hash = "#/search";
     await wait(700);
     auditPage("public search", allowedOverflow);

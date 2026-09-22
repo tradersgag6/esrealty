@@ -1,0 +1,16 @@
+{
+  "name": "es-realty-bir-import",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Imports official BIR zonal-value datasets for Batangas (RDO 58 West, RDO 59 East) into data/bir-batangas.",
+  "main": "import.js",
+  "scripts": {
+    "download": "node download.js",
+    "import": "node import.js",
+    "validate": "node validate.js"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.16",
+    "xlsx": "^0.18.5"
+  }
+}

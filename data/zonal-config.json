@@ -1,0 +1,181 @@
+{
+  "version": 2,
+  "calculationVersion": "2026.09.1",
+  "dataVersion": "bir-2022-rdo58-59",
+  "asOf": "2022-07-23",
+  "note": "Engine + data versions stamped on every estimate output. Deterministic and reconcilable.",
+  "purposes": [
+    "Selling",
+    "Buying",
+    "I received an offer",
+    "Estate",
+    "Loan",
+    "Other"
+  ],
+  "propertyTypes": {
+    "vacant_lot": {
+      "label": "Vacant Lot",
+      "kind": "land"
+    },
+    "house_lot": {
+      "label": "House & Lot",
+      "kind": "built",
+      "floorDefaultRatio": 0.6
+    }
+  },
+  "cornerLotPct": 0.025,
+  "construction": {
+    "wood_prefab": {
+      "label": "Wood / Pre-fab",
+      "costPerSqm": 15000
+    },
+    "mixed_chb": {
+      "label": "Mixed / CHB",
+      "costPerSqm": 25000
+    },
+    "rca_steel": {
+      "label": "Reinforced Concrete / Steel",
+      "costPerSqm": 40000
+    }
+  },
+  "floors": [
+    {
+      "key": "1",
+      "label": "1 floor",
+      "multiplier": 1
+    },
+    {
+      "key": "2",
+      "label": "2 floors",
+      "multiplier": 1.05
+    },
+    {
+      "key": "3plus",
+      "label": "3 floors or more",
+      "multiplier": 1.1
+    }
+  ],
+  "ageBands": [
+    {
+      "key": "0-5",
+      "label": "0–5 years",
+      "midpoint": 2.5
+    },
+    {
+      "key": "6-10",
+      "label": "6–10 years",
+      "midpoint": 8
+    },
+    {
+      "key": "11-20",
+      "label": "11–20 years",
+      "midpoint": 15
+    },
+    {
+      "key": "21-30",
+      "label": "21–30 years",
+      "midpoint": 25
+    },
+    {
+      "key": "31plus",
+      "label": "Over 30 years",
+      "midpoint": 35
+    }
+  ],
+  "depreciation": {
+    "lifeYears": 40,
+    "maxPct": 0.95
+  },
+  "features": {
+    "wall_gate": {
+      "label": "Concrete fence & gate",
+      "cost": 180000
+    },
+    "patio": {
+      "label": "Covered patio",
+      "cost": 80000
+    },
+    "garden": {
+      "label": "Landscaped garden",
+      "cost": 50000
+    },
+    "dirty_kitchen": {
+      "label": "Dirty kitchen",
+      "cost": 40000
+    },
+    "water_tank": {
+      "label": "Water tank",
+      "cost": 30000
+    },
+    "cctv": {
+      "label": "CCTV system",
+      "cost": 50000
+    },
+    "solar": {
+      "label": "Solar panels",
+      "cost": 200000
+    },
+    "pool": {
+      "label": "Swimming pool",
+      "cost": 500000
+    }
+  },
+  "proxyFactors": {
+    "residential": {
+      "label": "Residential",
+      "factor": 1
+    },
+    "commercial": {
+      "label": "Commercial",
+      "factor": 1.7
+    },
+    "agricultural": {
+      "label": "Agricultural",
+      "factor": 0.5
+    },
+    "industrial": {
+      "label": "Industrial",
+      "factor": 1.35
+    }
+  },
+  "marketBand": {
+    "regionalAdj": 1,
+    "bands": {
+      "residential": {
+        "min": 1.8,
+        "max": 3.2,
+        "mid": 2.5
+      },
+      "commercial": {
+        "min": 1.8,
+        "max": 3.2,
+        "mid": 2.5
+      },
+      "agricultural": {
+        "min": 1,
+        "max": 2,
+        "mid": 1.5
+      },
+      "industrial": {
+        "min": 1.5,
+        "max": 2.5,
+        "mid": 2
+      }
+    }
+  },
+  "tax": {
+    "cgtPct": 0.06,
+    "dstPct": 0.015,
+    "transferPct": 0.005,
+    "registrationPct": 0.001
+  },
+  "disclaimer": "Indicative guide estimate — not a certified appraisal (RA 9646). Land figures follow the official BIR zonal schedule for your municipality, barangay, street and classification; improvements use typical replacement construction cost less straight-line age depreciation. Confirm the current schedule and verify on the ground before any transaction.",
+  "labels": {
+    "reference": "BIR zonal reference",
+    "locality": "Locality",
+    "market": "Market adjustment",
+    "coverage_good": "Exact street-level BIR value",
+    "coverage_limited": "Limited street coverage — inside the municipality fallback",
+    "coverage_unavailable": "Estimate unavailable"
+  }
+}

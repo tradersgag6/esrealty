@@ -1,0 +1,2307 @@
+{
+  "slug": "san-jose",
+  "name": "SAN JOSE",
+  "region": "Region IV-A (CALABARZON)",
+  "province": "Batangas",
+  "rdo": "59",
+  "departmentOrder": "034-2022",
+  "revision": "5th",
+  "effectivityDate": "2022-07-10",
+  "classifications": [
+    "A50",
+    "CR",
+    "GP",
+    "I",
+    "RR"
+  ],
+  "rowCount": 574,
+  "barangays": {
+    "AGUILA": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1700
+                }
+              ]
+            },
+            "I": {
+              "value": 2800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2800
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                },
+                {
+                  "value": 800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2600,
+        "RR": 1200,
+        "I": 1500,
+        "GP": 1000,
+        "A50": 600
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "ANUS": {
+      "streets": {},
+      "other": {
+        "CR": 1600,
+        "RR": 1000,
+        "I": 1500,
+        "GP": 700,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "AYA": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1600,
+        "I": 1800,
+        "GP": 1000,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "BAGONG POOK": {
+      "streets": {},
+      "other": {
+        "CR": 1600,
+        "RR": 1000,
+        "I": 1500,
+        "GP": 700,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "BALAGTASIN I": {
+      "streets": {},
+      "other": {
+        "CR": 1600,
+        "RR": 1000,
+        "I": 1500,
+        "GP": 700,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "BALAGTASIN II": {
+      "streets": {},
+      "other": {
+        "CR": 1600,
+        "RR": 1000,
+        "I": 1500,
+        "GP": 700,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "BANAY-BANAY I": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1700
+                }
+              ]
+            },
+            "I": {
+              "value": 2800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2800
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                },
+                {
+                  "value": 800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2600,
+        "RR": 1200,
+        "I": 1500,
+        "GP": 1000,
+        "A50": 600
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "BANAY-BANAY II": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1700
+                }
+              ]
+            },
+            "I": {
+              "value": 2800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2800
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                },
+                {
+                  "value": 800
+                }
+              ]
+            }
+          }
+        },
+        "maharlika subd": {
+          "name": "MAHARLIKA SUBD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 6000,
+        "RR": 3500,
+        "I": 1500,
+        "GP": 1000,
+        "A50": 600
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "BIGAIN I": {
+      "streets": {},
+      "other": {
+        "CR": 1600,
+        "RR": 1000,
+        "I": 1500,
+        "GP": 700,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "BIGAIN II": {
+      "streets": {},
+      "other": {
+        "CR": 1600,
+        "RR": 1000,
+        "I": 1500,
+        "GP": 700,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "BIGAIN SOUTH": {
+      "streets": {},
+      "other": {
+        "CR": 1600,
+        "RR": 1000,
+        "I": 1500,
+        "GP": 700,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "CALANSAYAN": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            }
+          }
+        },
+        "green meadows axeia": {
+          "name": "GREEN MEADOWS (AXEIA)",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 6500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6500
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1600,
+        "I": 1800,
+        "GP": 1000,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "DAGATAN": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1600,
+        "I": 1800,
+        "GP": 1000,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "DON LUIS": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1700
+                }
+              ]
+            },
+            "I": {
+              "value": 2800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2800
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                },
+                {
+                  "value": 800
+                }
+              ]
+            }
+          }
+        },
+        "villa san jose subdivision": {
+          "name": "VILLA SAN JOSE SUBDIVISION",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 2500,
+        "I": 1500,
+        "GP": 1000,
+        "A50": 600
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "GALAMAY AMO": {
+      "streets": {},
+      "other": {
+        "CR": 2500,
+        "RR": 2000,
+        "I": 2200,
+        "GP": 1400,
+        "A50": 600
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "LALAYAT": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1600,
+        "I": 1800,
+        "GP": 1000,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "LAPU-LAPU I": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "villa san jose subdivision": {
+          "name": "VILLA SAN JOSE SUBDIVISION",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 5000,
+        "RR": 3000,
+        "I": 1800,
+        "GP": 1000,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "LAPU-LAPU II": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1600,
+        "I": 1800,
+        "GP": 800,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "LEPOTE": {
+      "streets": {},
+      "other": {
+        "CR": 1500,
+        "RR": 1000,
+        "I": 1400,
+        "GP": 600,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "LUMIL": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1600,
+        "I": 1800,
+        "GP": 1000,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "MOJON": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1400
+                }
+              ]
+            },
+            "I": {
+              "value": 1600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1600
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "GP": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1200,
+        "RR": 1000,
+        "I": 1100,
+        "GP": 600,
+        "A50": 300
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "NATUNUAN": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1600,
+        "I": 1800,
+        "GP": 1000,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "P. ULAN": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "A50": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 2800,
+        "I": 3000,
+        "GP": 1000,
+        "A50": 800
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "PALANCA": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1600,
+        "I": 1800,
+        "GP": 1000,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "POBLACION I": {
+      "streets": {
+        "makalintal avenue": {
+          "name": "MAKALINTAL AVENUE",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 4500,
+        "RR": 3800,
+        "I": 4200,
+        "GP": 1500,
+        "A50": 1000
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "POBLACION II": {
+      "streets": {
+        "makalintal avenue": {
+          "name": "MAKALINTAL AVENUE",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 4500,
+        "RR": 3800,
+        "I": 4200,
+        "GP": 1500,
+        "A50": 1000
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "POBLACION III": {
+      "streets": {
+        "makalintal avenue": {
+          "name": "MAKALINTAL AVENUE",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "san jose-ibaan-batangas road": {
+          "name": "SAN JOSE-IBAAN-BATANGAS ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3800
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "I": {
+              "value": 4200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4200
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 3300,
+        "I": 3400,
+        "GP": 1000,
+        "A50": 700
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "POBLACION IV": {
+      "streets": {
+        "makalintal avenue": {
+          "name": "MAKALINTAL AVENUE",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 4500,
+        "RR": 3800,
+        "I": 4200,
+        "GP": 1500,
+        "A50": 1000
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "SABANG": {
+      "streets": {},
+      "other": {
+        "CR": 1500,
+        "RR": 1000,
+        "I": 1400,
+        "GP": 600,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "SALABAN": {
+      "streets": {
+        "san jose-ibaan-batangas road": {
+          "name": "SAN JOSE-IBAAN-BATANGAS ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1600,
+        "I": 1800,
+        "GP": 1000,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "STO. CRISTO": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1700
+                }
+              ]
+            },
+            "I": {
+              "value": 2800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2800
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                },
+                {
+                  "value": 800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2600,
+        "RR": 1200,
+        "I": 1500,
+        "GP": 1000,
+        "A50": 600
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "TAYSAN": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "A50": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            }
+          }
+        },
+        "makalintal avenue": {
+          "name": "MAKALINTAL AVENUE",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 4200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A50": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3800,
+        "RR": 2800,
+        "I": 3400,
+        "GP": 800,
+        "A50": 700
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    },
+    "TUGTUG": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1600,
+        "I": 1800,
+        "GP": 1000,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR"
+      ]
+    }
+  }
+}

@@ -9,9 +9,14 @@
   "use strict";
   var DAYS_EXPIRING = 60;
   function complianceWindowDays(dateStr) {
-    var t = dateStr ? new Date(String(dateStr).slice(0, 10) + "T00:00:00").getTime() : null;
-    if (!t || isNaN(t)) return { label: "Active", cls: "green", due: false, days: null };
-    var d = Math.round((t - Date.now()) / 86400000);
+    var text = dateStr == null ? "" : String(dateStr).slice(0, 10);
+    var t = /^\d{4}-\d{2}-\d{2}$/.test(text)
+      ? Date.UTC(+text.slice(0, 4), +text.slice(5, 7) - 1, +text.slice(8, 10))
+      : (text ? NaN : null);
+    if (t == null || isNaN(t)) return { label: "Active", cls: "green", due: false, days: null };
+    var now = new Date();
+    var startNow = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+    var d = Math.round((t - startNow) / 86400000);
     if (d < 0) return { label: "Expired " + Math.abs(d) + "d", cls: "red", due: true, days: d };
     if (d <= DAYS_EXPIRING) return { label: "Expiring in " + d + "d", cls: "gold", due: true, days: d };
     return { label: "Active - " + d + "d", cls: "green", due: false, days: d };

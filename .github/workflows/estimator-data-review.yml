@@ -1,0 +1,57 @@
+name: Batangas Value Guide - Data Review
+
+on:
+  schedule:
+    - cron: "30 10 * * 1"   # Monday 18:30 PHT (UTC+8)
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate estimator datasets
+        # validate-only: never writes data/ or resets the nextReview review stamp,
+        # so the staleness check below can actually observe the due date.
+        run: node market-scan/build-batangas-data.js --validate
+
+      - name: Open review issue when data is stale
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const m = JSON.parse(fs.readFileSync('data/data-manifest.json', 'utf8'));
+            const stale = new Date(String(m.nextReview)) <= new Date();
+            const body = (stale ? ':warning: **Review due** - reference data should be refreshed.\n\n' : '') +
+              '| Field | Value |\n|---|---|\n' +
+              '| Validated | ' + m.validated + ' |\n' +
+              '| Next review | ' + m.nextReview + ' |\n' +
+              '| Status | ' + m.status + ' |\n' +
+              '| Municipalities | ' + (m.counts && m.counts.municipalities) + ' |\n' +
+              '| Barangays | ' + (m.counts && m.counts.barangays) + ' |\n' +
+              '| Streets | ' + (m.counts && m.counts.streets) + ' |\n' +
+              '| Classifications | ' + (m.counts && m.counts.classifications) + ' |\n\n' +
+              'To refresh: confirm current BIR zonal schedules and tracked developer projects, then run `node market-scan/build-batangas-data.js` locally and commit the refreshed data (nextReview will advance by 30 days).';
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+            const open = issues.data.find(i => /Batangas Value Guide review/i.test(i.title));
+            if (stale && !open) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'Batangas Value Guide review due - ' + m.nextReview,
+                body
+              });
+            }

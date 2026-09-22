@@ -1,0 +1,4845 @@
+{
+  "slug": "cuenca",
+  "name": "CUENCA",
+  "region": "Region IV-A (CALABARZON)",
+  "province": "Batangas",
+  "rdo": "59",
+  "departmentOrder": "034-2022",
+  "revision": "5th",
+  "effectivityDate": "2022-07-10",
+  "classifications": [
+    "A12",
+    "A17",
+    "A39",
+    "A40",
+    "A49",
+    "A50",
+    "CL",
+    "CR",
+    "GP",
+    "I",
+    "RR",
+    "X"
+  ],
+  "rowCount": 755,
+  "barangays": {
+    "BALAGBAG": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1100,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 750,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "X": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "GP": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                },
+                {
+                  "value": 150,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 150
+                }
+              ]
+            },
+            "A50": {
+              "value": 150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 150
+                },
+                {
+                  "value": 80
+                },
+                {
+                  "value": 70
+                }
+              ]
+            },
+            "A49": {
+              "value": 60,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 60
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A12",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "BUNGAHAN": {
+      "streets": {
+        "b laqui st cuenca to batangas city road": {
+          "name": "B. LAQUI ST.(CUENCA TO BATANGAS CITY ROAD)",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 1600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1600,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1450,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1100
+                },
+                {
+                  "value": 750
+                }
+              ]
+            },
+            "I": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1350
+                }
+              ]
+            },
+            "X": {
+              "value": 1250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1250
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A12": {
+              "value": 260,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 260
+                },
+                {
+                  "value": 220
+                }
+              ]
+            },
+            "A17": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 230
+                }
+              ]
+            },
+            "A50": {
+              "value": 250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 250
+                },
+                {
+                  "value": 200
+                }
+              ]
+            }
+          }
+        },
+        "pinagkrusan to anus road": {
+          "name": "PINAGKRUSAN TO ANUS ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 1350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1350,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1050,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1050
+                },
+                {
+                  "value": 850
+                }
+              ]
+            },
+            "I": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "X": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "GP": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A12": {
+              "value": 180,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 180
+                }
+              ]
+            },
+            "A17": {
+              "value": 190,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 190
+                }
+              ]
+            },
+            "A50": {
+              "value": 175,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 175
+                }
+              ]
+            }
+          }
+        },
+        "bungahan road": {
+          "name": "BUNGAHAN ROAD",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 750,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 650,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 650
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "X": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "GP": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 300
+                },
+                {
+                  "value": 250,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 140,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 140
+                },
+                {
+                  "value": 110
+                }
+              ]
+            },
+            "A17": {
+              "value": 180,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 180
+                },
+                {
+                  "value": 120
+                }
+              ]
+            },
+            "A50": {
+              "value": 130,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 130
+                },
+                {
+                  "value": 100
+                },
+                {
+                  "value": 80
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1650,
+        "RR": 1100
+      },
+      "classifications": [
+        "A12",
+        "A17",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "CALUMAYIN": {
+      "streets": {
+        "circumferential road": {
+          "name": "CIRCUMFERENTIAL ROAD",
+          "vicinity": "ALONG TAAL LAKE",
+          "classes": {
+            "CR": {
+              "value": 950,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 950,
+                  "vicinity": "ALONG TAAL LAKE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 750,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 450
+                },
+                {
+                  "value": 250,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A39": {
+              "value": 550,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 550
+                }
+              ]
+            },
+            "A49": {
+              "value": 80,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 80
+                }
+              ]
+            },
+            "A50": {
+              "value": 150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 150
+                },
+                {
+                  "value": 100
+                },
+                {
+                  "value": 70
+                }
+              ]
+            }
+          }
+        },
+        "no road": {
+          "name": "NO ROAD",
+          "vicinity": "ALONG TAAL LAKE",
+          "classes": {
+            "CR": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700,
+                  "vicinity": "ALONG TAAL LAKE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "GP": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                },
+                {
+                  "value": 220,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 170,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 170
+                }
+              ]
+            },
+            "A39": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A49": {
+              "value": 70,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 70
+                }
+              ]
+            },
+            "A50": {
+              "value": 120,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 120
+                },
+                {
+                  "value": 80
+                },
+                {
+                  "value": 60
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A12",
+        "A39",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "DALIPIT EAST": {
+      "streets": {
+        "pinagkrusan to anus road": {
+          "name": "PINAGKRUSAN TO ANUS ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1150
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "I": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 950
+                }
+              ]
+            },
+            "X": {
+              "value": 1250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1250
+                }
+              ]
+            },
+            "GP": {
+              "value": 750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 750
+                },
+                {
+                  "value": 550
+                }
+              ]
+            },
+            "A12": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 210
+                }
+              ]
+            },
+            "A17": {
+              "value": 310,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 310
+                },
+                {
+                  "value": 220
+                }
+              ]
+            },
+            "A50": {
+              "value": 280,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 280
+                },
+                {
+                  "value": 200
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 950,
+        "RR": 650,
+        "GP": 300,
+        "A12": 200,
+        "A17": 190,
+        "A50": 180
+      },
+      "classifications": [
+        "A12",
+        "A17",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "DALIPIT WEST": {
+      "streets": {
+        "pinagkrusan to anus road": {
+          "name": "PINAGKRUSAN TO ANUS ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1150
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "I": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 950
+                }
+              ]
+            },
+            "X": {
+              "value": 1250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1250
+                }
+              ]
+            },
+            "GP": {
+              "value": 750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 750
+                },
+                {
+                  "value": 550
+                }
+              ]
+            },
+            "A12": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 210
+                }
+              ]
+            },
+            "A17": {
+              "value": 310,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 310
+                },
+                {
+                  "value": 220
+                }
+              ]
+            },
+            "A50": {
+              "value": 280,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 280
+                },
+                {
+                  "value": 200
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 950,
+        "RR": 650,
+        "GP": 300,
+        "A12": 200,
+        "A17": 190,
+        "A50": 180
+      },
+      "classifications": [
+        "A12",
+        "A17",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "DITA": {
+      "streets": {
+        "lipa to lemery road": {
+          "name": "LIPA TO LEMERY ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 1650,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 1200,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1700
+                },
+                {
+                  "value": 1100
+                },
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "I": {
+              "value": 2100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2100
+                },
+                {
+                  "value": 1550
+                }
+              ]
+            },
+            "X": {
+              "value": 1900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1900
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "GP": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 750
+                },
+                {
+                  "value": 600
+                },
+                {
+                  "value": 300
+                },
+                {
+                  "value": 100,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                },
+                {
+                  "value": 250
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 250
+                },
+                {
+                  "value": 200
+                },
+                {
+                  "value": 110
+                },
+                {
+                  "value": 80
+                }
+              ]
+            },
+            "A49": {
+              "value": 160,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 160
+                }
+              ]
+            }
+          }
+        },
+        "greenhills putol little baguio burol cut ville": {
+          "name": "GREENHILLS, PUTOL, LITTLE BAGUIO, BUROL, CUT VILLE",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "RR": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2100,
+        "RR": 1300
+      },
+      "classifications": [
+        "A12",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "DON JUAN": {
+      "streets": {
+        "circumferential road": {
+          "name": "CIRCUMFERENTIAL ROAD",
+          "vicinity": "ALONG TAAL LAKE",
+          "classes": {
+            "CR": {
+              "value": 950,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 950,
+                  "vicinity": "ALONG TAAL LAKE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 750,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 450
+                },
+                {
+                  "value": 250,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A39": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A49": {
+              "value": 80,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 80
+                }
+              ]
+            },
+            "A50": {
+              "value": 150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 150
+                },
+                {
+                  "value": 100
+                },
+                {
+                  "value": 70
+                }
+              ]
+            }
+          }
+        },
+        "no road": {
+          "name": "NO ROAD",
+          "vicinity": "ALONG TAAL LAKE",
+          "classes": {
+            "CR": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700,
+                  "vicinity": "ALONG TAAL LAKE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "GP": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                },
+                {
+                  "value": 220,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 170,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 170
+                }
+              ]
+            },
+            "A39": {
+              "value": 250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 250
+                }
+              ]
+            },
+            "A49": {
+              "value": 70,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 70
+                }
+              ]
+            },
+            "A50": {
+              "value": 100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 100
+                },
+                {
+                  "value": 80
+                },
+                {
+                  "value": 60
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A12",
+        "A39",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "EMMANUEL": {
+      "streets": {
+        "b laqui st cuenca to batangas city road": {
+          "name": "B. LAQUI ST.(CUENCA TO BATANGAS CITY ROAD)",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2300,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "I": {
+              "value": 2150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2150
+                },
+                {
+                  "value": 1150
+                }
+              ]
+            },
+            "X": {
+              "value": 2100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2100
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 440
+                }
+              ]
+            },
+            "A12": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 340
+                }
+              ]
+            },
+            "A50": {
+              "value": 450,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 450
+                },
+                {
+                  "value": 270
+                }
+              ]
+            }
+          }
+        },
+        "pulong gubat": {
+          "name": "PULONG GUBAT",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 900,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "GP": {
+              "value": 320,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 320
+                },
+                {
+                  "value": 270
+                },
+                {
+                  "value": 120,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 280,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 280
+                },
+                {
+                  "value": 150
+                }
+              ]
+            },
+            "A50": {
+              "value": 200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 140
+                },
+                {
+                  "value": 90
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1800,
+        "RR": 1300,
+        "GP": 200,
+        "A12": 100,
+        "A50": 80
+      },
+      "classifications": [
+        "A12",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "IBABAO": {
+      "streets": {
+        "lipa to lemery road": {
+          "name": "LIPA TO LEMERY ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2200,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 1600,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 1400,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2100
+                },
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "I": {
+              "value": 2400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2400
+                },
+                {
+                  "value": 2100
+                }
+              ]
+            },
+            "X": {
+              "value": 2250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2250
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 900
+                },
+                {
+                  "value": 650
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A12": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                },
+                {
+                  "value": 280
+                },
+                {
+                  "value": 240
+                }
+              ]
+            },
+            "A50": {
+              "value": 330,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 330
+                },
+                {
+                  "value": 200
+                },
+                {
+                  "value": 190
+                },
+                {
+                  "value": 180
+                }
+              ]
+            }
+          }
+        },
+        "putol bigain intra saging iyong munting tubig tubog": {
+          "name": "PUTOL, BIGAIN, INTRA, SAGING, IYONG, MUNTING TUBIG, TUBOG",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 700,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 430
+                }
+              ]
+            },
+            "GP": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 250
+                },
+                {
+                  "value": 100,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 210,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 210
+                },
+                {
+                  "value": 140
+                }
+              ]
+            },
+            "A50": {
+              "value": 170,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 170
+                },
+                {
+                  "value": 130
+                },
+                {
+                  "value": 75
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1600,
+        "RR": 1000,
+        "GP": 180,
+        "A12": 120,
+        "A50": 80
+      },
+      "classifications": [
+        "A12",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "LABAC": {
+      "streets": {
+        "lipa to lemery road": {
+          "name": "LIPA TO LEMERY ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2750,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 1750,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1900
+                },
+                {
+                  "value": 1350
+                }
+              ]
+            },
+            "I": {
+              "value": 2550,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2550
+                },
+                {
+                  "value": 1750
+                }
+              ]
+            },
+            "X": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200
+                }
+              ]
+            },
+            "GP": {
+              "value": 950,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 950
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "A12": {
+              "value": 310,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 310
+                },
+                {
+                  "value": 250
+                }
+              ]
+            },
+            "A50": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 240
+                }
+              ]
+            }
+          }
+        },
+        "acacia st": {
+          "name": "ACACIA ST.",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 1450,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1450,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1350,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 1100,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 1050,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1100
+                },
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 950
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "I": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "X": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 1050
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                },
+                {
+                  "value": 450
+                },
+                {
+                  "value": 300
+                },
+                {
+                  "value": 110,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 230,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 230
+                },
+                {
+                  "value": 220
+                },
+                {
+                  "value": 180
+                },
+                {
+                  "value": 125
+                }
+              ]
+            },
+            "A50": {
+              "value": 220,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 200
+                },
+                {
+                  "value": 160
+                },
+                {
+                  "value": 85
+                },
+                {
+                  "value": 70
+                }
+              ]
+            },
+            "A49": {
+              "value": 60,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 60
+                }
+              ]
+            }
+          }
+        },
+        "usiw adan ubal etc": {
+          "name": "USIW, ADAN, UBAL, ETC.",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1150,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 750,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 950,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 950
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "GP": {
+              "value": 450,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 450
+                },
+                {
+                  "value": 275
+                }
+              ]
+            }
+          }
+        },
+        "rendezvous resort": {
+          "name": "RENDEZVOUS RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 700,
+        "RR": 650,
+        "GP": 250,
+        "A12": 100,
+        "A50": 80,
+        "A40": 2100
+      },
+      "classifications": [
+        "A12",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "PINAGKAISAHAN": {
+      "streets": {
+        "maculot st": {
+          "name": "MACULOT ST.",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 3100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3100,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 1650,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2150
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "GP": {
+              "value": 850,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 850
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A12": {
+              "value": 250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 250
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A50": {
+              "value": 190,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 190
+                },
+                {
+                  "value": 150
+                }
+              ]
+            }
+          }
+        },
+        "callejon": {
+          "name": "CALLEJON",
+          "vicinity": "ALONG CALLEJON",
+          "classes": {
+            "CR": {
+              "value": 650,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 650,
+                  "vicinity": "ALONG CALLEJON"
+                },
+                {
+                  "value": 550,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 370,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 370
+                },
+                {
+                  "value": 340
+                }
+              ]
+            },
+            "GP": {
+              "value": 200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 150
+                },
+                {
+                  "value": 90,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 120,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 120
+                }
+              ]
+            },
+            "A50": {
+              "value": 110,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 110
+                },
+                {
+                  "value": 80
+                },
+                {
+                  "value": 70
+                }
+              ]
+            },
+            "A49": {
+              "value": 70,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 70
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1450,
+        "RR": 1100,
+        "GP": 650,
+        "A12": 170,
+        "A50": 150
+      },
+      "classifications": [
+        "A12",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "POBLACION I": {
+      "streets": {
+        "lipa to lemery road": {
+          "name": "LIPA TO LEMERY ROAD",
+          "vicinity": "ALONG NATIONAL H-WAY",
+          "classes": {
+            "CR": {
+              "value": 5500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5500,
+                  "vicinity": "ALONG NATIONAL H-WAY"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2600
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 3650
+                }
+              ]
+            },
+            "X": {
+              "value": 3750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3750
+                }
+              ]
+            },
+            "GP": {
+              "value": 2150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2150
+                },
+                {
+                  "value": 1450
+                }
+              ]
+            }
+          }
+        },
+        "b laqui st": {
+          "name": "B. LAQUI ST.",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 2750,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 2450,
+                  "vicinity": "ALONG OTHER ROAD"
+                },
+                {
+                  "value": 1150,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2250
+                },
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1050
+                },
+                {
+                  "value": 650
+                }
+              ]
+            },
+            "I": {
+              "value": 3600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3600
+                },
+                {
+                  "value": 2600
+                },
+                {
+                  "value": 2400
+                }
+              ]
+            },
+            "X": {
+              "value": 3050,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3050
+                },
+                {
+                  "value": 2300
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 750
+                },
+                {
+                  "value": 850
+                },
+                {
+                  "value": 750
+                }
+              ]
+            },
+            "A12": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 250
+                },
+                {
+                  "value": 280
+                },
+                {
+                  "value": 250
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 200
+                },
+                {
+                  "value": 200
+                },
+                {
+                  "value": 190
+                }
+              ]
+            },
+            "CL": {
+              "value": 1250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1250
+                }
+              ]
+            }
+          }
+        },
+        "green view homes": {
+          "name": "GREEN VIEW HOMES",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 5200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5200
+                }
+              ]
+            },
+            "RR": {
+              "value": 3750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3750
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "GP": 300,
+        "A12": 150,
+        "A50": 100,
+        "CR": 5000,
+        "RR": 3000
+      },
+      "classifications": [
+        "A12",
+        "A50",
+        "CL",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION II": {
+      "streets": {
+        "lipa to lemery road": {
+          "name": "LIPA TO LEMERY ROAD",
+          "vicinity": "ALONG PUBLIC MARKET",
+          "classes": {
+            "CR": {
+              "value": 5750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5750,
+                  "vicinity": "ALONG PUBLIC MARKET"
+                },
+                {
+                  "value": 5500,
+                  "vicinity": "ALONG NATIONAL HIGHWAY"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3400
+                },
+                {
+                  "value": 2800
+                }
+              ]
+            },
+            "I": {
+              "value": 5100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5100
+                },
+                {
+                  "value": 4700
+                }
+              ]
+            },
+            "X": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            }
+          }
+        },
+        "b laqui st cuenca to batangas city road": {
+          "name": "B. LAQUI ST. (CUENCA TO BATANGAS CITY ROAD)",
+          "vicinity": "ALONG PROVINCIAL ROAD EXIT",
+          "classes": {
+            "CR": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500,
+                  "vicinity": "ALONG PROVINCIAL ROAD EXIT"
+                },
+                {
+                  "value": 3600,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 1600,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2600
+                },
+                {
+                  "value": 2600
+                },
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "I": {
+              "value": 4100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4100
+                },
+                {
+                  "value": 2700
+                },
+                {
+                  "value": 2300
+                },
+                {
+                  "value": 1600
+                }
+              ]
+            },
+            "X": {
+              "value": 3800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3800
+                },
+                {
+                  "value": 2050
+                }
+              ]
+            },
+            "GP": {
+              "value": 950,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 950
+                },
+                {
+                  "value": 650
+                }
+              ]
+            }
+          }
+        },
+        "holy family village": {
+          "name": "HOLY FAMILY VILLAGE",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5650,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5650,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3650,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3650
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3000,
+        "RR": 1700
+      },
+      "classifications": [
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION III": {
+      "streets": {
+        "lipa to lemery road": {
+          "name": "LIPA TO LEMERY ROAD",
+          "vicinity": "ALONG NATIONAL HIGHWAY",
+          "classes": {
+            "CR": {
+              "value": 4750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4750,
+                  "vicinity": "ALONG NATIONAL HIGHWAY"
+                },
+                {
+                  "value": 4650,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2750
+                },
+                {
+                  "value": 2650
+                }
+              ]
+            },
+            "I": {
+              "value": 4700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4700
+                },
+                {
+                  "value": 4600
+                }
+              ]
+            },
+            "X": {
+              "value": 4150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4150
+                }
+              ]
+            }
+          }
+        },
+        "b laqui st cuenca to batangas city road": {
+          "name": "B. LAQUI ST.(CUENCA TO BATANGAS CITY ROAD)",
+          "vicinity": "ALONG PROVINCIAL ROAD EXTENSION",
+          "classes": {
+            "CR": {
+              "value": 4550,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4550,
+                  "vicinity": "ALONG PROVINCIAL ROAD EXTENSION"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2550,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2550
+                },
+                {
+                  "value": 1550
+                }
+              ]
+            },
+            "I": {
+              "value": 4500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 2200
+                }
+              ]
+            },
+            "X": {
+              "value": 4050,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4050
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "GP": {
+              "value": 850,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 850
+                }
+              ]
+            },
+            "A12": {
+              "value": 450,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "b laqui st cuenca-batangas city road": {
+          "name": "B. LAQUI ST.(CUENCA-BATANGAS CITY ROAD)",
+          "vicinity": "INTERIOR",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "I": {
+              "value": 2300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2300
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "A12": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A50": {
+              "value": 250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 250
+                }
+              ]
+            }
+          }
+        },
+        "marasigan st extension": {
+          "name": "MARASIGAN ST. EXTENSION",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2850,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2850,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 2350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2350
+                }
+              ]
+            },
+            "X": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200
+                }
+              ]
+            }
+          }
+        },
+        "liberty subdivision": {
+          "name": "LIBERTY SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 5150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5150
+                }
+              ]
+            },
+            "RR": {
+              "value": 3400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3300,
+        "RR": 2050
+      },
+      "classifications": [
+        "A12",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION IV": {
+      "streets": {
+        "a mabini st": {
+          "name": "A. MABINI ST",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2950,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2950
+                }
+              ]
+            },
+            "I": {
+              "value": 3350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3350
+                }
+              ]
+            },
+            "X": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "j p rizal st": {
+          "name": "J.P. RIZAL ST",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2600
+                }
+              ]
+            },
+            "I": {
+              "value": 3350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3350
+                }
+              ]
+            },
+            "X": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "maculo st": {
+          "name": "MACULO ST",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2600
+                }
+              ]
+            },
+            "I": {
+              "value": 3350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3350
+                }
+              ]
+            },
+            "X": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "p burgos": {
+          "name": "P. BURGOS",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2600
+                }
+              ]
+            },
+            "I": {
+              "value": 3350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3350
+                }
+              ]
+            },
+            "X": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "malvar st": {
+          "name": "MALVAR ST",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2600
+                },
+                {
+                  "value": 2350
+                }
+              ]
+            },
+            "I": {
+              "value": 3350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3350
+                },
+                {
+                  "value": 2900
+                }
+              ]
+            },
+            "X": {
+              "value": 3300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3300
+                }
+              ]
+            },
+            "GP": {
+              "value": 1250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1250
+                }
+              ]
+            },
+            "A12": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A50": {
+              "value": 375,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 375
+                }
+              ]
+            }
+          }
+        },
+        "marasigan st extension": {
+          "name": "MARASIGAN ST. EXTENSION",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 2250,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1250
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "I": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 2200
+                }
+              ]
+            },
+            "X": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "GP": {
+              "value": 950,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 950
+                },
+                {
+                  "value": 500,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A50": {
+              "value": 330,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 330
+                },
+                {
+                  "value": 250
+                }
+              ]
+            }
+          }
+        },
+        "liberty subdivision": {
+          "name": "LIBERTY SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 5150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5150
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3300,
+        "RR": 2300
+      },
+      "classifications": [
+        "A12",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION V": {
+      "streets": {
+        "b laqui st": {
+          "name": "B. LAQUI ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3350,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2850,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2850
+                }
+              ]
+            },
+            "I": {
+              "value": 3250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3250
+                }
+              ]
+            },
+            "X": {
+              "value": 2900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2900
+                }
+              ]
+            }
+          }
+        },
+        "gen luna st": {
+          "name": "GEN LUNA ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2750
+                }
+              ]
+            },
+            "I": {
+              "value": 3600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3600
+                }
+              ]
+            },
+            "X": {
+              "value": 3200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3200
+                }
+              ]
+            }
+          }
+        },
+        "a mabini st": {
+          "name": "A. MABINI ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2750
+                }
+              ]
+            },
+            "I": {
+              "value": 3600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3600
+                }
+              ]
+            },
+            "X": {
+              "value": 3200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3200
+                }
+              ]
+            }
+          }
+        },
+        "p burgos st": {
+          "name": "P. BURGOS ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2750
+                }
+              ]
+            },
+            "I": {
+              "value": 3600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3600
+                }
+              ]
+            },
+            "X": {
+              "value": 3200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3200
+                }
+              ]
+            }
+          }
+        },
+        "del pilar st": {
+          "name": "DEL PILAR ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2750
+                }
+              ]
+            },
+            "I": {
+              "value": 3600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3600
+                }
+              ]
+            },
+            "X": {
+              "value": 3200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3200
+                }
+              ]
+            }
+          }
+        },
+        "j p rizal st": {
+          "name": "J.P. RIZAL ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2750
+                }
+              ]
+            },
+            "I": {
+              "value": 3600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3600
+                }
+              ]
+            },
+            "X": {
+              "value": 3200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3200
+                }
+              ]
+            }
+          }
+        },
+        "j p laurel st": {
+          "name": "J.P. LAUREL ST",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 1900,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2750
+                },
+                {
+                  "value": 1450
+                }
+              ]
+            },
+            "I": {
+              "value": 3600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3600
+                },
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "X": {
+              "value": 3200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3200
+                }
+              ]
+            },
+            "GP": {
+              "value": 900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "A12": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A12",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION VI": {
+      "streets": {
+        "b laqui st": {
+          "name": "B. LAQUI ST",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3350,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2850,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2850
+                }
+              ]
+            },
+            "I": {
+              "value": 3250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3250
+                }
+              ]
+            },
+            "X": {
+              "value": 2900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2900
+                }
+              ]
+            }
+          }
+        },
+        "gen luna st": {
+          "name": "GEN LUNA ST",
+          "vicinity": "ALONG MUNICIPAL ROAD EXIT",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG MUNICIPAL ROAD EXIT"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2650,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2650
+                }
+              ]
+            },
+            "I": {
+              "value": 3400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3400
+                }
+              ]
+            },
+            "X": {
+              "value": 3300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3300
+                }
+              ]
+            }
+          }
+        },
+        "p gomez st": {
+          "name": "P. GOMEZ ST",
+          "vicinity": "ALONG MUNICIPAL ROAD EXIT",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG MUNICIPAL ROAD EXIT"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2650,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2650
+                }
+              ]
+            },
+            "I": {
+              "value": 3400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3400
+                }
+              ]
+            },
+            "X": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "del pilar st": {
+          "name": "DEL PILAR ST",
+          "vicinity": "ALONG MUNICIPAL ROAD EXIT",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG MUNICIPAL ROAD EXIT"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2650,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2650
+                }
+              ]
+            },
+            "I": {
+              "value": 3400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3400
+                }
+              ]
+            },
+            "X": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "j p rizal st": {
+          "name": "J.P. RIZAL ST",
+          "vicinity": "ALONG MUNICIPAL ROAD EXIT",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG MUNICIPAL ROAD EXIT"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2650,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2650
+                }
+              ]
+            },
+            "I": {
+              "value": 3400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3400
+                }
+              ]
+            },
+            "X": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "j p laurel st": {
+          "name": "J.P. LAUREL ST",
+          "vicinity": "ALONG MUNICIPAL ROAD EXIT",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG MUNICIPAL ROAD EXIT"
+                },
+                {
+                  "value": 1800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2650,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2650
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "I": {
+              "value": 3400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3400
+                },
+                {
+                  "value": 1700
+                }
+              ]
+            },
+            "X": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "GP": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A12": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A12",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION VII": {
+      "streets": {
+        "del pilar st": {
+          "name": "DEL PILAR ST",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 2750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2750,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 1300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2150
+                },
+                {
+                  "value": 1150
+                }
+              ]
+            },
+            "I": {
+              "value": 2450,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2450
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "X": {
+              "value": 2300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2300
+                }
+              ]
+            },
+            "GP": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "A12": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        },
+        "g cuevas st": {
+          "name": "G. CUEVAS ST",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1750,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 1000,
+                  "vicinity": "ALONG OTHER ROAD"
+                },
+                {
+                  "value": 650,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1050,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1050
+                },
+                {
+                  "value": 800
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "I": {
+              "value": 1650,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1650
+                },
+                {
+                  "value": 950
+                },
+                {
+                  "value": 550
+                }
+              ]
+            },
+            "X": {
+              "value": 1450,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1450
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "GP": {
+              "value": 750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 750
+                },
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                },
+                {
+                  "value": 190,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 250
+                },
+                {
+                  "value": 230
+                }
+              ]
+            },
+            "A50": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 200
+                },
+                {
+                  "value": 200
+                },
+                {
+                  "value": 90
+                }
+              ]
+            },
+            "A49": {
+              "value": 40,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 40
+                },
+                {
+                  "value": 50
+                }
+              ]
+            }
+          }
+        },
+        "sitio tico bliss housing": {
+          "name": "SITIO TICO/ BLISS HOUSING",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "RR": {
+              "value": 1400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1900,
+        "RR": 1350,
+        "I": 350,
+        "GP": 200,
+        "A12": 150,
+        "A50": 100
+      },
+      "classifications": [
+        "A12",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION VIII": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3750,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2800
+                },
+                {
+                  "value": 1750
+                }
+              ]
+            },
+            "I": {
+              "value": 3250,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3250
+                },
+                {
+                  "value": 2250
+                }
+              ]
+            },
+            "X": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "laurel st": {
+          "name": "LAUREL ST.",
+          "vicinity": "ALONG MUNICIPAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3100,
+                  "vicinity": "ALONG MUNICIPAL ROAD"
+                },
+                {
+                  "value": 1750,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2450,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2450
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "I": {
+              "value": 3100,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3100
+                },
+                {
+                  "value": 1650
+                }
+              ]
+            },
+            "X": {
+              "value": 2800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2800
+                }
+              ]
+            }
+          }
+        },
+        "san juan st": {
+          "name": "SAN JUAN ST.",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 2200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2200,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 1250,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1450,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1450
+                },
+                {
+                  "value": 750
+                }
+              ]
+            },
+            "X": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 400
+                },
+                {
+                  "value": 200,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 450,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 450
+                },
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 250
+                },
+                {
+                  "value": 75
+                }
+              ]
+            },
+            "A49": {
+              "value": 80,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 80
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 2850,
+        "GP": 320,
+        "A50": 170
+      },
+      "classifications": [
+        "A12",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "SAN FELIPE": {
+      "streets": {
+        "lipa to lemery road": {
+          "name": "LIPA TO LEMERY ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3350,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 1800,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 1700,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 1000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2150
+                },
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 900
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "I": {
+              "value": 2750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2750
+                },
+                {
+                  "value": 1700
+                }
+              ]
+            },
+            "X": {
+              "value": 2300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2300
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "GP": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 700
+                },
+                {
+                  "value": 500
+                },
+                {
+                  "value": 350
+                },
+                {
+                  "value": 190,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A12": {
+              "value": 380,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 380
+                },
+                {
+                  "value": 300
+                },
+                {
+                  "value": 250
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A17": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 270
+                },
+                {
+                  "value": 270
+                },
+                {
+                  "value": 180
+                }
+              ]
+            },
+            "A50": {
+              "value": 240,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 240
+                },
+                {
+                  "value": 230
+                },
+                {
+                  "value": 220
+                },
+                {
+                  "value": 170
+                },
+                {
+                  "value": 90
+                }
+              ]
+            },
+            "A39": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A40": {
+              "value": 820,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 820
+                }
+              ]
+            },
+            "A49": {
+              "value": 180,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 180
+                }
+              ]
+            }
+          }
+        },
+        "longos camichile csl": {
+          "name": "LONGOS, CAMICHILE, CSL",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 850,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 850,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 660,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 550,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 550
+                },
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "GP": {
+              "value": 310,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 310
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        },
+        "la consolacion subd": {
+          "name": "LA CONSOLACION SUBD.",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 1900,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1900
+                }
+              ]
+            }
+          }
+        },
+        "remo subd": {
+          "name": "REMO SUBD.",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 2600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2600
+                }
+              ]
+            },
+            "RR": {
+              "value": 1700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1700
+                }
+              ]
+            }
+          }
+        },
+        "tjm tropical resort": {
+          "name": "TJM TROPICAL RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3200
+                }
+              ]
+            }
+          }
+        },
+        "endaya cove": {
+          "name": "ENDAYA COVE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3200
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2100,
+        "RR": 1400,
+        "GP": 220,
+        "A50": 90,
+        "A40": 2500
+      },
+      "classifications": [
+        "A12",
+        "A17",
+        "A39",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "SAN ISIDRO": {
+      "streets": {
+        "along all other streets": {
+          "name": "ALONG ALL OTHER STREETS",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 750,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 750,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 750
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "GP": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 250
+                }
+              ]
+            },
+            "A12": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 170
+                }
+              ]
+            },
+            "A50": {
+              "value": 200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 120
+                }
+              ]
+            }
+          }
+        },
+        "sitio mambog": {
+          "name": "SITIO MAMBOG",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1120,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1120,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 650,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 650,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 650
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "GP": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A12": {
+              "value": 160,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 160
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A50": {
+              "value": 150,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 150
+                },
+                {
+                  "value": 60,
+                  "vicinity": "ALONG THE CREEK"
+                }
+              ]
+            },
+            "A49": {
+              "value": 80,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 80
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A12",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    }
+  }
+}

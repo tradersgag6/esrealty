@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "validated": "2026-09-22",
+  "nextReview": "2026-10-22",
+  "datasets": [
+    "data/bir-batangas/manifest.json",
+    "data/bir-batangas/locations.json",
+    "data/bir-batangas/municipalities/*.json",
+    "data/zonal-config.json",
+    "data/batangas-zonal.json",
+    "data/batangas-projects.json"
+  ],
+  "status": "valid",
+  "counts": {
+    "municipalities": 34,
+    "barangays": 1085,
+    "streets": 3710,
+    "classifications": 38,
+    "calculationVersion": "2026.09.1",
+    "dataVersion": "bir-2022-rdo58-59"
+  },
+  "note": "BIR-backed Batangas dataset valid; deterministic and reconcilable."
+}

@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "region": "Region IV-A (CALABARZON)",
+  "province": "Batangas",
+  "generatedAt": "2026-09-22T02:28:48.536Z",
+  "importer": {
+    "name": "tools/bir-import",
+    "version": "1.0.0",
+    "dep": "xlsx + adm-zip"
+  },
+  "datasets": [
+    {
+      "id": "rdo58",
+      "rdo": "58",
+      "rdoName": "Batangas City, West Batangas",
+      "departmentOrder": "035-2022",
+      "revision": "4th",
+      "effectivityDate": "2022-07-23",
+      "effectiveTo": "Present",
+      "sourceDatasetId": 915,
+      "sourceTemplateId": 195,
+      "sourceName": "RDO No. 58 - Batangas City, West Batangas.xlsx",
+      "sourceSheet": "Sheet 7 (DO 35-2022)",
+      "sourceUrl": "https://bir-cdn.bir.gov.ph/local/pdf/RDO%20No.%2058%20-%20Batangas%20City%20West%20Batangas_copy_copy_copy_copy.zip",
+      "sourceFileHash": "sha256:a5e5bcce29d07ac57f7429a32f73e61c45f35b0c02f133dbbcbca6b35f7ba30a",
+      "sheetRows": 26088,
+      "rowCounts": {
+        "sheetRows": 26088,
+        "dataRows": 18261,
+        "municipalities": 15,
+        "barangays": 565,
+        "streets": 2058,
+        "maskedResolved": 172,
+        "maskedUnresolved": 532,
+        "invalidRows": 0,
+        "reconcile": true,
+        "mappedRows": 11997,
+        "otherRows": 5732,
+        "unresolvedRows": 532
+      }
+    },
+    {
+      "id": "rdo59",
+      "rdo": "59",
+      "rdoName": "Lipa City, East Batangas",
+      "departmentOrder": "034-2022",
+      "revision": "5th",
+      "effectivityDate": "2022-07-10",
+      "effectiveTo": "Present",
+      "sourceDatasetId": 914,
+      "sourceTemplateId": 195,
+      "sourceName": "RDO No. 59 - Lipa City, East Batangas.xls",
+      "sourceSheet": "Sheet 8 (34-22)",
+      "sourceUrl": "https://bir-cdn.bir.gov.ph/local/pdf/RDO%20No.%2059%20-%20Lipa%20City%20East%20Batangas_copy_copy_copy_copy_copy.zip",
+      "sourceFileHash": "sha256:991ed2c049c690d9d684e8f13da6a2190ee59a70b1d30b7a60765ef56fe8087a",
+      "sheetRows": 20986,
+      "rowCounts": {
+        "sheetRows": 20986,
+        "dataRows": 15158,
+        "municipalities": 19,
+        "barangays": 520,
+        "streets": 1652,
+        "maskedResolved": 4,
+        "maskedUnresolved": 353,
+        "invalidRows": 0,
+        "reconcile": true,
+        "mappedRows": 9091,
+        "otherRows": 5714,
+        "unresolvedRows": 353
+      }
+    }
+  ],
+  "lookup": {
+    "municipalityCount": 34,
+    "barangayCount": 1085,
+    "streetCount": 3710,
+    "classificationCount": 38
+  },
+  "note": "Official BIR zonal-value datasets for Batangas (RDO 58 West Batangas, DO 035-2022 / RDO 59 East Batangas, DO 034-2022). Imported from the official BIR sources listed below. Values are current until superseded by a newer Department Order.",
+  "warnings": [
+    "rdo58: 532 rows carried an unresolvable masked value and were excluded from lookup (172 resolved as 'same as above').",
+    "rdo59: 353 rows carried an unresolvable masked value and were excluded from lookup (4 resolved as 'same as above')."
+  ],
+  "errors": []
+}

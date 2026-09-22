@@ -1,0 +1,5712 @@
+{
+  "slug": "lian",
+  "name": "LIAN",
+  "region": "Region IV-A (CALABARZON)",
+  "province": "Batangas",
+  "rdo": "58",
+  "departmentOrder": "035-2022",
+  "revision": "4th",
+  "effectivityDate": "",
+  "classifications": [
+    "A1",
+    "A15",
+    "A17",
+    "A36",
+    "A39",
+    "A40",
+    "A50",
+    "CC",
+    "CR",
+    "GP",
+    "I",
+    "RC",
+    "RR",
+    "X"
+  ],
+  "rowCount": 1040,
+  "barangays": {
+    "BAGONG POOK": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "I": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "X": {
+              "value": 2200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2200
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "GP": {
+              "value": 900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 900
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A17": {
+              "value": 700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 450
+                }
+              ]
+            }
+          }
+        },
+        "bellavita-lian batch 3": {
+          "name": "BELLAVITA-LIAN BATCH 3",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 6500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6500
+                }
+              ]
+            },
+            "RR": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "bellavita-lian batch 1": {
+          "name": "BELLAVITA-LIAN BATCH 1",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 6500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6500
+                }
+              ]
+            },
+            "RR": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "bellavita-lian batch 2": {
+          "name": "BELLAVITA-LIAN BATCH 2",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 6500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6500
+                }
+              ]
+            },
+            "RR": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 5500,
+        "RR": 5000,
+        "I": 1500,
+        "X": 1200,
+        "GP": 700,
+        "A17": 500,
+        "A50": 350
+      },
+      "classifications": [
+        "A17",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BALIBAGO": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 2300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "I": {
+              "value": 2300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2300
+                },
+                {
+                  "value": 2200
+                }
+              ]
+            },
+            "X": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "GP": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "A17": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "A36": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            }
+          }
+        },
+        "piel tower lighthouse beach resort": {
+          "name": "PIEL TOWER LIGHTHOUSE BEACH RESORT",
+          "vicinity": "SITIO APLAYA ALONG BALIBAGO BEACH",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000,
+                  "vicinity": "SITIO APLAYA ALONG BALIBAGO BEACH"
+                }
+              ]
+            }
+          }
+        },
+        "la playa lian resorts residences": {
+          "name": "LA PLAYA LIAN RESORTS RESIDENCES",
+          "vicinity": "SITIO APLAYA ALONG BALIBAGO BEACH",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000,
+                  "vicinity": "SITIO APLAYA ALONG BALIBAGO BEACH"
+                }
+              ]
+            }
+          }
+        },
+        "madhavi beach resort": {
+          "name": "MADHAVI BEACH RESORT",
+          "vicinity": "SITIO ALMANSURA ALONG BALIBAGO BEACH",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000,
+                  "vicinity": "SITIO ALMANSURA ALONG BALIBAGO BEACH"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 2500,
+        "I": 1300,
+        "X": 1000,
+        "GP": 600,
+        "A17": 400,
+        "A36": 350,
+        "A50": 300,
+        "A39": 3000,
+        "A40": 3500
+      },
+      "classifications": [
+        "A17",
+        "A36",
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BARANGAY 1": {
+      "streets": {
+        "j p rizal": {
+          "name": "J. P RIZAL",
+          "vicinity": "H. LEJANO- LIAN INSTITUTE CPD.",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "H. LEJANO- LIAN INSTITUTE CPD."
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "d lapitan": {
+          "name": "D. LAPITAN",
+          "vicinity": "J.P RIZAL -G. LIMJOCO",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "J.P RIZAL -G. LIMJOCO"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "G. LIMJOCO - D. LIMON"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "X": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "q lejano": {
+          "name": "Q. LEJANO",
+          "vicinity": "D. LIMON - G. LIMJOCO",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "D. LIMON - G. LIMJOCO"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "G. LIMJOCO - L. BAVIERA"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "L. BAVIERA - J.P RIZAL"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "X": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "h lejano": {
+          "name": "H. LEJANO",
+          "vicinity": "D. LIMON - G. LIMJOCO",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "D. LIMON - G. LIMJOCO"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "G. LIMJOCO -L. BAVIERA"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "L. BAVIERA - JP RIZAL"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "X": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "d limon": {
+          "name": "D. LIMON",
+          "vicinity": "D. LAPITAN- Q. LEJANO",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "D. LAPITAN- Q. LEJANO"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "H. LEJANO - 48 MARTIREZ"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "Q. LEJANO- H. LEJANO"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "X": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "g limjoco": {
+          "name": "G. LIMJOCO",
+          "vicinity": "D. LAPITAN - Q. LEJANO",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "D. LAPITAN - Q. LEJANO"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "Q. LEJANO - H. LEJANO"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "H. LEJANO - 48 MARTIREZ"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "X": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "l baviera": {
+          "name": "L. BAVIERA",
+          "vicinity": "Q. LEJANO - H. LEJANO",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "Q. LEJANO - H. LEJANO"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "H. LEJANO - 48 MARTIREZ"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "I": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "X": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "limon subdivision": {
+          "name": "LIMON SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 5000,
+        "RR": 3000,
+        "I": 2500,
+        "X": 2000,
+        "GP": 1000,
+        "A1": 500,
+        "A50": 400
+      },
+      "classifications": [
+        "A1",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BARANGAY 2": {
+      "streets": {
+        "j p rizal": {
+          "name": "J. P RIZAL",
+          "vicinity": "H. LEJANO - KAPITAN ISKO",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "H. LEJANO - KAPITAN ISKO"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "kapitan isko": {
+          "name": "KAPITAN ISKO",
+          "vicinity": "D. LIMON - G. LIMJOCO",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "D. LIMON - G. LIMJOCO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "G. LIMJOCO- L. BAVIERA"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "L. BAVIERA- J.P RIZAL"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "48 martirez": {
+          "name": "48 MARTIREZ",
+          "vicinity": "D. LIMON - G. LIMJOCO",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "D. LIMON - G. LIMJOCO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "G. LIMJOCO- L. BAVIERA"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "L. BAVIERA- J.P RIZAL"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "d limon": {
+          "name": "D. LIMON",
+          "vicinity": "H. LEJANO - 48 MARTIREZ",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "H. LEJANO - 48 MARTIREZ"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "48 MARTIREZ - KAPITAN ISKO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "g limjoco": {
+          "name": "G. LIMJOCO",
+          "vicinity": "H. LEJANO - 48 MARTIREZ",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "H. LEJANO - 48 MARTIREZ"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "48 MARTIREZ - KAPITAN ISKO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "l baviera": {
+          "name": "L. BAVIERA",
+          "vicinity": "H. LEJANO - 48 MARTIREZ",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "H. LEJANO - 48 MARTIREZ"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "48 MARTIREZ - KAPITAN ISKO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "herrera subdivision": {
+          "name": "HERRERA SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 5000,
+        "RR": 3000,
+        "I": 2500,
+        "X": 2200,
+        "GP": 1000,
+        "A1": 500,
+        "A50": 400
+      },
+      "classifications": [
+        "A1",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BARANGAY 3": {
+      "streets": {
+        "j p rizal": {
+          "name": "J. P RIZAL",
+          "vicinity": "KAPITAN ISKO - BRIDGE",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "KAPITAN ISKO - BRIDGE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "kapitan isko": {
+          "name": "KAPITAN ISKO",
+          "vicinity": "D. LIMON - G. LIMJOCO",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "D. LIMON - G. LIMJOCO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "G. LIMJOCO- L. BAVIERA"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "L. BAVIERA- J.P RIZAL"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "g limjoco": {
+          "name": "G. LIMJOCO",
+          "vicinity": "KAPITAN ISKO - M. APACIBLE",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "KAPITAN ISKO - M. APACIBLE"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "M. APACIBLE - G. ZARGOSO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "m apacible": {
+          "name": "M. APACIBLE",
+          "vicinity": "D. LIMON - G. LIMJOCO",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "D. LIMON - G. LIMJOCO"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "G. LIMJOCO- L. BAVIERA"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "L. BAVIERA- J.P RIZAL"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "I": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "X": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "g zargoso": {
+          "name": "G. ZARGOSO",
+          "vicinity": "D. LIMON - G. LIMJOCO",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "D. LIMON - G. LIMJOCO"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "G. LIMJOCO- L. BAVIERA"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "L. BAVIERA- J.P RIZAL"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "G. SARSOSO - PALICO RIVER"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "I": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "X": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "d limon": {
+          "name": "D. LIMON",
+          "vicinity": "KAPITAN ISKO - M. APACIBLE",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "KAPITAN ISKO - M. APACIBLE"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "M. APACIBLE - G. ZARGOSO"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "I": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "X": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "l baviera": {
+          "name": "L. BAVIERA",
+          "vicinity": "KAPITAN ISKO - M. APACIBLE",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "KAPITAN ISKO - M. APACIBLE"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "M. APACIBLE - G. ZARGOSO"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "I": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "X": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1300,
+        "I": 1800,
+        "X": 1500,
+        "GP": 1000,
+        "A1": 500,
+        "A50": 400
+      },
+      "classifications": [
+        "A1",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BARANGAY 4": {
+      "streets": {
+        "j p rizal": {
+          "name": "J. P RIZAL",
+          "vicinity": "D. LAPITAN - 48 MARTIREZ",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "D. LAPITAN - 48 MARTIREZ"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "d lapitan": {
+          "name": "D. LAPITAN",
+          "vicinity": "M. LEJANO - JP. RIZAL",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "M. LEJANO - JP. RIZAL"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "h lejano": {
+          "name": "H. LEJANO",
+          "vicinity": "M. LEJANO - SAN JUAN",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "M. LEJANO - SAN JUAN"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "SAN JUAN- LUCAS NUEVE"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "LUCAS NUEVE - J.P RIZAL"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "48 martirez": {
+          "name": "48 MARTIREZ",
+          "vicinity": "M. LEJANO - SAN JUAN",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "M. LEJANO - SAN JUAN"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "SAN JUAN- LUCAS NUEVE"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "LUCAS NUEVE - J.P RIZAL"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "lucas nueva": {
+          "name": "LUCAS NUEVA",
+          "vicinity": "H. LEJANO - 48 MARTIREZ",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "H. LEJANO - 48 MARTIREZ"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "san juan": {
+          "name": "SAN JUAN",
+          "vicinity": "H. LEJANO - 48 MARTIREZ",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "H. LEJANO - 48 MARTIREZ"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "m lejano": {
+          "name": "M. LEJANO",
+          "vicinity": "D. LAPITAN - H. LEJANO",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "D. LAPITAN - H. LEJANO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "H. LEJANO - 48 MARTIREZ"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1300,
+        "I": 1800,
+        "X": 1500,
+        "GP": 1000,
+        "A1": 500,
+        "A50": 400
+      },
+      "classifications": [
+        "A1",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BARANGAY 5": {
+      "streets": {
+        "j p rizal": {
+          "name": "J. P RIZAL",
+          "vicinity": "48 MARTIREZ - BRIDGE",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "48 MARTIREZ - BRIDGE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "48 martirez": {
+          "name": "48 MARTIREZ",
+          "vicinity": "LUCAS NUEVE - J.P RIZAL",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "LUCAS NUEVE - J.P RIZAL"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "M. LEJANO - SAN JUAN"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "SAN JUAN - LUCAS NUEVE"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "kapitan isko": {
+          "name": "KAPITAN ISKO",
+          "vicinity": "M. LEJANO - SAN JUAN",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "M. LEJANO - SAN JUAN"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "SAN JUAN - LUCAS NUEVE"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "LUCAS NUEVE - J.P RIZAL"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "m apacible": {
+          "name": "M. APACIBLE",
+          "vicinity": "COR M. LEJANO - SAN JUAN",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "COR M. LEJANO - SAN JUAN"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "SAN JUAN - LUCAS NUEVE"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "LUCAS NUEVE - J.P RIZAL"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "g zargoso": {
+          "name": "G. ZARGOSO",
+          "vicinity": "SAN JUAN - LUCAS NUEVE",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "SAN JUAN - LUCAS NUEVE"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "LUCAS NUEVE - J.P RIZAL"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "G. ZARGOSO - PALICO RIVER"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "lucas nueva": {
+          "name": "LUCAS NUEVA",
+          "vicinity": "48 MARTIREZ - KAPITAN ISKO",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "48 MARTIREZ - KAPITAN ISKO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "KAPITAN ISKO - M. APACIBLE"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "M. APACIBLE - G. ZARGOSO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "san juan": {
+          "name": "SAN JUAN",
+          "vicinity": "48 MARTIREZ - KAPITAN ISKO",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "48 MARTIREZ - KAPITAN ISKO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "KAPITAN ISKO - M. APACIBLE"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "M. APACIBLE - G. ZARGOSO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        },
+        "m lejano": {
+          "name": "M. LEJANO",
+          "vicinity": "48 MARTIREZ - KAPITAN ISKO",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "48 MARTIREZ - KAPITAN ISKO"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "KAPITAN ISKO - M. APACIBLE"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "X": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 4500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2000,
+        "RR": 1300,
+        "I": 1800,
+        "X": 1500,
+        "GP": 1000,
+        "A1": 500,
+        "A50": 400
+      },
+      "classifications": [
+        "A1",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BINUBUSAN (BINUHUSAN)": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6200,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3800
+                }
+              ]
+            },
+            "I": {
+              "value": 5600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5600
+                }
+              ]
+            },
+            "X": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "A15": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A17": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "el pueblo de hermano": {
+          "name": "EL PUEBLO DE HERMANO",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "xceed realty & development": {
+          "name": "XCEED REALTY & DEVELOPMENT",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "familiar subdivision": {
+          "name": "FAMILIAR SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "villa el pescador": {
+          "name": "VILLA EL PESCADOR",
+          "vicinity": "ALONG BINUBUSAN BEACH",
+          "classes": {
+            "A40": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG BINUBUSAN BEACH"
+                }
+              ]
+            }
+          }
+        },
+        "el pueblo de hermano by cocotel": {
+          "name": "EL PUEBLO DE HERMANO BY COCOTEL",
+          "vicinity": "ALONG BINUBUSAN BEACH",
+          "classes": {
+            "A40": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG BINUBUSAN BEACH"
+                }
+              ]
+            }
+          }
+        },
+        "jopertizone resort": {
+          "name": "JOPERTIZONE RESORT",
+          "vicinity": "ALONG MATUOD ROAD",
+          "classes": {
+            "A40": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG MATUOD ROAD"
+                }
+              ]
+            }
+          }
+        },
+        "marcelo ko beach house": {
+          "name": "MARCELO KO BEACH HOUSE",
+          "vicinity": "ALONG MATUOD ROAD",
+          "classes": {
+            "A40": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG MATUOD ROAD"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 2500,
+        "I": 3000,
+        "X": 2700,
+        "GP": 1400,
+        "A15": 500,
+        "A17": 400,
+        "A50": 300,
+        "A39": 5600,
+        "A40": 5900
+      },
+      "classifications": [
+        "A15",
+        "A17",
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "BUNGAHAN": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 6500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 6000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3800
+                },
+                {
+                  "value": 3300
+                }
+              ]
+            },
+            "I": {
+              "value": 5700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5700
+                },
+                {
+                  "value": 5500
+                }
+              ]
+            },
+            "X": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4700
+                }
+              ]
+            },
+            "GP": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "A17": {
+              "value": 700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "herrera subdivision": {
+          "name": "HERRERA SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 2700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2700
+                }
+              ]
+            }
+          }
+        },
+        "butiong subdivision": {
+          "name": "BUTIONG SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 2700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2700
+                }
+              ]
+            }
+          }
+        },
+        "paradise village": {
+          "name": "PARADISE VILLAGE",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 2700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2700
+                }
+              ]
+            }
+          }
+        },
+        "ureta subdivision": {
+          "name": "URETA SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 2700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2700
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 2500,
+        "I": 3000,
+        "X": 2700,
+        "GP": 1400,
+        "A17": 500,
+        "A50": 400
+      },
+      "classifications": [
+        "A17",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "CUMBA": {
+      "streets": {},
+      "other": {
+        "CR": 1200,
+        "RR": 700,
+        "I": 1000,
+        "X": 900,
+        "GP": 600,
+        "A17": 400,
+        "A50": 300
+      },
+      "classifications": [
+        "A17",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "HUMAYINGAN": {
+      "streets": {},
+      "other": {
+        "CR": 1200,
+        "RR": 700,
+        "I": 1000,
+        "X": 900,
+        "GP": 600,
+        "A17": 400,
+        "A36": 350,
+        "A50": 300
+      },
+      "classifications": [
+        "A17",
+        "A36",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "KAPITO": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 1700,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "I": {
+              "value": 1700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1700
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "X": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A17": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1200,
+        "RR": 600,
+        "I": 1000,
+        "X": 800,
+        "GP": 400,
+        "A17": 300,
+        "A50": 200
+      },
+      "classifications": [
+        "A17",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "LUMANIAG": {
+      "streets": {
+        "san diego realty": {
+          "name": "SAN DIEGO REALTY",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "new port hill": {
+          "name": "NEW PORT HILL",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "fil-esatate properties": {
+          "name": "FIL-ESATATE PROPERTIES",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "angelita bondoc flores subdivision": {
+          "name": "ANGELITA BONDOC FLORES SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "san ireneus waterfront estate": {
+          "name": "SAN IRENEUS WATERFRONT ESTATE",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "villa blanca beach resort": {
+          "name": "VILLA BLANCA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "hespirides beach front": {
+          "name": "HESPIRIDES BEACH FRONT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 3000,
+        "I": 2300,
+        "X": 2000,
+        "GP": 800,
+        "A15": 500,
+        "A17": 400,
+        "A50": 300,
+        "A39": 3200,
+        "A40": 3500
+      },
+      "classifications": [
+        "A15",
+        "A17",
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "LUYAHAN": {
+      "streets": {
+        "duyan beach resort": {
+          "name": "DUYAN BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "bella beach resort": {
+          "name": "BELLA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "maccas beach resort": {
+          "name": "MACCAS BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "coral beach club": {
+          "name": "CORAL BEACH CLUB",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "white house": {
+          "name": "WHITE HOUSE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "boy alfon camp-talim beach": {
+          "name": "BOY ALFON CAMP-TALIM BEACH",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "the lily batangas": {
+          "name": "THE LILY BATANGAS",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "the pelicans resort": {
+          "name": "THE PELICANS RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "jerry s jv resort": {
+          "name": "JERRY'S JV RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "balai puling": {
+          "name": "BALAI PULING",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "water moon resort": {
+          "name": "WATER MOON RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "royale tagaytay beach resort": {
+          "name": "ROYALE TAGAYTAY BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "hacienda resort": {
+          "name": "HACIENDA RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "tahahnan resort": {
+          "name": "TAHAHNAN RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3000,
+        "RR": 2000,
+        "I": 2500,
+        "X": 2200,
+        "GP": 900,
+        "A15": 500,
+        "A17": 400,
+        "A50": 300,
+        "A39": 5000,
+        "A40": 5200
+      },
+      "classifications": [
+        "A15",
+        "A17",
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "MALARUHATAN": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 5400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5400,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3300
+                },
+                {
+                  "value": 2900
+                }
+              ]
+            },
+            "I": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4800
+                }
+              ]
+            },
+            "X": {
+              "value": 4400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4400
+                },
+                {
+                  "value": 3900
+                }
+              ]
+            },
+            "GP": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1600
+                }
+              ]
+            },
+            "A17": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "san juan subdivision": {
+          "name": "SAN JUAN SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            }
+          }
+        },
+        "fuentes subdivision": {
+          "name": "FUENTES SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            }
+          }
+        },
+        "dona salome subdivision": {
+          "name": "DONA SALOME SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            }
+          }
+        },
+        "golden pine": {
+          "name": "GOLDEN PINE",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            }
+          }
+        },
+        "danilo antonio terra grande estates": {
+          "name": "DANILO ANTONIO (TERRA GRANDE ESTATES)",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            }
+          }
+        },
+        "malaruhatan country club": {
+          "name": "MALARUHATAN COUNTRY CLUB",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 2000,
+        "I": 3300,
+        "X": 2800,
+        "GP": 1400,
+        "A17": 400,
+        "A50": 300,
+        "A40": 3000
+      },
+      "classifications": [
+        "A17",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "MATABUNGKAY": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2600
+                },
+                {
+                  "value": 2300
+                }
+              ]
+            },
+            "I": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3700
+                }
+              ]
+            },
+            "X": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A17": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "A36": {
+              "value": 700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "south coast subdivision": {
+          "name": "SOUTH COAST SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "coral beach resort condominium": {
+          "name": "CORAL BEACH RESORT (CONDOMINIUM)",
+          "vicinity": "",
+          "classes": {
+            "CC": {
+              "value": 30000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 30000
+                }
+              ]
+            },
+            "RC": {
+              "value": 25000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 25000
+                }
+              ]
+            }
+          }
+        },
+        "sea breeze rendezvous resort": {
+          "name": "SEA BREEZE RENDEZVOUS RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "pia s place matabungkay beach": {
+          "name": "PIA'S PLACE MATABUNGKAY BEACH",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "casa verde beach resort": {
+          "name": "CASA VERDE BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "hip nautic beach resort by cocotel": {
+          "name": "HIP NAUTIC BEACH RESORT BY COCOTEL",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "pati beach resort and cottages": {
+          "name": "PATI BEACH RESORT AND COTTAGES",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "villa alexandra beach resort": {
+          "name": "VILLA ALEXANDRA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "matabungkay aqua world": {
+          "name": "MATABUNGKAY AQUA WORLD",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "matabungkay seaside cottages": {
+          "name": "MATABUNGKAY SEASIDE COTTAGES",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "matabungkay beach hotel": {
+          "name": "MATABUNGKAY BEACH HOTEL",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "rui and rans resort": {
+          "name": "RUI AND RANS RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "stardust beach hotel": {
+          "name": "STARDUST BEACH HOTEL",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "max javiers place": {
+          "name": "MAX JAVIERS PLACE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "villa osterreich": {
+          "name": "VILLA OSTERREICH",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "koobo matabungkay rest house": {
+          "name": "KOOBO MATABUNGKAY REST HOUSE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "janet ballelos beach resort": {
+          "name": "JANET BALLELOS BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "kandahar cottages at matabungkay beach": {
+          "name": "KANDAHAR COTTAGES AT MATABUNGKAY BEACH",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "shiela s palm beach resort": {
+          "name": "SHIELA'S PALM BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "tan awan beach resort": {
+          "name": "TAN AWAN BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "le nid douillet de matabungkay": {
+          "name": "LE NID DOUILLET DE MATABUNGKAY",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "primavera beach resort": {
+          "name": "PRIMAVERA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "matabungkay beach camp": {
+          "name": "MATABUNGKAY BEACH CAMP",
+          "vicinity": "ALONG MATABUNGKAY ROAD",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500,
+                  "vicinity": "ALONG MATABUNGKAY ROAD"
+                }
+              ]
+            }
+          }
+        },
+        "lighthaus resort": {
+          "name": "LIGHTHAUS RESORT",
+          "vicinity": "ALONG MATABUNGKAY ROAD",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500,
+                  "vicinity": "ALONG MATABUNGKAY ROAD"
+                }
+              ]
+            }
+          }
+        },
+        "quintana private pool de matabungkay": {
+          "name": "QUINTANA PRIVATE POOL DE MATABUNGKAY",
+          "vicinity": "ALONG MATABUNGKAY ROAD",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500,
+                  "vicinity": "ALONG MATABUNGKAY ROAD"
+                }
+              ]
+            }
+          }
+        },
+        "villa anabelle resort": {
+          "name": "VILLA ANABELLE RESORT",
+          "vicinity": "ALONG MATABUNGKAY ROAD",
+          "classes": {
+            "A40": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500,
+                  "vicinity": "ALONG MATABUNGKAY ROAD"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 4000,
+        "RR": 3000,
+        "I": 2500,
+        "X": 2000,
+        "GP": 1100,
+        "A17": 600,
+        "A36": 500,
+        "A50": 400,
+        "A39": 5000,
+        "CC": 28000,
+        "RC": 23000,
+        "A40": 5200
+      },
+      "classifications": [
+        "A17",
+        "A36",
+        "A39",
+        "A40",
+        "A50",
+        "CC",
+        "CR",
+        "GP",
+        "I",
+        "RC",
+        "RR",
+        "X"
+      ]
+    },
+    "PRENZA": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "I": {
+              "value": 3300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3300
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2700
+                }
+              ]
+            },
+            "GP": {
+              "value": 1200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A15": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "A17": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A36": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        },
+        "casa de familia": {
+          "name": "CASA DE FAMILIA",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "ibanez cove": {
+          "name": "IBANEZ COVE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "mervz place beach resort": {
+          "name": "MERVZ PLACE BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "marina beach": {
+          "name": "MARINA BEACH",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "casa amari lina": {
+          "name": "CASA AMARI LINA",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "villa rose and bianca beach resort": {
+          "name": "VILLA ROSE AND BIANCA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "newport hills clubhouse": {
+          "name": "NEWPORT HILLS CLUBHOUSE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2500,
+        "RR": 1300,
+        "I": 2200,
+        "X": 1800,
+        "GP": 1000,
+        "A15": 400,
+        "A17": 350,
+        "A36": 300,
+        "A50": 250,
+        "A40": 3000
+      },
+      "classifications": [
+        "A15",
+        "A17",
+        "A36",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "PUTING KAHOY": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "I": {
+              "value": 1600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1600
+                },
+                {
+                  "value": 1400
+                }
+              ]
+            },
+            "X": {
+              "value": 1400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1400
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "GP": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "A15": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A17": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1200,
+        "RR": 700,
+        "I": 1000,
+        "X": 900,
+        "GP": 600,
+        "A15": 350,
+        "A17": 300,
+        "A50": 250
+      },
+      "classifications": [
+        "A15",
+        "A17",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "SAN DIEGO": {
+      "streets": {
+        "dina s beach resort": {
+          "name": "DINA'S BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "hiraya aplaya beach resort": {
+          "name": "HIRAYA APLAYA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "black pearl resort": {
+          "name": "BLACK PEARL RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "the beach at san diego": {
+          "name": "THE BEACH AT SAN DIEGO",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "hi peak resort": {
+          "name": "HI PEAK RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "ja-nilo beach resort": {
+          "name": "JA-NILO BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "the sand bar lian": {
+          "name": "THE SAND BAR LIAN",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "villa tomasa beach resort": {
+          "name": "VILLA TOMASA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "golden sunsets private beach resort": {
+          "name": "GOLDEN SUNSETS PRIVATE BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "villa faustina resort": {
+          "name": "VILLA FAUSTINA RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "maranans resort": {
+          "name": "MARANANS RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "halfmoon village": {
+          "name": "HALFMOON VILLAGE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "g&n havenside beach resort": {
+          "name": "G&N HAVENSIDE BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "tron beach resort": {
+          "name": "TRON BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "four siblings beach resort": {
+          "name": "FOUR SIBLINGS BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "paris beach resort": {
+          "name": "PARIS BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "jm beach camp": {
+          "name": "JM BEACH CAMP",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "mc dom s grill and activity resort": {
+          "name": "MC DOM'S GRILL AND ACTIVITY RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "balai lian": {
+          "name": "BALAI LIAN",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "green land beach resort": {
+          "name": "GREEN LAND BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "east cliff beach resort": {
+          "name": "EAST CLIFF BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1800,
+        "RR": 1100,
+        "I": 1500,
+        "X": 1300,
+        "GP": 800,
+        "A17": 400,
+        "A50": 300,
+        "A39": 3000,
+        "A40": 3200
+      },
+      "classifications": [
+        "A17",
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    }
+  }
+}

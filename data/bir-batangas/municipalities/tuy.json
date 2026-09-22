@@ -1,0 +1,4261 @@
+{
+  "slug": "tuy",
+  "name": "TUY",
+  "region": "Region IV-A (CALABARZON)",
+  "province": "Batangas",
+  "rdo": "58",
+  "departmentOrder": "035-2022",
+  "revision": "4th",
+  "effectivityDate": "2022-07-23",
+  "classifications": [
+    "A14",
+    "A15",
+    "A17",
+    "A23",
+    "A25",
+    "A4",
+    "A47",
+    "A49",
+    "A50",
+    "CL",
+    "CR",
+    "GP",
+    "RR",
+    "X"
+  ],
+  "rowCount": 690,
+  "barangays": {
+    "ACLE": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG ALL STREETS",
+          "classes": {
+            "CR": {
+              "value": 2450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2450,
+                  "vicinity": "ALONG ALL STREETS"
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A4": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A14": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A17": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A23": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A50": {
+              "value": 340,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 340
+                },
+                {
+                  "value": 250
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A14",
+        "A17",
+        "A23",
+        "A4",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "BAYUDBUD": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG ALL STREETS",
+          "classes": {
+            "CR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800,
+                  "vicinity": "ALONG ALL STREETS"
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 900
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "GP": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A15": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A17": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 180
+                }
+              ]
+            },
+            "A25": {
+              "value": 210,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 210
+                },
+                {
+                  "value": 170
+                }
+              ]
+            },
+            "A50": {
+              "value": 180,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 180
+                },
+                {
+                  "value": 150
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A15",
+        "A17",
+        "A25",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "BOLBOK": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG ALL STREETS",
+          "classes": {
+            "CR": {
+              "value": 1400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1400,
+                  "vicinity": "ALONG ALL STREETS"
+                },
+                {
+                  "value": 1200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 750,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 750
+                },
+                {
+                  "value": 650
+                }
+              ]
+            },
+            "GP": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A4": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 180
+                }
+              ]
+            },
+            "A15": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A17": {
+              "value": 210,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 210
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A23": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A50": {
+              "value": 190,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 190
+                },
+                {
+                  "value": 150
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A15",
+        "A17",
+        "A23",
+        "A4",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "DALIMA": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG ALL STREETS",
+          "classes": {
+            "CR": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000,
+                  "vicinity": "ALONG ALL STREETS"
+                },
+                {
+                  "value": 900,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 640,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 640
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "GP": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A4": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 180
+                }
+              ]
+            },
+            "A17": {
+              "value": 210,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 210
+                },
+                {
+                  "value": 170
+                }
+              ]
+            },
+            "A23": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 180
+                }
+              ]
+            },
+            "A50": {
+              "value": 180,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 180
+                },
+                {
+                  "value": 150
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A17",
+        "A23",
+        "A4",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "DAO": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG ALL STREETS",
+          "classes": {
+            "CR": {
+              "value": 1400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1400,
+                  "vicinity": "ALONG ALL STREETS"
+                },
+                {
+                  "value": 1200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 850,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 850
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "GP": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A4": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 170
+                }
+              ]
+            },
+            "A14": {
+              "value": 210,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 210
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A17": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 170
+                }
+              ]
+            },
+            "A47": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A50": {
+              "value": 190,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 190
+                },
+                {
+                  "value": 150
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A14",
+        "A17",
+        "A4",
+        "A47",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "GUINHAWA": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2800
+                }
+              ]
+            },
+            "GP": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1800
+                }
+              ]
+            },
+            "A4": {
+              "value": 550,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 550
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A14": {
+              "value": 530,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 530
+                },
+                {
+                  "value": 480
+                }
+              ]
+            },
+            "A17": {
+              "value": 540,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 540
+                },
+                {
+                  "value": 490
+                }
+              ]
+            },
+            "A23": {
+              "value": 550,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 550
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A47": {
+              "value": 410,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 410
+                },
+                {
+                  "value": 360
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            }
+          }
+        },
+        "castelo subd": {
+          "name": "CASTELO SUBD.",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "martina subd": {
+          "name": "MARTINA SUBD.",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3000,
+        "RR": 2500,
+        "GP": 1500,
+        "A4": 450,
+        "A14": 420,
+        "A17": 440,
+        "A23": 450,
+        "A47": 310,
+        "A50": 300
+      },
+      "classifications": [
+        "A14",
+        "A17",
+        "A23",
+        "A4",
+        "A47",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "LUMBANGAN": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 1700
+                }
+              ]
+            },
+            "GP": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "A4": {
+              "value": 420,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 420
+                },
+                {
+                  "value": 370
+                }
+              ]
+            },
+            "A14": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A17": {
+              "value": 410,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 410
+                },
+                {
+                  "value": 360
+                }
+              ]
+            },
+            "A47": {
+              "value": 340,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 340
+                },
+                {
+                  "value": 270
+                }
+              ]
+            },
+            "A50": {
+              "value": 290,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 290
+                },
+                {
+                  "value": 250
+                }
+              ]
+            }
+          }
+        },
+        "holy spirit subd": {
+          "name": "HOLY SPIRIT SUBD",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "apacible subd": {
+          "name": "APACIBLE SUBD",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3700
+                }
+              ]
+            },
+            "RR": {
+              "value": 3200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3200
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 3100,
+        "GP": 700,
+        "A4": 320,
+        "A14": 300,
+        "A17": 310,
+        "A47": 210,
+        "A50": 200
+      },
+      "classifications": [
+        "A14",
+        "A17",
+        "A4",
+        "A47",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "LUNTAL": {
+      "streets": {
+        "palico junction": {
+          "name": "PALICO JUNCTION",
+          "vicinity": "ALONG PALICO JUNCTION",
+          "classes": {
+            "CR": {
+              "value": 3800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3800,
+                  "vicinity": "ALONG PALICO JUNCTION"
+                },
+                {
+                  "value": 3300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "A14": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A17": {
+              "value": 320,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 320
+                }
+              ]
+            },
+            "A47": {
+              "value": 290,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 290
+                }
+              ]
+            },
+            "A50": {
+              "value": 260,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 260
+                }
+              ]
+            }
+          }
+        },
+        "national hi way": {
+          "name": "NATIONAL HI WAY",
+          "vicinity": "MATAYWANAC RIVER-OBISPO RIVER OUTSIDE POB-FR BGY SABANG-MUNTING TUBIG",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "MATAYWANAC RIVER-OBISPO RIVER OUTSIDE POB-FR BGY SABANG-MUNTING TUBIG"
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "BGY GUINHAWA"
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A14": {
+              "value": 250,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 250
+                }
+              ]
+            },
+            "A17": {
+              "value": 270,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 270
+                }
+              ]
+            },
+            "A47": {
+              "value": 210,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 210
+                }
+              ]
+            },
+            "A50": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                }
+              ]
+            }
+          }
+        },
+        "luntal farm to market road": {
+          "name": "LUNTAL FARM TO MARKET ROAD",
+          "vicinity": "ALONG LUNTAL FARM TO MARKET ROAD",
+          "classes": {
+            "CR": {
+              "value": 2800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2800,
+                  "vicinity": "ALONG LUNTAL FARM TO MARKET ROAD"
+                },
+                {
+                  "value": 2500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2200
+                },
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A14": {
+              "value": 270,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 270
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A17": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 220
+                }
+              ]
+            },
+            "A47": {
+              "value": 240,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 240,
+                  "vicinity": "ALONG LUNTAL FARM TO MARKET ROAD"
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A50": {
+              "value": 230,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 230
+                },
+                {
+                  "value": 150
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3000,
+        "RR": 2500,
+        "GP": 600,
+        "A14": 190,
+        "A17": 220,
+        "A47": 150,
+        "A50": 140
+      },
+      "classifications": [
+        "A14",
+        "A17",
+        "A47",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "MAGAHIS": {
+      "streets": {
+        "luna-magahis road": {
+          "name": "LUNA-MAGAHIS ROAD",
+          "vicinity": "NEAR POBLACION",
+          "classes": {
+            "CR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800,
+                  "vicinity": "NEAR POBLACION"
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "GP": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A4": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                }
+              ]
+            },
+            "A17": {
+              "value": 240,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 240
+                }
+              ]
+            },
+            "A23": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                }
+              ]
+            },
+            "A49": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A50": {
+              "value": 190,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 190
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1200,
+        "RR": 700,
+        "GP": 300,
+        "A4": 200,
+        "A17": 220,
+        "A23": 200,
+        "A50": 180
+      },
+      "classifications": [
+        "A17",
+        "A23",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "MALIBU": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG ALL STREETS",
+          "classes": {
+            "CR": {
+              "value": 900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 900,
+                  "vicinity": "ALONG ALL STREETS"
+                },
+                {
+                  "value": 750,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "GP": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A17": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A47": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 180
+                }
+              ]
+            },
+            "A49": {
+              "value": 170,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 170
+                }
+              ]
+            },
+            "A50": {
+              "value": 160,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 160
+                },
+                {
+                  "value": 140
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A17",
+        "A47",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "MATAYWANAC": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "A4": {
+              "value": 520,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 520
+                },
+                {
+                  "value": 470
+                }
+              ]
+            },
+            "A14": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "A15": {
+              "value": 480,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 480
+                },
+                {
+                  "value": 430
+                }
+              ]
+            },
+            "A17": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "A50": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A4": {
+              "value": 420,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 420
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A14": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 380
+                }
+              ]
+            },
+            "A15": {
+              "value": 380,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 380
+                },
+                {
+                  "value": 360
+                }
+              ]
+            },
+            "A17": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 370
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 330
+                }
+              ]
+            }
+          }
+        },
+        "de guzman subd": {
+          "name": "DE GUZMAN SUBD",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2500,
+        "RR": 2000,
+        "CL": 1250,
+        "GP": 800,
+        "A4": 370,
+        "A14": 330,
+        "A15": 350,
+        "A17": 360,
+        "A49": 320,
+        "A50": 300
+      },
+      "classifications": [
+        "A14",
+        "A15",
+        "A17",
+        "A4",
+        "A49",
+        "A50",
+        "CL",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "PALINCARO": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG ALL STREETS",
+          "classes": {
+            "CR": {
+              "value": 850,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 850,
+                  "vicinity": "ALONG ALL STREETS"
+                },
+                {
+                  "value": 800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 740,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 740
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "GP": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A15": {
+              "value": 190,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 190
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A17": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 190
+                }
+              ]
+            },
+            "A49": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A50": {
+              "value": 180,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 180
+                },
+                {
+                  "value": 160
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A15",
+        "A17",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "POBLACION (BURGOS, LUNA, RILLO, RIZAL)": {
+      "streets": {
+        "basa st": {
+          "name": "BASA ST",
+          "vicinity": "RILLO ST - LUNA ST",
+          "classes": {
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "RILLO ST - LUNA ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                }
+              ]
+            }
+          }
+        },
+        "bonifacio st": {
+          "name": "BONIFACIO ST",
+          "vicinity": "RILLO ST - LUNA ST",
+          "classes": {
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "RILLO ST - LUNA ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                }
+              ]
+            }
+          }
+        },
+        "burgos st": {
+          "name": "BURGOS ST",
+          "vicinity": "V. CALINGASAN ST - GOMEZ ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "V. CALINGASAN ST - GOMEZ ST",
+                  "maskedResolved": true
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "GOMEZ ST - BASA ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "BASA ST - EVANGELISTA ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                }
+              ]
+            }
+          }
+        },
+        "evangelista st": {
+          "name": "EVANGELISTA ST",
+          "vicinity": "RILLO - BURGOS ST",
+          "classes": {
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "RILLO - BURGOS ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "BURGOS - LUNA ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                }
+              ]
+            }
+          }
+        },
+        "gomez st": {
+          "name": "GOMEZ ST",
+          "vicinity": "RIZAL ST - LUNA ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "RIZAL ST - LUNA ST",
+                  "maskedResolved": true
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "RILLO ST - RIZAL ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                }
+              ]
+            }
+          }
+        },
+        "luna st": {
+          "name": "LUNA ST",
+          "vicinity": "MUN H.C.-GOMEZ ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "MUN H.C.-GOMEZ ST",
+                  "maskedResolved": true
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "GOMEZ ST - BASA ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "BASA ST - EVANGELISTA ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                }
+              ]
+            },
+            "A50": {
+              "value": 280,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 280,
+                  "maskedResolved": true
+                }
+              ]
+            }
+          }
+        },
+        "rillo st": {
+          "name": "RILLO ST",
+          "vicinity": "GOMEZ - BONIFACIO ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "GOMEZ - BONIFACIO ST",
+                  "maskedResolved": true
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "V. CALINGASAN ST - BASA ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "BASA ST - EVANGELISTA ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                }
+              ]
+            },
+            "A50": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300,
+                  "maskedResolved": true
+                }
+              ]
+            }
+          }
+        },
+        "rizal st": {
+          "name": "RIZAL ST",
+          "vicinity": "MATAYWANAC RIVER - BASA",
+          "classes": {
+            "CR": {
+              "value": 7000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 7000,
+                  "vicinity": "MATAYWANAC RIVER - BASA",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "BASA - NATL HI WAY JUNCTION",
+                  "maskedResolved": true
+                }
+              ]
+            }
+          }
+        },
+        "v calingasan st": {
+          "name": "V. CALINGASAN ST",
+          "vicinity": "RIZAL ST - LUNA ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "RIZAL ST - LUNA ST",
+                  "maskedResolved": true
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "RILLO ST - RIZAL ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "RR": 2500
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "RR"
+      ]
+    },
+    "POBLACION BURGOS": {
+      "streets": {
+        "burgos st": {
+          "name": "BURGOS ST",
+          "vicinity": "V. CALINGASAN ST - GOMEZ ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "V. CALINGASAN ST - GOMEZ ST"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "GOMEZ ST - BASA ST"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "BASA ST - EVANGELISTA ST"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3800
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "evangelista st": {
+          "name": "EVANGELISTA ST",
+          "vicinity": "RIZAL POB. BOUNDARY - BURGOS ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "RIZAL POB. BOUNDARY - BURGOS ST"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "BURGOS - POB. LUNA BOUNDARY"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3800
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "basa st": {
+          "name": "BASA ST",
+          "vicinity": "POB. RIZAL BOUNDARY - POB. LUNA BOUNDARY",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "POB. RIZAL BOUNDARY - POB. LUNA BOUNDARY"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3800
+                }
+              ]
+            }
+          }
+        },
+        "bonifacio st": {
+          "name": "BONIFACIO ST",
+          "vicinity": "POB. RIZAL BOUNDARY - POB. LUNA BOUNDARY",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "POB. RIZAL BOUNDARY - POB. LUNA BOUNDARY"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3800
+                }
+              ]
+            }
+          }
+        },
+        "gomez st": {
+          "name": "GOMEZ ST",
+          "vicinity": "POB. RIZAL BOUNDARY - POB. LUNA BOUNDARY",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "POB. RIZAL BOUNDARY - POB. LUNA BOUNDARY"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "X": {
+              "value": 3800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3800
+                }
+              ]
+            }
+          }
+        },
+        "v calingasan st": {
+          "name": "V. CALINGASAN ST",
+          "vicinity": "POB. RIZAL BOUNDARY - POB. LUNA BOUNDARY",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "POB. RIZAL BOUNDARY - POB. LUNA BOUNDARY"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "X": {
+              "value": 3800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "CR",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION LUNA": {
+      "streets": {
+        "luna st": {
+          "name": "LUNA ST",
+          "vicinity": "M.H.C-GOMEZ ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "M.H.C-GOMEZ ST"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "GOMEZ ST - BASA ST"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "BASA ST - EVANGELISTA ST"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "A17": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A25": {
+              "value": 290,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 290
+                }
+              ]
+            },
+            "A50": {
+              "value": 280,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 280
+                }
+              ]
+            }
+          }
+        },
+        "basa st": {
+          "name": "BASA ST",
+          "vicinity": "POB. BURGOS BOUNDARY - LUNA ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "POB. BURGOS BOUNDARY - LUNA ST"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "bonifacio st": {
+          "name": "BONIFACIO ST",
+          "vicinity": "POB. BURGOS BOUNDARY - LUNA ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "POB. BURGOS BOUNDARY - LUNA ST"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "gomez st": {
+          "name": "GOMEZ ST",
+          "vicinity": "POB. BURGOS BOUNDARY - LUNA ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "POB. BURGOS BOUNDARY - LUNA ST"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "v calingasan st": {
+          "name": "V. CALINGASAN ST",
+          "vicinity": "POB. BURGOS BOUNDARY - LUNA ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "POB. BURGOS BOUNDARY - LUNA ST"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "evangelista st": {
+          "name": "EVANGELISTA ST.",
+          "vicinity": "POB. BURGOS BOUNDARY - LUNA ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "POB. BURGOS BOUNDARY - LUNA ST"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "obispo river": {
+          "name": "OBISPO RIVER",
+          "vicinity": "EVANGELISTA ST - OBISPO RIVER",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "EVANGELISTA ST - OBISPO RIVER"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1700
+                }
+              ]
+            },
+            "A17": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A25": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 350
+                }
+              ]
+            }
+          }
+        },
+        "tuy community multi- purpose coop": {
+          "name": "TUY COMMUNITY MULTI- PURPOSE COOP",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 4000,
+        "RR": 2500,
+        "X": 3700,
+        "GP": 1500,
+        "A17": 450,
+        "A25": 350,
+        "A50": 300
+      },
+      "classifications": [
+        "A17",
+        "A25",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION RILLO": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 7500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 7500,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            },
+            "X": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            }
+          }
+        },
+        "rillo st": {
+          "name": "RILLO ST",
+          "vicinity": "GOMEZ - BONIFACIO ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "GOMEZ - BONIFACIO ST"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "V. CALINGASAN ST - GOMEZ ST"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "BONIFACIO - BASA"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "BASA ST - EVANGELISTA ST"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "A14": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "A17": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "A50": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        },
+        "basa st": {
+          "name": "BASA ST",
+          "vicinity": "RILLO ST - POB. RIZAL BOUNDARY",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "RILLO ST - POB. RIZAL BOUNDARY"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "bonifacio st": {
+          "name": "BONIFACIO ST",
+          "vicinity": "RILLO ST - POB. RIZAL BOUNDARY",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "RILLO ST - POB. RIZAL BOUNDARY"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "evangelista st": {
+          "name": "EVANGELISTA ST",
+          "vicinity": "RILLO ST - POB. RIZAL BOUNDARY",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "RILLO ST - POB. RIZAL BOUNDARY"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "v calingasan st": {
+          "name": "V. CALINGASAN ST",
+          "vicinity": "RILLO ST - POB. RIZAL BOUNDARY",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "RILLO ST - POB. RIZAL BOUNDARY"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "sugarland subd": {
+          "name": "SUGARLAND SUBD",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "ermita subd": {
+          "name": "ERMITA SUBD",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3300
+                }
+              ]
+            },
+            "RR": {
+              "value": 2800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 4000,
+        "RR": 2500,
+        "X": 3000,
+        "GP": 1000,
+        "A14": 450,
+        "A17": 450,
+        "A50": 340
+      },
+      "classifications": [
+        "A14",
+        "A17",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION RIZAL": {
+      "streets": {
+        "rizal st": {
+          "name": "RIZAL ST",
+          "vicinity": "MATAYWANAC RIVER - BASA",
+          "classes": {
+            "CR": {
+              "value": 7000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 7000,
+                  "vicinity": "MATAYWANAC RIVER - BASA"
+                },
+                {
+                  "value": 7000,
+                  "vicinity": "BASA - NATL HI WAY JUNCTION"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4350,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4350
+                },
+                {
+                  "value": 4350
+                }
+              ]
+            },
+            "X": {
+              "value": 5450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5450
+                },
+                {
+                  "value": 5450
+                }
+              ]
+            }
+          }
+        },
+        "basa st": {
+          "name": "BASA ST",
+          "vicinity": "POB. RILLO BOUNDARY - POB. BURGOS BOUNDARY",
+          "classes": {
+            "CR": {
+              "value": 4900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4900,
+                  "vicinity": "POB. RILLO BOUNDARY - POB. BURGOS BOUNDARY"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3100
+                },
+                {
+                  "value": 2800
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3400
+                }
+              ]
+            }
+          }
+        },
+        "bonifacio st": {
+          "name": "BONIFACIO ST",
+          "vicinity": "POB. RILLO BOUNDARY - POB. BURGOS BOUNDARY",
+          "classes": {
+            "CR": {
+              "value": 4900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4900,
+                  "vicinity": "POB. RILLO BOUNDARY - POB. BURGOS BOUNDARY"
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3100
+                },
+                {
+                  "value": 2800
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 3400
+                }
+              ]
+            }
+          }
+        },
+        "gomez st": {
+          "name": "GOMEZ ST",
+          "vicinity": "RIZAL ST - POB. BURGOS BOUNDARY",
+          "classes": {
+            "CR": {
+              "value": 4950,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4950,
+                  "vicinity": "RIZAL ST - POB. BURGOS BOUNDARY"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "RIZAL ST - POB. RILLO BOUNDARY"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3100
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "v calingasan st": {
+          "name": "V. CALINGASAN ST",
+          "vicinity": "RIZAL ST - POB. BURGOS BOUNDARY",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "RIZAL ST - POB. BURGOS BOUNDARY"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "RIZAL ST - POB. RILLO BOUNDARY"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "leonora subd": {
+          "name": "LEONORA SUBD",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        },
+        "ermita subd": {
+          "name": "ERMITA SUBD",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3300
+                }
+              ]
+            },
+            "RR": {
+              "value": 2800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 4000,
+        "RR": 2500,
+        "X": 3800
+      },
+      "classifications": [
+        "CR",
+        "RR",
+        "X"
+      ]
+    },
+    "PUTOL": {
+      "streets": {
+        "tuy-balayan road": {
+          "name": "TUY-BALAYAN ROAD",
+          "vicinity": "ALONG TUY-BALAYAN ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "ALONG TUY-BALAYAN ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 3300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2200
+                }
+              ]
+            },
+            "GP": {
+              "value": 1200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "A4": {
+              "value": 360,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 360
+                },
+                {
+                  "value": 270
+                }
+              ]
+            },
+            "A17": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 250
+                }
+              ]
+            },
+            "A50": {
+              "value": 290,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 290
+                },
+                {
+                  "value": 220
+                }
+              ]
+            }
+          }
+        },
+        "de castro subd": {
+          "name": "DE CASTRO SUBD",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3300,
+        "RR": 2900,
+        "A4": 240,
+        "A17": 220,
+        "A50": 200
+      },
+      "classifications": [
+        "A17",
+        "A4",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "SABANG": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "GP": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                },
+                {
+                  "value": 950
+                }
+              ]
+            },
+            "A14": {
+              "value": 320,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 320
+                },
+                {
+                  "value": 270
+                }
+              ]
+            },
+            "A17": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 250
+                }
+              ]
+            },
+            "A49": {
+              "value": 290,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 290
+                }
+              ]
+            },
+            "A50": {
+              "value": 260,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 260
+                },
+                {
+                  "value": 220
+                }
+              ]
+            }
+          }
+        },
+        "rcd subd": {
+          "name": "RCD SUBD.",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 3000,
+        "GP": 800,
+        "A14": 240,
+        "A17": 220,
+        "A50": 200
+      },
+      "classifications": [
+        "A14",
+        "A17",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "SAN JOSE": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG ALL STREETS",
+          "classes": {
+            "CR": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000,
+                  "vicinity": "ALONG ALL STREETS"
+                },
+                {
+                  "value": 900,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "GP": {
+              "value": 350,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A4": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A14": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 180
+                }
+              ]
+            },
+            "A15": {
+              "value": 190,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 190
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A17": {
+              "value": 210,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 210
+                },
+                {
+                  "value": 190
+                }
+              ]
+            },
+            "A49": {
+              "value": 170,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 170
+                }
+              ]
+            },
+            "A50": {
+              "value": 160,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 160
+                },
+                {
+                  "value": 140
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A14",
+        "A15",
+        "A17",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "TALON": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG ALL STREETS",
+          "classes": {
+            "CR": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000,
+                  "vicinity": "ALONG ALL STREETS"
+                },
+                {
+                  "value": 800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "GP": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A15": {
+              "value": 190,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 190
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A17": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 180
+                }
+              ]
+            },
+            "A23": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A49": {
+              "value": 170,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 170
+                }
+              ]
+            },
+            "A50": {
+              "value": 160,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 160
+                },
+                {
+                  "value": 150
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A15",
+        "A17",
+        "A23",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "TOONG": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG ALL STREETS",
+          "classes": {
+            "CR": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000,
+                  "vicinity": "ALONG ALL STREETS"
+                },
+                {
+                  "value": 800,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "GP": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 250
+                }
+              ]
+            },
+            "A4": {
+              "value": 220,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 220
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A15": {
+              "value": 170,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 170
+                },
+                {
+                  "value": 150
+                }
+              ]
+            },
+            "A17": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 180
+                }
+              ]
+            },
+            "A49": {
+              "value": 170,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 170
+                }
+              ]
+            },
+            "A50": {
+              "value": 160,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 160
+                },
+                {
+                  "value": 140
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A15",
+        "A17",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    },
+    "TUYON - TUYON": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3700,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2400
+                }
+              ]
+            },
+            "GP": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "A14": {
+              "value": 460,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 460
+                },
+                {
+                  "value": 370
+                }
+              ]
+            },
+            "A17": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A47": {
+              "value": 420,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 420
+                },
+                {
+                  "value": 330
+                }
+              ]
+            },
+            "A50": {
+              "value": 360,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 360
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1500,
+        "RR": 1100,
+        "GP": 800,
+        "A14": 370,
+        "A17": 350,
+        "A47": 330,
+        "A50": 300
+      },
+      "classifications": [
+        "A14",
+        "A17",
+        "A47",
+        "A50",
+        "CR",
+        "GP",
+        "RR"
+      ]
+    }
+  }
+}

@@ -1,0 +1,139 @@
+"use strict";
+/* Phase 3 core engine regression — pure Node, no server needed.
+   Uses the committed BIR-backed datasets. */
+const fs = require("fs");
+const path = require("path");
+
+const ROOT = path.join(__dirname, "..");
+const est = require(path.join(ROOT, "js", "estimator.js"));
+const core = est.core;
+
+const config = JSON.parse(fs.readFileSync(path.join(ROOT, "data/zonal-config.json"), "utf8"));
+const index = JSON.parse(fs.readFileSync(path.join(ROOT, "data/batangas-zonal.json"), "utf8"));
+const balayan = JSON.parse(fs.readFileSync(path.join(ROOT, "data/bir-batangas/municipalities/balayan.json"), "utf8"));
+
+let checked = 0;
+let failures = 0;
+function eq(actual, expected, label) {
+  checked++;
+  const ok = actual === expected;
+  if (!ok) failures++;
+  console.log((ok ? "[PASS] " : "[FAIL] ") + label + (ok ? "" : "  expected=" + expected + " got=" + actual));
+}
+
+/* ---- exact street value, commercial CR (depth 1) ---- */
+let r = core.computeEstimate(config, index, balayan, {
+  municipality: "Balayan", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "CR", area: 200
+});
+eq(r.available, true, "cr available");
+eq(core.normKey(r.municipality), "BALAYAN", "cr municipality");
+eq(r.streetName, "ALL STREET", "cr street name");
+eq(r.use, "commercial", "cr use group");
+eq(r.source.depth, 1, "cr depth 1");
+eq(r.source.level, "street", "cr level street");
+eq(r.reference.value, 3500, "cr reference 3500");
+eq(r.landPerSqm, 14875, "cr landPerSqm = 3500 x 1.7 x 2.5 x 1.0");
+eq(r.landValue, 2975000, "cr landValue");
+eq(r.low, 2826250, "cr low ±5%");
+eq(r.high, 3123750, "cr high ±5%");
+eq(r.perSqm, 14875, "cr perSqm");
+eq(core.integrityCheck(r).ok, true, "cr reconciles");
+eq(r.calculationVersion, config.calculationVersion, "cr calc version stamped");
+eq(r.dataVersion, index.dataVersion, "cr data version stamped");
+
+/* ---- corner lot toggle ---- */
+let rc = core.computeEstimate(config, index, balayan, {
+  municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "CR", area: 200, corner: true
+});
+eq(rc.corner.applied, true, "corner applied");
+eq(rc.landPerSqm, Math.round(3500 * 1.025 * 1.7 * 2.5 * 1.0), "corner landPerSqm 15247");
+
+/* ---- residential RR (proxy 1.0, band 2.5) ---- */
+let rr = core.computeEstimate(config, index, balayan, {
+  municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "RR", area: 200
+});
+eq(rr.use, "residential", "rr use group");
+eq(rr.landPerSqm, 5000, "rr landPerSqm = 2000 x 1.0 x 2.5");
+eq(rr.landValue, 1000000, "rr landValue");
+
+/* ---- barangay all-other-streets fallback (depth 2) ---- */
+let d2 = core.computeEstimate(config, index, balayan, {
+  municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "DOES NOT EXIST", classification: "A40", area: 100
+});
+eq(d2.source.depth, 2, "d2 depth 2");
+eq(d2.source.level, "barangay-other", "d2 level");
+eq(d2.reference.value, 2500, "d2 other value 2500");
+
+/* ---- municipality aggregate fallback (depth 3) ---- */
+let d3 = core.computeEstimate(config, index, balayan, {
+  municipality: "BALAYAN", barangay: "NO SUCH BRGY", streetKey: "X", classification: "GP", area: 100
+});
+eq(d3.source.depth, 3, "d3 depth 3");
+eq(d3.source.level, "municipality", "d3 level");
+eq(d3.source.count >= 1, true, "d3 has count");
+
+/* ---- province aggregate fallback (depth 4) ---- */
+let d4 = core.computeEstimate(config, index, balayan, {
+  municipality: "BALAYAN", barangay: "NO SUCH BRGY", streetKey: "X", classification: "RC", area: 100
+});
+eq(d4.source.depth, 4, "d4 depth 4");
+eq(d4.source.level, "province", "d4 level");
+eq(index.provinceByClass.RC.p50 > 0, true, "d4 province RC agg exists");
+
+/* ---- fail closed ---- */
+let nu = core.computeEstimate(config, index, balayan, {
+  municipality: "BALAYAN", barangay: "NO SUCH BRGY", streetKey: "X", classification: "ZZ", area: 100
+});
+eq(nu.available, false, "unavailable for unknown class");
+eq(nu.reason, "no-data", "reason no-data");
+let na = core.computeEstimate(config, index, balayan, {
+  municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "CR"
+});
+eq(na.available, false, "no-area unavailable");
+eq(na.reason, "no-area", "no-area reason");
+let nm = core.computeEstimate(config, index, balayan, {
+  municipality: "NOWHERE", barangay: "X", streetKey: "X", classification: "RR", area: 100
+});
+eq(nm.available, false, "missing municipality unavailable");
+eq(nm.reason, "municipality-not-found", "missing municipality reason");
+
+/* ---- house & lot improvement ---- */
+let hl = core.computeEstimate(config, index, balayan, {
+  municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "RR", area: 200,
+  type: "house_lot", floorArea: 120, floors: "2", ageBand: "11-20", construction: "rca_steel",
+  features: ["wall_gate", "solar"]
+});
+eq(hl.type, "house_lot", "hl type");
+eq(hl.floorArea, 120, "hl floorArea");
+eq(hl.floorsMultiplier, 1.05, "hl floors 2 = 1.05");
+eq(hl.ageMidpoint, 15, "hl age midpoint 15");
+eq(hl.depreciatedPct, 38, "hl dep 15/40 = 38%");
+eq(hl.buildCostPerSqm, 40000, "hl RCA 40000");
+eq(hl.featuresTotal, 380000, "hl features 180000 + 200000");
+eq(hl.improvement, 3504800, "hl improvement exact");
+eq(hl.total, hl.landValue + hl.improvement, "hl total = land + improvement");
+eq(core.integrityCheck(hl).ok, true, "hl reconciles");
+
+/* ---- house & lot floor default ratio ---- */
+let hd = core.computeEstimate(config, index, balayan, {
+  municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "RR", area: 200,
+  type: "house_lot"
+});
+eq(hd.floorArea, 120, "hd floor default 0.6 x 200");
+
+/* ---- taxes incl. registration ---- */
+let tax = core.taxMath(config, 1000000);
+eq(tax.cgt, 60000, "tax cgt");
+eq(tax.dst, 15000, "tax dst");
+eq(tax.transfer, 5000, "tax transfer");
+eq(tax.registration, 1000, "tax registration 0.1%");
+eq(tax.total, 81000, "tax total");
+
+/* ---- determinism ---- */
+let r2 = core.computeEstimate(config, index, balayan, {
+  municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "CR", area: 200
+});
+eq(JSON.stringify(r) === JSON.stringify(r2), true, "deterministic same inputs");
+
+if (failures) { console.log(failures + " FAILURES"); process.exit(1); }
+console.log("ALL GREEN (" + checked + " checks)");

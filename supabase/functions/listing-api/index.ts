@@ -585,11 +585,12 @@ const submitInquiry = async (req: Request, id: string, admin: SupabaseClient, pe
 const submitContact = async (req: Request, admin: SupabaseClient, pepper: string) => {
   const body = await parseBody(req);
   const inquiryType = String(body.inquiry_type || "consult").trim().toLowerCase();
-  if (inquiryType !== "consult" && inquiryType !== "guide" && inquiryType !== "project-bt") {
+  if (inquiryType !== "consult" && inquiryType !== "guide" && inquiryType !== "project-bt" && inquiryType !== "location-analysis") {
     throw new HttpError(400, "inquiry_type is invalid");
   }
   const isGuide = inquiryType === "guide";
   const isProjectBt = inquiryType === "project-bt";
+  const isLocation = inquiryType === "location-analysis";
   const fullName = isGuide ? "" : stringValue(body.full_name, 160, "full_name", true);
   const phone = isGuide ? "" : stringValue(body.phone, 50, "phone", !isProjectBt);
   const email = stringValue(body.email, 254, "email");
@@ -651,6 +652,7 @@ const submitContact = async (req: Request, admin: SupabaseClient, pepper: string
       channel: inquiryType,
       propertyInterest: isGuide ? "Shophouse investment guide"
         : isProjectBt ? (interest || "Project B.T inquiry")
+        : isLocation ? "Location analysis full report"
         : "Shophouse consultation",
       notes: isGuide ? "Download the Shophouse Investment Guide" : message,
       assignedTo: "",

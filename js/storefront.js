@@ -42,11 +42,11 @@
   function header() {
     return '<header class="sf-header"><a class="sf-brand" href="#/home" aria-label="ES Realty home">' +
       '<span class="sf-brand-mark">ES</span><span><b>ES Realty</b><small>Property, clearly.</small></span></a>' +
-      '<nav class="sf-nav"><a href="#/home">Home</a><a href="#/search">Properties</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>Services</a></nav>' +
+      '<nav class="sf-nav"><a href="#/home">Home</a><a href="#/shophouse">Shophouse</a><a href="#/search">Properties</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>Services</a></nav>' +
       '<div class="sf-header-actions"><button class="sf-link-btn" data-sf-auth="signin">Sign in</button>' +
       '<button class="sf-primary-btn" data-sf-auth="signup">Create account</button>' +
       '<button class="sf-menu-btn" data-sf-menu aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button></div>' +
-      '<div class="sf-menu" data-sf-menu-panel><a href="#/home">Home</a><a href="#/search">Properties</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>Services</a><button data-sf-auth="signin">Sign in</button><button data-sf-auth="signup">Create account</button></div></header>';
+      '<div class="sf-menu" data-sf-menu-panel><a href="#/home">Home</a><a href="#/shophouse">Shophouse</a><a href="#/search">Properties</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>Services</a><button data-sf-auth="signin">Sign in</button><button data-sf-auth="signup">Create account</button></div></header>';
   }
 
   function footer() {
@@ -183,6 +183,71 @@
       '<button type="submit">Search properties</button></form>';
   }
 
+  function contactDetails() {
+    var out = [];
+    if (siteContact.phone) {
+      out.push('<a href="tel:' + encodeURIComponent(String(siteContact.phone).replace(/[^\d+]/g, "")) + '">' + esc(siteContact.phone) + '</a>');
+    }
+    if (siteContact.email) {
+      out.push('<a href="mailto:' + encodeURIComponent(siteContact.email) + '">' + esc(siteContact.email) + '</a>');
+    }
+    if (siteContact.address) out.push('<span>' + esc(siteContact.address) + '</span>');
+    if (siteContact.hours) out.push('<span>' + esc(siteContact.hours) + '</span>');
+    if (!out.length) out.push('<span>Contact details available soon.</span>');
+    return out.join("");
+  }
+
+    var sfCities = ["Batangas City", "Lipa", "Tanauan", "Santo Tomas", "Imus", "Bacoor", "Dasmariñas", "General Trias", "Santa Rosa", "Calamba", "Biñan", "Angeles", "San Fernando", "Antipolo", "Taytay", "Iloilo City", "Cebu City", "Lapu-Lapu", "Cagayan de Oro", "Davao City", "General Santos"];
+
+  function home() {
+    var listings = viewState.result && viewState.result.data || [];
+    // Frontend-only filter: hide obvious placeholder/test listings (numeric titles like 321321, sample)
+    var displayListings = listings.filter(function (l) {
+      var t = String(l.title || "").trim().toLowerCase();
+      if (!t) return false;
+      if (/^\d+$/.test(t)) return false;
+      if (/^sample\d*$/i.test(t)) return false;
+      return true;
+    });
+    if (!displayListings.length && listings.length) displayListings = listings;
+    var cards = viewState.loading ? skeletons(3) : displayListings.length ? displayListings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
+    var chips = sfCities.map(function (city, i) { return '<a class="sf-reveal sf-reveal-zoom" style="--d:' + (Math.min(i, 11) * 0.05).toFixed(2) + 's" href="#/search?city=' + encodeURIComponent(city) + '">' + esc(city) + '</a>'; }).join("");
+    return shell(
+      '<section class="sf-est-hero" id="sf-intro">' +
+      '<div class="sf-est-hero-copy sf-reveal">' +
+      '<p class="sf-eyebrow">BATANGAS VALUE GUIDE</p>' +
+      '<h1>What is your <em>property worth?</em></h1>' +
+      '<p class="sf-est-hero-lede">An instant, free guide estimate for any home, lot, shophouse, or condo in Batangas — published BIR zonal reference compounded with locality and current market movement. A starting point for a conversation, not a certified appraisal.</p>' +
+      '<div class="sf-est-proof"><span><b>BIR Zonal</b> reference schedules</span><span><b>Locality × market</b> adjustment</span><span><b>Free &amp; instant</b> estimate</span></div>' +
+      '</div>' +
+      (typeof window.ESREALTY_EST === "object" && window.ESREALTY_EST.cardSection ? window.ESREALTY_EST.cardSection() : '<section class="sf-section sf-est" id="sf-estimator" data-est-root><div class="sf-est-card" data-est-card><p class="sf-est-empty">Loading the value guide…</p></div></section>') +
+      '</section>' +
+
+      '<section class="sf-section"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">FEATURED LISTINGS</p><h2>Shophouses &amp; live-work spaces, handpicked</h2></div><a href="#/search">View all properties →</a></div>' +
+      '<div class="sf-featured-filter sf-reveal sf-reveal-zoom">' + searchFields(new URLSearchParams(), true) + '</div>' +
+      '<div class="sf-property-grid">' + cards + '</div></section>' +
+      '<section class="sf-locations"><div class="sf-locations-wrap"><div class="sf-reveal"><p class="sf-eyebrow">LOCATIONS WE COVER</p><h2>Where shophouse demand is growing.</h2><p>From CALABARZON to Central Visayas, ES Realty tracks live-work listings in the provinces where daily commerce is on the rise. Tap a city to browse its current inventory.</p></div>' +
+      '<div class="sf-loc-chips">' + chips + '</div></div></section>' +
+
+      
+      '<section class="sf-process" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">REAL ESTATE SERVICES</p><h2>Local guidance for every <em>property decision.</em></h2></div><p>Practical real estate support for buyers, sellers, landlords, investors, and developers across the Philippines.</p></div><div class="sf-process-steps">' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Property Sales &amp; Acquisition</h3><p>Buy or sell residential, commercial, land, condominium, townhouse, and shophouse properties with transaction guidance.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>02</b><h3>Leasing &amp; Tenant Placement</h3><p>Find suitable spaces, screen tenant requirements, and structure leasing conversations for homes and businesses.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>03</b><h3>Investment &amp; Feasibility</h3><p>Review purchase costs, financing, rental potential, development options, cash flow, and expected returns.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>04</b><h3>Property Appraisal &amp; Valuation</h3><p>Prepare market-based valuation guidance using location, comparable properties, improvements, and current demand.</p><a class="sf-est-service-link" href="#sf-estimator" data-est-services>&#8250; Value your property</a></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>05</b><h3>Property Management</h3><p>Support owners with tenant coordination, rent tracking, maintenance, property records, and day-to-day oversight.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>06</b><h3>Due Diligence Coordination</h3><p>Organize checks for title, zoning, taxes, permits, documents, site condition, and other closing requirements.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>07</b><h3>Project Development Advisory</h3><p>Assess sites, highest and best use, product positioning, unit economics, and development planning.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>08</b><h3>Commercial &amp; Shophouse Advisory</h3><p>Match business concepts with visible locations, flexible layouts, tenant demand, and practical operating plans.</p></article>' +
+      '</div></section>' +
+
+      
+      '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div class="sf-reveal"><p class="sf-eyebrow">' + esc(siteContact.eyebrow) + '</p><h2>' + esc(siteContact.title) + '</h2><p>' + esc(siteContact.description) + '</p><div class="sf-contact-details">' + contactDetails() + '</div></div>' +
+      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="Mobile number"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Province, budget, and business idea..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about this request.</span></label><button type="submit">Request a call →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>'
+    );
+  }
+
+
   function constructionSection() {
     return '<section class="sf-construction"><div class="sf-construction-track sf-motion-track"><div class="sf-construction-sticky">' +
       '<div class="sf-construction-heading"><p class="sf-eyebrow">BUILT IN MOTION</p><h2>Shophouse. <em>One thriving address.</em></h2><p>Scroll to develop a connected live-work row, layer by architectural layer.</p></div>' +
@@ -305,21 +370,7 @@
     '</div></div></section>';
   }
 
-  function contactDetails() {
-    var out = [];
-    if (siteContact.phone) {
-      out.push('<a href="tel:' + encodeURIComponent(String(siteContact.phone).replace(/[^\d+]/g, "")) + '">' + esc(siteContact.phone) + '</a>');
-    }
-    if (siteContact.email) {
-      out.push('<a href="mailto:' + encodeURIComponent(siteContact.email) + '">' + esc(siteContact.email) + '</a>');
-    }
-    if (siteContact.address) out.push('<span>' + esc(siteContact.address) + '</span>');
-    if (siteContact.hours) out.push('<span>' + esc(siteContact.hours) + '</span>');
-    if (!out.length) out.push('<span>Contact details available soon.</span>');
-    return out.join("");
-  }
-
-  function home() {
+function shophousePage() {
     var listings = viewState.result && viewState.result.data || [];
     // Frontend-only filter: hide obvious placeholder/test listings (numeric titles like 321321, sample)
     var displayListings = listings.filter(function (l) {
@@ -397,8 +448,7 @@
       '<div class="bt-actions"><button class="bt-button bt-button-dark" data-bt-inquire="Project B.T">Inquire About Project B.T <span>↗</span></button><a class="bt-link" href="#bt-concept" data-sf-scroll="#bt-concept">Explore the concept <span>↓</span></a></div>' +
       '<div class="bt-hero-proof"><span><b>01</b> Business below</span><span><b>02</b> Living above</span><span><b>∞</b> Value over time</span></div></div>' +
       '<div class="bt-hero-media"><img src="' + heroImage + '" alt="Modern white and wood two-storey shophouse exterior"><div class="bt-image-label"><span>Mixed-use by design</span><b>Built for business. Made for living.</b></div><div class="bt-hero-stamp">B.T<br><small>BAHAY<br>TINDAHAN</small></div></div></section>' +
-
-      '<section class="bt-intro bt-section"><div class="bt-section-label">01 / THE OPPORTUNITY</div><div class="bt-intro-grid"><div><h2>One address.<br><em>Multiple incomes.</em></h2></div><div class="bt-intro-copy"><p>Project B.T (BahayTindahan) is a modern mixed-use development combining commercial and residential spaces within a single two-storey building. The ground floor is designed for retail and business; the second floor becomes a residence, office, or rental unit.</p><p>It is a practical response to the way growing Philippine communities live and trade: close to home, visible from the road, and flexible enough to evolve with the owner.</p><div class="bt-note"><span>INSPIRATION NOTE</span><b>Informed by proven models like Alfamart-style retail fronts and townhouse-store concepts.</b></div></div></div></section>' +
+'<section class="bt-intro bt-section"><div class="bt-section-label">01 / THE OPPORTUNITY</div><div class="bt-intro-grid"><div><h2>One address.<br><em>Multiple incomes.</em></h2></div><div class="bt-intro-copy"><p>Project B.T (BahayTindahan) is a modern mixed-use development combining commercial and residential spaces within a single two-storey building. The ground floor is designed for retail and business; the second floor becomes a residence, office, or rental unit.</p><p>It is a practical response to the way growing Philippine communities live and trade: close to home, visible from the road, and flexible enough to evolve with the owner.</p><div class="bt-note"><span>INSPIRATION NOTE</span><b>Informed by proven models like Alfamart-style retail fronts and townhouse-store concepts.</b></div></div></div></section>' +
 
       '<section class="bt-mission"><div class="bt-mission-image"><img src="' + conceptImage + '" alt="Warm modern mixed-use interior and exterior concept" loading="lazy"><div class="bt-image-caption">A compact footprint with room to grow</div></div><div class="bt-mission-copy"><div class="bt-section-label">02 / OUR NORTH STAR</div><h2>Real estate that works as hard as its owner.</h2><div class="bt-mission-block"><span>MISSION</span><p>Develop modern, affordable, and profitable shophouse communities that support local businesses while creating sustainable long-term real estate investments.</p></div><div class="bt-mission-block"><span>VISION</span><p>Be the leading developer of high-quality mixed-use developments in strategic locations, creating lasting value for business owners, residents, investors, and communities throughout the Philippines.</p></div></div></section>' +
 
@@ -566,15 +616,17 @@
     if (!active || !host) return;
     var current = route();
     if (current.path === "project-bt") host.innerHTML = projectBtPage();
+    else if (current.path === "shophouse") host.innerHTML = shophousePage();
     else if (current.path.indexOf("listing/") === 0) host.innerHTML = detailPage(viewState.result && viewState.result.data);
     else if (current.path === "search") host.innerHTML = searchPage(current.params);
     else if (host.querySelector(".sf-hero")) patchHome();
     else host.innerHTML = home();
     mountMap();
+    try { if (typeof window.ESREALTY_EST === "object" && window.ESREALTY_EST.mount) window.ESREALTY_EST.mount(); } catch (e) {}
     if (current.path === "search" && viewState.mode === "map") setTimeout(sfInitMap, 60);
     bindHomeMotion();
     bindBtMotion();
-    if (current.path === "home" || current.path === "") bindConstruction();
+    if (current.path === "home" || current.path === "" || current.path === "shophouse") bindConstruction();
   }
 
   function loadCurrent(force) {

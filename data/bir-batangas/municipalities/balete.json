@@ -1,0 +1,1362 @@
+{
+  "slug": "balete",
+  "name": "BALETE",
+  "region": "Region IV-A (CALABARZON)",
+  "province": "Batangas",
+  "rdo": "59",
+  "departmentOrder": "034-2022",
+  "revision": "5th",
+  "effectivityDate": "2022-07-10",
+  "classifications": [
+    "A39",
+    "A40",
+    "A50",
+    "CR",
+    "GP",
+    "I",
+    "RR",
+    "X"
+  ],
+  "rowCount": 298,
+  "barangays": {
+    "ALANGILAN": {
+      "streets": {
+        "balete-alangilan road": {
+          "name": "BALETE-ALANGILAN ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "I": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "X": {
+              "value": 1700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1700
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            }
+          }
+        },
+        "alta del lago mozzafiato": {
+          "name": "ALTA DEL LAGO / MOZZAFIATO",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 13000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 13000
+                }
+              ]
+            },
+            "RR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000
+                }
+              ]
+            }
+          }
+        },
+        "mozzafiato lakeshore resort": {
+          "name": "MOZZAFIATO LAKESHORE RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1200,
+        "RR": 700,
+        "I": 800,
+        "X": 700,
+        "GP": 400,
+        "A40": 900,
+        "A50": 300
+      },
+      "classifications": [
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "CALAWIT": {
+      "streets": {},
+      "other": {
+        "CR": 400,
+        "RR": 350,
+        "A39": 250,
+        "A50": 200
+      },
+      "classifications": [
+        "A39",
+        "A50",
+        "CR",
+        "RR"
+      ]
+    },
+    "LOOC": {
+      "streets": {
+        "provicial road": {
+          "name": "PROVICIAL ROAD",
+          "vicinity": "ALONG PROVICIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000,
+                  "vicinity": "ALONG PROVICIAL ROAD"
+                },
+                {
+                  "value": 900,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "X": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                },
+                {
+                  "value": 750
+                }
+              ]
+            },
+            "GP": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "A50": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 250
+                }
+              ]
+            }
+          }
+        },
+        "circumferential road": {
+          "name": "CIRCUMFERENTIAL ROAD",
+          "vicinity": "ALONG TAAL LAKE",
+          "classes": {
+            "CR": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800,
+                  "vicinity": "ALONG TAAL LAKE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "X": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "GP": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A39": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A40": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "A50": {
+              "value": 220,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 220
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 700,
+        "RR": 400,
+        "X": 600,
+        "GP": 350,
+        "A39": 250,
+        "A40": 600,
+        "A50": 200
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "MAGAPI": {
+      "streets": {
+        "balete-malvar road": {
+          "name": "BALETE-MALVAR ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "X": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 700,
+        "X": 900,
+        "GP": 400,
+        "A50": 200
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "MAKINA": {
+      "streets": {
+        "balete-leviste road": {
+          "name": "BALETE-LEVISTE ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "X": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 2800
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "A40": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2200
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "alta del lago mozzafiato": {
+          "name": "ALTA DEL LAGO / MOZZAFIATO",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 13000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 13000
+                }
+              ]
+            },
+            "RR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000
+                }
+              ]
+            }
+          }
+        },
+        "jowivil crater subdivision": {
+          "name": "JOWIVIL CRATER SUBDIVISION",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 5000
+                }
+              ]
+            },
+            "RR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "mozzafiato lakeshore resort": {
+          "name": "MOZZAFIATO LAKESHORE RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2500,
+        "RR": 2000,
+        "X": 2200,
+        "GP": 1000,
+        "A40": 2000,
+        "A50": 300
+      },
+      "classifications": [
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "MALABANAN": {
+      "streets": {
+        "balete-leviste road": {
+          "name": "BALETE-LEVISTE ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "X": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A40": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "cintai corito s garden": {
+          "name": "CINTAI CORITO'S GARDEN",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2500,
+        "RR": 1500,
+        "X": 2000,
+        "GP": 1000,
+        "A40": 2000,
+        "A50": 350
+      },
+      "classifications": [
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "PALIGAWAN": {
+      "streets": {},
+      "other": {
+        "CR": 2000,
+        "RR": 1000,
+        "I": 1400,
+        "X": 1300,
+        "GP": 900,
+        "A50": 400
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "I",
+        "RR",
+        "X"
+      ]
+    },
+    "PALSARA": {
+      "streets": {
+        "balete-alangilan road": {
+          "name": "BALETE-ALANGILAN ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 3000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                },
+                {
+                  "value": 2200
+                }
+              ]
+            },
+            "X": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "GP": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A40": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "A50": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 350
+                }
+              ]
+            }
+          }
+        },
+        "alta del lago mozzafiato": {
+          "name": "ALTA DEL LAGO / MOZZAFIATO",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 13000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 13000
+                }
+              ]
+            },
+            "RR": {
+              "value": 9000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 9000
+                }
+              ]
+            }
+          }
+        },
+        "emilio s farm and resort": {
+          "name": "EMILIO'S FARM AND RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "nayomi santuary resort": {
+          "name": "NAYOMI SANTUARY RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            }
+          }
+        },
+        "mozzafiato lakeshore resort": {
+          "name": "MOZZAFIATO LAKESHORE RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2500,
+        "RR": 2000,
+        "X": 2300,
+        "GP": 1000,
+        "A39": 500,
+        "A40": 1200,
+        "A50": 300
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION": {
+      "streets": {
+        "national road": {
+          "name": "NATIONAL ROAD",
+          "vicinity": "ALONG NATIONAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 4000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 4000,
+                  "vicinity": "ALONG NATIONAL ROAD"
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "X": {
+              "value": 3500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3500
+                },
+                {
+                  "value": 3300
+                }
+              ]
+            },
+            "A50": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 500
+                }
+              ]
+            }
+          }
+        },
+        "circumferential road": {
+          "name": "CIRCUMFERENTIAL ROAD",
+          "vicinity": "ALONG TAAL LAKE",
+          "classes": {
+            "CR": {
+              "value": 3000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 3000,
+                  "vicinity": "ALONG TAAL LAKE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "X": {
+              "value": 2500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2500
+                }
+              ]
+            },
+            "A39": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "A40": {
+              "value": 2600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2600
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        },
+        "the lakeshore resort": {
+          "name": "THE LAKESHORE RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                }
+              ]
+            }
+          }
+        },
+        "front beach hotel & resort": {
+          "name": "FRONT BEACH HOTEL & RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1800
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 2500,
+        "RR": 1500,
+        "X": 2000,
+        "A39": 1000,
+        "A40": 2000,
+        "A50": 350
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "RR",
+        "X"
+      ]
+    },
+    "SALA": {
+      "streets": {
+        "balete-malvar road": {
+          "name": "BALETE-MALVAR ROAD",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG PROVINCIAL ROAD"
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "X": {
+              "value": 1500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1500
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 350
+                }
+              ]
+            }
+          }
+        },
+        "circumferential road": {
+          "name": "CIRCUMFERENTIAL ROAD",
+          "vicinity": "ALONG TAAL LAKE",
+          "classes": {
+            "CR": {
+              "value": 1300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1300,
+                  "vicinity": "ALONG TAAL LAKE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 700,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "X": {
+              "value": 800,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "GP": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A39": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A40": {
+              "value": 1200,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "A50": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1200,
+        "RR": 600,
+        "X": 700,
+        "GP": 350,
+        "A39": 300,
+        "A40": 1000,
+        "A50": 250
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "SAMPALOCAN": {
+      "streets": {},
+      "other": {
+        "CR": 700,
+        "RR": 500,
+        "X": 600,
+        "GP": 400,
+        "A39": 300,
+        "A40": 600,
+        "A50": 250
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "SAN SEBASTIAN": {
+      "streets": {
+        "circumferential road": {
+          "name": "CIRCUMFERENTIAL ROAD",
+          "vicinity": "ALONG TAAL LAKE",
+          "classes": {
+            "CR": {
+              "value": 500,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 500,
+                  "vicinity": "ALONG TAAL LAKE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "X": {
+              "value": 450,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "GP": {
+              "value": 350,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A39": {
+              "value": 320,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 320
+                }
+              ]
+            },
+            "A40": {
+              "value": 400,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A50": {
+              "value": 300,
+              "valueLabel": "BIR 034-2022",
+              "segments": [
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 400,
+        "RR": 350,
+        "X": 370,
+        "GP": 300,
+        "A39": 270,
+        "A40": 300,
+        "A50": 250
+      },
+      "classifications": [
+        "A39",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "SOLIS": {
+      "streets": {},
+      "other": {
+        "CR": 600,
+        "RR": 500,
+        "X": 550,
+        "GP": 300,
+        "A50": 250
+      },
+      "classifications": [
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    }
+  }
+}

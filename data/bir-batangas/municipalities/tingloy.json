@@ -1,0 +1,1571 @@
+{
+  "slug": "tingloy",
+  "name": "TINGLOY",
+  "region": "Region IV-A (CALABARZON)",
+  "province": "Batangas",
+  "rdo": "58",
+  "departmentOrder": "035-2022",
+  "revision": "4th",
+  "effectivityDate": "2022-07-23",
+  "classifications": [
+    "A14",
+    "A39",
+    "A4",
+    "A40",
+    "A49",
+    "A50",
+    "CL",
+    "CR",
+    "GP",
+    "RR",
+    "X"
+  ],
+  "rowCount": 441,
+  "barangays": {
+    "CORONA": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG VERDE ISLAND PASSAGE",
+          "classes": {
+            "CR": {
+              "value": 1200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1200,
+                  "vicinity": "ALONG VERDE ISLAND PASSAGE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "A39": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A40": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A50": {
+              "value": 250,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 250
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 600,
+        "X": 700,
+        "GP": 300,
+        "A4": 210,
+        "A14": 200,
+        "A39": 300,
+        "A40": 500,
+        "A50": 150,
+        "A49": 120
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "GAMAO": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG MARICABAN STRAIT/",
+          "classes": {
+            "CR": {
+              "value": 1200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1200,
+                  "vicinity": "ALONG MARICABAN STRAIT/"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800,
+                  "vicinity": "BATANGAS BAY"
+                }
+              ]
+            },
+            "A39": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A40": {
+              "value": 700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "A50": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 700,
+        "X": 800,
+        "GP": 350,
+        "A4": 210,
+        "A14": 200,
+        "A39": 300,
+        "A40": 650,
+        "A50": 180
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "MACAWAYAN": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG MINDORO PASSAGE",
+          "classes": {
+            "CR": {
+              "value": 1200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1200,
+                  "vicinity": "ALONG MINDORO PASSAGE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A39": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A40": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A50": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1100,
+        "RR": 700,
+        "X": 900,
+        "GP": 250,
+        "A4": 210,
+        "A14": 200,
+        "A39": 300,
+        "A40": 1000,
+        "A50": 180,
+        "A49": 120
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "MARICABAN": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG MARICABAN STRAIT/",
+          "classes": {
+            "CR": {
+              "value": 1600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1600,
+                  "vicinity": "ALONG MARICABAN STRAIT/"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000,
+                  "vicinity": "MINDORO PASSAGE"
+                }
+              ]
+            },
+            "A39": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A40": {
+              "value": 1400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1400
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 350
+                }
+              ]
+            }
+          }
+        },
+        "caban island": {
+          "name": "CABAN ISLAND",
+          "vicinity": "",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A39": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "A50": {
+              "value": 190,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 190
+                }
+              ]
+            }
+          }
+        },
+        "sombrero island": {
+          "name": "SOMBRERO ISLAND",
+          "vicinity": "",
+          "classes": {
+            "A39": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        },
+        "sepoc beach": {
+          "name": "SEPOC BEACH",
+          "vicinity": "",
+          "classes": {
+            "A39": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A40": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300
+                }
+              ]
+            }
+          }
+        },
+        "portales beach": {
+          "name": "PORTALES BEACH",
+          "vicinity": "",
+          "classes": {
+            "A39": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A40": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300
+                }
+              ]
+            }
+          }
+        },
+        "mang oscar s beach": {
+          "name": "MANG OSCAR'S BEACH",
+          "vicinity": "",
+          "classes": {
+            "A39": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A40": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300
+                }
+              ]
+            }
+          }
+        },
+        "mapating beach": {
+          "name": "MAPATING BEACH",
+          "vicinity": "",
+          "classes": {
+            "A39": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A40": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300
+                }
+              ]
+            }
+          }
+        },
+        "moreno resort": {
+          "name": "MORENO RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1400,
+        "RR": 900,
+        "X": 1100,
+        "GP": 400,
+        "A4": 280,
+        "A14": 260,
+        "A39": 1000,
+        "A40": 1300,
+        "A50": 250
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "PAPAYA": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG VERDE ISLAND PASSAGE",
+          "classes": {
+            "CR": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300,
+                  "vicinity": "ALONG VERDE ISLAND PASSAGE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A39": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A40": {
+              "value": 900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "A50": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        },
+        "d perlie s place private resort": {
+          "name": "D' PERLIE'S PLACE PRIVATE RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 700,
+        "X": 900,
+        "GP": 400,
+        "A4": 210,
+        "A14": 200,
+        "A39": 400,
+        "A40": 750,
+        "A50": 250
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "PISA": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG MARICABAN STRAIT & BONITO ISLAND",
+          "classes": {
+            "CR": {
+              "value": 1400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1400,
+                  "vicinity": "ALONG MARICABAN STRAIT & BONITO ISLAND"
+                }
+              ]
+            },
+            "RR": {
+              "value": 900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "A39": {
+              "value": 700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "A40": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A50": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        },
+        "culebra island bonito": {
+          "name": "CULEBRA ISLAND (BONITO)",
+          "vicinity": "ALONG CULEBRA ISLAND",
+          "classes": {
+            "CR": {
+              "value": 1600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1600,
+                  "vicinity": "ALONG CULEBRA ISLAND"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "A4": {
+              "value": 250,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 250
+                }
+              ]
+            },
+            "A39": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A40": {
+              "value": 900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 900
+                }
+              ]
+            }
+          }
+        },
+        "balahibong manok island": {
+          "name": "BALAHIBONG MANOK ISLAND",
+          "vicinity": "",
+          "classes": {
+            "A39": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "A40": {
+              "value": 850,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 850
+                }
+              ]
+            }
+          }
+        },
+        "bonito island resort": {
+          "name": "BONITO ISLAND RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1250,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1250
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1200,
+        "RR": 800,
+        "X": 1000,
+        "GP": 400,
+        "A4": 210,
+        "A14": 200,
+        "A39": 600,
+        "A40": 1000,
+        "A50": 190,
+        "CL": 700
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CL",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION 13": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG MARICABAN STRAIT",
+          "classes": {
+            "CR": {
+              "value": 1700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1700,
+                  "vicinity": "ALONG MARICABAN STRAIT"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "A39": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1500,
+        "RR": 1300,
+        "X": 1400,
+        "A4": 400,
+        "A14": 390,
+        "A39": 500,
+        "A40": 1400,
+        "A50": 350,
+        "GP": 500
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION 14": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG MARICABAN STRAIT",
+          "classes": {
+            "CR": {
+              "value": 1700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1700,
+                  "vicinity": "ALONG MARICABAN STRAIT"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "A39": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1500,
+        "RR": 1300,
+        "X": 1400,
+        "A4": 400,
+        "A14": 390,
+        "A39": 500,
+        "A40": 1400,
+        "A50": 350,
+        "GP": 500
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION 15": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG MARICABAN STRAIT",
+          "classes": {
+            "CR": {
+              "value": 1700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1700,
+                  "vicinity": "ALONG MARICABAN STRAIT"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "A39": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            },
+            "A50": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1500,
+        "RR": 1300,
+        "X": 1400,
+        "CL": 1000,
+        "A4": 400,
+        "A14": 390,
+        "A39": 500,
+        "A40": 1400,
+        "A50": 350,
+        "GP": 500
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CL",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "SAN ISIDRO": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG VERDE ISLAND PASSAGE",
+          "classes": {
+            "CR": {
+              "value": 1200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1200,
+                  "vicinity": "ALONG VERDE ISLAND PASSAGE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A39": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A40": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A50": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1100,
+        "RR": 700,
+        "X": 900,
+        "GP": 250,
+        "A4": 210,
+        "A14": 200,
+        "A39": 300,
+        "A40": 1000,
+        "A50": 180
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "SAN JOSE": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG MARICABAN STRAIT",
+          "classes": {
+            "CR": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300,
+                  "vicinity": "ALONG MARICABAN STRAIT"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A39": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A40": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A50": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                }
+              ]
+            }
+          }
+        },
+        "olympic point island resort": {
+          "name": "OLYMPIC POINT ISLAND RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 700,
+        "X": 800,
+        "GP": 400,
+        "A4": 210,
+        "A14": 200,
+        "A39": 350,
+        "A40": 1000,
+        "A50": 180
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "SAN JUAN": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG MINDORO PASSAGE",
+          "classes": {
+            "CR": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300,
+                  "vicinity": "ALONG MINDORO PASSAGE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A39": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A40": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "A50": {
+              "value": 250,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 250
+                }
+              ]
+            }
+          }
+        },
+        "masasa beach": {
+          "name": "MASASA BEACH",
+          "vicinity": "",
+          "classes": {
+            "A39": {
+              "value": 750,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 750
+                }
+              ]
+            },
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        },
+        "hidden paradise resort": {
+          "name": "HIDDEN PARADISE RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1200,
+        "RR": 700,
+        "X": 800,
+        "GP": 400,
+        "A4": 210,
+        "A14": 200,
+        "A39": 400,
+        "A40": 1000,
+        "A50": 190
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "SAN PEDRO": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG MARICABAN STRAIT",
+          "classes": {
+            "CR": {
+              "value": 1200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1200,
+                  "vicinity": "ALONG MARICABAN STRAIT"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A39": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A40": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A50": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 700,
+        "X": 800,
+        "GP": 350,
+        "A4": 210,
+        "A14": 200,
+        "A39": 300,
+        "A40": 700,
+        "A50": 180,
+        "A49": 120
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "SANTO TOMAS": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG MARICABAN STRAIT",
+          "classes": {
+            "CR": {
+              "value": 1200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1200,
+                  "vicinity": "ALONG MARICABAN STRAIT"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A39": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A40": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "A50": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                }
+              ]
+            }
+          }
+        },
+        "macuha beach island resort": {
+          "name": "MACUHA BEACH ISLAND RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 700,
+        "X": 800,
+        "GP": 350,
+        "A4": 210,
+        "A14": 180,
+        "A39": 350,
+        "A40": 800,
+        "A50": 170
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "TALAHIB": {
+      "streets": {
+        "provincial road": {
+          "name": "PROVINCIAL ROAD",
+          "vicinity": "ALONG BATANGAS BAY",
+          "classes": {
+            "CR": {
+              "value": 1200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1200,
+                  "vicinity": "ALONG BATANGAS BAY"
+                }
+              ]
+            },
+            "RR": {
+              "value": 800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 800
+                }
+              ]
+            },
+            "A39": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A40": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "A50": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 700,
+        "X": 800,
+        "GP": 350,
+        "A4": 210,
+        "A14": 200,
+        "A39": 300,
+        "A40": 1000,
+        "A50": 180,
+        "A49": 150
+      },
+      "classifications": [
+        "A14",
+        "A39",
+        "A4",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    }
+  }
+}

@@ -1,0 +1,4644 @@
+{
+  "slug": "lobo",
+  "name": "LOBO",
+  "region": "Region IV-A (CALABARZON)",
+  "province": "Batangas",
+  "rdo": "58",
+  "departmentOrder": "035-2022",
+  "revision": "4th",
+  "effectivityDate": "",
+  "classifications": [
+    "A1",
+    "A14",
+    "A16",
+    "A20",
+    "A23",
+    "A24",
+    "A26",
+    "A3",
+    "A39",
+    "A4",
+    "A40",
+    "A44",
+    "A49",
+    "A50",
+    "CL",
+    "CR",
+    "GP",
+    "RR",
+    "X"
+  ],
+  "rowCount": 857,
+  "barangays": {
+    "APAR": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "GP": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A1": {
+              "value": 60,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 60
+                },
+                {
+                  "value": 50
+                }
+              ]
+            },
+            "A4": {
+              "value": 50,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 50
+                },
+                {
+                  "value": 35
+                }
+              ]
+            },
+            "A16": {
+              "value": 45,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 45
+                },
+                {
+                  "value": 30
+                }
+              ]
+            },
+            "A49": {
+              "value": 40,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 40
+                },
+                {
+                  "value": 25
+                }
+              ]
+            },
+            "A50": {
+              "value": 35,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 35
+                },
+                {
+                  "value": 10
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A1",
+        "A16",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "BALATBAT": {
+      "streets": {
+        "taysan to lobo road": {
+          "name": "TAYSAN TO LOBO ROAD",
+          "vicinity": "ALONG TAYSAN TO LOBO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG TAYSAN TO LOBO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 1100,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "X": {
+              "value": 1900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A3": {
+              "value": 160,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 160
+                },
+                {
+                  "value": 110
+                }
+              ]
+            },
+            "A4": {
+              "value": 180,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 180
+                },
+                {
+                  "value": 130
+                }
+              ]
+            },
+            "A16": {
+              "value": 165,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 165
+                },
+                {
+                  "value": 115
+                }
+              ]
+            },
+            "A20": {
+              "value": 170,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 170
+                },
+                {
+                  "value": 120
+                }
+              ]
+            },
+            "A23": {
+              "value": 175,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 175
+                },
+                {
+                  "value": 125
+                }
+              ]
+            },
+            "A49": {
+              "value": 160,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 160
+                },
+                {
+                  "value": 110
+                }
+              ]
+            },
+            "A50": {
+              "value": 155,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 155
+                },
+                {
+                  "value": 105
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 800,
+        "X": 900,
+        "CL": 800,
+        "GP": 400,
+        "A3": 100,
+        "A4": 120,
+        "A16": 105,
+        "A20": 110,
+        "A23": 115,
+        "A49": 100,
+        "A50": 95
+      },
+      "classifications": [
+        "A16",
+        "A20",
+        "A23",
+        "A3",
+        "A4",
+        "A49",
+        "A50",
+        "CL",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "BALIBAGO": {
+      "streets": {
+        "lobo to malabrigo to laiya road": {
+          "name": "LOBO TO MALABRIGO TO LAIYA ROAD",
+          "vicinity": "ALONG LOBO TO MALABRIGO TO LAIYA ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500,
+                  "vicinity": "ALONG LOBO TO MALABRIGO TO LAIYA ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 900,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "X": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "GP": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A3": {
+              "value": 130,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 130
+                },
+                {
+                  "value": 80
+                }
+              ]
+            },
+            "A4": {
+              "value": 150,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 150
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A16": {
+              "value": 135,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 135
+                },
+                {
+                  "value": 85
+                }
+              ]
+            },
+            "A20": {
+              "value": 140,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 140
+                },
+                {
+                  "value": 90
+                }
+              ]
+            },
+            "A23": {
+              "value": 145,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 145
+                },
+                {
+                  "value": 95
+                }
+              ]
+            },
+            "A49": {
+              "value": 130,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 130
+                },
+                {
+                  "value": 80
+                }
+              ]
+            },
+            "A50": {
+              "value": 125,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 125
+                },
+                {
+                  "value": 75
+                }
+              ]
+            }
+          }
+        },
+        "punta verde resort": {
+          "name": "PUNTA VERDE RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "playa de oro beach resort": {
+          "name": "PLAYA DE ORO BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1500,
+        "RR": 1300,
+        "X": 700,
+        "GP": 300,
+        "A3": 60,
+        "A4": 80,
+        "A16": 65,
+        "A20": 70,
+        "A23": 75,
+        "A49": 60,
+        "A50": 55,
+        "A39": 1000,
+        "A40": 2500
+      },
+      "classifications": [
+        "A16",
+        "A20",
+        "A23",
+        "A3",
+        "A39",
+        "A4",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "BANALO": {
+      "streets": {
+        "batangas to tabangao to lobo road": {
+          "name": "BATANGAS TO TABANGAO TO LOBO ROAD",
+          "vicinity": "ALONG BATANGAS TO TABANGAO TO LOBO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG BATANGAS TO TABANGAO TO LOBO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 1400,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "X": {
+              "value": 2200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2200
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A3": {
+              "value": 340,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 340
+                },
+                {
+                  "value": 185
+                }
+              ]
+            },
+            "A4": {
+              "value": 380,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 380
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A16": {
+              "value": 370,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 370
+                },
+                {
+                  "value": 190
+                }
+              ]
+            },
+            "A20": {
+              "value": 375,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 375
+                },
+                {
+                  "value": 195
+                }
+              ]
+            },
+            "A50": {
+              "value": 330,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 330
+                },
+                {
+                  "value": 180
+                }
+              ]
+            }
+          }
+        },
+        "emy bel hin beach resort": {
+          "name": "EMY BEL HIN BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 3000,
+        "X": 1200,
+        "GP": 500,
+        "A3": 170,
+        "A4": 185,
+        "A16": 175,
+        "A20": 180,
+        "A50": 250,
+        "A39": 2000,
+        "A40": 3000
+      },
+      "classifications": [
+        "A16",
+        "A20",
+        "A3",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "BIGA": {
+      "streets": {
+        "lobo to malabrigo to laiya road": {
+          "name": "LOBO TO MALABRIGO TO LAIYA ROAD",
+          "vicinity": "ALONG LOBO TO MALABRIGO TO LAIYA ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500,
+                  "vicinity": "ALONG LOBO TO MALABRIGO TO LAIYA ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 900,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1000
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "X": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "GP": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A3": {
+              "value": 130,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 130
+                },
+                {
+                  "value": 80
+                }
+              ]
+            },
+            "A4": {
+              "value": 150,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 150
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A16": {
+              "value": 140,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 140
+                },
+                {
+                  "value": 90
+                }
+              ]
+            },
+            "A23": {
+              "value": 145,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 145
+                },
+                {
+                  "value": 95
+                }
+              ]
+            },
+            "A26": {
+              "value": 135,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 135
+                },
+                {
+                  "value": 85
+                }
+              ]
+            },
+            "A49": {
+              "value": 130,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 130
+                },
+                {
+                  "value": 80
+                }
+              ]
+            },
+            "A50": {
+              "value": 125,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 125
+                },
+                {
+                  "value": 75
+                }
+              ]
+            }
+          }
+        },
+        "bigang munti beach resort": {
+          "name": "BIGANG MUNTI BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1500,
+        "RR": 1300,
+        "X": 700,
+        "GP": 300,
+        "A3": 60,
+        "A4": 80,
+        "A16": 70,
+        "A23": 75,
+        "A26": 65,
+        "A49": 60,
+        "A50": 55,
+        "A39": 700,
+        "A40": 2500
+      },
+      "classifications": [
+        "A16",
+        "A23",
+        "A26",
+        "A3",
+        "A39",
+        "A4",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "BIGNAY": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "GP": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A3": {
+              "value": 45,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 45
+                },
+                {
+                  "value": 25
+                }
+              ]
+            },
+            "A4": {
+              "value": 70,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 70
+                },
+                {
+                  "value": 50
+                }
+              ]
+            },
+            "A16": {
+              "value": 60,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 60
+                },
+                {
+                  "value": 35
+                }
+              ]
+            },
+            "A26": {
+              "value": 50,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 50
+                },
+                {
+                  "value": 30
+                }
+              ]
+            },
+            "A49": {
+              "value": 45,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 45
+                },
+                {
+                  "value": 25
+                }
+              ]
+            },
+            "A50": {
+              "value": 40,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 40
+                },
+                {
+                  "value": 15
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A16",
+        "A26",
+        "A3",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "CALO": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "GP": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A3": {
+              "value": 45,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 45
+                },
+                {
+                  "value": 25
+                }
+              ]
+            },
+            "A4": {
+              "value": 60,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 60
+                },
+                {
+                  "value": 50
+                }
+              ]
+            },
+            "A16": {
+              "value": 55,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 55
+                },
+                {
+                  "value": 35
+                }
+              ]
+            },
+            "A49": {
+              "value": 45,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 45
+                },
+                {
+                  "value": 25
+                }
+              ]
+            },
+            "A50": {
+              "value": 40,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 40
+                },
+                {
+                  "value": 15
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A16",
+        "A3",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "CALUMPIT": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "GP": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A3": {
+              "value": 45,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 45
+                },
+                {
+                  "value": 25
+                }
+              ]
+            },
+            "A4": {
+              "value": 60,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 60
+                },
+                {
+                  "value": 50
+                }
+              ]
+            },
+            "A16": {
+              "value": 55,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 55
+                },
+                {
+                  "value": 35
+                }
+              ]
+            },
+            "A49": {
+              "value": 45,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 45
+                },
+                {
+                  "value": 25
+                }
+              ]
+            },
+            "A50": {
+              "value": 40,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 40
+                },
+                {
+                  "value": 15
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A16",
+        "A3",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "FABRICA": {
+      "streets": {
+        "batangas to tabangao to lobo road": {
+          "name": "BATANGAS TO TABANGAO TO LOBO ROAD",
+          "vicinity": "ALONG BATANGAS TO TABANGAO TO LOBO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 2700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2700,
+                  "vicinity": "ALONG BATANGAS TO TABANGAO TO LOBO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2100
+                },
+                {
+                  "value": 1300
+                }
+              ]
+            },
+            "X": {
+              "value": 2400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2400
+                }
+              ]
+            },
+            "GP": {
+              "value": 700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 700
+                },
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "A1": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "A4": {
+              "value": 370,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 370
+                },
+                {
+                  "value": 250
+                }
+              ]
+            },
+            "A16": {
+              "value": 360,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 360
+                },
+                {
+                  "value": 235
+                }
+              ]
+            },
+            "A50": {
+              "value": 350,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 230
+                }
+              ]
+            }
+          }
+        },
+        "casa del sol resort": {
+          "name": "CASA DEL SOL RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "almalin beach resort": {
+          "name": "ALMALIN BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "la palmera resort": {
+          "name": "LA PALMERA RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "gerthel beach & resorts": {
+          "name": "GERTHEL BEACH & RESORTS",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "bermac beach resort": {
+          "name": "BERMAC BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "butterfly beach resort": {
+          "name": "BUTTERFLY BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 3000,
+        "X": 1300,
+        "CL": 1200,
+        "GP": 500,
+        "A1": 250,
+        "A4": 230,
+        "A16": 225,
+        "A50": 250,
+        "A39": 2000,
+        "A40": 3000
+      },
+      "classifications": [
+        "A1",
+        "A16",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CL",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "JAYBANGA": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "CL": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                }
+              ]
+            },
+            "GP": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A1": {
+              "value": 60,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 60
+                },
+                {
+                  "value": 50
+                }
+              ]
+            },
+            "A3": {
+              "value": 40,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 40
+                },
+                {
+                  "value": 25
+                }
+              ]
+            },
+            "A4": {
+              "value": 50,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 50
+                },
+                {
+                  "value": 35
+                }
+              ]
+            },
+            "A16": {
+              "value": 45,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 45
+                },
+                {
+                  "value": 30
+                }
+              ]
+            },
+            "A49": {
+              "value": 40,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 40
+                },
+                {
+                  "value": 25
+                }
+              ]
+            },
+            "A50": {
+              "value": 35,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 35
+                },
+                {
+                  "value": 10
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A1",
+        "A16",
+        "A3",
+        "A4",
+        "A49",
+        "A50",
+        "CL",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "LAGADLARIN": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 1200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1200,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "ALONG THE SEASHORE"
+                }
+              ]
+            },
+            "RR": {
+              "value": 900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 900
+                },
+                {
+                  "value": 500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 1200,
+                  "vicinity": "FACING VERDE ISLAND PASSAGE"
+                },
+                {
+                  "value": 3000
+                }
+              ]
+            },
+            "X": {
+              "value": 1100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "GP": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A4": {
+              "value": 180,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 180
+                },
+                {
+                  "value": 110
+                }
+              ]
+            },
+            "A16": {
+              "value": 170,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 170
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A24": {
+              "value": 165,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 165
+                },
+                {
+                  "value": 95
+                }
+              ]
+            },
+            "A50": {
+              "value": 160,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 160
+                },
+                {
+                  "value": 90
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A39": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500
+                }
+              ]
+            }
+          }
+        },
+        "island of corals beach resort": {
+          "name": "ISLAND OF CORALS BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "c & c beach resort": {
+          "name": "C & C BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "untalan beach resort": {
+          "name": "UNTALAN BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "A40": 3200
+      },
+      "classifications": [
+        "A16",
+        "A24",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "MABILOG NA BUNDOK": {
+      "streets": {
+        "lobo to malabrigo road": {
+          "name": "LOBO TO MALABRIGO ROAD",
+          "vicinity": "ALONG LOBO TO MALABRIGO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG LOBO TO MALABRIGO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 1200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "X": {
+              "value": 1900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A1": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A4": {
+              "value": 270,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 270
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A16": {
+              "value": 260,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 260
+                },
+                {
+                  "value": 150
+                }
+              ]
+            },
+            "A20": {
+              "value": 265,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 265
+                },
+                {
+                  "value": 155
+                }
+              ]
+            },
+            "A50": {
+              "value": 250,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 250
+                },
+                {
+                  "value": 140
+                }
+              ]
+            },
+            "A3": {
+              "value": 145,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 145
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 1000,
+        "RR": 800,
+        "X": 900,
+        "GP": 400,
+        "A1": 170,
+        "A3": 140,
+        "A4": 150,
+        "A16": 140,
+        "A20": 145,
+        "A49": 140,
+        "A50": 135
+      },
+      "classifications": [
+        "A1",
+        "A16",
+        "A20",
+        "A3",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "MALABRIGO": {
+      "streets": {
+        "lobo to malabrigo road": {
+          "name": "LOBO TO MALABRIGO ROAD",
+          "vicinity": "ALONG LOBO TO MALABRIGO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG LOBO TO MALABRIGO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 1300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "X": {
+              "value": 1900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A3": {
+              "value": 190,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 190
+                },
+                {
+                  "value": 140
+                }
+              ]
+            },
+            "A4": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A16": {
+              "value": 195,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 195
+                },
+                {
+                  "value": 145
+                }
+              ]
+            },
+            "A49": {
+              "value": 190,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 190
+                },
+                {
+                  "value": 140
+                }
+              ]
+            },
+            "A50": {
+              "value": 180,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 180
+                },
+                {
+                  "value": 135
+                }
+              ]
+            }
+          }
+        },
+        "cerca parola beach resort": {
+          "name": "CERCA PAROLA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "la vien beach resort": {
+          "name": "LA VIEN BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "punta malabrigo beach": {
+          "name": "PUNTA MALABRIGO BEACH",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "d2go beach resort": {
+          "name": "D2GO BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "holidays beach resort": {
+          "name": "HOLIDAYS BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "dawas beach resort": {
+          "name": "DAWAS BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 3000,
+        "X": 1100,
+        "GP": 400,
+        "A3": 130,
+        "A4": 150,
+        "A16": 135,
+        "A49": 130,
+        "A50": 150,
+        "A39": 2000,
+        "A40": 3000
+      },
+      "classifications": [
+        "A16",
+        "A3",
+        "A39",
+        "A4",
+        "A40",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "MALALIM NA SANOG": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 200,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 450,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 450
+                }
+              ]
+            },
+            "GP": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A3": {
+              "value": 50,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 50
+                },
+                {
+                  "value": 25
+                }
+              ]
+            },
+            "A4": {
+              "value": 70,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 70
+                },
+                {
+                  "value": 50
+                }
+              ]
+            },
+            "A16": {
+              "value": 60,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 60
+                },
+                {
+                  "value": 35
+                }
+              ]
+            },
+            "A49": {
+              "value": 50,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 50
+                },
+                {
+                  "value": 25
+                }
+              ]
+            },
+            "A50": {
+              "value": 45,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 45
+                },
+                {
+                  "value": 15
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A16",
+        "A3",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "MALAPAD NA PARANG": {
+      "streets": {
+        "taysan to lobo road": {
+          "name": "TAYSAN TO LOBO ROAD",
+          "vicinity": "ALONG TAYSAN TO LOBO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500,
+                  "vicinity": "ALONG TAYSAN TO LOBO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 900,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "X": {
+              "value": 1400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1400
+                }
+              ]
+            },
+            "GP": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A3": {
+              "value": 125,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 125
+                },
+                {
+                  "value": 75
+                }
+              ]
+            },
+            "A4": {
+              "value": 150,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 150
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A14": {
+              "value": 135,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 135
+                },
+                {
+                  "value": 85
+                }
+              ]
+            },
+            "A16": {
+              "value": 140,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 140
+                },
+                {
+                  "value": 90
+                }
+              ]
+            },
+            "A20": {
+              "value": 145,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 145
+                },
+                {
+                  "value": 95
+                }
+              ]
+            },
+            "A44": {
+              "value": 130,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 130
+                },
+                {
+                  "value": 80
+                }
+              ]
+            },
+            "A49": {
+              "value": 125,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 125
+                },
+                {
+                  "value": 75
+                }
+              ]
+            },
+            "A50": {
+              "value": 120,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 120
+                },
+                {
+                  "value": 70
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 800,
+        "RR": 600,
+        "X": 700,
+        "GP": 300,
+        "A3": 55,
+        "A4": 80,
+        "A14": 65,
+        "A16": 70,
+        "A20": 75,
+        "A44": 60,
+        "A49": 55,
+        "A50": 50
+      },
+      "classifications": [
+        "A14",
+        "A16",
+        "A20",
+        "A3",
+        "A4",
+        "A44",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "MASAGUITSIT": {
+      "streets": {
+        "batangas to tabangao to lobo road": {
+          "name": "BATANGAS TO TABANGAO TO LOBO ROAD",
+          "vicinity": "ALONG BATANGAS TO TABANGAO TO LOBO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 2500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2500,
+                  "vicinity": "ALONG BATANGAS TO TABANGAO TO LOBO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 1400,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000
+                },
+                {
+                  "value": 1200
+                }
+              ]
+            },
+            "X": {
+              "value": 2200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2200
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A3": {
+              "value": 330,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 330
+                },
+                {
+                  "value": 180
+                }
+              ]
+            },
+            "A4": {
+              "value": 350,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 350
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A16": {
+              "value": 340,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 340
+                },
+                {
+                  "value": 190
+                }
+              ]
+            },
+            "A50": {
+              "value": 320,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 320
+                },
+                {
+                  "value": 170
+                }
+              ]
+            }
+          }
+        },
+        "pedrosa beach resort": {
+          "name": "PEDROSA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "catada beach resort": {
+          "name": "CATADA BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 3000,
+        "X": 1200,
+        "GP": 500,
+        "A3": 160,
+        "A4": 180,
+        "A16": 175,
+        "A50": 250,
+        "A39": 2000,
+        "A40": 3000
+      },
+      "classifications": [
+        "A16",
+        "A3",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "NAGTALONGTONG": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG PROVINCIAL ROAD",
+          "classes": {
+            "CR": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500,
+                  "vicinity": "ALONG PROVINCIAL ROAD",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 800,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400,
+                  "maskedResolved": true
+                },
+                {
+                  "value": 400,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 600
+                },
+                {
+                  "value": 400,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "A50": {
+              "value": 35,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 35,
+                  "maskedResolved": true
+                },
+                {
+                  "value": 35,
+                  "maskedResolved": true
+                },
+                {
+                  "value": 110
+                },
+                {
+                  "value": 70
+                }
+              ]
+            },
+            "X": {
+              "value": 700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "GP": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A1": {
+              "value": 160,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 160
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A4": {
+              "value": 140,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 140
+                },
+                {
+                  "value": 85
+                }
+              ]
+            },
+            "A16": {
+              "value": 120,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 120
+                },
+                {
+                  "value": 75
+                }
+              ]
+            },
+            "A20": {
+              "value": 130,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 130
+                },
+                {
+                  "value": 80
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A1",
+        "A16",
+        "A20",
+        "A4",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "NAGTOCTOC": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 700,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "GP": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A3": {
+              "value": 60,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 60
+                },
+                {
+                  "value": 30
+                }
+              ]
+            },
+            "A4": {
+              "value": 120,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 120
+                },
+                {
+                  "value": 70
+                }
+              ]
+            },
+            "A16": {
+              "value": 100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 100
+                },
+                {
+                  "value": 50
+                }
+              ]
+            },
+            "A49": {
+              "value": 60,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 60
+                },
+                {
+                  "value": 30
+                }
+              ]
+            },
+            "A50": {
+              "value": 50,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 50
+                },
+                {
+                  "value": 15
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A16",
+        "A3",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "OLO-OLO": {
+      "streets": {
+        "lobo to malabrigo road": {
+          "name": "LOBO TO MALABRIGO ROAD",
+          "vicinity": "ALONG LOBO TO MALABRIGO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG LOBO TO MALABRIGO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 1300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1000
+                }
+              ]
+            },
+            "X": {
+              "value": 1900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A1": {
+              "value": 300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 300
+                },
+                {
+                  "value": 200
+                }
+              ]
+            },
+            "A4": {
+              "value": 270,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 270
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A16": {
+              "value": 260,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 260
+                },
+                {
+                  "value": 155
+                }
+              ]
+            },
+            "A50": {
+              "value": 250,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 250
+                },
+                {
+                  "value": 150
+                }
+              ]
+            }
+          }
+        },
+        "lawas seaside resort": {
+          "name": "LAWAS SEASIDE RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "lily beach resort": {
+          "name": "LILY BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "monteville beach resort": {
+          "name": "MONTEVILLE BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 3000,
+        "X": 1100,
+        "GP": 400,
+        "A1": 170,
+        "A4": 150,
+        "A16": 145,
+        "A24": 140,
+        "A50": 200,
+        "A39": 2000,
+        "A40": 3000
+      },
+      "classifications": [
+        "A1",
+        "A16",
+        "A24",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "PINAGHAWANAN": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 700,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                }
+              ]
+            },
+            "GP": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A3": {
+              "value": 70,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 70
+                },
+                {
+                  "value": 40
+                }
+              ]
+            },
+            "A4": {
+              "value": 110,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 110
+                },
+                {
+                  "value": 70
+                }
+              ]
+            },
+            "A16": {
+              "value": 90,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 90
+                },
+                {
+                  "value": 50
+                }
+              ]
+            },
+            "A49": {
+              "value": 70,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 70
+                },
+                {
+                  "value": 40
+                }
+              ]
+            },
+            "A50": {
+              "value": 50,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 50
+                },
+                {
+                  "value": 20
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A16",
+        "A3",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "POBLACION": {
+      "streets": {
+        "batangas to tabangao to lobo road": {
+          "name": "BATANGAS TO TABANGAO TO LOBO ROAD",
+          "vicinity": "ALONG BATANGAS TO TABANGAO TO LOBO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG BATANGAS TO TABANGAO TO LOBO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 3600
+                }
+              ]
+            },
+            "X": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            },
+            "A1": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A50": {
+              "value": 470,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 470
+                },
+                {
+                  "value": 330
+                }
+              ]
+            }
+          }
+        },
+        "taysan to lobo road": {
+          "name": "TAYSAN TO LOBO ROAD",
+          "vicinity": "ALONG TAYSAN TO LOBO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 6000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 6000,
+                  "vicinity": "ALONG TAYSAN TO LOBO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 4000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 3600
+                }
+              ]
+            },
+            "X": {
+              "value": 5500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5500
+                }
+              ]
+            },
+            "A1": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 350
+                }
+              ]
+            },
+            "A50": {
+              "value": 470,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 470
+                },
+                {
+                  "value": 330
+                }
+              ]
+            }
+          }
+        },
+        "malvar st": {
+          "name": "MALVAR ST",
+          "vicinity": "P. BURGOS ST - J. P. RIZAL ST",
+          "classes": {
+            "CR": {
+              "value": 5700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5700,
+                  "vicinity": "P. BURGOS ST - J. P. RIZAL ST"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "A. BONIFACIO ST - J. P. RIZAL ST"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "mabini st": {
+          "name": "MABINI ST",
+          "vicinity": "J. P. RIZAL ST TO M. H. DEL PILAR ST",
+          "classes": {
+            "CR": {
+              "value": 5700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5700,
+                  "vicinity": "J. P. RIZAL ST TO M. H. DEL PILAR ST"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "BONIFACIO ST - J. P. RIZAL ST"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "p burgos st": {
+          "name": "P. BURGOS ST",
+          "vicinity": "JAENA ST - N. BABAO ST",
+          "classes": {
+            "CR": {
+              "value": 5700,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5700,
+                  "vicinity": "JAENA ST - N. BABAO ST",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 5700,
+                  "vicinity": "N. BABAO ST - BASA ST"
+                },
+                {
+                  "value": 5000,
+                  "vicinity": "JAENA ST - BASA ST"
+                }
+              ]
+            },
+            "RR": {
+              "value": 4500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4500,
+                  "maskedResolved": true
+                },
+                {
+                  "value": 4500,
+                  "vicinity": "INTERIOR",
+                  "maskedResolved": true
+                },
+                {
+                  "value": 4500
+                },
+                {
+                  "value": 3500,
+                  "vicinity": "INTERIOR"
+                },
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 2000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000
+                },
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "j p rizal st": {
+          "name": "J. P. RIZAL ST",
+          "vicinity": "L. JAENA ST TO N. BABAO ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "L. JAENA ST TO N. BABAO ST"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "basa st": {
+          "name": "BASA ST",
+          "vicinity": "M. H. DEL PILAR ST. - A. BONIFACIO ST.",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "M. H. DEL PILAR ST. - A. BONIFACIO ST."
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "jaena st": {
+          "name": "JAENA ST",
+          "vicinity": "M. H. DELPILAR ST - A. BONIFACIO ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "M. H. DELPILAR ST - A. BONIFACIO ST"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "n babao st": {
+          "name": "N. BABAO ST",
+          "vicinity": "M.H. DEL PILAR ST - A. BONIFACIO ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "M.H. DEL PILAR ST - A. BONIFACIO ST"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "gen luna st": {
+          "name": "GEN. LUNA ST",
+          "vicinity": "JAENA ST - N. BABAO ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "JAENA ST - N. BABAO ST"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "a bonifacio st": {
+          "name": "A. BONIFACIO ST",
+          "vicinity": "JAENA ST - N. BABAO ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "JAENA ST - N. BABAO ST"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "m h delpilar st": {
+          "name": "M. H. DELPILAR ST",
+          "vicinity": "JAENA ST - N. BABAO ST",
+          "classes": {
+            "CR": {
+              "value": 5000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 5000,
+                  "vicinity": "JAENA ST - N. BABAO ST"
+                }
+              ]
+            },
+            "RR": {
+              "value": 3000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3000
+                },
+                {
+                  "value": 1500,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 4000,
+        "RR": 2800,
+        "X": 3500,
+        "GP": 800,
+        "A1": 340,
+        "A50": 320
+      },
+      "classifications": [
+        "A1",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "SAN MIGUEL": {
+      "streets": {
+        "taysan to lobo road": {
+          "name": "TAYSAN TO LOBO ROAD",
+          "vicinity": "ALONG TAYSAN TO LOBO ROAD(NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 1500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1500,
+                  "vicinity": "ALONG TAYSAN TO LOBO ROAD(NATIONAL ROAD)"
+                },
+                {
+                  "value": 900,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1300,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1300
+                },
+                {
+                  "value": 700
+                }
+              ]
+            },
+            "X": {
+              "value": 1400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1400
+                }
+              ]
+            },
+            "GP": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                },
+                {
+                  "value": 400
+                }
+              ]
+            },
+            "A4": {
+              "value": 150,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 150
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A16": {
+              "value": 140,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 140
+                },
+                {
+                  "value": 90
+                }
+              ]
+            },
+            "A20": {
+              "value": 145,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 145
+                },
+                {
+                  "value": 95
+                }
+              ]
+            },
+            "A50": {
+              "value": 130,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 130
+                },
+                {
+                  "value": 80
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 800,
+        "RR": 600,
+        "X": 700,
+        "GP": 300,
+        "A4": 80,
+        "A16": 70,
+        "A20": 75,
+        "A49": 65,
+        "A50": 60
+      },
+      "classifications": [
+        "A16",
+        "A20",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "SAN NICOLAS": {
+      "streets": {
+        "all streets": {
+          "name": "ALL STREETS",
+          "vicinity": "ALONG BARANGAY ROAD",
+          "classes": {
+            "CR": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600,
+                  "vicinity": "ALONG BARANGAY ROAD"
+                }
+              ]
+            },
+            "RR": {
+              "value": 400,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 400
+                },
+                {
+                  "value": 300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "X": {
+              "value": 500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "GP": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 100
+                }
+              ]
+            },
+            "A4": {
+              "value": 100,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 100
+                },
+                {
+                  "value": 60
+                }
+              ]
+            },
+            "A16": {
+              "value": 80,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 80
+                },
+                {
+                  "value": 50
+                }
+              ]
+            },
+            "A49": {
+              "value": 60,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 60
+                },
+                {
+                  "value": 40
+                }
+              ]
+            },
+            "A50": {
+              "value": 50,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 50
+                },
+                {
+                  "value": 20
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {},
+      "classifications": [
+        "A16",
+        "A4",
+        "A49",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "SAWANG": {
+      "streets": {
+        "lobo to malabrigo road": {
+          "name": "LOBO TO MALABRIGO ROAD",
+          "vicinity": "ALONG LOBO TO MALABRIGO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG LOBO TO MALABRIGO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 1300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "X": {
+              "value": 1900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A1": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 160
+                }
+              ]
+            },
+            "A4": {
+              "value": 180,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 180
+                },
+                {
+                  "value": 140
+                }
+              ]
+            },
+            "A16": {
+              "value": 170,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 170
+                },
+                {
+                  "value": 130
+                }
+              ]
+            },
+            "A20": {
+              "value": 175,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 175
+                },
+                {
+                  "value": 135
+                }
+              ]
+            },
+            "A50": {
+              "value": 165,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 165
+                },
+                {
+                  "value": 120
+                }
+              ]
+            },
+            "A3": {
+              "value": 125,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 125
+                }
+              ]
+            }
+          }
+        },
+        "submarine garden beach resort": {
+          "name": "SUBMARINE GARDEN BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "honey beach resort": {
+          "name": "HONEY BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "de marvic beach resort": {
+          "name": "DE MARVIC BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 4000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 4000
+                }
+              ]
+            }
+          }
+        },
+        "sable blanc beach resort": {
+          "name": "SABLE BLANC BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "time traveller s beach resort": {
+          "name": "TIME TRAVELLER'S BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "the beach at lobo": {
+          "name": "THE BEACH AT LOBO",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "anna s ocean view place": {
+          "name": "ANNA'S OCEAN VIEW PLACE",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "harisa beach": {
+          "name": "HARISA BEACH",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 3000,
+        "X": 1100,
+        "GP": 400,
+        "A1": 150,
+        "A4": 130,
+        "A16": 120,
+        "A20": 125,
+        "A50": 150,
+        "A39": 2000,
+        "A40": 3000
+      },
+      "classifications": [
+        "A1",
+        "A16",
+        "A20",
+        "A3",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "SOLOC": {
+      "streets": {
+        "lobo to malabrigo road": {
+          "name": "LOBO TO MALABRIGO ROAD",
+          "vicinity": "ALONG LOBO TO MALABRIGO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG LOBO TO MALABRIGO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 1300,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 1100
+                }
+              ]
+            },
+            "X": {
+              "value": 1900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A4": {
+              "value": 200,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 200
+                },
+                {
+                  "value": 155
+                }
+              ]
+            },
+            "A16": {
+              "value": 190,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 190
+                },
+                {
+                  "value": 145
+                }
+              ]
+            },
+            "A20": {
+              "value": 195,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 195
+                },
+                {
+                  "value": 150
+                }
+              ]
+            },
+            "A50": {
+              "value": 185,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 185
+                },
+                {
+                  "value": 135
+                }
+              ]
+            },
+            "A3": {
+              "value": 140,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 140
+                }
+              ]
+            }
+          }
+        },
+        "andrea beach & scuba diving resort": {
+          "name": "ANDREA BEACH & SCUBA DIVING RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        },
+        "flordeliz beach resort": {
+          "name": "FLORDELIZ BEACH RESORT",
+          "vicinity": "",
+          "classes": {
+            "A40": {
+              "value": 3500,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 3500
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 3500,
+        "RR": 3000,
+        "X": 1100,
+        "GP": 400,
+        "A4": 145,
+        "A16": 135,
+        "A20": 140,
+        "A50": 150,
+        "A3": 80,
+        "A39": 2000,
+        "A40": 3000
+      },
+      "classifications": [
+        "A16",
+        "A20",
+        "A3",
+        "A39",
+        "A4",
+        "A40",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    },
+    "TAYUMAN": {
+      "streets": {
+        "taysan to lobo road": {
+          "name": "TAYSAN TO LOBO ROAD",
+          "vicinity": "ALONG TAYSAN TO LOBO ROAD (NATIONAL ROAD)",
+          "classes": {
+            "CR": {
+              "value": 2000,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 2000,
+                  "vicinity": "ALONG TAYSAN TO LOBO ROAD (NATIONAL ROAD)"
+                },
+                {
+                  "value": 1000,
+                  "vicinity": "INTERIOR"
+                }
+              ]
+            },
+            "RR": {
+              "value": 1800,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1800
+                },
+                {
+                  "value": 900
+                }
+              ]
+            },
+            "X": {
+              "value": 1900,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 1900
+                }
+              ]
+            },
+            "GP": {
+              "value": 600,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 600
+                },
+                {
+                  "value": 500
+                }
+              ]
+            },
+            "A4": {
+              "value": 180,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 180
+                },
+                {
+                  "value": 150
+                }
+              ]
+            },
+            "A16": {
+              "value": 170,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 170
+                },
+                {
+                  "value": 140
+                }
+              ]
+            },
+            "A20": {
+              "value": 175,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 175
+                },
+                {
+                  "value": 145
+                }
+              ]
+            },
+            "A50": {
+              "value": 160,
+              "valueLabel": "BIR 035-2022",
+              "segments": [
+                {
+                  "value": 160
+                },
+                {
+                  "value": 110
+                }
+              ]
+            }
+          }
+        }
+      },
+      "other": {
+        "CR": 800,
+        "RR": 600,
+        "X": 700,
+        "GP": 300,
+        "A4": 120,
+        "A16": 110,
+        "A20": 115,
+        "A50": 95
+      },
+      "classifications": [
+        "A16",
+        "A20",
+        "A4",
+        "A50",
+        "CR",
+        "GP",
+        "RR",
+        "X"
+      ]
+    }
+  }
+}
