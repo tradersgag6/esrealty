@@ -557,6 +557,7 @@
     streetLabel: "",
     allOther: false,
     classification: "",
+    classificationUse: "",
     area: null,
     salePrice: null,
     corner: false,
@@ -648,9 +649,27 @@
     return list;
   }
 
+  function classificationUses() {
+    return ["residential", "commercial", "agricultural", "industrial"];
+  }
+
+  function selectedClassificationUse() {
+    return est.classificationUse || (est.classification ? useOfClassification(DATA && DATA.config, est.classification) : "");
+  }
+
+  function classUseOptions() {
+    var selected = selectedClassificationUse();
+    return '<option value="">— choose a category —</option>' + classificationUses().map(function (use) {
+      return '<option value="' + use + '"' + (use === selected ? " selected" : "") + '>' + use.charAt(0).toUpperCase() + use.slice(1) + "</option>";
+    }).join("");
+  }
+
   function classOptions() {
     var list = classCandidates();
-    if (!list.length) return '<option value="">— no classifications available —</option>';
+    var use = selectedClassificationUse();
+    if (!use) return '<option value="">— choose a category first —</option>';
+    list = list.filter(function (c) { return useOfClassification(DATA && DATA.config, c) === use; });
+    if (!list.length) return '<option value="">— no codes available for this category —</option>';
     var labels = (DATA && DATA.index.classifications) || {};
     return '<option value="">— choose a BIR classification —</option>' + list.map(function (c) {
       var l = labels[c] ? " — " + labels[c] : "";
@@ -703,8 +722,9 @@
       '<input data-est-street-q type="search" placeholder="Type to search streets…" autocomplete="off" aria-label="Search the BIR street list" value="' + esc(est.allOther ? "" : est.streetLabel) + '">' +
       '<div class="sf-est-street-list" data-est-street-list></div></div>';
 
-    out += '<label class="sf-est-field">BIR classification<span>Zonal use classification</span>' +
-      '<select data-est-class>' + classOptions() + "</select></label>";
+    out += '<label class="sf-est-field sf-est-span2">BIR classification<span>Choose a land-use category, then the exact BIR code</span>' +
+      '<select data-est-class-use aria-label="BIR classification category">' + classUseOptions() + "</select>" +
+      '<select data-est-class aria-label="Exact BIR classification code">' + classOptions() + "</select></label>";
 
     out += '<label class="sf-est-field">Lot area (sqm)<span>The total land area</span>' +
       '<input data-est-area type="number" min="20" max="100000" step="1" inputmode="decimal" placeholder="e.g. 200" value="' + esc(est.area != null ? est.area : "") + '"></label>';
@@ -1029,6 +1049,7 @@
       est.streetLabel = "";
       est.allOther = false;
       est.classification = "";
+      est.classificationUse = "";
       est.result = null;
       var row = null;
       (DATA.index.municipalities || []).forEach(function (m) { if (m.name === v) row = m; });
@@ -1056,6 +1077,7 @@
       est.streetLabel = "";
       est.allOther = false;
       est.classification = "";
+      est.classificationUse = "";
       est.result = null;
       renderLayout();
     });
@@ -1087,6 +1109,7 @@
         var source = est.allOther ? (br && br.other) : (br && br.streets && br.streets[est.streetKey] && br.streets[est.streetKey].classes);
         var list = source ? Object.keys(source) : [];
         est.classification = list.indexOf(keep) !== -1 ? keep : "";
+        est.classificationUse = est.classification ? useOfClassification(DATA && DATA.config, est.classification) : "";
       };
       card.addEventListener("click", function (e) {
         var st = e.target.closest ? e.target.closest("[data-est-street]") : null;
@@ -1128,9 +1151,19 @@
       card.addEventListener("input", clearInvalid, true);
     }
 
+    var classUseSel = $q(card, "[data-est-class-use]");
+    if (classUseSel) classUseSel.addEventListener("change", function () {
+      est.classificationUse = classUseSel.value;
+      var codes = classCandidates().filter(function (c) { return useOfClassification(DATA && DATA.config, c) === est.classificationUse; });
+      if (codes.indexOf(est.classification) === -1) est.classification = "";
+      est.result = null;
+      renderLayout();
+    });
+
     var classSel = $q(card, "[data-est-class]");
     if (classSel) classSel.addEventListener("change", function () {
       est.classification = classSel.value;
+      est.classificationUse = est.classification ? useOfClassification(DATA && DATA.config, est.classification) : selectedClassificationUse();
       est.result = null;
     });
 

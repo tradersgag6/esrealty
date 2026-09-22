@@ -84,6 +84,7 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     (filtered.find(b => b.getAttribute("data-est-street") === streetKey) || qa('[data-est-street]')[0]).click();
     await wait(120);
     chk("street-clicked-from-search-selects", !!q('[data-est-street-q]') && String(q('[data-est-street-q]').value).toLowerCase() === "all street" && !!estApi()._state().streetKey && !estApi()._state().allOther, "value=" + ((q('[data-est-street-q]') || {}).value || ""));
+    setValue('[data-est-class-use]', "commercial");
     chk("class-options-from-street", Array.from(q('[data-est-class]').options).some(o => o.value === "CR"), "opts=" + q('[data-est-class]').options.length);
     setValue('[data-est-class]', "CR");
     setInput('[data-est-area]', "200");
@@ -136,6 +137,7 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     chk("back-to-screen1", !!q('[data-est-screen="1"]'), "");
     q('[data-est-screen="1"] [data-est-street-all]').click();
     await wait(90);
+    setValue('[data-est-class-use]', "agricultural");
     const cs2 = q('[data-est-class]');
     chk("class-options-after-allother", Array.from(cs2.options).some(o => o.value === "A40"), "opts=" + Array.from(cs2.options).map(o => o.value).join(","));
     setValue('[data-est-class]', "A40");
