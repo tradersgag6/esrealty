@@ -436,13 +436,41 @@
     });
   }
 
+  function loadOptionalGuideSettings() {
+    if (typeof window === "undefined" || !window.ESREALTY_API_BASE) return Promise.resolve(null);
+    var request = fetch(String(window.ESREALTY_API_BASE).replace(/\/$/, "") + "/site-settings", { credentials: "include" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
+    var timeout = new Promise(function (resolve) { setTimeout(function () { resolve(null); }, 1500); });
+    return Promise.race([request, timeout]);
+  }
+
+  function applyGuideSettings(config, payload) {
+    var guide = payload && payload.valueGuide;
+    if (!guide) return config;
+    var out = JSON.parse(JSON.stringify(config));
+    var proxy = guide.proxyFactors || {};
+    var mid = guide.marketBandMid || {};
+    var construction = guide.construction || {};
+    ["residential", "commercial", "agricultural", "industrial"].forEach(function (use) {
+      if (out.proxyFactors && out.proxyFactors[use] && Number(proxy[use]) > 0) out.proxyFactors[use].factor = Number(proxy[use]);
+      if (out.marketBand && out.marketBand.bands && out.marketBand.bands[use] && Number(mid[use]) > 0) out.marketBand.bands[use].mid = Number(mid[use]);
+    });
+    Object.keys(construction).forEach(function (key) {
+      if (out.construction && out.construction[key] && Number(construction[key]) > 0) out.construction[key].costPerSqm = Number(construction[key]);
+    });
+    if (guide.version) out.calculationVersion = String(guide.version);
+    return out;
+  }
+
   function loadData(force) {
     if (dataPromise && !force) return dataPromise;
     dataPromise = Promise.all([
       loadJSON("data/zonal-config.json"),
-      loadJSON("data/batangas-zonal.json")
+      loadJSON("data/batangas-zonal.json"),
+      loadOptionalGuideSettings()
     ]).then(function (parts) {
-      DATA = { config: parts[0], index: parts[1] };
+      DATA = { config: applyGuideSettings(parts[0], parts[2]), index: parts[1] };
       return DATA;
     });
     return dataPromise;
@@ -454,6 +482,46 @@
     if (muniCache[slug]) return muniCache[slug];
     muniCache[slug] = loadJSON("data/bir-batangas/municipalities/" + slug + ".json");
     return muniCache[slug];
+  }
+
+  function loadComparableListings(opts) {
+    if (typeof window === "undefined" || !window.ESREALTY_LISTINGS_API || !window.ESREALTY_LISTINGS_API.list) return Promise.resolve([]);
+    var filters = {
+      state: "Batangas",
+      city: opts.municipality,
+      offer_type: "sale",
+      status: "available",
+      property_type: opts.type === "house_lot" ? "house-and-lot" : "lot-only",
+      per_page: 50,
+      sort: "date_desc"
+    };
+    var request = window.ESREALTY_LISTINGS_API.list(filters).then(function (result) {
+      return result && Array.isArray(result.data) ? result.data : [];
+    }).catch(function () { return []; });
+    var timeout = new Promise(function (resolve) { setTimeout(function () { resolve([]); }, 900); });
+    return Promise.race([request, timeout]);
+  }
+
+  function loadExternalComparables(opts) {
+    if (typeof window === "undefined" || !window.ESREALTY_MARKET_SCAN_BASE) return Promise.resolve([]);
+    var base = String(window.ESREALTY_MARKET_SCAN_BASE).replace(/\/$/, "");
+    var query = new URLSearchParams({
+      city: opts.municipality,
+      type: opts.type === "house_lot" ? "house-and-lot" : "lot-only",
+      mode: "sale",
+      maxResults: "20",
+      live: "true"
+    });
+    var request = fetch(base + "/api/market-scan?" + query.toString(), { credentials: "omit" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (result) {
+        return result && Array.isArray(result.listings) ? result.listings.map(function (item) {
+          item.sourceType = "External web evidence · " + (item.sourceLabel || item.source || "market scan");
+          return item;
+        }) : [];
+      }).catch(function () { return []; });
+    var timeout = new Promise(function (resolve) { setTimeout(function () { resolve([]); }, 1500); });
+    return Promise.race([request, timeout]);
   }
 
   /* ---------------------------------------------------------- */
@@ -694,7 +762,7 @@
 
   function screen3Html() {
     return '<div class="sf-est-step sf-est-anim" data-est-screen="3">' +
-      '<div class="sf-est-anim-ring" data-est-spin><b data-est-anim-total>₱0</b><span>calculating…</span></div>' +
+       '<div class="sf-est-anim-ring spin" data-est-spin><b data-est-anim-total>₱0</b><span>calculating…</span></div>' +
       '<p class="sf-est-anim-note" data-est-anim-note>Matching your barangay, street and BIR classification…</p></div>';
   }
 
@@ -1168,10 +1236,19 @@
       construction: est.type === "house_lot" ? est.construction : "mixed_chb",
       features: est.type === "house_lot" ? est.features : []
     };
-    loadMunicipality(est.municipalitySlug).then(function (md) {
-      var r = core.computeEstimate(config, index, md, opts);
-      est.result = r;
-      animateThenReport();
+    Promise.all([loadMunicipality(est.municipalitySlug), loadComparableListings(opts)]).then(function (parts) {
+      var md = parts[0];
+      var internal = parts[1];
+      var evidence = internal.length ? Promise.resolve({ records: internal, source: "ES Realty listing" }) : loadExternalComparables(opts).then(function (external) {
+        return { records: external, source: external.length ? "External web evidence" : "" };
+      });
+      return evidence.then(function (evidenceSet) {
+        opts.comparables = evidenceSet.records;
+        opts.comparableSource = evidenceSet.source;
+        var r = core.computeEstimate(config, index, md, opts);
+        est.result = r;
+        animateThenReport();
+      });
     }).catch(function () {
       est.result = { available: false, reason: "no-data" };
       animateThenReport();

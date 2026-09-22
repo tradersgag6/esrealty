@@ -18,6 +18,7 @@ const ROOT = PATH.join(__dirname, "..");
 const L = (p) => FS.readFileSync(PATH.join(ROOT, p), "utf8");
 const LR = L("supabase/functions/location-report/index.ts");
 const EST = L("js/estimator.js");
+const APP = L("js/app.js");
 const BUILD = L("market-scan/build-batangas-data.js");
 const WF = L(".github/workflows/estimator-data-review.yml");
 
@@ -99,6 +100,10 @@ c("estimator sends Idempotency-Key", /Idempotency-Key/.test(EST) && /estIdempote
 c("estimator dedupes retries with same key", /form\.dataset\.estIdempotencyKey/.test(EST), "key reuse across retries");
 c("estimator resets key after success", /delete form\.dataset\.estIdempotencyKey/.test(EST), "key reset on success");
 c("estimator fallback only on transport errors", /isHttp/.test(EST) && /isHttp\s*(if|\)|\?)/.test(EST) && /^\s*if \(isHttp\) throw err;/m.test(EST), "network-only fallback");
+c("estimator prefers internal comparables", /loadComparableListings/.test(EST) && /internal\.length/.test(EST), "internal-first comparable path");
+c("estimator external fallback is source-attributed", /loadExternalComparables/.test(EST) && /External web evidence/.test(EST), "external evidence label");
+c("admin value-guide factors require approval", /data-vg-save/.test(APP) && /roleIs\("super-admin"\)/.test(APP), "admin factor gate");
+c("public settings expose sanitized value-guide factors", /safeNumber/.test(L("supabase/functions/listing-api/index.ts")) && /valueGuide/.test(L("supabase/functions/listing-api/index.ts")), "public settings contract");
 
 /* ----------------- build + workflow contract ----------------- */
 

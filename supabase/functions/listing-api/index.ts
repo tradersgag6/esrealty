@@ -469,7 +469,12 @@ const getSiteSettings = async (admin: SupabaseClient) => {
     .limit(1)
     .maybeSingle();
   if (profileError) throw new Error(profileError.message);
-  if (!adminProfile) return json({ data: DEFAULT_SITE_CONTACT });
+  if (!adminProfile) return json({ data: { ...DEFAULT_SITE_CONTACT, valueGuide: {
+    version: "2026.09.3", approvedBy: "", approvedAt: "",
+    proxyFactors: { residential: 1, commercial: 1.7, agricultural: 0.5, industrial: 1.35 },
+    marketBandMid: { residential: 2.5, commercial: 2.5, agricultural: 1.5, industrial: 2 },
+    construction: { wood_prefab: 16000, mixed_chb: 25000, rca_steel: 32000 },
+  } } });
 
   const { data: appState, error: stateError } = await admin
     .from("app_state")
@@ -480,8 +485,35 @@ const getSiteSettings = async (admin: SupabaseClient) => {
   const saved = appState?.payload && typeof appState.payload === "object" && !Array.isArray(appState.payload)
     ? (appState.payload as JsonRecord).siteContact
     : null;
+  const savedGuide = appState?.payload && typeof appState.payload === "object" && !Array.isArray(appState.payload)
+    ? (appState.payload as JsonRecord).valueGuide
+    : null;
   const contact = saved && typeof saved === "object" && !Array.isArray(saved) ? saved as JsonRecord : {};
-  return json({ data: { ...DEFAULT_SITE_CONTACT, ...contact } });
+  const guide = savedGuide && typeof savedGuide === "object" && !Array.isArray(savedGuide) ? savedGuide as JsonRecord : {};
+  const proxy = guide.proxyFactors && typeof guide.proxyFactors === "object" ? guide.proxyFactors as JsonRecord : {};
+  const mid = guide.marketBandMid && typeof guide.marketBandMid === "object" ? guide.marketBandMid as JsonRecord : {};
+  const construction = guide.construction && typeof guide.construction === "object" ? guide.construction as JsonRecord : {};
+  const safeNumber = (value: unknown, fallback: number, min: number, max: number) => {
+    const n = Number(value);
+    return Number.isFinite(n) && n >= min && n <= max ? n : fallback;
+  };
+  const valueGuide = {
+    version: stringValue(guide.version || "2026.09.3", 40, "valueGuide.version"),
+    approvedBy: stringValue(guide.approvedBy || "", 160, "valueGuide.approvedBy"),
+    approvedAt: stringValue(guide.approvedAt || "", 40, "valueGuide.approvedAt"),
+    proxyFactors: {
+      residential: safeNumber(proxy.residential, 1, 0.1, 10), commercial: safeNumber(proxy.commercial, 1.7, 0.1, 10),
+      agricultural: safeNumber(proxy.agricultural, 0.5, 0.1, 10), industrial: safeNumber(proxy.industrial, 1.35, 0.1, 10),
+    },
+    marketBandMid: {
+      residential: safeNumber(mid.residential, 2.5, 0.1, 10), commercial: safeNumber(mid.commercial, 2.5, 0.1, 10),
+      agricultural: safeNumber(mid.agricultural, 1.5, 0.1, 10), industrial: safeNumber(mid.industrial, 2, 0.1, 10),
+    },
+    construction: {
+      wood_prefab: safeNumber(construction.wood_prefab, 16000, 1000, 200000), mixed_chb: safeNumber(construction.mixed_chb, 25000, 1000, 200000), rca_steel: safeNumber(construction.rca_steel, 32000, 1000, 200000),
+    },
+  };
+  return json({ data: { ...DEFAULT_SITE_CONTACT, ...contact, valueGuide } });
 };
 
 const sha256 = async (value: string) => {

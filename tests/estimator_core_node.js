@@ -128,9 +128,9 @@ eq(hl.floorArea, 120, "hl floorArea");
 eq(hl.floorsMultiplier, 1.05, "hl floors 2 = 1.05");
 eq(hl.ageMidpoint, 15, "hl age midpoint 15");
 eq(hl.depreciatedPct, 38, "hl dep 15/40 = 38%");
-eq(hl.buildCostPerSqm, 40000, "hl RCA 40000");
+eq(hl.buildCostPerSqm, 32000, "hl RCA 32000");
 eq(hl.featuresTotal, 380000, "hl features 180000 + 200000");
-eq(hl.improvement, 3504800, "hl improvement exact");
+eq(hl.improvement, 2879840, "hl improvement exact");
 eq(hl.total, hl.landValue + hl.improvement, "hl total = land + improvement");
 eq(core.integrityCheck(hl).ok, true, "hl reconciles");
 

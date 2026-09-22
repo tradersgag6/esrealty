@@ -12,6 +12,10 @@
   const url = "https://mrngaqtbaseewzcsogqi.supabase.co";
   const publishableKey = "sb_publishable_OtrE6VXTJb4OrSCe6Z-f6g_qAcKyOvk";
   window.ESREALTY_API_BASE = url + "/functions/v1/listing-api/api";
+  /* Public market-scan fallback used only when internal Batangas listings do
+   * not provide a usable comparable. Results remain source-attributed asking
+   * price evidence, never verified transactions. */
+  window.ESREALTY_MARKET_SCAN_BASE = "https://esrealty-market-scan.vercel.app";
   function boot() {
     if (!window.supabase) return false;
     window.ESREALTY_SUPABASE = window.supabase.createClient(url, publishableKey, {

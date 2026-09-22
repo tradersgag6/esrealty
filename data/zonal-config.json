@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "calculationVersion": "2026.09.2",
+  "calculationVersion": "2026.09.3",
   "dataVersion": "bir-2022-rdo58-59",
   "asOf": "2022-07-23",
   "note": "Engine + data versions stamped on every estimate output. Deterministic and reconcilable.",
@@ -27,21 +27,21 @@
   "construction": {
     "wood_prefab": {
       "label": "Wood / Pre-fab",
-      "costPerSqm": 15000,
-      "sourceType": "ES Realty provisional assumption",
-      "sourceDate": "2026-09"
+      "costPerSqm": 16000,
+      "sourceType": "ES Realty appraisal RCN table (2026 PH mid-range)",
+      "sourceDate": "2026"
     },
     "mixed_chb": {
       "label": "Mixed / CHB",
       "costPerSqm": 25000,
-      "sourceType": "ES Realty provisional assumption",
-      "sourceDate": "2026-09"
+      "sourceType": "ES Realty appraisal RCN table (2026 PH mid-range)",
+      "sourceDate": "2026"
     },
     "rca_steel": {
       "label": "Reinforced Concrete / Steel",
-      "costPerSqm": 40000,
-      "sourceType": "ES Realty provisional assumption",
-      "sourceDate": "2026-09"
+      "costPerSqm": 32000,
+      "sourceType": "ES Realty appraisal RCN table (2026 PH mid-range)",
+      "sourceDate": "2026"
     }
   },
   "floors": [

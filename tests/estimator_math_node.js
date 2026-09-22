@@ -34,7 +34,7 @@ function ok(cond, label, detail) {
 /* ---- dataset + manifest reconciliation ---- */
 eq(index.municipalities.length, 34, "dataset municipality count 34");
 eq(index.dataVersion, "bir-2022-rdo58-59", "dataset dataVersion");
-eq(config.calculationVersion, "2026.09.2", "config calculationVersion 2026.09.2");
+eq(config.calculationVersion, "2026.09.3", "config calculationVersion 2026.09.3");
 eq(manifest.status, "valid", "manifest status valid");
 eq(manifest.counts.municipalities, 34, "manifest municipality count");
 eq(manifest.counts.streets, 3710, "manifest street count 3710");

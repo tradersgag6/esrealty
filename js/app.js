@@ -263,7 +263,7 @@
   }
 
   function defaultState() {
-    return { deals: [], current: null, view: "dashboard", wizardStep: 1, theme: "light", dealTab: "overview", appraisal: null, appraisalTab: "setup", appraisals: [], market: null, pms: { properties: [], units: [], owners: [], tenants: [], leases: [], payments: [], maintenance: [], expenses: [], documents: [] }, pmsTab: "properties", listings: [], favorites: [], listingFilters: {}, listingDetail: null, lsTab: "catalog", leads: [], leadFilters: {}, leadDetail: null, leadMode: "pipeline", leadCalendarMonth: "", lang: "en", users: [], transactions: [], financingScenarios: [], financingDraft: null, salesPlaybooks: [], playbookFilters: { q: "", stage: "", category: "", propertyType: "", status: "" }, commission: { settings: { grossPct: 3, brokerShare: 40, agentShare: 50, referralShare: 10 }, payouts: [] }, docVault: [], siteVisits: [], campaigns: [], listingStats: {}, siteContact: { eyebrow: "TALK TO A SHOPHOUSE SPECIALIST", title: "Ready to put the ground floor to work?", description: "Tell us your province, budget, and business plan. A shophouse specialist from ES Realty will reply within one business day with listings and next steps.", phone: "+63 900 000 0000", email: "hello@esrealty.ph", address: "Batangas, Philippines", hours: "Monday–Saturday, 9:00 AM–6:00 PM" }, adminTab: "overview", txDetail: null, usersTab: "pending",
+    return { deals: [], current: null, view: "dashboard", wizardStep: 1, theme: "light", dealTab: "overview", appraisal: null, appraisalTab: "setup", appraisals: [], market: null, pms: { properties: [], units: [], owners: [], tenants: [], leases: [], payments: [], maintenance: [], expenses: [], documents: [] }, pmsTab: "properties", listings: [], favorites: [], listingFilters: {}, listingDetail: null, lsTab: "catalog", leads: [], leadFilters: {}, leadDetail: null, leadMode: "pipeline", leadCalendarMonth: "", lang: "en", users: [], transactions: [], financingScenarios: [], financingDraft: null, salesPlaybooks: [], playbookFilters: { q: "", stage: "", category: "", propertyType: "", status: "" }, commission: { settings: { grossPct: 3, brokerShare: 40, agentShare: 50, referralShare: 10 }, payouts: [] }, docVault: [], siteVisits: [], campaigns: [], listingStats: {}, valueGuide: { version: "2026.09.3", approvedBy: "", approvedAt: "", proxyFactors: { residential: 1, commercial: 1.7, agricultural: 0.5, industrial: 1.35 }, marketBandMid: { residential: 2.5, commercial: 2.5, agricultural: 1.5, industrial: 2 }, construction: { wood_prefab: 16000, mixed_chb: 25000, rca_steel: 32000 } }, siteContact: { eyebrow: "TALK TO A SHOPHOUSE SPECIALIST", title: "Ready to put the ground floor to work?", description: "Tell us your province, budget, and business plan. A shophouse specialist from ES Realty will reply within one business day with listings and next steps.", phone: "+63 900 000 0000", email: "hello@esrealty.ph", address: "Batangas, Philippines", hours: "Monday–Saturday, 9:00 AM–6:00 PM" }, adminTab: "overview", txDetail: null, usersTab: "pending",
       portfolioAccounts: [], cashEntries: [], constructionProjects: [], constructionPhases: [], constructionVendors: [], constructionInvoices: [], changeOrders: [], portfolioTab: "overview", portfolioAuditEvents: [] };
   }
   function loadState() {
@@ -15769,8 +15769,29 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     save(); render(); toast("Generated pending payouts for " + missings.length + " closed deal(s)", "ok");
   }
   function adminTabAllowed(tab) {
-    const capability = { overview: "brokerage.view", commission: "commission.manage", payouts: "payout.approve", analytics: "brokerage.view", cobroke: "brokerage.view", inventory: "inventory.view", compliance: "brokerage.view", ads: "brokerage.view" };
+    const capability = { overview: "brokerage.view", commission: "commission.manage", payouts: "payout.approve", analytics: "brokerage.view", cobroke: "brokerage.view", inventory: "inventory.view", compliance: "brokerage.view", ads: "brokerage.view", "value-guide": "brokerage.view" };
     return can(capability[tab] || "brokerage.view");
+  }
+
+  function valueGuideSettings() {
+    if (!state.valueGuide) state.valueGuide = defaultState().valueGuide;
+    if (!state.valueGuide.proxyFactors) state.valueGuide.proxyFactors = {};
+    if (!state.valueGuide.marketBandMid) state.valueGuide.marketBandMid = {};
+    if (!state.valueGuide.construction) state.valueGuide.construction = {};
+    return state.valueGuide;
+  }
+
+  function adminValueGuide() {
+    const v = valueGuideSettings();
+    const factor = (key, label) => '<div class="field"><label>' + label + ' proxy factor</label><input class="input input-num" id="vg-proxy-' + key + '" type="number" min="0.1" max="10" step="0.05" value="' + esc(v.proxyFactors[key] ?? "") + '"></div>' +
+      '<div class="field"><label>' + label + ' market midpoint</label><input class="input input-num" id="vg-mid-' + key + '" type="number" min="0.1" max="10" step="0.05" value="' + esc(v.marketBandMid[key] ?? "") + '"></div>';
+    return '<div class="card card-pad mb-24"><div class="row spread"><div><h3>Batangas Value Guide Factors</h3><p class="dim mt-8">Admin-approved assumptions used by the public Batangas market guide. These are not official BIR values.</p></div><span class="badge gold">Admin approval required</span></div>' +
+      '<div class="grid grid-2 mt-16">' + factor("residential", "Residential") + factor("commercial", "Commercial") + factor("agricultural", "Agricultural") + factor("industrial", "Industrial") + '</div>' +
+      '<div class="subhead mt-16">Construction cost assumptions / sqm</div><div class="grid grid-3 mt-8">' +
+      ['wood_prefab', 'mixed_chb', 'rca_steel'].map(k => '<div class="field"><label>' + esc(k.replace(/_/g, " ")) + '</label><input class="input input-num" id="vg-cost-' + k + '" type="number" min="1000" max="200000" step="500" value="' + esc(v.construction[k] ?? "") + '"></div>').join("") +
+      '</div><p class="dim tiny mt-8">Rates remain provisional until supported by Batangas contractor, project, DPWH, PSA, or quantity-surveyor evidence.</p>' +
+      '<button class="btn btn-primary mt-16" data-vg-save>' + icon("check", 15) + ' Approve and publish factors</button>' +
+      '<p class="dim tiny mt-8">Last approval: ' + esc(v.approvedBy || "none") + (v.approvedAt ? " · " + esc(v.approvedAt) : "") + ' · version ' + esc(v.version || "—") + '</p></div>';
   }
   function adminCobroke() {
     loadCobroke();
@@ -15932,14 +15953,14 @@ const ccBtn = e.target.closest("[data-cc-calc]");
 
   function renderAdmin() {
     if (!canBroker()) return '<div class="hero"><div><h1>Brokerage</h1></div></div><div class="card card-pad empty">' + icon("shield", 40) + "<h3>Brokers / admins only</h3><p>Commission, payouts, analytics, and inventory are restricted to brokerage roles.</p></div>";
-    const tabs = [["overview", "Overview"], ["commission", "Commission"], ["payouts", "Payouts"], ["analytics", "Analytics"], ["cobroke", "Co-Broke"], ["inventory", "Inventory"], ["compliance", "Compliance"], ["ads", "Ads"]].filter(x => adminTabAllowed(x[0]));
+    const tabs = [["overview", "Overview"], ["commission", "Commission"], ["payouts", "Payouts"], ["analytics", "Analytics"], ["cobroke", "Co-Broke"], ["inventory", "Inventory"], ["compliance", "Compliance"], ["ads", "Ads"], ["value-guide", "Value Guide"]].filter(x => adminTabAllowed(x[0]));
     const tab = adminTabAllowed(state.adminTab) ? state.adminTab : "overview";
     if (state.adminTab !== tab) state.adminTab = tab;
     let html = '<div class="hero"><div><h1>Brokerage</h1><p>Commission management, payouts, team performance, and developer inventory.</p></div>' +
       '<div class="actions"><button class="btn btn-ghost btn-sm" data-tl-toggle>' + icon("moon", 14) + (lang === "fil" ? " English" : " Filipino") + "</button></div></div>";
     if (roleIs("broker")) html += '<div class="notice-banner">' + icon("shield", 14) + '<span><b>Private brokerage workspace:</b> transactions, commissions, payouts, and team leads belong to ' + esc((currentUser && currentUser.name) || "this broker") + '. Listings and Inventory use the shared catalog.</span></div>';
     html += '<div class="tabs-row mb-16">' + tabs.map(x => '<button class="tab-btn' + (tab === x[0] ? " on" : "") + '" data-admin-tab="' + x[0] + '">' + x[1] + "</button>").join("") + "</div>";
-    html += '<div id="admin-body">' + (tab === "overview" ? adminOverview() : tab === "commission" ? adminCommission() : tab === "payouts" ? adminPayouts() : tab === "cobroke" ? adminCobroke() : tab === "analytics" ? adminAnalytics() : tab === "inventory" ? adminInventory() : tab === "compliance" ? adminCompliance() : tab === "ads" ? renderAds() : "") + "</div>";
+    html += '<div id="admin-body">' + (tab === "overview" ? adminOverview() : tab === "commission" ? adminCommission() : tab === "payouts" ? adminPayouts() : tab === "cobroke" ? adminCobroke() : tab === "analytics" ? adminAnalytics() : tab === "inventory" ? adminInventory() : tab === "compliance" ? adminCompliance() : tab === "ads" ? renderAds() : tab === "value-guide" ? adminValueGuide() : "") + "</div>";
     return html;
   }
   function adminOverview() {
@@ -16110,6 +16131,25 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     s.referralShare = $n("com-referral") || 0;
     save(); render(); toast("Commission settings saved");
   }
+  function adminValueGuideSave() {
+    if (!roleIs("super-admin")) { toast("Only a super-admin can approve value-guide factors", "err"); return; }
+    const v = valueGuideSettings();
+    const read = id => Number(document.getElementById(id)?.value || 0);
+    ["residential", "commercial", "agricultural", "industrial"].forEach(k => {
+      const proxy = read("vg-proxy-" + k);
+      const mid = read("vg-mid-" + k);
+      if (proxy > 0) v.proxyFactors[k] = proxy;
+      if (mid > 0) v.marketBandMid[k] = mid;
+    });
+    ["wood_prefab", "mixed_chb", "rca_steel"].forEach(k => {
+      const cost = read("vg-cost-" + k);
+      if (cost > 0) v.construction[k] = cost;
+    });
+    v.version = "2026.09." + Date.now().toString().slice(-4);
+    v.approvedBy = (currentUser && (currentUser.email || currentUser.name)) || "super-admin";
+    v.approvedAt = new Date().toISOString();
+    save(); render(); toast("Value Guide factors approved and saved");
+  }
   let adminHooked = false;
   function bindAdmin() {
     if (!adminHooked) {
@@ -16127,6 +16167,8 @@ const ccBtn = e.target.closest("[data-cc-calc]");
         if (invr) { e.preventDefault(); refreshAdminInventory(); return; }
         const cs = e.target.closest("[data-com-save]");
         if (cs) { adminComSave(); return; }
+        const vg = e.target.closest("[data-vg-save]");
+        if (vg) { adminValueGuideSave(); return; }
         const po = e.target.closest("[data-payout]");
         if (po) { payoutMark(po.getAttribute("data-payout"), po.getAttribute("data-payout-status")); return; }
         const pgen = e.target.closest("[data-payouts-generate]");
