@@ -990,10 +990,12 @@
   function screen4Html() {
     var r = est.result;
     if (!r || !r.available) return unavailableHtml();
-    var out = '<div class="sf-est-step" data-est-screen="4">';
+    var selling = r.purpose === "Selling";
+    var out = '<div class="sf-est-step sf-est-result-screen' + (selling ? " sf-est-selling-result" : "") + '" data-est-screen="4" data-est-purpose="' + esc(r.purpose || "") + '">';
     out += locSummary();
-    out += '<div class="sf-est-step-head"><span class="sf-est-step-no">03</span><h3 id="sf-est-result-heading" tabindex="-1">Your property value guide</h3></div>';
+    out += '<div class="sf-est-step-head sf-est-result-head"><span class="sf-est-step-no">03</span><div><p class="sf-est-result-eyebrow">' + (selling ? "SELLING APPROACH" : "PROPERTY VALUE GUIDE") + '</p><h3 id="sf-est-result-heading" tabindex="-1">Your property value guide</h3><p class="sf-est-result-subtitle">' + (selling ? "Protect your value, set a credible asking price, and negotiate with a clear floor." : "A clear view of the official reference and your indicative property guidance.") + '</p></div></div>';
     out += '<p class="sf-est-report-label">Full Property Report · valuation, pricing and transaction planning</p>';
+    if (selling) out += '<div class="sf-est-selling-callout"><b>Sell with a plan</b><span>Start with the official BIR reference, use the market guidance as context, and keep your negotiation floor visible.</span></div>';
     out += '<div class="sf-est-cov-row">' + coverageTag(r.coverage) + '<span class="sf-est-asof">BIR schedule effective ' + esc(r.effectivityDate) + " · data " + esc(r.dataVersion) + "</span></div>";
     out += '<div class="sf-est-report">';
     reportSections(r).forEach(function (sec, i) {

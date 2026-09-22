@@ -119,6 +119,7 @@ function chooseOwnershipNotSure() {
     chk("screen3-is-revealed", !!screen3 && screen3.getBoundingClientRect().bottom > 0 && screen3.getBoundingClientRect().top < window.innerHeight, "top=" + (screen3 && screen3.getBoundingClientRect().top));
     await waitFor(() => q('[data-est-screen="4"]'), 90, ESP);
     chk("result-heading-is-clear", !!q('#sf-est-result-heading') && /Your property value guide/.test(q('#sf-est-result-heading').textContent), "");
+    chk("selling-result-design", !!q('.sf-est-selling-result') && /SELLING APPROACH/.test(q('.sf-est-result-eyebrow').textContent) && !!q('.sf-est-selling-callout'), "");
 
     const rD1 = estApi()._state().result;
     chk("depth1-available", rD1 && rD1.available, "");

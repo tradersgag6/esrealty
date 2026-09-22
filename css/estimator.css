@@ -346,6 +346,12 @@
 .sf-est-rsec h4 { font-size: 17px; }
 .sf-est-rsec p, .sf-est-rsec li { font-size: 14px; line-height: 1.7; }
 .sf-est-report-label { margin: -10px 0 20px; color: #657080; font-size: 13px; letter-spacing: .04em; }
+.sf-est-result-head { align-items: flex-start; gap: 16px; }
+.sf-est-result-eyebrow { margin: 1px 0 7px; color: #a35d16; font-size: 12px; font-weight: 850; letter-spacing: .14em; }
+.sf-est-result-subtitle { max-width: 650px; margin: 8px 0 0; color: #46515d; font-size: 15px; line-height: 1.6; }
+.sf-est-selling-callout { display: flex; align-items: center; gap: 14px; margin: 0 0 20px; padding: 15px 18px; border-left: 5px solid #b36b14; border-radius: 8px; background: #fff7e8; color: #5b431f; }
+.sf-est-selling-callout b { flex: none; color: #8f4f0c; font-size: 15px; }
+.sf-est-selling-callout span { font-size: 14px; line-height: 1.55; }
 .sf-est-pricing-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .sf-est-ownership-intro { display: flex; gap: 14px; align-items: flex-start; padding: 18px; border: 1px solid #d8c39a; border-radius: 10px; background: #fffaf0; }
 .sf-est-ownership-intro > span { font-size: 24px; line-height: 1; }
@@ -367,11 +373,12 @@
 .sf-est-price-card span { color: #5f6771; font-size: 12px; font-weight: 700; letter-spacing: .03em; }
 .sf-est-price-card b { display: block; margin: 8px 0; color: #1e2a3a; font-size: 24px; }
 .sf-est-price-card small { color: #657080; font-size: 12px; line-height: 1.5; }
-.sf-est-price-floor { border-top: 4px solid #9b4d45; }
-.sf-est-price-sweet { border-top: 4px solid #2c6b89; }
-.sf-est-price-ask { border-top: 4px solid #b78532; }
+.sf-est-price-floor { border-top: 4px solid #a34646; background: #fff8f7; }
+.sf-est-price-sweet { border-top: 4px solid #21698e; background: #f4f9fc; }
+.sf-est-price-ask { border-top: 4px solid #b36b14; background: #fffaf1; }
 @media (max-width: 640px) { .sf-est-pricing-grid { grid-template-columns: 1fr; } }
 @media (max-width: 640px) { .sf-est-ownership-options { grid-template-columns: 1fr; } .sf-est-ownership-intro { padding: 15px; } }
+@media (max-width: 640px) { .sf-est-selling-callout { align-items: flex-start; flex-direction: column; gap: 5px; } .sf-est-result-subtitle { font-size: 14px; } }
 @keyframes sfEstSpin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .sf-est-anim-ring.spin { animation: none; } .sf-est-rsec-toggle { transition: none; } }
 
