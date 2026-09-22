@@ -52,6 +52,65 @@
     return (a == null) ? 1 : a;
   }
 
+  function normalizeComparable(raw, sourceType) {
+    raw = raw && typeof raw === "object" ? raw : {};
+    var price = Number(raw.price != null ? raw.price : (raw.display_price != null ? raw.display_price : raw.askingPrice));
+    var lotArea = Number(raw.lotArea != null ? raw.lotArea : (raw.lot_size_sqm != null ? raw.lot_size_sqm : raw.lot_size));
+    var floorArea = Number(raw.floorArea != null ? raw.floorArea : (raw.floor_area_sqm != null ? raw.floor_area_sqm : raw.floor_area));
+    if (!(price > 0) || !(lotArea > 0)) return null;
+    var source = sourceType || raw.sourceType || "unknown";
+    var type = normKey(raw.propertyType != null ? raw.propertyType : raw.property_type);
+    if (/HOUSE|HOME/.test(type)) type = "HOUSE_LOT";
+    else if (/LOT|LAND/.test(type)) type = "VACANT_LOT";
+    var offer = normKey(raw.offerType != null ? raw.offerType : raw.offer_type);
+    if (offer && offer !== "SALE" && offer !== "FOR SALE") return null;
+    return {
+      id: String(raw.id || raw.listingId || raw.url || "").slice(0, 160),
+      source: String(source).slice(0, 80),
+      sourceUrl: String(raw.sourceUrl || raw.source_url || raw.url || "").slice(0, 500),
+      retrievedAt: String(raw.retrievedAt || raw.retrieved_at || "").slice(0, 40),
+      municipality: normKey(raw.municipality || raw.city || raw.town),
+      barangay: normKey(raw.barangay),
+      propertyType: type,
+      price: Math.round(price),
+      lotArea: Math.round(lotArea * 100) / 100,
+      floorArea: floorArea > 0 ? Math.round(floorArea * 100) / 100 : 0,
+      pricePerSqm: Math.round(price / lotArea),
+      isAskingPrice: source !== "ES Realty transaction"
+    };
+  }
+
+  function comparableSummary(records, opts) {
+    opts = opts || {};
+    var normalized = (records || []).map(function (item) {
+      return item && item.pricePerSqm ? item : normalizeComparable(item, opts.sourceType);
+    }).filter(Boolean);
+    var wantedMunicipality = normKey(opts.municipality);
+    var wantedBarangay = normKey(opts.barangay);
+    var wantedType = normKey(opts.propertyType).replace(/-/g, "_");
+    normalized = normalized.filter(function (item) {
+      if (normKey(item.municipality) !== wantedMunicipality) return false;
+      if (wantedBarangay && item.barangay && normKey(item.barangay) !== wantedBarangay) return false;
+      if (wantedType && item.propertyType && item.propertyType !== wantedType) return false;
+      return true;
+    }).sort(function (a, b) {
+      var aLocal = normKey(a.barangay) === wantedBarangay ? 0 : 1;
+      var bLocal = normKey(b.barangay) === wantedBarangay ? 0 : 1;
+      return aLocal - bLocal;
+    }).slice(0, 8);
+    var values = normalized.map(function (item) { return item.pricePerSqm; }).sort(function (a, b) { return a - b; });
+    var median = values.length ? values[Math.floor((values.length - 1) / 2)] : 0;
+    var sources = [];
+    normalized.forEach(function (item) { if (sources.indexOf(item.source) === -1) sources.push(item.source); });
+    return {
+      count: normalized.length,
+      medianPricePerSqm: median,
+      sourceType: sources.join(", "),
+      records: normalized,
+      status: normalized.length ? "evidence-available" : "no-comparable-data"
+    };
+  }
+
   var DEPTH_META = {
     1: { level: "street", pct: 0.95, rangePct: 0.05, label: "Exact BIR street value" },
     2: { level: "barangay-other", pct: 0.85, rangePct: 0.10, label: "Barangay all-other-streets value" },
@@ -189,6 +248,12 @@
 
     var salePrice = Number(opts && opts.salePrice);
     salePrice = salePrice > 0 ? Math.round(salePrice) : 0;
+    var comps = comparableSummary(opts && opts.comparables, {
+      municipality: opts && opts.municipality,
+      barangay: opts && opts.barangay,
+      propertyType: typeKey,
+      sourceType: opts && opts.comparableSource
+    });
     return {
       available: true,
       reason: "",
@@ -221,8 +286,9 @@
         value: total,
         landValue: landValue,
         ratePerSqm: landPerSqm,
-        sourceType: (config.marketGuide && config.marketGuide.sourceType) || "ES Realty approved factors",
-        comparableCount: 0,
+        sourceType: comps.count ? comps.sourceType : ((config.marketGuide && config.marketGuide.sourceType) || "ES Realty approved factors"),
+        comparableCount: comps.count,
+        comparableMedianPricePerSqm: comps.medianPricePerSqm,
         status: "assumption-backed"
       },
       birZonalRatePerSqm: birZonalRatePerSqm,
@@ -246,6 +312,7 @@
       low: low,
       high: high,
       salePrice: salePrice,
+      comparableSummary: comps,
       calculationVersion: cfgVersion(cfg),
       dataVersion: dataVersionOf(index),
       disclaimer: (cfg && cfg.disclaimer) || "",
@@ -319,6 +386,8 @@
     resolveBase: resolveBase,
     computeEstimate: computeEstimate,
     taxMath: taxMath,
+    normalizeComparable: normalizeComparable,
+    comparableSummary: comparableSummary,
     integrityCheck: integrityCheck
   };
 
@@ -635,6 +704,9 @@
       birZonalValue: r.birZonalValue,
       marketGuideEstimate: r.marketGuideEstimate
     });
+    var comparableNote = r.marketGuide && r.marketGuide.comparableCount
+      ? " Comparable evidence attached: " + r.marketGuide.comparableCount + " record(s) from " + r.marketGuide.sourceType + "."
+      : " No comparable listing evidence is attached to this estimate yet.";
     var s = [];
 
     s.push({ t: "Estimate at a glance", h:
@@ -693,7 +765,7 @@
       "</b> (" + Math.round(r.rangePct * 100) + "% guide range based on BIR data coverage). ≈ <b>" + money(r.perSqm) + "</b>/sqm.</p>" });
 
     s.push({ t: "Coverage and limitations", h:
-      "<p class=\"sf-est-rdp\">The BIR figure is matched street-by-street; where a street has no listed rate for a classification the engine falls back to the barangay all-other-streets rate, then municipality and province medians. The market guide currently uses approved ES Realty factors; comparable listings are not yet attached to this estimate. Rows the BIR masked as “same as above” were resolved only when a municipality-wide rate existed — never guessed.</p>" });
+      "<p class=\"sf-est-rdp\">The BIR figure is matched street-by-street; where a street has no listed rate for a classification the engine falls back to the barangay all-other-streets rate, then municipality and province medians. The market guide currently uses approved ES Realty factors." + comparableNote + " Rows the BIR masked as “same as above” were resolved only when a municipality-wide rate existed — never guessed.</p>" });
 
     s.push({ t: "Estimated transfer costs and seller proceeds", h:
       '<div class="sf-est-tax"><span>Illustrative tax base: <b>' + money(tax.base) + "</b> · " + esc(tax.baseBasis) + "</span>" +

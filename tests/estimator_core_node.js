@@ -45,6 +45,22 @@ eq(core.integrityCheck(r).ok, true, "cr reconciles");
 eq(r.calculationVersion, config.calculationVersion, "cr calc version stamped");
 eq(r.dataVersion, index.dataVersion, "cr data version stamped");
 
+const comp = core.normalizeComparable({
+  id: "internal-1", city: "Balayan", barangay: "BACLARAN", property_type: "House & Lot",
+  offer_type: "sale", display_price: 4000000, lot_size_sqm: 200, source_url: "https://example.test/internal-1"
+}, "ES Realty listing");
+eq(comp.propertyType, "HOUSE_LOT", "comparable property type normalized");
+eq(comp.pricePerSqm, 20000, "comparable price per lot sqm");
+eq(comp.isAskingPrice, true, "listing comparable marked asking price");
+eq(core.normalizeComparable({ offer_type: "rent", display_price: 100000, lot_size_sqm: 100 }, "ES Realty listing"), null, "rental is not a sale comparable");
+const comps = core.comparableSummary([comp, {
+  city: "Balayan", barangay: "BACLARAN", property_type: "House & Lot", offer_type: "sale",
+  price: 6000000, lotArea: 200, sourceUrl: "https://example.test/internal-2"
+}], { municipality: "BALAYAN", barangay: "BACLARAN", propertyType: "house_lot", sourceType: "ES Realty listing" });
+eq(comps.count, 2, "comparable summary keeps matching internal records");
+eq(comps.medianPricePerSqm, 20000, "comparable summary median is deterministic");
+eq(comps.status, "evidence-available", "comparable summary status");
+
 /* ---- corner lot toggle ---- */
 let rc = core.computeEstimate(config, index, balayan, {
   municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "CR", area: 200, corner: true

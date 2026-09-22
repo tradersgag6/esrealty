@@ -140,6 +140,7 @@ function sanitizeEstimate(raw: any): any {
     out.marketGuide = {
       sourceType: str(m.sourceType, 120),
       comparableCount: Number.isFinite(Number(m.comparableCount)) ? Number(m.comparableCount) : 0,
+      comparableMedianPricePerSqm: Number.isFinite(Number(m.comparableMedianPricePerSqm)) ? Number(m.comparableMedianPricePerSqm) : 0,
       status: str(m.status, 80),
     };
   }
