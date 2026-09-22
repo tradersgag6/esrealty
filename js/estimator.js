@@ -312,6 +312,7 @@
   var DATA = null;
   var dataPromise = null;
   var muniCache = {};
+  var streetDelegationBound = false;
 
   function loadJSON(url) {
     return fetch(url, { credentials: "same-origin" }).then(function (r) {
@@ -836,26 +837,35 @@
       if (listEl) listEl.innerHTML = streetListHtml("");
     }
 
-    $qa(card, "[data-est-street]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        est.streetKey = btn.getAttribute("data-est-street");
-        var t = currentBarangay();
-        est.streetLabel = t && t.streets && t.streets[est.streetKey] ? (t.streets[est.streetKey].name || est.streetKey) : est.streetKey;
-        est.allOther = false;
-        est.classification = "";
-        est.result = null;
-        renderLayout();
+    // Street / "street not listed" clicks are delegated at the document level
+    // and bound exactly once. The search-results list (streetListHtml) is
+    // re-injected via innerHTML on every keystroke, creating fresh button nodes
+    // that bindCard() never sees — per-node handlers would silently die there.
+    if (!streetDelegationBound) {
+      streetDelegationBound = true;
+      document.addEventListener("click", function (e) {
+        var st = e.target.closest ? e.target.closest("[data-est-street]") : null;
+        if (st) {
+          est.streetKey = st.getAttribute("data-est-street");
+          var t = currentBarangay();
+          est.streetLabel = t && t.streets && t.streets[est.streetKey] ? (t.streets[est.streetKey].name || est.streetKey) : est.streetKey;
+          est.allOther = false;
+          est.classification = "";
+          est.result = null;
+          renderLayout();
+          return;
+        }
+        var all = e.target.closest ? e.target.closest("[data-est-street-all]") : null;
+        if (all) {
+          est.allOther = true;
+          est.streetKey = "";
+          est.streetLabel = "Street not listed";
+          est.classification = "";
+          est.result = null;
+          renderLayout();
+        }
       });
-    });
-    var allBtn = $q(card, "[data-est-street-all]");
-    if (allBtn) allBtn.addEventListener("click", function () {
-      est.allOther = true;
-      est.streetKey = "";
-      est.streetLabel = "Street not listed";
-      est.classification = "";
-      est.result = null;
-      renderLayout();
-    });
+    }
 
     var classSel = $q(card, "[data-est-class]");
     if (classSel) classSel.addEventListener("change", function () {

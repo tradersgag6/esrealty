@@ -68,9 +68,16 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     await waitFor(() => qa('[data-est-street]').length > 0, 30, ESP);
     chk("street-list-populated", qa('[data-est-street]').length > 0, "n=" + qa('[data-est-street]').length);
     chk("street-not-listed-button", !!q('[data-est-screen="1"] [data-est-street-all]'), "");
-    const streetKey = (qa('[data-est-street]').find(b => /all street/i.test(b.textContent)) || qa('[data-est-street]')[0]).getAttribute("data-est-street");
-    qa('[data-est-street]').find(b => b.getAttribute("data-est-street") === streetKey).click();
-    await wait(90);
+    // Search-filtered street buttons are re-injected via innerHTML on each
+    // keystroke; clicking them must still select the street (delegated handler).
+    setInput('[data-est-street-q]', "all street");
+    await wait(80);
+    const filtered = qa('[data-est-street]').filter(b => !b.hasAttribute('data-est-street-all'));
+    chk("street-search-filters-list", filtered.length > 0 && filtered.length <= 3 && filtered.some(b => /all street/i.test(b.textContent)), "n=" + filtered.length);
+    const streetKey = (filtered.find(b => /all street/i.test(b.textContent)) || qa('[data-est-street]')[0]).getAttribute("data-est-street");
+    (filtered.find(b => b.getAttribute("data-est-street") === streetKey) || qa('[data-est-street]')[0]).click();
+    await wait(120);
+    chk("street-clicked-from-search-selects", !!q('[data-est-street-q]') && String(q('[data-est-street-q]').value).toLowerCase() === "all street" && !!estApi()._state().streetKey && !estApi()._state().allOther, "value=" + ((q('[data-est-street-q]') || {}).value || ""));
     chk("class-options-from-street", Array.from(q('[data-est-class]').options).some(o => o.value === "CR"), "opts=" + q('[data-est-class]').options.length);
     setValue('[data-est-class]', "CR");
     setInput('[data-est-area]', "200");
