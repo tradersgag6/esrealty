@@ -327,12 +327,11 @@
 .sf-est-anim-head { display: flex; align-items: center; gap: 14px; }
 .sf-est-anim-head > div > p { margin: 0 0 5px; color: #80551d; font-size: 12px; font-weight: 800; letter-spacing: .12em; }
 .sf-est-anim-head .sf-est-anim-title { text-align: left; }
-.sf-est-anim-panel { display: grid; grid-template-columns: 190px minmax(0, 1fr); align-items: center; gap: clamp(24px, 6vw, 70px); padding: 26px; border: 1px solid #d8dbdc; border-radius: 12px; background: linear-gradient(135deg, #fbfaf7, #f4f7f8); }
-.sf-est-anim-ring { display: grid; place-items: center; width: 170px; height: 170px; margin: auto; border: 4px solid #d8c39a; border-top-color: #a87942; border-radius: 50%; background: #fff; box-shadow: 0 8px 22px rgba(30, 42, 58, .08); }
+.sf-est-anim-panel { padding: 24px 26px; border: 1px solid #d8dbdc; border-radius: 12px; background: linear-gradient(135deg, #fbfaf7, #f4f7f8); }
 .sf-est-anim-ring.spin { animation: sfEstSpin 1.1s linear infinite; }
 .sf-est-anim-ring b { font-family: Inter, Arial, sans-serif; font-size: 18px; font-weight: 800; color: #1e2a3a; letter-spacing: .08em; }
 .sf-est-anim-ring span { color: #46515d; font-size: 12px; font-weight: 700; }
-.sf-est-anim-stages { display: grid; gap: 12px; }
+.sf-est-anim-stages { display: grid; gap: 12px; max-width: 680px; margin: auto; }
 .sf-est-anim-stage { display: flex; align-items: center; gap: 12px; min-height: 44px; color: #687582; font-size: 14px; }
 .sf-est-anim-stage i { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border: 1px solid #cbd1d5; border-radius: 50%; background: #fff; color: #687582; font-size: 13px; font-style: normal; font-weight: 800; }
 .sf-est-anim-stage.active { color: #1e2a3a; font-weight: 750; }
@@ -396,8 +395,6 @@
 
 @media (max-width: 640px) {
   .sf-est-feat-grid { grid-template-columns: 1fr 1fr; }
-  .sf-est-anim-panel { grid-template-columns: 1fr; gap: 24px; padding: 20px 16px; }
-  .sf-est-anim-ring { width: 145px; height: 145px; }
-  .sf-est-anim-ring b { font-size: 24px; }
+  .sf-est-anim-panel { padding: 20px 16px; }
   .sf-est-anim-title { font-size: 23px; }
 }
