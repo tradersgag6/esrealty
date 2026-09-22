@@ -1093,7 +1093,8 @@
       sq.addEventListener("blur", function () {
         setTimeout(function () { if (listEl) listEl.innerHTML = ""; }, 150);
       });
-      if (listEl) listEl.innerHTML = streetListHtml("");
+      // Keep the street picker closed until the user focuses or searches it.
+      if (listEl) listEl.innerHTML = "";
     }
 
     // Keep the delegated handler on the estimator card. Search results are

@@ -71,6 +71,7 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     await waitFor(() => qa('[data-est-barangay] option').some(o => o.value === "BACLARAN"), 60, ESP);
     chk("barangay-options-loaded", qa('[data-est-barangay] option').length >= 2, "n=" + qa('[data-est-barangay] option').length);
     setValue('[data-est-barangay]', "BACLARAN");
+    q('[data-est-street-q]').focus();
     await waitFor(() => qa('[data-est-street]').length > 0, 30, ESP);
     chk("street-list-populated", qa('[data-est-street]').length > 0, "n=" + qa('[data-est-street]').length);
     chk("street-not-listed-button", !!q('[data-est-screen="1"] [data-est-street-all]'), "");
@@ -134,6 +135,7 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     // --- depth 2: "Street not listed" (barangay all-other) ---
     estApi().debug.render(1);
     await wait(70);
+    q('[data-est-street-q]').focus();
     chk("back-to-screen1", !!q('[data-est-screen="1"]'), "");
     q('[data-est-screen="1"] [data-est-street-all]').click();
     await wait(90);
