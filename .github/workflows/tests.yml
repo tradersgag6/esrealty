@@ -102,37 +102,66 @@ jobs:
           node market-scan/worker/server.js &
           npx wait-on --timeout 60000 http://127.0.0.1:8931/index.html http://127.0.0.1:8932/api/ping
 
-      - name: Run hermetic browser suites (desktop)
-        run: |
-          set -e
-          fail=0
-          for t in estimator_e2e estimator_barangay_select_e2e portfolio_ledger_integrity_e2e portfolio_overview_e2e \
-                   portfolio_filters_e2e portfolio_ledger_ui_e2e compliance_registry_e2e \
-                   agent_crm_e2e crm_core_e2e playbook_e2e presell_upgrade_e2e \
-                   pms_crud_e2e feasibility_e2e ds_summary_e2e listings_upgrade_e2e \
-                   database_backup_e2e ui_preload_flash_e2e \
-                   ui_storefront_routing_e2e ui_public_nav_e2e ui_properties_e2e \
-                   ui_content_integrity_e2e ui_mobile_nav_e2e ui_type_system_e2e \
-                   value_guide_internal_e2e value_guide_pdf_browser_e2e \
-                   ui_bt_assets_e2e ui_shophouse_tab_e2e; do
-            echo "===== $t ====="
-            # Retry once. These suites drive fixed-delay waits against a live
-            # page; running 27 of them back-to-back on a shared CI runner makes
-            # the short waits occasionally too tight, which is flakiness rather
-            # than a regression. A genuine regression fails both attempts.
-            if pwsh -NoProfile -File tests/run_all.ps1 -Test "$t"; then
-              echo "$t PASSED"
-            else
-              echo "::warning::$t failed, retrying once"
-              if pwsh -NoProfile -File tests/run_all.ps1 -Test "$t"; then
-                echo "::warning::$t passed on retry (flaky)"
-              else
-                echo "::error::$t failed twice - genuine failure"
-                fail=1
-              fi
-            fi
-          done
-          exit $fail
+      # One step per suite rather than one combined desktop step: a failure then
+      # names the suite in the check summary, which is the only place it is
+      # visible without pulling the whole job log. Each is retried once, since
+      # the suites drive fixed-delay waits against a live page and a loaded
+      # runner occasionally makes those too tight; a real regression fails
+      # both attempts.
+      - name: e2e estimator_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test estimator_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test estimator_e2e
+      - name: e2e estimator_barangay_select_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test estimator_barangay_select_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test estimator_barangay_select_e2e
+      - name: e2e portfolio_ledger_integrity_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test portfolio_ledger_integrity_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test portfolio_ledger_integrity_e2e
+      - name: e2e portfolio_overview_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test portfolio_overview_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test portfolio_overview_e2e
+      - name: e2e portfolio_filters_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test portfolio_filters_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test portfolio_filters_e2e
+      - name: e2e portfolio_ledger_ui_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test portfolio_ledger_ui_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test portfolio_ledger_ui_e2e
+      - name: e2e compliance_registry_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test compliance_registry_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test compliance_registry_e2e
+      - name: e2e agent_crm_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test agent_crm_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test agent_crm_e2e
+      - name: e2e crm_core_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test crm_core_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test crm_core_e2e
+      - name: e2e playbook_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test playbook_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test playbook_e2e
+      - name: e2e presell_upgrade_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test presell_upgrade_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test presell_upgrade_e2e
+      - name: e2e pms_crud_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test pms_crud_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test pms_crud_e2e
+      - name: e2e feasibility_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test feasibility_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test feasibility_e2e
+      - name: e2e ds_summary_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test ds_summary_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test ds_summary_e2e
+      - name: e2e listings_upgrade_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test listings_upgrade_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test listings_upgrade_e2e
+      - name: e2e database_backup_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test database_backup_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test database_backup_e2e
+      - name: e2e ui_preload_flash_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test ui_preload_flash_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test ui_preload_flash_e2e
+      - name: e2e ui_storefront_routing_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test ui_storefront_routing_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test ui_storefront_routing_e2e
+      - name: e2e ui_public_nav_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test ui_public_nav_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test ui_public_nav_e2e
+      - name: e2e ui_properties_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test ui_properties_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test ui_properties_e2e
+      - name: e2e ui_content_integrity_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test ui_content_integrity_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test ui_content_integrity_e2e
+      - name: e2e ui_mobile_nav_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test ui_mobile_nav_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test ui_mobile_nav_e2e
+      - name: e2e ui_type_system_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test ui_type_system_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test ui_type_system_e2e
+      - name: e2e value_guide_internal_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test value_guide_internal_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test value_guide_internal_e2e
+      - name: e2e value_guide_pdf_browser_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test value_guide_pdf_browser_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test value_guide_pdf_browser_e2e
+      - name: e2e ui_bt_assets_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test ui_bt_assets_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test ui_bt_assets_e2e
+      - name: e2e ui_shophouse_tab_e2e
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test ui_shophouse_tab_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test ui_shophouse_tab_e2e
 
       - name: Mobile viewport pass
         run: pwsh -NoProfile -File tests/run_all.ps1 -Test ui_readability_mobile_e2e -Mobile
