@@ -113,7 +113,7 @@ jobs:
                    agent_crm_e2e crm_core_e2e playbook_e2e presell_upgrade_e2e \
                    pms_crud_e2e feasibility_e2e ds_summary_e2e listings_upgrade_e2e \
                    database_backup_e2e ui_preload_flash_e2e \
-ui_storefront_routing_e2e ui_public_nav_e2e ui_properties_e2e \
+                   ui_storefront_routing_e2e ui_public_nav_e2e ui_properties_e2e \
                     ui_content_integrity_e2e ui_mobile_nav_e2e ui_type_system_e2e \
                     value_guide_internal_e2e value_guide_pdf_browser_e2e \
                     ui_bt_assets_e2e ui_shophouse_tab_e2e; do
