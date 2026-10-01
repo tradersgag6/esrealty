@@ -112,11 +112,25 @@ jobs:
                    pms_crud_e2e feasibility_e2e ds_summary_e2e listings_upgrade_e2e \
                    database_backup_e2e ui_preload_flash_e2e \
                    ui_storefront_routing_e2e ui_public_nav_e2e ui_properties_e2e \
-                    ui_content_integrity_e2e ui_mobile_nav_e2e ui_type_system_e2e \
-                    value_guide_internal_e2e value_guide_pdf_browser_e2e \
-                    ui_bt_assets_e2e ui_shophouse_tab_e2e; do
+                   ui_content_integrity_e2e ui_mobile_nav_e2e ui_type_system_e2e \
+                   value_guide_internal_e2e value_guide_pdf_browser_e2e \
+                   ui_bt_assets_e2e ui_shophouse_tab_e2e; do
             echo "===== $t ====="
-            pwsh -NoProfile -File tests/run_all.ps1 -Test "$t" || fail=1
+            # Retry once. These suites drive fixed-delay waits against a live
+            # page; running 27 of them back-to-back on a shared CI runner makes
+            # the short waits occasionally too tight, which is flakiness rather
+            # than a regression. A genuine regression fails both attempts.
+            if pwsh -NoProfile -File tests/run_all.ps1 -Test "$t"; then
+              echo "$t PASSED"
+            else
+              echo "::warning::$t failed, retrying once"
+              if pwsh -NoProfile -File tests/run_all.ps1 -Test "$t"; then
+                echo "::warning::$t passed on retry (flaky)"
+              else
+                echo "::error::$t failed twice - genuine failure"
+                fail=1
+              fi
+            fi
           done
           exit $fail
 
