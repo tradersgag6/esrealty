@@ -34,16 +34,16 @@ eq(r.source.level, "street", "cr level street");
 eq(r.reference.value, 3500, "cr reference 3500");
 eq(r.birZonalRatePerSqm, 3500, "cr BIR zonal rate remains official base");
 eq(r.birZonalValue, 700000, "cr BIR zonal value stays separate");
-eq(r.landPerSqm, 8750, "cr landPerSqm capped at 2.5x BIR without comparables");
-eq(r.landValue, 1750000, "cr landValue capped");
-eq(r.low, 1662500, "cr low ±5%");
-eq(r.high, 1837500, "cr high ±5%");
-eq(r.perSqm, 8750, "cr perSqm");
-eq(r.marketGuideEstimate, null, "market guide stays unavailable without comparables");
+eq(r.landPerSqm, 14875, "cr landPerSqm uses restored uncapped factor calculation");
+eq(r.landValue, 2975000, "cr landValue uses BIR × disclosed factors");
+eq(r.low, 2826250, "cr low ±5%");
+eq(r.high, 3123750, "cr high ±5%");
+eq(r.perSqm, 14875, "cr perSqm");
+eq(r.marketGuideEstimate, r.total, "factor-based estimate remains available without comparables");
 eq(r.marketGuideAvailable, false, "market guide availability requires comparables");
-eq(r.recommendedAskingPrice, r.high, "asking price uses capped guide upper range without comparables");
-eq(r.marketGuide.status, "assumption-backed-capped", "market guide source status");
-eq(r.marketGuide.capApplied, true, "market guide cap applied without comparables");
+eq(r.recommendedAskingPrice, r.high, "recommended asking price uses guide upper range");
+eq(r.marketGuide.status, "factor-based-no-comparable-data", "no-comparable basis is explicit");
+eq(r.marketGuide.comparablePricesUsed, false, "comparable asking prices do not feed the factor calculation");
 eq(core.integrityCheck(r).ok, true, "cr reconciles");
 eq(r.calculationVersion, config.calculationVersion, "cr calc version stamped");
 eq(r.dataVersion, index.dataVersion, "cr data version stamped");
@@ -76,7 +76,7 @@ let rc = core.computeEstimate(config, index, balayan, {
   municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "CR", area: 200, corner: true
 });
 eq(rc.corner.applied, true, "corner applied");
-eq(rc.landPerSqm, 8750, "corner landPerSqm remains capped at 2.5x BIR");
+eq(rc.landPerSqm, 15247, "corner factor applies to the restored factor calculation");
 
 /* ---- residential RR (proxy 1.0, band 2.5) ---- */
 let rr = core.computeEstimate(config, index, balayan, {

@@ -58,9 +58,17 @@ function chooseOwnershipNotSure() {
     chk("sf-estimator-section-present", !!q('#sf-estimator') && !!q('[data-est-card]') && !!q('.sf-est'), "root ok");
     chk("funnel-brand-eyebrow", /BATANGAS VALUE GUIDE/.test(document.body.innerText), "");
     chk("homepage-primary-estimate-cta", !!q('.sf-est-hero-actions [data-est-services]') && /Get My Free Estimate/.test(q('.sf-est-hero-actions [data-est-services]').textContent), "");
-    chk("homepage-secondary-batangas-cta", !!q('.sf-est-hero-actions a[href*="state=Batangas"]'), "");
+    /* Was: a[href*="state=Batangas"] on the hero. That link applied a filter the
+       filter form did not expose, so it always rendered "No properties found"
+       with no visible way to undo it. The secondary CTA now points at the
+       unfiltered browse page; Batangas is still carried by the value guide,
+       which is genuinely Batangas-specific (BIR zonal data), and the state
+       filter remains available as a visible, removable chip. */
+    chk("homepage-secondary-browse-cta", !!q('.sf-est-hero-actions a[href="#/search"]'), "hrefs=" + Array.prototype.map.call(document.querySelectorAll('.sf-est-hero-actions a'), function (a) { return a.getAttribute('href'); }).join(','));
+    chk("homepage-secondary-cta-has-no-hidden-filter", !q('.sf-est-hero-actions a[href*="state="]'), "hero still ships an unexposed state filter");
     chk("homepage-guide-summary-heading", /A clearer answer before your next property step/.test(document.body.innerText), "");
     chk("screen1-rendered", !!q('[data-est-screen="1"]'), "");
+    chk("screen1-guides-inputs", /START WITH THE DETAILS/.test(q('[data-est-screen="1"]').textContent) && /match the right BIR reference/.test(q('[data-est-screen="1"]').textContent), "");
     chk("region-fixed-batangas", !!q('.sf-est-loc-fixed') && /CALABARZON.*Batangas/.test(q('.sf-est-loc-fixed').textContent), "txt=" + (q('.sf-est-loc-fixed') && q('.sf-est-loc-fixed').textContent));
     chk("mn-options-gte34", pt >= 34, "mn=" + pt);
     chk("legacy-map-removed", !document.getElementById("est-map") && !q('[data-est-step]'), "");
@@ -109,6 +117,7 @@ function chooseOwnershipNotSure() {
     q('[data-est-next]').click();
     await waitFor(() => q('[data-est-screen="2"]'), 30, ESP);
     chk("describe-property-screen-present", !!q('[data-est-screen="2"]') && /Describe your property/.test(q('[data-est-screen="2"] h3').textContent), "");
+    chk("screen2-is-revealed", !!q('[data-est-screen="2"]') && q('[data-est-screen="2"]').getBoundingClientRect().top < window.innerHeight, "top=" + (q('[data-est-screen="2"]') && q('[data-est-screen="2"]').getBoundingClientRect().top));
     chk("ownership-title-questions-present", qa('[data-est-ownership]').length === 13, "options=" + qa('[data-est-ownership]').length);
     chooseOwnershipNotSure();
     q('[data-est-next]').click();
@@ -116,10 +125,24 @@ function chooseOwnershipNotSure() {
     const screen3 = q('[data-est-screen="3"]');
     chk("screen3-no-rotating-indicator", !q('[data-est-screen="3"] [data-est-spin]') && !q('[data-est-screen="3"] [data-est-anim-mark]'), "");
     chk("screen3-progress-design", !!q('[data-est-screen="3"] .sf-est-anim-panel') && qa('[data-est-screen="3"] [data-est-stage]').length === 3 && /Calculating your property value/.test(q('[data-est-screen="3"] .sf-est-anim-title').textContent), "");
-    chk("screen3-is-revealed", !!screen3 && screen3.getBoundingClientRect().bottom > 0 && screen3.getBoundingClientRect().top < window.innerHeight, "top=" + (screen3 && screen3.getBoundingClientRect().top));
+    await waitFor(() => !!screen3 && screen3.getBoundingClientRect().bottom > 0 && screen3.getBoundingClientRect().top < window.innerHeight, 120, ESP);
+    const revealAncestors = [];
+    for (let node = screen3; node && node !== document.body; node = node.parentElement) {
+      const style = getComputedStyle(node);
+      revealAncestors.push((node.id || node.className || node.tagName) + ":" + node.scrollTop + "/" + node.scrollHeight + "/" + style.overflowY);
+    }
+    chk("screen3-is-revealed", !!screen3 && screen3.getBoundingClientRect().bottom > 0 && screen3.getBoundingClientRect().top < window.innerHeight, "top=" + (screen3 && screen3.getBoundingClientRect().top) + " bottom=" + (screen3 && screen3.getBoundingClientRect().bottom) + " scrollY=" + window.scrollY + " h=" + (screen3 && screen3.getBoundingClientRect().height) + " ancestors=" + revealAncestors.join(" | "));
     await waitFor(() => q('[data-est-screen="4"]'), 90, ESP);
-    chk("result-heading-is-clear", !!q('#sf-est-result-heading') && /Your property value guide/.test(q('#sf-est-result-heading').textContent), "");
-    chk("selling-result-design", !!q('.sf-est-selling-result') && /SELLING APPROACH/.test(q('.sf-est-result-eyebrow').textContent) && !!q('.sf-est-selling-callout'), "");
+    chk("result-heading-is-clear", !!q('#sf-est-result-heading') && /Your guide is ready\./.test(q('#sf-est-result-heading').textContent), "");
+    chk("selling-result-design", !!q('.sf-est-selling-result') && /YOUR PROPERTY VALUE GUIDE/.test(q('.sf-est-result-eyebrow').textContent) && !!q('.sf-est-nextstep') && /04/.test(q('.sf-est-step-no').textContent), "");
+    chk("result-scroll-cue", !!q('[data-est-scroll-report]') && /Explore calculation details/.test(q('[data-est-scroll-report]').textContent), "");
+    chk("result-data-strip", !!q('.sf-est-result-data') && /BIR street data/.test(q('.sf-est-result-data').textContent) && /2022-07-23/.test(q('.sf-est-result-data').textContent), "");
+    chk("analysis-summary", !!q('.sf-est-analysis-summary') && /Analysis complete/.test(q('.sf-est-analysis-summary').textContent) && /Vacant lot/i.test(q('.sf-est-analysis-summary').textContent), "");
+    chk("next-step-card-above-report", !!q('.sf-est-nextstep') && !!q('[data-est-lead-open]') &&
+        q('.sf-est-nextstep').compareDocumentPosition(q('.sf-est-report')) & Node.DOCUMENT_POSITION_FOLLOWING &&
+        /no obligation/i.test(q('.sf-est-nextstep').textContent) &&
+        /Pricing details, unlocked/.test(q('.sf-est-nextstep').textContent) &&
+        /one business day/i.test(q('.sf-est-nextstep').textContent), "");
 
     const rD1 = estApi()._state().result;
     chk("depth1-available", rD1 && rD1.available, "");
@@ -128,19 +151,33 @@ function chooseOwnershipNotSure() {
     const e1 = await estimateExpected(stateOpts());
     chk("total-matches-core", MONEY(rD1.total) === MONEY(e1.total), "dom=" + MONEY(rD1.total) + " core=" + MONEY(e1.total));
     chk("corner-note-shown", /corner lot \(\+2.5%\)/.test(document.body.innerText), "");
-    chk("range-or-bir-reference-shown", !!q('.sf-est-range') && (/–/.test(q('.sf-est-range').textContent) || /BIR reference/.test(q('.sf-est-range').textContent)), "txt=" + ((q('.sf-est-range') || { textContent: "" }).textContent));
+    chk("bir-reference-still-shown", !!q('.sf-est-bir-primary') && /Official BIR zonal reference/.test(q('.sf-est-bir-primary').textContent) && /\/sqm/.test(q('.sf-est-bir-primary').textContent), "txt=" + ((q('.sf-est-bir-primary') || { textContent: "" }).textContent));
+    chk("hidden-values-absent-everywhere", !/Indicative guide range/.test(document.body.innerText) && !/Factor-based guide estimate/.test(document.body.innerText), "");
+    const provSec = Array.prototype.find.call(qa('.sf-est-rsec'), function (el) { return /How this number was built/.test(el.textContent); });
+    const provTxt = provSec ? provSec.textContent : "";
+    chk("provenance-section-rendered", !!provSec && !!q('.sf-est-prov-block'), "found=" + !!provSec + " blocks=" + qa('.sf-est-prov-block').length);
+    chk("provenance-states-basis-of-value", /Basis of value/i.test(provTxt) && /planning/i.test(provTxt), "");
+    chk("provenance-names-bir-instrument", /035-2022/.test(provTxt) && /RDO 05[89]|RDO 058|RDO 059/.test(provTxt), "do-ref=" + /035-2022/.test(provTxt));
+    chk("provenance-has-valuation-date", /Valuation date/i.test(provTxt) && /2026/.test(provTxt), "");
+    chk("provenance-lists-checks", /Checks applied to every result/i.test(provTxt) && /Determinism/i.test(provTxt) && /Reconciliation/i.test(provTxt), "");
+    chk("provenance-lists-limitations", /does not cover/i.test(provTxt) && /No physical inspection/i.test(provTxt), "");
+    chk("provenance-order-numbered", qa('.sf-est-prov-steps li').length >= 5, "steps=" + qa('.sf-est-prov-steps li').length);
+    chk("provenance-avoids-pvs-claim", !/PVS\s*105/.test(provTxt) && !/PVS[- ]compliant/i.test(provTxt), "");
     chk("per-sqm-shown", !!q('.sf-est-per') && /sqm/.test(q('.sf-est-per').textContent), "");
-    chk("bir-value-shown-separately", !!q('.sf-est-bir-primary') && /Official BIR zonal value/.test(q('.sf-est-bir-primary').textContent), "");
-    chk("market-guide-evidence-gated", !!q('.sf-est-guide-unavailable') && /pending comparable evidence/i.test(q('.sf-est-guide-unavailable').textContent), "");
-    chk("asking-price-value-shown", !!q('.sf-est-asking') && !/Pending comparables/.test(q('.sf-est-asking').textContent) && /₱/.test(q('.sf-est-asking').textContent), "");
+    chk("bir-value-shown-separately", !!q('.sf-est-bir-primary') && /Official BIR zonal reference/.test(q('.sf-est-bir-primary').textContent) && /tax floor/.test(q('.sf-est-bir-primary').textContent), "");
+chk("only-asking-price-in-summary", !!q('.sf-est-result-summary') && !!q('.sf-est-result-value') && /Recommended asking price/.test(q('.sf-est-result-summary').textContent) && !/Factor-based guide estimate/.test(q('.sf-est-result-summary').textContent) && !/Indicative guide range/.test(q('.sf-est-result-summary').textContent), "");
+    chk("asking-price-clearly-shown", !!q('.sf-est-result-value') && /Recommended asking price/.test(q('.sf-est-result-summary').textContent) && /₱/.test(q('.sf-est-result-value').textContent), "");
+    chk("estimate-result-is-large", !!q('.sf-est-result-value') && parseFloat(getComputedStyle(q('.sf-est-result-value')).fontSize) >= 40, "font=" + (q('.sf-est-result-value') && getComputedStyle(q('.sf-est-result-value')).fontSize));
+    chk("asking-price-amount-is-large", !!q('.sf-est-result-value') && parseFloat(getComputedStyle(q('.sf-est-result-value')).fontSize) >= 32, "font=" + (q('.sf-est-result-value') && getComputedStyle(q('.sf-est-result-value')).fontSize));
     const reportText = (q('.sf-est-report') || { textContent: "" }).textContent;
-    chk("full-property-report-label", /Full Property Report/.test(document.body.innerText), "");
-    chk("pricing-strategy-shown", /Negotiation floor/.test(reportText) && /Buyer sweet spot/.test(reportText), "");
+     chk("guide-section-label", /YOUR GUIDE, SECTION BY SECTION/.test(document.body.innerText), "");
+     chk("pricing-strategy-has-no-duplicate-asking-card", qa('[data-est-pricing-body] .sf-est-recommended-ask').length === 0 && qa('.sf-est-result-summary .sf-est-recommended-ask').length === 0, "pricing-body cards=" + qa('[data-est-pricing-body] .sf-est-recommended-ask').length);
+     chk("locked-cards-state-purpose", qa('.sf-est-pricing-preview .sf-est-price-lock').length === 4 && !/Available after review/.test((q('[data-est-pricing-body]') || { textContent: "" }).textContent), "");
     chk("taxes-fees-commissions-shown", /Taxes, fees & commissions/.test(reportText) && /Broker commission/.test(reportText), "");
     chk("tax-base-disclosed", /Illustrative tax base/.test(reportText), "");
     chk("coverage-good-tag", !!q('.sf-est-tag-good') && /BIR street data/.test(q('.sf-est-tag-good').textContent), "");
-    chk("report-16-sections", qa('.sf-est-rsec').length === 16, "n=" + qa('.sf-est-rsec').length);
-    chk("report-sections-are-accessible", qa('.sf-est-rsec details').length === 0 && qa('.sf-est-rsec > summary').length === 16, "summaries=" + qa('.sf-est-rsec > summary').length);
+chk("report-17-sections", qa('.sf-est-rsec').length === 17, "n=" + qa('.sf-est-rsec').length);
+      chk("report-sections-are-accessible", qa('.sf-est-rsec details').length === 0 && qa('.sf-est-rsec > summary').length === 17, "summaries=" + qa('.sf-est-rsec > summary').length);
     chk("report-summary-priority", qa('.sf-est-rsec[open]').length >= 3, "open=" + qa('.sf-est-rsec[open]').length);
     q('[data-est-prev]').click();
     await wait(40);
@@ -148,11 +185,13 @@ function chooseOwnershipNotSure() {
     estApi().debug.render(4);
     await wait(40);
 
-    // lead block + submit (fallback to contact stub, no email -> "saved")
-    chk("lead-block-present", !!q('[data-est-lead]'), "");
-    q('[data-est-appraisal-open]').click();
-    await wait(40);
-    chk("appraisal-lead-form-opens", !!q('[data-est-lead-form]') && /professional appraisal/i.test(q('[data-est-lead-form] h3').textContent), "");
+     // lead block + submit (fallback to contact stub, no email -> "saved")
+     chk("lead-block-present", !!q('[data-est-lead]'), "");
+     const leadButtons = qa('[data-est-lead-open]');
+     chk("bottom-appraisal-cta-present", leadButtons.length >= 2 && /appraisal consultation/i.test(leadButtons[leadButtons.length - 1].textContent), "buttons=" + leadButtons.length);
+     leadButtons[leadButtons.length - 1].click();
+     await wait(40);
+     chk("appraisal-lead-form-opens", !!q('[data-est-lead-form]') && /appraisal consultation/i.test(q('[data-est-lead-form] h3').textContent), "");
     chk("appraisal-lead-form-focuses", !!q('[data-est-lead-form] input:focus'), "");
     const form = q('[data-est-lead-form]');
     form.querySelector('[name=name]').value = "E2E Tester";
@@ -161,8 +200,10 @@ function chooseOwnershipNotSure() {
     form.querySelector('[name=consent]').checked = true;
     window.ESREALTY_LISTINGS_API = { contact: () => Promise.resolve({ emailSent: false }) };
     form.querySelector('button[type=submit]').click();
-    await waitFor(() => /saved/.test((q('[data-est-lead-status]') || { textContent: "" }).textContent), 40, ESP);
-    chk("lead-submit-success-saved", /saved/.test((q('[data-est-lead-status]') || { textContent: "" }).textContent), (q('[data-est-lead-status]') || { textContent: "" }).textContent);
+     await waitFor(() => /saved/.test((q('[data-est-lead-status]') || { textContent: "" }).textContent), 40, ESP);
+     chk("lead-submit-success-saved", /saved/.test((q('[data-est-lead-status]') || { textContent: "" }).textContent), (q('[data-est-lead-status]') || { textContent: "" }).textContent);
+      chk("pricing-unlocks-after-submit", /Lower end of guide range/.test((q('[data-est-pricing-body]') || { textContent: "" }).textContent) && /₱/.test((q('[data-est-pricing-body]') || { textContent: "" }).textContent), "");
+     chk("lead-confirmation-shown", !!q('.sf-est-lead-done') && /Request received/.test(q('.sf-est-lead-done').textContent) && !q('.sf-est-nextstep'), "");
 
     // --- depth 2: "Street not listed" (barangay all-other) ---
     estApi().debug.render(1);

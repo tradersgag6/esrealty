@@ -19,8 +19,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://images.unsplash.com">
 <link rel="preconnect" href="https://mrngaqtbaseewzcsogqi.supabase.co">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap"></noscript>
 <link rel="stylesheet" href="css/bootstrap.min.css">
 <script>
   // Bootstrap detection: pin the local Bootstrap build; if it ever fails to
@@ -39,10 +39,18 @@
   })();
 </script>
 <link rel="stylesheet" href="css/bootstrap-fallback.css">
-<link rel="stylesheet" href="css/styles.css">
-<link rel="stylesheet" href="css/estimator.css">
+  <link rel="stylesheet" href="css/storefront-legacy.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/estimator.css">
+  <link rel="stylesheet" href="css/storefront.css">
 
   <script>window.ESREALTY_LEAFLET = { ensure: function () { if (window.L) return Promise.resolve(); if (!this._p) this._p = new Promise(function (resolve) { var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "vendor/leaflet/leaflet.css"; document.head.appendChild(l); var s = document.createElement("script"); s.src = "vendor/leaflet/leaflet.js?v=19"; s.onload = s.onerror = function () { resolve(); }; document.head.appendChild(s); }); return this._p; } };</script>
+  <!-- pdf-lib is 513 KB and only the internal Value Guide needs it, so it is
+       fetched on first use rather than added to the startup payload every page
+       load pays for. Same lazy pattern as Leaflet above. The promise resolves
+       even on failure; callers check window.PDFLib and surface the error. -->
+  <script>window.ESREALTY_PDF_LIB = { ensure: function () { if (window.PDFLib) return Promise.resolve(window.PDFLib); if (!this._p) this._p = new Promise(function (resolve, reject) { var s = document.createElement("script"); s.src = "vendor/pdf-lib/pdf-lib.min.js?v=1"; s.onload = function () { window.PDFLib ? resolve(window.PDFLib) : reject(new Error("pdf-lib loaded without exposing PDFLib")); }; s.onerror = function () { reject(new Error("Could not load vendor/pdf-lib/pdf-lib.min.js")); }; document.head.appendChild(s); }); return this._p; } };</script>
+  <script src="js/util.js" defer></script>
   <script src="js/supabase-config.js" defer></script>
   <script src="js/listings-api.js" defer></script>
   <script src="js/storefront.js" defer></script>
@@ -52,7 +60,9 @@
   <script src="js/portfolio_ledger.js" defer></script>
 <script src="js/portfolio_cloud.js" defer></script>
 <script src="js/attribution.js" defer></script>
-  <script src="js/estimator.js" defer></script>
+<script src="js/estimator.js" defer></script>
+<script src="js/value_guide_tax.js" defer></script>
+<script src="js/value_guide_pdf.js" defer></script>
   <script src="js/compliance_due.js" defer></script>
   <script src="js/agent_next.js" defer></script>
 <script src="js/app.min.js" defer></script>
@@ -60,6 +70,10 @@
 </head>
 <body class="preload">
   <div class="app-bg"></div>
+
+  <!-- Skip link: without this, reaching #content costs ~15 Tab presses through
+       30+ nav buttons on every single page load. -->
+  <a class="skip-link" href="#content">Skip to main content</a>
 
   <!-- ===== AUTH OVERLAY ===== -->
   <div id="auth-screen" class="auth-screen hidden">
@@ -164,6 +178,10 @@
         <div class="nav-dropdown-menu" data-dropdown-menu="analysis">
           <button class="nav-dropdown-item" data-view="deal"><span class="nav-ic" data-ic="chart"></span>Deal Analysis</button>
           <button class="nav-dropdown-item" data-view="appraisal"><span class="nav-ic" data-ic="scale"></span>Appraisal</button>
+          <!-- Value Guide reuses the public estimator's calculation and the
+               appraisal.view capability, so it appears exactly where Appraisal
+               does rather than under a new permission. -->
+          <button class="nav-dropdown-item" data-view="value-guide"><span class="nav-ic" data-ic="doc"></span>Value Guide</button>
           <button class="nav-dropdown-item" data-view="market"><span class="nav-ic" data-ic="search"></span>Market Scan</button>
         </div>
       </div>
@@ -205,7 +223,7 @@
       <div class="nav-section" data-section="ACCOUNT">ACCOUNT</div>
       <div class="nav-dropdown">
         <button class="nav-item nav-dropdown-trigger" data-dropdown="account">
-          <span class="nav-ic" data-ic="user"></span>
+          <span class="nav-ic" data-ic="users"></span>
           <span>Account</span>
           <span class="nav-chevron" data-ic="chevron-down"></span>
         </button>
@@ -425,9 +443,18 @@
     </div>
   </div>
   <script>
-    if (location.protocol === "https:" || location.hostname === "localhost") {
-      if ("serviceWorker" in navigator) window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
-    }
+    /* Service workers need a secure context. https: qualifies, and so do the
+     loopback hosts — localhost AND 127.0.0.1, which is what the CDP e2e suite
+     and most local tooling use. 127.0.0.1 was missing here, which meant the
+     worker never registered during tests and its behaviour went unverified. */
+    (function () {
+      var h = location.hostname;
+      if (location.protocol === "https:" || h === "localhost" || h === "127.0.0.1" || h === "[::1]") {
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+        }
+      }
+    })();
   </script>
   <script>
     const vEl = document.getElementById("app-version");

@@ -17,6 +17,13 @@ const TestFile = arg("-test-file", "");
 const Url = arg("-url", "http://127.0.0.1:8931/index.html");
 const NavDelayMs = parseInt(arg("-nav-delay-ms", "4500"), 10);
 const WindowSize = arg("-window-size", "1400,900");
+/* Opt-in: wait for the .sf-site shell to stop re-rendering before evaluating.
+ * Only tests that keep LIVE node references across the storefront's two-phase
+ * render (boot shell -> data shell) need this - the mobile-nav test and its
+ * sweep. Everything else (back-office, maps, market-scan) boots on the
+ * storefront but does not measure its header, and holding those tests for the
+ * shell to settle under load only manufactured timeouts. */
+const WaitShellStable = process.argv.indexOf("-wait-shell-stable") >= 0;
 const [W, H] = WindowSize.split(",").map(n => parseInt(n, 10));
 
 function report(result) {
@@ -84,7 +91,161 @@ const { chromium: pw } = chromium;
       setInterval(autoConfirm, 50);
     });
     await page.goto(Url, { waitUntil: "domcontentloaded", timeout: 60000 });
-    await page.waitForTimeout(NavDelayMs);
+
+    /* Wait for the app to actually be ready instead of sleeping a fixed 4.5s.
+     * The app sets window.__ESREALTY_READY when boot() finishes and strips
+     * body.preload. A fixed sleep is the single largest source of flake: it is
+     * simultaneously too long on a warm cache and too short on a cold CI box.
+     * NavDelayMs is kept as a FLOOR so nothing regresses to zero-wait.
+     *
+     * If the signal never arrives this now FAILS with a clear reason rather
+     * than proceeding. It used to swallow the timeout and carry on, which is
+     * how a slow boot turned into a page of nonsense layout failures: the header
+     * measured 0x0, the hamburger's three bars measured unrotated, and the menu
+     * panel could not be opened because it was never built. Those all reported
+     * as CSS and accessibility bugs - "header-no-overflow: actions 8-56 vs
+     * header 0-0", "icon-open-state-rotates-bars: rotated=0 of 3",
+     * "accordion-targets-44px: under-44px rows=8" - and sent people looking for
+     * a layout fault that did not exist. The real fault was the harness
+     * measuring a page that had not booted. */
+    let booted = true;
+    try {
+      await page.waitForFunction(
+        () => window.__ESREALTY_READY === true || document.body && !document.body.classList.contains("preload"),
+        null,
+        { timeout: Math.max(NavDelayMs, 30000), polling: 100 }
+      );
+    } catch (e) {
+      booted = false;
+    }
+    await page.waitForTimeout(Math.min(NavDelayMs, 1500));
+    if (!booted) {
+      report({
+        ok: false,
+        checks: [{
+          name: "app-booted",
+          ok: false,
+          detail: "the app never signalled ready within " + Math.max(NavDelayMs, 30000) +
+            "ms (window.__ESREALTY_READY never became true and body.preload was never removed). " +
+            "The page was not booted, so every layout assertion below would be meaningless. " +
+            "This is a harness/environment timeout, not a CSS or accessibility fault."
+        }]
+      });
+      await browser.close();
+      return;
+    }
+
+    /* Wait for the STYLESHEETS, not just for the app's JavaScript.
+     *
+     * __ESREALTY_READY means boot() finished, which says nothing about whether
+     * the CSS has been fetched and applied. When the sweep runs straight after
+     * a full suite the machine is busy enough that the test can start measuring
+     * a page whose stylesheets have not landed - and then it reports the
+     * unstyled page as a design bug. The first failure in that state is
+     * `collapse-matches-breakpoint`, because at 320px the desktop nav is still
+     * visible with no stylesheet applied, and everything downstream then fails
+     * with the same noise.
+     *
+     * Waiting for the sheets to be present AND parsed (cssRules readable, not
+     * just linked) is what makes the measurement meaningful. */
+    let styled = true;
+    try {
+      await page.waitForFunction(() => {
+        const want = ["storefront.css", "storefront-legacy.css", "styles.css", "estimator.css"];
+        const ours = Array.from(document.styleSheets).filter(s => {
+          if (!s.href) return true;
+          try { const u = new URL(s.href); return u.origin === location.origin; } catch (e) { return false; }
+        });
+        const have = ours.map(s => (s.href || "").split("/").pop());
+        if (!want.every(w => have.indexOf(w) >= 0)) return false;
+        /* Parsed: cssRules is non-null once the sheet has been read. A sheet
+           still loading throws or returns null on access. Foreign sheets (the
+           Google Fonts link) are excluded above because their cssRules throws
+           on cross-origin access. */
+        return ours.every(s => {
+          try { return !!s.cssRules; } catch (e) { return false; }
+        });
+      }, null, { timeout: Math.max(NavDelayMs, 30000), polling: 100 });
+    } catch (e) {
+      styled = false;
+    }
+    if (!styled) {
+      report({
+        ok: false,
+        checks: [{
+          name: "stylesheets-applied",
+          ok: false,
+          detail: "the storefront stylesheets were not present and parsed in time, so the test " +
+            "measured an unstyled page. Any layout assertion here would be reporting the " +
+            "absence of CSS rather than a CSS fault."
+        }]
+      });
+      await browser.close();
+      return;
+    }
+
+    /* Wait for the SHELL to be stable, not just booted and styled.
+     *
+     * Only active with -wait-shell-stable (see the flag declaration).
+     *
+     * The storefront renders its entire shell (header + main + footer) via
+     * innerHTML, and it renders more than once: boot paints a loading shell
+     * (skeleton cards in the featured section), then the featured-listings
+     * fetch resolves and renderCurrent swaps the whole tree again. A test that
+     * keeps live node references from the first render past the second one
+     * measures a detached DOM soup: the header node it held is no longer in the
+     * document (reports a 0x0 rect), the hamburger no longer rotates, and the
+     * menu panel does not open.
+     *
+     * Fixed sleeps cannot gate this because the second render is driven by a
+     * network response whose latency is exactly what varies. The condition
+     * below is deterministic instead: the .sf-site node must be the SAME
+     * INSTANCE across ~1s of polling AND no loading skeleton may be present.
+     * The skeleton half is what closes the residual race - a slow fetch leaves
+     * the loading shell stable but full of skeletons, so the gate does not
+     * clear until the data render has actually replaced them. */
+    let stable = !WaitShellStable;
+    if (!stable) {
+      try {
+        await page.waitForFunction(() => {
+          const host = document.getElementById("sf-site") || document.querySelector(".sf-site");
+          /* Not a storefront page (back-office, auth views, etc.) - there is no
+             shell to be re-rendered, so there is no race to gate. Passing here
+             keeps non-storefront tests from being held by a gate that only
+             exists to protect storefront node references. */
+          if (!host) return true;
+          if (window.__sfShellNode === undefined) { window.__sfShellNode = host; window.__sfShellSeq = 0; return false; }
+          if (window.__sfShellNode === host) {
+            window.__sfShellSeq += 1;
+          } else {
+            window.__sfShellNode = host;
+            window.__sfShellSeq = 0;
+            return false;
+          }
+          if (window.__sfShellSeq < 8) return false;
+          return !document.querySelector(".sf-skeleton");
+        }, null, { timeout: Math.max(NavDelayMs, 30000), polling: 120 });
+        stable = true;
+      } catch (e) {
+        stable = false;
+      }
+    }
+    if (!stable) {
+      report({
+        ok: false,
+        checks: [{
+          name: "shell-stable",
+          ok: false,
+          detail: "the .sf-site shell kept being re-rendered (or the loading skeleton never " +
+            "cleared) within the wait window, so live node references taken mid-render would " +
+            "measure a detached tree. This is a harness timeout, not a CSS or accessibility fault."
+        }]
+      });
+      await browser.close();
+      return;
+    }
+    /* Give the final render a beat to finish layout before evaluating. */
+    await page.waitForTimeout(100);
 
     await Promise.race([
       page.evaluate(src).catch(() => {}),

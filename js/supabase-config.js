@@ -2,8 +2,15 @@
  * protect data; never place a secret/service-role key in this browser file. */
 (function () {
   "use strict";
-  /* Lazy-load the vendored Supabase client: public storefront visitors skip
-   * the download entirely; it arrives async and boot() picks it up below. */
+  /* The vendored supabase-js client is injected here, at parse time, on
+   * purpose. Deferring it was tried and reverted: the boot sequence in app.js
+   * calls sbUp() to restore a returning session, and whether a visitor is
+   * signed in cannot be known without the client that owns the session token.
+   * Loading it on first interaction would silently sign people out on reload.
+   * ~31 KB gzip is the honest cost of "stay signed in".
+   *
+   * Do not "optimise" this into an on-demand loader — it cannot work while the
+   * session token lives in supabase-js's own storage. */
   var sbScript = document.createElement("script");
   sbScript.src = "vendor/supabase/supabase.js";
   sbScript.defer = true;
@@ -24,7 +31,7 @@
     return true;
   }
   if (boot()) return;
-  /* The supabase-js CDN script may still be loading when this file runs.
+  /* The supabase-js script may still be loading when this file runs.
    * Retry briefly so login does not fail with "Supabase client could not load". */
   let tries = 0;
   const timer = setInterval(function () {

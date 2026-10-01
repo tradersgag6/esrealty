@@ -13,14 +13,24 @@ param(
 #   powershell -File tests\run_all.ps1 -Test appraisal_b2_e2e
 #   powershell -File tests\run_all.ps1 -Mobile      # mobile viewport pass
 
-$driver = Join-Path $env:TEMP "opencode\cdp_driver.ps1"
-if (-not (Test-Path $driver)) {
-    # fallback: extract driver from repo copy if present
-    $driver = Join-Path $PSScriptRoot "cdp_driver.ps1"
-}
+$ErrorActionPreference = "Continue"
+
+# Always use the driver committed in this repo. The previous version preferred
+# %TEMP%\opencode\cdp_driver.ps1 when it existed, which let a stray file on a
+# developer machine silently replace the harness under test.
+$driver = Join-Path $PSScriptRoot "cdp_driver.ps1"
 if (-not (Test-Path $driver)) { Write-Error "cdp_driver.ps1 not found"; exit 1 }
 
 if ($Mobile) { $WindowSize = "390,844" }
+
+# Precondition: stores_freshness_e2e asserts the local worker's cache contract
+# (cached/refreshed/stale), which the production Vercel adapter intentionally
+# omits. Warn once rather than letting that test fail for an unrelated reason.
+if (-not $Test -or $Test -like "*store*") {
+    try { $ms = Invoke-RestMethod "http://127.0.0.1:8932/api/ping" -TimeoutSec 2
+          if ($ms.ok -ne $true) { Write-Host "WARNING: market-scan worker on :8932 is not ready; stores_* e2e will fail." -ForegroundColor Yellow } }
+    catch { Write-Host "WARNING: market-scan worker not running on :8932 (start_esrealty.cmd). stores_* e2e will fail." -ForegroundColor Yellow }
+}
 
 $browser = @()
 $node = @()
@@ -40,10 +50,19 @@ if ($Test) {
 }
 
 $results = @()
+# Tests that keep LIVE node references across the storefront's two-phase render
+# (boot shell, then the featured-listings response) need the driver to wait for
+# the shell to settle first. Without it the header node the test captured is
+# replaced mid-run and reports a bogus layout failure - a 0x0 header, a hamburger
+# that does not rotate, a panel that will not open. Only the mobile-nav test
+# measures those nodes, so only it opts in; holding every other test (back-office,
+# maps, market-scan) for a storefront re-render only manufactured timeouts.
+$shellStableTests = @("ui_mobile_nav_e2e")
 foreach ($name in $browser) {
     $t = Join-Path $PSScriptRoot "$name.js"
     Write-Host "== $name ==" -ForegroundColor Cyan
-    $out = & powershell -NoProfile -ExecutionPolicy Bypass -File $driver -TestFile $t -Url $BaseUrl -NavDelayMs $NavDelayMs -WindowSize $WindowSize 2>&1
+    $waitFlag = if ($shellStableTests -contains $name) { "-WaitShellStable" } else { "" }
+    $out = & powershell -NoProfile -ExecutionPolicy Bypass -File $driver -TestFile $t -Url $BaseUrl -NavDelayMs $NavDelayMs -WindowSize $WindowSize $waitFlag 2>&1
     try { $json = ($out -join "") | ConvertFrom-Json } catch { $json = $null }
     $pass = $json -and $json.ok
     $results += [pscustomobject]@{ Test = $name; Pass = [bool]$pass }

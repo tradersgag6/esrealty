@@ -34,7 +34,7 @@ function ok(cond, label, detail) {
 /* ---- dataset + manifest reconciliation ---- */
 eq(index.municipalities.length, 34, "dataset municipality count 34");
 eq(index.dataVersion, "bir-2022-rdo58-59", "dataset dataVersion");
-eq(config.calculationVersion, "2026.09.4", "config calculationVersion 2026.09.4");
+eq(config.calculationVersion, "2026.09.5", "config calculationVersion 2026.09.5");
 eq(manifest.status, "valid", "manifest status valid");
 eq(manifest.counts.municipalities, 34, "manifest municipality count");
 eq(manifest.counts.streets, 3710, "manifest street count 3710");
@@ -92,20 +92,20 @@ eq(d1.reference.value, 3500, "d1 BIR base 3500");
 eq(d1.factors.proxyFactor, 1.7, "d1 proxy factor drained");
 eq(d1.factors.bandMid, 2.5, "d1 band drained");
 eq(d1.factors.regionalAdj, 1.0, "d1 regional adj drained");
-eq(d1.landPerSqm, 8750, "d1 landPerSqm capped at 2.5x BIR without comparables");
-eq(d1.landValue, 200 * 8750, "d1 landValue 1,750,000");
-eq(d1.total, 1750000, "d1 total");
-eq(d1.perSqm, Math.round(1750000 / 200), "d1 perSqm");
-eq(d1.low, Math.round(1750000 * 0.95), "d1 low ±5%");
-eq(d1.high, Math.round(1750000 * 1.05), "d1 high ±5%");
+eq(d1.landPerSqm, 14875, "d1 landPerSqm equals BIR × use × market-band factors");
+eq(d1.landValue, 200 * 14875, "d1 landValue 2,975,000");
+eq(d1.total, 2975000, "d1 factor-based total remains available without comparables");
+eq(d1.perSqm, Math.round(2975000 / 200), "d1 perSqm");
+eq(d1.low, Math.round(2975000 * 0.95), "d1 low ±5%");
+eq(d1.high, Math.round(2975000 * 1.05), "d1 high ±5%");
 eq(d1.use, "commercial", "d1 use commercial");
 ok(core.integrityCheck(d1).ok, "d1 reconciles");
 
 const corner = core.computeEstimate(config, index, balayan, {
   municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "all street", classification: "CR", area: 200, corner: true
 });
-eq(corner.landPerSqm, 8750, "corner landPerSqm capped at 2.5x BIR");
-eq(corner.total, 200 * 8750, "corner total 1,750,000");
+eq(corner.landPerSqm, 15247, "corner multiplier applies to uncapped factor calculation");
+eq(corner.total, 200 * 15247, "corner total 3,049,400");
 
 /* ---- house & lot build-up re-derived ---- */
 const hl = core.computeEstimate(config, index, balayan, {

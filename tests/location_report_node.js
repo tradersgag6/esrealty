@@ -105,6 +105,17 @@ c("estimator external fallback is source-attributed", /loadExternalComparables/.
 c("admin value-guide factors require approval", /data-vg-save/.test(APP) && /roleIs\("super-admin"\)/.test(APP), "admin factor gate");
 c("public settings expose sanitized value-guide factors", /safeNumber/.test(L("supabase/functions/listing-api/index.ts")) && /valueGuide/.test(L("supabase/functions/listing-api/index.ts")), "public settings contract");
 
+/* ----------------- provenance surfaced in the delivered report ---------------- */
+
+c("manifest carries appraisal provenance block", /"provenance"/.test(L("data/data-manifest.json")) && /"basisOfValue"/.test(L("data/data-manifest.json")) && /"assurance"/.test(L("data/data-manifest.json")), "manifest v3 sections");
+c("estimator loads the manifest it renders", /data-manifest\.json/.test(EST) && /provenanceHtml/.test(EST), "single source of wording");
+c("estimator renders the audit section", /How this number was built/.test(EST) && /Basis of value/i.test(EST), "customer-facing section");
+c("report sanitizes provenance instead of trusting it", /if \(raw\.provenance && typeof raw\.provenance === "object"\)/.test(LR) && /basisOfValue/.test(LR), "allowlisted");
+c("pdf shows the land-rate build-up", /Effective land rate build-up/.test(LR), "factor arithmetic in PDF");
+c("pdf states basis and provenance", /Basis and provenance/.test(LR) && /Order of adjustments/.test(LR), "provenance block in PDF");
+c("email carries the same provenance", /Basis and provenance/.test(LR) && /provHtml/.test(LR), "provenance in email");
+c("report discloses what the guide excludes", /This guide does not cover/.test(LR), "limitations disclosed");
+
 /* ----------------- build + workflow contract ----------------- */
 
 c("builder supports --validate", /--validate/.test(BUILD) && /VALIDATE_ONLY/.test(BUILD), "validate flag");

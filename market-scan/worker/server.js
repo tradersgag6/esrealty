@@ -14,6 +14,7 @@ const http = require("http");
 const path = require("path");
 const { runMarketScan, mergeQueryDefaults, testListingMatch, htmlDecode } = require("../vercel/lib/_lib.js");
 const { findStores } = require("../vercel/lib/store_chains.js");
+const { cityInProvince } = require("../vercel/lib/ph_geo.js");
 
 const storesCache = new Map();
 const inflight = new Map();
@@ -117,6 +118,7 @@ function benchTypeKey(t) {
 function liveBenchmarkListings(q) {
   const mode = q.mode === "rent" ? "rent" : "sale";
   const wantCity = String(q.city || "").trim().toLowerCase();
+  const wantProvince = String(q.province || "").trim();
   const wantType = String(q.type || "").trim();
   const wantKey = wantType ? benchTypeKey(wantType) : "";
   const pool = store.bench(0).slice().reverse();
@@ -124,8 +126,15 @@ function liveBenchmarkListings(q) {
   for (const b of pool) {
     if (b.mode !== mode) continue;
     if (wantKey && benchTypeKey(b.type) !== wantKey) continue;
+    const rawCity = htmlDecode(String(b.city || "").split(",")[0].trim());
+    /* Province was never consulted, only city. A province-only query therefore
+     * had no geographic constraint at all and emitted a median row for every
+     * city the worker had ever seen. Each row does carry a real city, so
+     * resolving that city against the PH region table is what makes a
+     * province-scoped scan actually scoped. */
+    if (wantProvince && !cityInProvince(rawCity, wantProvince)) continue;
     if (wantCity) {
-      const head = htmlDecode(String(b.city || "").split(",")[0].trim().toLowerCase());
+      const head = rawCity.toLowerCase();
       if (head !== wantCity && head !== "city of " + wantCity) continue;
     }
     if (!(b.samples > 0) || !(b.medianPps > 0)) continue;
@@ -153,23 +162,70 @@ function liveBenchmarkListings(q) {
 
 // ------------------------------------------------------------ handlers
 
+// Scan results are cached per *base* query - every criterion except `type`.
+//
+// The reason `type` is excluded from the cache key is that narrowing a filter
+// has to be able to only ever shrink the result set. Previously each filter
+// change re-ran the whole scan, so "Metro Manila" and "Metro Manila + Condo"
+// were two independent live fetches of two different underlying datasets, and
+// the condo scan could legitimately return MORE rows than the unfiltered one.
+// Fetching type-agnostically and applying `type` locally makes the typed result
+// a strict subset by construction, and makes toggling Type instant.
+const scanCache = new Map();
+const SCAN_TTL_MS = 90 * 1000;
+const SCAN_CACHE_MAX = 24;
+
+function scanCacheKey(q) {
+  return JSON.stringify([
+    q.region || "", q.province || "", q.city || "", q.mode,
+    q.minPrice, q.maxPrice, q.minArea, q.minBeds, q.maxResults, !!q.live
+  ]);
+}
+
+function clonePayload(p) {
+  return JSON.parse(JSON.stringify(p));
+}
+
+async function fetchBaseScan(raw, q) {
+  const key = scanCacheKey(q);
+  const hit = scanCache.get(key);
+  const now = Date.now();
+  if (hit && now - hit.at < SCAN_TTL_MS) return clonePayload(hit.payload);
+
+  // Strip `type` so one fetch serves every type variant of this query.
+  const rawAll = Object.assign({}, raw);
+  delete rawAll.type;
+  const payload = await runMarketScan(rawAll);
+
+  if (scanCache.size >= SCAN_CACHE_MAX) {
+    // Drop the oldest insertion; Map preserves insertion order.
+    const oldest = scanCache.keys().next().value;
+    if (oldest !== undefined) scanCache.delete(oldest);
+  }
+  scanCache.set(key, { at: now, payload });
+  return clonePayload(payload);
+}
+
 async function handleMarketScan(res, query) {
   const raw = {};
   for (const [k, v] of query) raw[k] = v;
   const q = mergeQueryDefaults(raw);
   const start = Date.now();
 
-  const payload = await runMarketScan(raw);
+  const payload = await fetchBaseScan(raw, q);
+  // The engine saw no `type`; report the type the caller actually asked for.
+  if (payload.query) payload.query.type = q.type;
 
   payload.listings = enrichWithHistory(payload.listings || []);
   collectBench(payload.listings, q.mode);
 
   // Live Facebook Marketplace (optional Playwright) — merge in with the same
-  // post-filtering the engine applies to its own sources.
+  // post-filtering the engine applies to its own sources. FB is asked without a
+  // type for the same reason as the cached fetch: `type` is applied locally.
   const fbSrc = (payload.sources || []).find(s => s.name === "facebook");
   if (q.live && fb.available) {
     try {
-      const r = await fb.search(q);
+      const r = await fb.search(Object.assign({}, q, { type: "" }));
       if (r.status === "ok" && r.listings.length) {
         const existing = new Set(payload.listings.map(l => String(l.url || "").replace(/[?#].*$/, "")));
         let added = 0;
@@ -197,8 +253,12 @@ async function handleMarketScan(res, query) {
   }
 
   // Live Benchmark source (replaces the retired offline static table): rows
-  // derived only from listings actually observed by this worker.
-  const benchRows = liveBenchmarkListings(q);
+  // derived only from listings actually observed by this worker. Province
+  // scoping is applied inside liveBenchmarkListings(), so a province-only query
+  // no longer falls back to "every city the worker has ever seen". Type is
+  // requested empty for the same reason as the cached fetch: the shared filter
+  // at the end of this function is the single place `type` is applied.
+  const benchRows = liveBenchmarkListings(Object.assign({}, q, { type: "" }));
   const lbSrc = (payload.sources || []).find(s => s.name === "localbenchmark");
   if (benchRows.length) {
     payload.listings = payload.listings.concat(benchRows);
@@ -208,6 +268,13 @@ async function handleMarketScan(res, query) {
     payload.sources = payload.sources.filter(s => s.name !== "localbenchmark");
   }
 
+  /* Filter BEFORE capping, which is the order the hosted Vercel function already
+   * uses (_lib.js: uniq.filter(testListingMatch) then slice). The worker used to
+   * cap first and never re-filter, so the rows that survived were chosen by
+   * source alone: narrowing a filter re-rolled a different set rather than
+   * returning a subset. Facebook and benchmark rows are merged in above the
+   * cap, so the union has to be re-filtered here, once, at the end. */
+  payload.listings = (payload.listings || []).filter(l => testListingMatch(l, q));
   payload.listings = interleaveBySource(payload.listings, Math.max(1, q.maxResults));
 
   // Reconcile per-source counts to the rows actually sent (a source's found

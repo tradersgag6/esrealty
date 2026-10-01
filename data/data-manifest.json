@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "validated": "2026-09-22",
   "nextReview": "2026-10-22",
   "datasets": [
@@ -16,8 +16,143 @@
     "barangays": 1085,
     "streets": 3710,
     "classifications": 38,
-    "calculationVersion": "2026.09.4",
+    "calculationVersion": "2026.09.5",
     "dataVersion": "bir-2022-rdo58-59"
   },
-  "note": "BIR-backed Batangas dataset valid; deterministic and reconcilable."
+  "note": "BIR-backed Batangas dataset valid; deterministic and reconcilable.",
+
+  "provenance": {
+    "recordLabel": "Source of Record",
+    "records": [
+      {
+        "id": "bir-d035-2022",
+        "authority": "Bureau of Internal Revenue",
+        "instrument": "Department Order 035-2022",
+        "coverage": "RDO 058 (Batangas City, West Batangas)",
+        "effectiveDate": "2022-07-23",
+        "revision": "4th",
+        "status": "in-force",
+        "currencyNote": "No superseding Department Order identified as at the currency check below. Under RA 12001 (Real Property Valuation and Assessment Reform Act), BIR zonal values remain in force until replaced by an LGU-approved Schedule of Market Values."
+      },
+      {
+        "id": "bir-d034-2022",
+        "authority": "Bureau of Internal Revenue",
+        "instrument": "Department Order 034-2022",
+        "coverage": "RDO 059 (Lipa City, East Batangas)",
+        "effectiveDate": "2022-07-10",
+        "revision": "5th",
+        "status": "in-force",
+        "currencyNote": "No superseding Department Order identified as at the currency check below. Under RA 12001 (Real Property Valuation and Assessment Reform Act), BIR zonal values remain in force until replaced by an LGU-approved Schedule of Market Values."
+      },
+      {
+        "id": "esrcn-2026",
+        "authority": "ES Realty",
+        "instrument": "Replacement Cost New (RCN) construction rate table",
+        "coverage": "Batangas province, house-and-lot improvements only",
+        "effectiveDate": "2026-01-01",
+        "status": "internal-reference",
+        "currencyNote": "Assumed new-build construction cost used for the cost approach. Depreciated by age band."
+      }
+    ],
+    "currencyCheckedOn": "2026-09-30",
+    "nextCurrencyReview": "2026-10-30"
+  },
+
+  "valuation": {
+    "basisOfValue": "Market-oriented planning guide",
+    "basisNote": "A decision-support guide positioned for a selling or buying decision. It is not a statutory assessment, tax determination, or lending valuation.",
+    "valuationDateRule": "The valuation date is the date the guide is generated. Reference-rate effectivity is tracked separately as provenance and is not treated as the valuation date.",
+    "intendedUsers": [
+      "Property owners preparing to list",
+      "Buyers orienting before an offer",
+      "Brokers qualifying an enquiry before a site visit"
+    ],
+    "standardOfCare": "Automated valuation model with disclosed, deterministic and reconcilable inputs. Every peso in the output traces to a documented reference rate or a stated factor."
+  },
+
+  "approach": {
+    "market": {
+      "label": "Market approach (adjusted reference rate)",
+      "usedFor": "Land value for all property types",
+      "description": "The official BIR zonal rate for the matched street and classification is adjusted by disclosed market factors to produce an effective land rate per square metre. Area is then applied."
+    },
+    "cost": {
+      "label": "Cost approach (replacement cost new less depreciation)",
+      "usedFor": "House-and-lot improvements only",
+      "description": "Construction cost per square metre is applied to floor area, adjusted for storeys, then depreciated by age band. Vacant lots carry no improvement component."
+    },
+    "evidence": {
+      "label": "Market evidence display",
+      "usedFor": "Context only",
+      "description": "Comparable asking listings are retrieved and shown for orientation. Asking prices are not direct inputs to the calculated figure."
+    }
+  },
+
+  "adjustmentFramework": {
+    "order": [
+      "BIR zonal rate per sqm for matched street and classification",
+      "Corner lot adjustment",
+      "Property-use proxy factor",
+      "Market band midpoint",
+      "Regional adjustment",
+      "Lot area",
+      "Improvement component (house and lot only)"
+    ],
+    "note": "Factors compose multiplicatively. The build-up is displayed in full so the arithmetic can be checked by the reader.",
+    "factors": [
+      { "key": "birRate", "label": "BIR zonal base rate", "kind": "source-of-record", "disclosure": "Per sqm, per street and classification" },
+      { "key": "corner", "label": "Corner lot adjustment", "kind": "adjustment", "value": 0.025, "unit": "ratio", "disclosure": "Applied only when a corner influence is recorded" },
+      { "key": "use", "label": "Property-use proxy", "kind": "adjustment", "value": { "residential": 1, "commercial": 1.7, "agricultural": 0.5, "industrial": 1.35 }, "disclosure": "Classification to use-group proxy" },
+      { "key": "band", "label": "Market band midpoint", "kind": "adjustment", "value": { "residential": 2.5, "commercial": 2.5, "agricultural": 1.5, "industrial": 2 }, "disclosure": "Midpoint of the disclosed band; band width sets the reported range" },
+      { "key": "region", "label": "Regional adjustment", "kind": "adjustment", "value": 1, "disclosure": "Held at 1.00 for current Batangas coverage; reserved for future regional differentiation" },
+      { "key": "area", "label": "Lot area", "kind": "quantity", "disclosure": "User-supplied; effective rate multiplied by area" }
+    ],
+    "construction": {
+      "label": "RCN rates (house and lot)",
+      "unit": "PHP per sqm of floor area",
+      "rates": { "wood_prefab": 16000, "mixed_chb": 25000, "rca_steel": 32000 },
+      "depreciation": "Straight-line by age band midpoint",
+      "storeys": { "1": 1, "2": 1.05, "3plus": 1.1 }
+    }
+  },
+
+  "range": {
+    "method": "Band width applied to the calculated point estimate",
+    "meaning": "The range expresses sensitivity to the market-band assumption. Its width reflects the BIR data match level for the matched street, and is not a statistical confidence interval or an accuracy score.",
+    "guidance": "Treat the reported figure as the recommended asking price and the range as the negotiation envelope around it."
+  },
+
+  "assurance": [
+    { "check": "Reconciliation", "statement": "Land value, improvement value and the stated total reconcile arithmetically on every run." },
+    { "check": "Determinism", "statement": "Identical inputs always produce an identical output; no random or time-dependent term enters the calculation." },
+    { "check": "Source traceability", "statement": "Every reference rate resolves to a named BIR instrument, RDO, classification and effectivity date." },
+    { "check": "Fallback disclosure", "statement": "Where a street has no listed rate for the classification, the fallback chain is used and disclosed in the result. Masked 'same as above' rows are resolved only where a municipality-wide rate exists; they are never guessed." },
+    { "check": "Versioning", "statement": "Data version and calculation version are stamped on every output and advance on any change to the dataset or engine." },
+    { "check": "Review cadence", "statement": "The dataset is re-validated on a 30-day cycle and the reference schedule is re-checked for supersession on the same cycle." }
+  ],
+
+  "limitations": [
+    "No physical inspection of the property is performed or implied.",
+    "Interior condition, structural defects and unpermitted additions are not observed; recorded condition inputs are unverified.",
+    "Comparable listings are asking-price context, not verified transaction records.",
+    "The factor set is an ES Realty internal reference and has not been reviewed by an independent qualified appraiser.",
+    "Flood, title and legal status are recorded as client-supplied flags for on-site verification; they do not alter the arithmetic."
+  ],
+
+  "taxContext": {
+    "note": "Illustrative tax figures use published statutory rates for orientation. The BIR tax base is the higher of selling price, zonal value, or assessed value, and is determined by the BIR, not by this guide.",
+    "cgtPct": 6,
+    "dstPct": 1.5,
+    "transferPct": 0.5,
+    "registrationPct": 0.1,
+    "brokerPct": 3
+  },
+
+  "customerSummary": [
+    "Every figure traces to a published BIR zonal rate or a factor shown on screen.",
+    "The arithmetic is displayed in full so you can check it yourself.",
+    "The BIR rate is a tax reference and is reported separately from the estimate.",
+    "Where data is missing the fallback used is stated rather than hidden.",
+    "This is a decision-support guide; a site inspection refines it."
+  ]
 }

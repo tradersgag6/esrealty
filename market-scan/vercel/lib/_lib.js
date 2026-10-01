@@ -547,6 +547,67 @@ async function invokeIndexedListingSite(query, site, label) {
 
 // ------------------------------------------------------------ filtering
 
+// The UI offers a fixed set of property types, but listings spell them every
+// possible way ("Condo", "Condominium Unit", "Studio", "2BR Condo"). Matching
+// the raw strings meant a "Condo" listing was not a "Condominium Unit" result,
+// so the Type filter silently dropped valid rows. These groups let the two
+// sides agree on what counts as the same kind of property.
+const TYPE_GROUPS = [
+  ["condo", "condominium", "condominium unit", "apartment", "flat", "studio", "unit"],
+  ["house", "house and lot", "house & lot", "single family", "residential", "bungalow"],
+  ["lot", "vacant lot", "vacant land", "land", "residential lot"],
+  ["townhouse", "town house", "row house", "rowhome"],
+  ["commercial", "commercial lot", "shop", "shophouse", "retail", "office", "warehouse", "industrial"]
+];
+
+// Words that carry no discriminating power in a listing title.
+const TYPE_STOPWORDS = new Set(["for", "sale", "rent", "rented", "in", "at", "the", "a", "an", "and", "with", "new", "used", "ready", "occupancy", "freehold"]);
+
+function normTypeText(s) {
+  return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+// Returns the group index a type string belongs to, or -1.
+function typeGroupOf(s) {
+  const t = normTypeText(s);
+  if (!t) return -1;
+  for (let i = 0; i < TYPE_GROUPS.length; i++) {
+    if (TYPE_GROUPS[i].indexOf(t) >= 0) return i;
+  }
+  // Fall back to token overlap so "2 Bedroom Condominium Unit" still resolves.
+  const toks = t.split(" ").filter((w) => w && !TYPE_STOPWORDS.has(w));
+  if (!toks.length) return -1;
+  for (let i = 0; i < TYPE_GROUPS.length; i++) {
+    const g = new Set(TYPE_GROUPS[i].map(normTypeText));
+    let hit = 0;
+    for (const w of toks) if (g.has(w)) hit++;
+    if (hit > 0 && hit >= Math.ceil(toks.length / 2)) return i;
+  }
+  return -1;
+}
+
+function typeMatches(l, wantType) {
+  const want = normTypeText(wantType);
+  if (!want) return true;
+  const wg = typeGroupOf(want);
+  const propType = (l && (l.propertyType || l.type)) || "";
+  const hay = normTypeText(propType + " " + (l && l.title));
+  if (!hay) return false;
+  if (wg < 0) {
+    // Unknown requested type: fall back to a literal containment test rather
+    // than dropping everything.
+    return hay.indexOf(want) >= 0;
+  }
+  // The declared propertyType is the authoritative signal. Scoring the whole
+  // title instead meant a long title diluted the match below threshold and a
+  // genuine "Condo" was rejected for "Condominium Unit".
+  const pg = typeGroupOf(propType);
+  if (pg >= 0) return pg === wg;
+  // No usable propertyType: any group word in the title is enough.
+  const lg = typeGroupOf(hay);
+  return lg === wg;
+}
+
 function testListingMatch(l, query) {
   const city = String(query.city || "");
   if (city.trim()) {
@@ -554,6 +615,12 @@ function testListingMatch(l, query) {
     const needle = city.trim().toLowerCase();
     if (hay.indexOf(needle) < 0) return false;
   }
+  /* Type was the one filter the server never applied. The client filtered on it
+   * after the response, which meant the reported match count ignored it
+   * entirely - so narrowing Type could *increase* the count, because the
+   * source-only cap re-rolled a different set of rows. Applying it here, before
+   * the cap, makes the result set a genuine subset. */
+  if (!typeMatches(l, query.type)) return false;
   if (l.price > 0) {
     const min = query.minPrice, max = query.maxPrice;
     if (min > 0 && l.price < min) return false;
@@ -573,6 +640,8 @@ function mergeQueryDefaults(q) {
   q = q || {};
   const d = {
     city: String(q.city || ""),
+    province: String(q.province || ""),
+    region: String(q.region || ""),
     type: String(q.type || ""),
     mode: String(q.mode || "").toLowerCase() === "rent" ? "rent" : "sale",
     minPrice: 0, maxPrice: 0, minArea: 0, minBeds: 0, maxResults: 40, live: true
@@ -691,7 +760,7 @@ async function runMarketScan(query) {
   return {
     ok: true,
     query: {
-      city: q.city, type: q.type, mode: q.mode,
+      city: q.city, province: q.province, region: q.region, type: q.type, mode: q.mode,
       minPrice: q.minPrice, maxPrice: q.maxPrice,
       minArea: q.minArea, minBeds: q.minBeds,
       maxResults: q.maxResults, live: q.live

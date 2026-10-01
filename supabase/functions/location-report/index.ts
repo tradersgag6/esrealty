@@ -114,7 +114,8 @@ const SCORE_KEYS = [
 function sanitizeEstimate(raw: any): any {
   if (!raw || typeof raw !== "object") return null;
   const out: Record<string, unknown> = {};
-  const numberKeys = ["total", "marketGuideEstimate", "recommendedAskingPrice", "low", "high", "perSqm", "birZonalRatePerSqm", "birZonalValue", "landValue", "improvement", "area", "floorArea", "landPerSqm", "salePrice", "ownershipAdjustmentPct"];
+  const numberKeys = ["total", "marketGuideEstimate", "recommendedAskingPrice", "low", "high", "perSqm", "birZonalRatePerSqm", "birZonalValue", "landValue", "improvement", "area", "floorArea", "landPerSqm", "salePrice", "ownershipAdjustmentPct",
+    "cornerPct", "proxyFactor", "bandMid", "regionalAdj", "buildCostPerSqm", "floorsMultiplier", "ageMidpoint", "depreciatedPct", "featuresTotal"];
   for (const k of numberKeys) {
     if (k in raw) { const n = Number(raw[k]); if (isFinite(n)) out[k] = Math.round(n * 100) / 100; }
   }
@@ -125,6 +126,34 @@ function sanitizeEstimate(raw: any): any {
     if (raw[k] != null) out[k] = str(raw[k], 120);
   }
   if (raw.marketGuideAvailable != null) out.marketGuideAvailable = raw.marketGuideAvailable === true;
+  if (raw.cornerApplied != null) out.cornerApplied = raw.cornerApplied === true;
+  /* Provenance is allowlisted here as well: the report must be able to state
+   * where the figure came from, but only from fields we recognise. */
+  if (raw.provenance && typeof raw.provenance === "object") {
+    const p = raw.provenance as Record<string, unknown>;
+    const arr = (v: unknown, max: number, len: number): string[] =>
+      Array.isArray(v) ? v.slice(0, max).map((x) => str(x, len)).filter(Boolean) : [];
+    out.provenance = {
+      basisOfValue: str(p.basisOfValue, 80),
+      basisNote: str(p.basisNote, 300),
+      order: arr(p.order, 12, 90),
+      rangeMeaning: str(p.rangeMeaning, 300),
+      currencyCheckedOn: str(p.currencyCheckedOn, 20),
+      nextCurrencyReview: str(p.nextCurrencyReview, 20),
+      limitations: arr(p.limitations, 10, 220),
+      sources: Array.isArray(p.sources) ? p.sources.slice(0, 6).map((s) => {
+        const rec = s as Record<string, unknown>;
+        return {
+          instrument: str(rec.instrument, 80),
+          authority: str(rec.authority, 80),
+          coverage: str(rec.coverage, 120),
+          effectiveDate: str(rec.effectiveDate, 20),
+          revision: str(rec.revision, 20),
+          status: str(rec.status, 40),
+        };
+      }).filter((r) => r.instrument) : [],
+    };
+  }
   if (raw.confidencePct != null) { const n = Number(raw.confidencePct); if (isFinite(n)) out.confidencePct = n; }
   if (raw.source && typeof raw.source === "object") {
     const s = raw.source as Record<string, unknown>;
@@ -291,16 +320,15 @@ async function buildPdf(p: any) {
   for (const [k, v] of scoreRows) line(k, String(v));
 
   heading("Estimated value");
-  const hasMarketGuide = estimate.marketGuideAvailable !== false && Number(estimate.marketGuideEstimate) > 0;
+  const hasEstimate = Number(estimate.marketGuideEstimate) > 0;
+  const hasComparableContext = estimate.marketGuideAvailable === true;
   if (estimate && (estimate.birZonalValue || estimate.total)) {
     line("Official BIR zonal value", moneyPdf(estimate.birZonalValue || estimate.total));
-    if (hasMarketGuide) {
-      line("ES Realty market guide", moneyPdf(estimate.marketGuideEstimate));
-      line("Indicative range", moneyPdf(estimate.low) + " - " + moneyPdf(estimate.high));
+    if (hasEstimate) {
       line("Recommended asking price", moneyPdf(estimate.recommendedAskingPrice || estimate.high));
+      line("Comparable listing context", hasComparableContext ? "Available; asking prices are context only and are not direct calculation inputs." : "No comparable asking listings were available; the estimate uses the disclosed BIR-based factors.");
     } else {
-      line("Market guide", "Pending comparable evidence");
-      line("Provisional asking price", estimate.recommendedAskingPrice ? moneyPdf(estimate.recommendedAskingPrice) + " (capped BIR guide)" : "Unavailable");
+      line("Recommended asking price", "Unavailable for this location and classification");
     }
     line("BIR rate per sqm", moneyPdf(estimate.birZonalRatePerSqm || estimate.perSqm) + " on " + num(estimate.area) + " sqm");
     line("Land component", moneyPdf(estimate.landValue || estimate.birZonalValue));
@@ -308,6 +336,22 @@ async function buildPdf(p: any) {
       line("Improvement component", moneyPdf(estimate.improvement) + " (" + num(estimate.depreciatedPct) + "% age-depreciated)");
     }
     line("Data coverage", str(estimate.coverage, 40) || "good");
+    /* Audit trail: show the arithmetic so a reader can check it, not just the
+     * answer. Factors are echoed from the sanitized clone, never recomputed. */
+    if (estimate.landPerSqm > 0 && estimate.proxyFactor > 0) {
+      line("Effective land rate build-up",
+        moneyPdf(estimate.birZonalRatePerSqm) + "/sqm BIR base" +
+        (estimate.cornerApplied ? " x (1+" + num(Math.round(Number(estimate.cornerPct || 0) * 1000) / 10) + "% corner)" : " (no corner adj.)") +
+        " x " + num(estimate.proxyFactor) + " use x " + num(estimate.bandMid) + " band x " + num(estimate.regionalAdj) + " region" +
+        " = " + moneyPdf(estimate.landPerSqm) + "/sqm");
+    }
+    if (estimate.buildCostPerSqm > 0) {
+      line("Improvement build-up",
+        moneyPdf(estimate.buildCostPerSqm) + "/sqm RCN" +
+        " x storeys " + num(estimate.floorsMultiplier) +
+        " less " + num(estimate.depreciatedPct) + "% depreciation (age midpoint " + num(estimate.ageMidpoint) + " yrs)" +
+        (Number(estimate.featuresTotal) > 0 ? " + " + moneyPdf(Number(estimate.featuresTotal)) + " improvements" : ""));
+    }
     if (estimate.occupancy || estimate.titleStatus || estimate.inheritanceStatus) {
       line("Ownership/title review", "Occupancy: " + str(estimate.occupancy, 50) + " · title: " + str(estimate.titleStatus, 60) + " · inheritance: " + str(estimate.inheritanceStatus, 50));
       line("Indicative marketability adjustment", estimate.ownershipAdjustmentPct ? "-" + num(estimate.ownershipAdjustmentPct) + "%" : "None recorded");
@@ -316,11 +360,40 @@ async function buildPdf(p: any) {
     para("No estimate was produced for this location (not yet a covered Batangas town). Our team can check it on the ground.", 9, gray);
   }
 
+  /* Provenance block: basis, source of record, order of adjustments, and what
+   * the guide does not cover. This is the part that makes the figure auditable
+   * once the PDF is separated from the website. */
+  const prov: any = estimate && estimate.provenance;
+  if (prov && (prov.basisOfValue || (prov.sources && prov.sources.length))) {
+    y -= 10;
+    ensure(70);
+    page.drawText("Basis and provenance", { x: 48, y, size: 10, font: bold, color: navy });
+    y -= 18;
+    if (prov.basisOfValue) line("Basis of value", str(prov.basisOfValue, 80));
+    if (prov.basisNote) para(str(prov.basisNote, 300), 8, gray);
+    for (const s of prov.sources) {
+      line(str(s.instrument, 80) + " - " + str(s.authority, 60),
+        str(s.coverage, 110) + " · eff " + str(s.effectiveDate, 20) +
+        (s.revision ? " · " + str(s.revision, 20) : "") + " · " + str(s.status, 30));
+    }
+    if (prov.currencyCheckedOn) {
+      line("Schedule currency check", "Checked " + str(prov.currencyCheckedOn, 20) +
+        (prov.nextCurrencyReview ? "; next review " + str(prov.nextCurrencyReview, 20) : ""));
+    }
+    if (prov.order && prov.order.length) {
+      para("Order of adjustments: " + prov.order.join(" -> "), 8, gray);
+    }
+    if (prov.rangeMeaning) para(str(prov.rangeMeaning, 300), 8, gray);
+    if (prov.limitations && prov.limitations.length) {
+      para("This guide does not cover: " + prov.limitations.join(" "), 8, gray);
+    }
+  }
+
   y -= 10;
   ensure(40);
   page.drawText("Tax context on the available reference (guide only)", { x: 48, y, size: 10, font: bold, color: navy });
   y -= 18;
-  const t = estimate && (hasMarketGuide ? estimate.marketGuideEstimate : estimate.birZonalValue);
+  const t = estimate && (hasComparableContext && hasEstimate ? estimate.marketGuideEstimate : estimate.birZonalValue);
   if (t && t > 0) {
     const cgt = Math.round(t * 0.06), dst = Math.round(t * 0.015), trans = Math.round(t * 0.005);
     line("Capital gains tax 6%", moneyPdf(cgt));
@@ -338,7 +411,7 @@ async function buildPdf(p: any) {
   if (contact.notes) line("Client notes", str(contact.notes, 240));
   y -= 6;
   para("Reference data as of " + str(report.asOf, 40) + ". " + str(report.disclaimer, 600), 8, gray);
-  para("Generated by ES Realty. This is an indicative guide estimate - not a certified appraisal under RA 9646. Confirm with the current BIR zonal schedule and the LGU Schedule of Market Value, and verify site conditions, before any transaction.", 8, gray);
+  para("Generated by ES Realty. Review the source schedule, match level, and stated calculation factors. Property condition, title, local evidence, and buyer demand can affect transaction value. For a formal valuation assignment, request a licensed real estate appraiser's site and document review.", 8, gray);
 
   const bytes = await doc.save();
   return bytes;
@@ -349,13 +422,40 @@ function emailHtml(p: any) {
   const property = report.property || {};
   const location = report.location || {};
   const estimate = report.estimate || {};
-  const hasMarketGuide = estimate.marketGuideAvailable !== false && Number(estimate.marketGuideEstimate) > 0;
+  const hasEstimate = Number(estimate.marketGuideEstimate) > 0;
+  const hasComparableContext = estimate.marketGuideAvailable === true;
   const rows = [
     ["Property type", esc(property.typeLabel || property.type || "—")],
     ["Area", esc((num(property.area) || "—") + " sqm") + (property.kind === "built" ? " · " + esc((num(property.floorArea) || "auto") + " sqm floor") : "")],
     ["Location", esc([location.town, location.barangay, location.address].filter(Boolean).join(" · ") || "Pinned location")],
-    ["Official BIR / market guide", hasMarketGuide ? esc(money(estimate.marketGuideEstimate)) + " (" + esc(money(estimate.low)) + "–" + esc(money(estimate.high)) + ") · asking " + esc(money(estimate.recommendedAskingPrice || estimate.high)) : (estimate.birZonalValue ? esc(money(estimate.birZonalValue)) + " · provisional asking " + esc(money(estimate.recommendedAskingPrice || 0)) + " · market comparables pending" : "Not estimated")],
+    ["BIR reference / recommended asking price", hasEstimate ? esc(money(estimate.birZonalValue || 0)) + " BIR reference · recommended asking " + esc(money(estimate.recommendedAskingPrice || estimate.high)) : (estimate.birZonalValue ? esc(money(estimate.birZonalValue)) + " BIR reference" : "Not estimated")],
+    ["Comparable listing context", hasComparableContext ? "Available; asking-listing prices are not direct calculation inputs." : "No comparable asking listings available; guide uses disclosed BIR-based factors."],
   ].map((r) => "<tr><td style='padding:6px 12px;font-size:13px;color:#5f6771'>" + r[0] + "</td><td style='padding:6px 12px;font-size:13px;font-weight:700;color:#1e2a3a'>" + r[1] + "</td></tr>").join("");
+  /* Same provenance as the PDF, so the email alone still explains the figure. */
+  const prov: any = estimate.provenance;
+  const provHtml = prov && (prov.basisOfValue || (prov.sources && prov.sources.length))
+    ? '<div style="margin:4px 0 16px;padding:12px;border:1px solid #e8e2d7;border-radius:10px;background:#fdfaf5">' +
+      '<div style="font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#7d531d;margin-bottom:8px">Basis and provenance</div>' +
+      (prov.basisOfValue ? '<p style="margin:0 0 6px;font-size:13px;color:#1e2a3a"><b>' + esc(str(prov.basisOfValue, 80)) + "</b></p>" : "") +
+      (prov.basisNote ? '<p style="margin:0 0 8px;font-size:12px;color:#5f6771;line-height:1.6">' + esc(str(prov.basisNote, 300)) + "</p>" : "") +
+      (prov.sources || []).map((s: any) =>
+        '<p style="margin:0 0 4px;font-size:12px;color:#374151;line-height:1.6"><b>' + esc(str(s.instrument, 80)) + "</b> &middot; " + esc(str(s.coverage, 110)) +
+        '<br><span style="color:#6b7280">eff ' + esc(str(s.effectiveDate, 20)) +
+        (s.revision ? " &middot; " + esc(str(s.revision, 20)) : "") +
+        " &middot; " + esc(str(s.status, 30)) + "</span></p>").join("") +
+      (Number(estimate.landPerSqm) > 0 && Number(estimate.proxyFactor) > 0
+        ? '<p style="margin:8px 0 0;font-size:12px;color:#374151;line-height:1.6">Land rate build-up: ' +
+          esc(money(estimate.birZonalRatePerSqm)) + "/sqm BIR base" +
+          (estimate.cornerApplied ? " &times; (1+" + esc(String(Math.round(Number(estimate.cornerPct || 0) * 1000) / 10)) + "% corner)" : " (no corner adjustment)") +
+          " &times; " + esc(num(estimate.proxyFactor)) + " use &times; " + esc(num(estimate.bandMid)) + " band &times; " + esc(num(estimate.regionalAdj)) + " region = <b>" + esc(money(estimate.landPerSqm)) + "/sqm</b></p>"
+        : "") +
+      (prov.rangeMeaning ? '<p style="margin:8px 0 0;font-size:12px;color:#5f6771;line-height:1.6">' + esc(str(prov.rangeMeaning, 300)) + "</p>" : "") +
+      (prov.limitations && prov.limitations.length
+        ? '<p style="margin:8px 0 0;font-size:12px;color:#5f6771;line-height:1.6"><b>Not covered:</b> ' +
+          esc(prov.limitations.slice(0, 10).map((l: unknown) => str(l, 220)).join(" ")) + "</p>"
+        : "") +
+      "</div>"
+    : "";
   return [
     '<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px">',
     '<div style="font-weight:800;font-size:18px;color:#1e2a3a;margin-bottom:4px">ES Realty</div>',
@@ -363,8 +463,9 @@ function emailHtml(p: any) {
     '<p style="font-size:14px;color:#374151;line-height:1.6">Hi ' + esc(p.full_name || "") + ',</p>',
     '<p style="font-size:14px;color:#374151;line-height:1.6">Thanks for your interest. Attached is the full location analysis for your property — nearby establishments, neighborhood scores, and the indicative estimate described below.</p>',
     '<table style="width:100%;border-collapse:collapse;margin:8px 0 16px">' + rows + "</table>",
+    provHtml,
     '<p style="font-size:12px;color:#6b7280;line-height:1.6">Your details have been sent to the ES Realty team. A specialist will reply within one business day — reply to this email anytime.</p>',
-    '<p style="font-size:12px;color:#6b7280;line-height:1.6">Indicative guide estimate — not a certified appraisal (RA 9646).</p>',
+    '<p style="font-size:12px;color:#6b7280;line-height:1.6">Your guide shows the reference and factors used. A site and document review can refine it for your property.</p>',
     "</div>",
   ].join("");
 }
@@ -437,7 +538,7 @@ Deno.serve(async (req) => {
     inquiryType === "professional-appraisal-request" ? "Professional appraisal consultation request" : "Location analysis full report request",
     location.town ? "Town: " + location.town + (location.barangay ? " · " + location.barangay : "") : "",
     location.address ? "Address: " + location.address : "",
-    estimate.marketGuideAvailable !== false && estimate.marketGuideEstimate ? "Market guide: " + money(estimate.marketGuideEstimate) + " (" + money(estimate.low) + "–" + money(estimate.high) + ")" : (estimate.birZonalValue ? "BIR zonal: " + money(estimate.birZonalValue) + " · market guide pending comparable evidence" : "Not estimated"),
+    Number(estimate.recommendedAskingPrice) > 0 ? "Recommended asking price: " + money(estimate.recommendedAskingPrice) + " · " + (estimate.marketGuideAvailable === true ? "asking listings shown as context" : "no comparable asking listings available") : (estimate.birZonalValue ? "BIR zonal reference: " + money(estimate.birZonalValue) + " · no estimate available" : "Not estimated"),
     estimate.birZonalValue ? "BIR zonal: " + money(estimate.birZonalValue) : "",
     body.purpose ? "Purpose: " + str(body.purpose, 80) : "",
     body.budget ? "Budget: " + str(body.budget, 80) : "",

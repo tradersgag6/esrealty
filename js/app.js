@@ -50,7 +50,12 @@
 
   const $ = s => document.querySelector(s);
   const $$ = s => Array.prototype.slice.call(document.querySelectorAll(s));
-  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  /* Shared implementation from js/util.js, with a byte-identical local
+   * fallback so this module still works when required directly by the Node
+   * test suite (where there is no window). */
+  const esc = (window.ESREALTY_UTIL && window.ESREALTY_UTIL.esc)
+    ? window.ESREALTY_UTIL.esc
+    : (s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])));
   const friendlyErr = s => {
     const low = String(s == null ? "" : s).toLowerCase();
     if (low.indexOf("database error querying schema") >= 0 || /querying schema|failed to fetch schema/i.test(low)) return "Please contact the administrator (database schema error).";
@@ -221,10 +226,29 @@
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/>',
     alert: '<path d="M12 3l10 18H2zM12 10v4M12 17h.01"/>',
     upload: '<path d="M12 16V4m0 0l-4 4m4-4l4 4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>',
-    settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h.08a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h.08a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.08a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/>'
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h.08a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h.08a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.08a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/>',
+    /* Added because these names were requested by call sites but never defined.
+     * icon() used to fall back to a checkmark, so an "Undo"/"Reverse entry"
+     * button silently rendered a tick and several map/trend headings rendered a
+     * tick too. */
+    undo: '<polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>',
+    eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+    play: '<polygon points="5 3 19 12 5 21 5 3"/>',
+    map: '<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>',
+    activity: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>'
   };
+  /* Icons are decorative here: every one sits next to a text label or inside a
+   * button that already has an accessible name. Exposing them added 32 stray
+   * graphic nodes per page for screen-reader users. */
   function icon(name, size) {
-    return '<svg viewBox="0 0 24 24" style="width:' + (size || 16) + 'px;height:' + (size || 16) + 'px" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[name] || ICONS.check) + '</svg>';
+    const body = ICONS[name];
+    if (!body) {
+      /* Loud on purpose. The old silent fallback to a checkmark hid nine
+       * undefined names, including a wrong glyph on an "Undo" button. */
+      if (typeof console !== "undefined" && console.warn) console.warn("[icon] unknown name:", name);
+      return "";
+    }
+    return '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:' + (size || 16) + 'px;height:' + (size || 16) + 'px" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + body + "</svg>";
   }
   function fillIcons() {
     $$("[data-ic]").forEach(s => { s.innerHTML = icon(s.getAttribute("data-ic"), 16); });
@@ -270,23 +294,75 @@
     if (!IS_LOCAL_DEV) return defaultState();
     try {
       const s = JSON.parse(localStorage.getItem(KEY));
-      if (s && Array.isArray(s.deals)) return Object.assign(defaultState(), s);
+      if (s && Array.isArray(s.deals)) {
+        const merged = Object.assign(defaultState(), s);
+        /* A stale `vg` from a build that did persist the draft must not
+           resurrect a guide the operator believed was discarded. */
+        delete merged.vg;
+        return merged;
+      }
     } catch (e) {}
     return defaultState();
   }
+  /* Photo and proof images are kept in memory as base64 dataUrls so the UI can
+   * show them immediately. They must NOT be written to storage: a single
+   * appraisal photo can be ~3 MB, and state is persisted as one JSON blob, so
+   * a handful of photos overruns the ~5 MB localStorage quota. The old code
+   * caught that error, showed a toast, and silently discarded the ENTIRE
+   * write — losing deals, ledger, and portfolio along with the photos.
+   *
+   * These blobs are session-only until they are uploaded to Supabase Storage
+   * (which the portfolio proof reader and document vault already do). Stripping
+   * them keeps every other field durable. */
+  const BLOB_KEYS = { dataUrl: 1, dataURL: 1, base64: 1 };
+  const BLOB_MIN_LEN = 100000;
+  function stripHeavyBlobs(value, depth) {
+    depth = depth || 0;
+    if (depth > 14) return value;
+    if (Array.isArray(value)) {
+      const arr = new Array(value.length);
+      for (let i = 0; i < value.length; i++) arr[i] = stripHeavyBlobs(value[i], depth + 1);
+      return arr;
+    }
+    if (value && typeof value === "object") {
+      const out = {};
+      for (const k in value) {
+        if (!Object.prototype.hasOwnProperty.call(value, k)) continue;
+        const v = value[k];
+        if (BLOB_KEYS[k] && typeof v === "string" && (v.indexOf("data:") === 0 || v.length > BLOB_MIN_LEN)) {
+          out[k] = "";
+          continue;
+        }
+        out[k] = stripHeavyBlobs(v, depth + 1);
+      }
+      return out;
+    }
+    return value;
+  }
+
   function save() {
     if (state.appraisal && state.appraisal.name && state.appraisal.name.trim()) {
       const a = state.appraisal;
       const existing = state.appraisals.findIndex(x => x.id === a.id);
       if (existing >= 0) state.appraisals[existing] = a; else state.appraisals.unshift(a);
     }
-    if (IS_LOCAL_DEV && !(currentUser && currentUser.id)) {
-      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { toast("Local draft could not be saved", "err"); }
+if (IS_LOCAL_DEV && !(currentUser && currentUser.id)) {
+     try {
+       /* Value Guide drafts are session-only by design - see stripValueGuideDraft. */
+       localStorage.setItem(KEY, JSON.stringify(stripHeavyBlobs(stripValueGuideDraft(state))));
+     } catch (e) {
+        /* The write failed. Say so plainly — a silent toast here previously
+         * looked like a successful save followed by data loss. */
+        const quota = e && (e.name === "QuotaExceededError" || e.code === 22 || e.code === 1014);
+        toastHtml(quota
+          ? "<b>Local draft could not be saved.</b> This browser's storage is full. Everything except uploaded photos and proofs was discarded from this session. Free up space or sign in to save to the cloud."
+          : "<b>Local draft could not be saved.</b> Sign in to save to the cloud instead.", "err");
+      }
       return;
     }
     if (!SB || !currentUser || !currentUser.id) return;
     const ownerId = currentUser.id;
-    const payload = JSON.parse(JSON.stringify(state));
+    const payload = stripHeavyBlobs(state);
     delete payload.salesPlaybooks;
     clearTimeout(remoteSaveTimer);
     remoteSaveTimer = setTimeout(async () => {
@@ -343,7 +419,7 @@
   function schedulePmsCloudSave() {
     if (!SB || !currentUser || !currentUser.id || currentUser.role !== "super-admin") return;
     const ownerId = currentUser.id;
-    const payload = JSON.parse(JSON.stringify(pms()));
+    const payload = stripHeavyBlobs(pms());
     clearTimeout(pmsSaveTimer);
     pmsSaveTimer = setTimeout(async () => {
       if (!currentUser || currentUser.id !== ownerId || currentUser.role !== "super-admin") return;
@@ -953,7 +1029,7 @@
     u.tx_ref = tx.ref;
     save();
     persistTransactionToCloud(tx);
-    toast("Transaction <b>" + esc(tx.ref) + "</b> created for Unit " + esc(u.unit_no || ""), "ok");
+    toastHtml("Transaction <b>" + esc(tx.ref) + "</b> created for Unit " + esc(u.unit_no || ""), "ok");
   }
   function psExportCsv(projId) {
     const proj = psProject(projId) || {};
@@ -975,7 +1051,7 @@
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob); a.download = "ps_inventory_" + (proj.name || "").replace(/\s+/g, "_") + ".csv";
     document.body.appendChild(a); a.click(); a.remove();
-    toast("Exported <b>" + units.length + "</b> units", "ok");
+    toastHtml("Exported <b>" + units.length + "</b> units", "ok");
   }
   function bindPresellOnce() {
     if (psBound) return;
@@ -1231,7 +1307,7 @@
         if (notifItems.some(n => n.id === row.id)) return;
         notifItems.unshift(row);
         notifUpdateChrome();
-        toast("<b>" + esc(row.title || "Notification") + "</b>", "info");
+        toastHtml("<b>" + esc(row.title || "Notification") + "</b>", "info");
         const pnl = document.getElementById("notif-panel");
         if (pnl && !pnl.classList.contains("hidden")) renderNotifPanel();
       })
@@ -1313,19 +1389,33 @@
   }
 
   /* ================= HELPERS ================= */
-  function toast(msg, type) {
+  /* Toasts and popups render UNTRUSTED text: server error messages, file
+   * names, and user-entered labels (e.g. account.label) all reach these sinks.
+   * They used to assign innerHTML unconditionally, which made a stored-XSS
+   * out of a free-text field.
+   *
+   *   toast(msg)                -> textContent  (safe default)
+   *   toastHtml(msg, type)      -> innerHTML     (explicit opt-in, caller escapes)
+   *
+   * The HTML variants exist because ~40 call sites intentionally bold part of
+   * the message. They all escape their interpolations. Anything new should use
+   * toast() so untrusted text can never become markup by accident. */
+  function toast(msg, type, allowHtml) {
     const t = document.createElement("div");
     t.className = "toast " + (type || "ok");
-    t.innerHTML = msg;
+    if (allowHtml) t.innerHTML = msg; else t.textContent = String(msg == null ? "" : msg);
     $("#toasts").appendChild(t);
     setTimeout(() => { t.style.opacity = "0"; t.style.transition = "opacity .4s"; }, 2800);
     setTimeout(() => t.remove(), 3300);
   }
 
-  function popupNotify(msg, type) {
+  function popupNotify(msg, type, allowHtml) {
     const wrap = document.createElement("div");
     wrap.className = "popup-notify";
-    wrap.innerHTML = '<div class="popup-toast ' + (type || "ok") + '">' + msg + "</div>";
+    const box = document.createElement("div");
+    box.className = "popup-toast " + (type || "ok");
+    if (allowHtml) box.innerHTML = msg; else box.textContent = String(msg == null ? "" : msg);
+    wrap.appendChild(box);
     document.body.appendChild(wrap);
     let done = false;
     const dismiss = () => {
@@ -1336,6 +1426,9 @@
     wrap.addEventListener("click", e => { if (e.target === wrap) dismiss(); });
     setTimeout(dismiss, 4000);
   }
+
+  const toastHtml = (msg, type) => toast(msg, type, true);
+  const popupNotifyHtml = (msg, type) => popupNotify(msg, type, true);
 
   function confirmModal(opts) {
     opts = opts || {};
@@ -1890,7 +1983,7 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
       save(); render();
       var found = countsResult.present || 0;
       if (found > 0) {
-        toast("Location analysis complete — <b>" + found + "</b> nearby type(s) found, scores updated", "ok");
+        toastHtml("Location analysis complete — <b>" + found + "</b> nearby type(s) found, scores updated", "ok");
       } else {
         toast("Address resolved — no nearby OpenStreetMap data found for this pin. Scores set to defaults.", "info");
       }
@@ -2292,6 +2385,90 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
     save();
     render();
   }
+  /* ============================================================
+   *  TAB ACCESSIBILITY
+   *  There are eight independent tab bars in this app (wizard steps, deal,
+   *  portfolio, appraisal, PMS, listings, users, brokerage admin) and until now
+   *  none of them carried a single ARIA attribute. A screen-reader user heard
+   *  "Overview, button; Returns, button; ..." with no indication that these were
+   *  tabs, which one was selected, or that arrow keys would move between them.
+   *
+   *  Rather than patch eight render functions, upgrade them all in one pass
+   *  after the view is in the DOM. This adds:
+   *    - role="tablist" on the group, role="tab" on each button
+   *    - aria-selected reflecting the existing .active/.on class
+   *    - a roving tabindex, so a 7-tab bar costs ONE Tab press, not seven
+   *    - ArrowLeft/Right/Home/End to move and activate
+   *
+   *  Deliberately NOT done: role="tabpanel" + aria-controls. The eight layouts
+   *  have no consistent panel relationship, and wiring the wrong panel is worse
+   *  than omitting it. The active tab is announced correctly regardless.
+   * ============================================================ */
+  const TAB_ATTRS = "[data-step],[data-dtab],[data-ptab],[data-atab],[data-pmtab],[data-ls-tab],[data-users-tab],[data-admin-tab]";
+  const TAB_ACTIVE_CLASSES = ["active", "on", "is-active"];
+
+  function tabIsActive(btn) {
+    return TAB_ACTIVE_CLASSES.some(c => btn.classList.contains(c));
+  }
+
+  function syncTabGroup(group) {
+    const tabs = $$("[data-step],[data-dtab],[data-ptab],[data-atab],[data-pmtab],[data-ls-tab],[data-users-tab],[data-admin-tab]", group)
+      .filter(b => b.tagName === "BUTTON" || b.tagName === "A");
+    if (!tabs.length) return;
+    const active = tabs.find(tabIsActive) || tabs[0];
+    tabs.forEach(btn => {
+      const on = btn === active;
+      btn.setAttribute("role", "tab");
+      btn.setAttribute("aria-selected", on ? "true" : "false");
+      btn.tabIndex = on ? 0 : -1;
+    });
+  }
+
+  function enhanceTabs(root) {
+    const scope = root || document;
+    // Group by shared parent so each bar gets exactly one tablist.
+    const groups = new Set();
+    $$(TAB_ATTRS, scope).forEach(btn => {
+      const g = btn.parentElement;
+      if (g) groups.add(g);
+    });
+    groups.forEach(g => {
+      if (!g.getAttribute("role")) g.setAttribute("role", "tablist");
+      syncTabGroup(g);
+    });
+  }
+
+  function installTabKeyboard() {
+    if (document.__esTabKeys) return;
+    document.__esTabKeys = true;
+    document.addEventListener("keydown", e => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight" && e.key !== "Home" && e.key !== "End") return;
+      const btn = e.target && e.target.closest ? e.target.closest(TAB_ATTRS) : null;
+      if (!btn || btn.tagName !== "BUTTON") return;
+      const group = btn.parentElement;
+      if (!group) return;
+      const tabs = $$(TAB_ATTRS, group).filter(b => b.tagName === "BUTTON");
+      const i = tabs.indexOf(btn);
+      if (i < 0 || tabs.length < 2) return;
+      let next = i;
+      if (e.key === "ArrowRight") next = (i + 1) % tabs.length;
+      else if (e.key === "ArrowLeft") next = (i - 1 + tabs.length) % tabs.length;
+      else if (e.key === "Home") next = 0;
+      else if (e.key === "End") next = tabs.length - 1;
+      e.preventDefault();
+      tabs[next].focus();
+      // Activate, matching the click behaviour these bars already have.
+      tabs[next].click();
+      syncTabGroup(group);
+    });
+    // Keep aria-selected truthful for bars that swap content without a re-render.
+    document.addEventListener("click", e => {
+      const btn = e.target && e.target.closest ? e.target.closest(TAB_ATTRS) : null;
+      if (!btn || !btn.parentElement) return;
+      setTimeout(() => syncTabGroup(btn.parentElement), 0);
+    });
+  }
+
   function render(opts) {
     opts = opts || {};
     if (currentUser && state && !navAllowed(state.view)) state.view = firstAllowedView();
@@ -2322,7 +2499,7 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
     const main = document.querySelector(".main");
     if (main) main.classList.remove("public-main");
     hideAuth();
-    const title = { dashboard: "Dashboard", wizard: "New Investment", deal: "Deal Analysis", portfolio: "Portfolio", pms: "Property Management", assistant: "AI Assistant", reports: "Reports", appraisal: "Appraisal", market: "Market Scan", listings: "Listings", leads: "CRM / Leads", transactions: "Transactions", financing: "Financing", presell: "Pre-Selling", portal: "Buyer Portal", playbook: "Sales Playbook", users: "Users & Access", admin: "Brokerage", settings: "Settings" };
+    const title = { dashboard: "Dashboard", wizard: "New Investment", deal: "Deal Analysis", portfolio: "Portfolio", pms: "Property Management", assistant: "AI Assistant", reports: "Reports", appraisal: "Appraisal", "value-guide": "Value Guide", market: "Market Scan", listings: "Listings", leads: "CRM / Leads", transactions: "Transactions", financing: "Financing", presell: "Pre-Selling", portal: "Buyer Portal", playbook: "Sales Playbook", users: "Users & Access", admin: "Brokerage", settings: "Settings" };
     $("#topbar-title").textContent = (lang === "fil" ? (FIL_TITLES[state.view] || title[state.view]) : title[state.view]) || "ES Realty";
     $$("#nav .nav-item").forEach(b => b.classList.toggle("active", b.getAttribute("data-view") === state.view));
     $$("#nav .nav-dropdown-item").forEach(b => {
@@ -2385,11 +2562,13 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
     const prevScroll = opts.keepScroll && content ? content.scrollTop : null;
     const prevFocus = opts.keepFocus && document.activeElement ? document.activeElement : null;
     const prevFocusId = prevFocus && prevFocus.id ? prevFocus.id : null;
-    const map = { dashboard: renderDashboard, wizard: renderWizard, deal: renderDeal, portfolio: renderPortfolio, pms: renderPMS, assistant: renderAssistant, reports: renderReports, appraisal: renderAppraisal, market: renderMarketScan, listings: renderListings, leads: renderLeads, transactions: renderTransactions, financing: renderFinancing, presell: renderPresell, portal: renderBuyerPortal, playbook: renderPlaybook, users: renderUsers, admin: renderAdmin, settings: renderSettings };
+    const map = { dashboard: renderDashboard, wizard: renderWizard, deal: renderDeal, portfolio: renderPortfolio, pms: renderPMS, assistant: renderAssistant, reports: renderReports, appraisal: renderAppraisal, "value-guide": renderValueGuide, market: renderMarketScan, listings: renderListings, leads: renderLeads, transactions: renderTransactions, financing: renderFinancing, presell: renderPresell, portal: renderBuyerPortal, playbook: renderPlaybook, users: renderUsers, admin: renderAdmin, settings: renderSettings };
     content.innerHTML = map[state.view] ? map[state.view]() : "";
     updateDealPicker();
     fillIcons();
     bindPerView();
+    installTabKeyboard();
+    enhanceTabs(content);
     if (state.view === "portfolio" && state.portfolioTab === "ledger" && typeof pfApplyLedgerFilters === "function") pfApplyLedgerFilters();
     updateSidebar();
     // auto aria-label for inputs without label (readability audit)
@@ -2397,8 +2576,25 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
       if(el.type==="hidden"||el.type==="submit"||el.type==="button") return;
       if(el.id && document.querySelector('label[for="'+el.id+'"]')) return;
       if(el.closest("label")||el.getAttribute("aria-label")||el.getAttribute("aria-labelledby")) return;
-      const ph=el.getAttribute("placeholder")||el.getAttribute("name")||el.id||"input";
-      el.setAttribute("aria-label", ph.replace(/[-_]/g," "));
+      /* Prefer a structural name. A placeholder is a poor accessible name: it
+       * is an EXAMPLE, not a label. The old order used it first, so a field
+       * with placeholder "e.g. Acacia Villas Phase 1" announced exactly that.
+       * Example text is only used as a last resort, with the example stripped. */
+      const name = el.getAttribute("name") || el.id;
+      if (name) {
+        el.setAttribute("aria-label", String(name).replace(/[-_]/g, " ").trim());
+        return;
+      }
+      const ph = el.getAttribute("placeholder");
+      if (ph) {
+        const cleaned = String(ph)
+          .replace(/^\s*(e\.g\.|eg\.|for example)\s*/i, "")
+          .replace(/\s*\(.*?\)\s*$/, "")
+          .trim();
+        el.setAttribute("aria-label", cleaned || "input");
+      } else {
+        el.setAttribute("aria-label", "input");
+      }
     });
     // bump tiny text <12px to 12px for readability audit
     document.querySelectorAll("body *").forEach(el=>{
@@ -2663,7 +2859,7 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
             await requireApprovedProfile(currentUser);
             await withTimeout(loadCurrentUserCloudState(), 20000);
             applyPostLoginView();
-            toast("Welcome, <b>" + esc(currentUser.name || currentUser.email) + "</b>");
+            toastHtml("Welcome, <b>" + esc(currentUser.name || currentUser.email) + "</b>");
             await loadBrokerTeam();
             await loadCloudListings();
             await completePostAuthIntent();
@@ -2689,7 +2885,7 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
             saveUser(currentUser);
             if (!navAllowed(state.view)) state.view = firstAllowedView();
             save();
-            toast("Welcome, <b>" + esc(currentUser.name || currentUser.email) + "</b>");
+            toastHtml("Welcome, <b>" + esc(currentUser.name || currentUser.email) + "</b>");
             if (sessionStorage.getItem("esrealty_post_auth_favorite")) state.view = navAllowed("dashboard") ? "dashboard" : state.view;
             render();
             return;
@@ -2701,7 +2897,7 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
         await requireApprovedProfile(currentUser);
         await withTimeout(loadCurrentUserCloudState(), 20000);
         applyPostLoginView();
-        toast("Welcome, <b>" + esc(currentUser.name || currentUser.email) + "</b>");
+        toastHtml("Welcome, <b>" + esc(currentUser.name || currentUser.email) + "</b>");
         await loadBrokerTeam();
         await loadCloudListings();
         await completePostAuthIntent();
@@ -2759,7 +2955,7 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
       remoteProfiles = [];
       remoteProfilesLoaded = false;
       if (!navAllowed(state.view)) applyPostLoginView();
-      toast("Test login — welcome <b>" + esc(u.name) + "</b>");
+      toastHtml("Test login — welcome <b>" + esc(u.name) + "</b>");
       render();
     });
     $("#btn-signout").addEventListener("click", async () => {
@@ -2793,7 +2989,7 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
       currentUser.role = roleSelect.value;
       brokerTeamCache = null;
       saveUser(currentUser);
-      toast("Role → <b>" + esc(roleLabel(roleSelect.value)) + "</b>");
+      toastHtml("Role → <b>" + esc(roleLabel(roleSelect.value)) + "</b>");
       render();
     });
   }
@@ -3121,7 +3317,7 @@ function bindPerView() {
     }));
     $$("#content [data-edit-deal]").forEach(b => b.addEventListener("click", () => {
       const d = state.deals.find(x => x.id === b.getAttribute("data-edit-deal"));
-      if (d) { state.current = JSON.parse(JSON.stringify(d.data)); state.wizardStep = 1; save(); navigate("wizard"); toast("Editing <b>" + esc(d.data.property.name) + "</b> in the wizard"); }
+      if (d) { state.current = JSON.parse(JSON.stringify(d.data)); state.wizardStep = 1; save(); navigate("wizard"); toastHtml("Editing <b>" + esc(d.data.property.name) + "</b> in the wizard"); }
     }));
     $$("#content [data-delete-deal]").forEach(b => b.addEventListener("click", async () => {
       const id = b.getAttribute("data-delete-deal");
@@ -3141,7 +3337,7 @@ function bindPerView() {
         d.status = sel.value;
         save(); render();
         const cfg = statusCfg(d.status);
-        toast("Status → <b>" + esc(cfg ? cfg.label : d.status) + "</b>" + (cfg ? '<div class="dim tiny">' + esc(cfg.note) + "</div>" : ""));
+        toastHtml("Status → <b>" + esc(cfg ? cfg.label : d.status) + "</b>" + (cfg ? '<div class="dim tiny">' + esc(cfg.note) + "</div>" : ""));
       }
     }));
     if (state.view === "wizard") bindWizard();
@@ -3149,6 +3345,7 @@ function bindPerView() {
     if (state.view === "deal") bindDealContent();
     if (state.view === "reports") bindReports();
     if (state.view === "appraisal") bindAppraisal();
+    if (state.view === "value-guide") bindValueGuide();
     if (state.view === "market") bindMarketScan();
     if (state.view === "pms") bindPMS();
     if (state.view === "listings" || state.view === "dashboard") bindListings();
@@ -3343,7 +3540,7 @@ function bindPerView() {
       var ncKeys = Object.keys(nc);
       if (ncKeys.length > 0) {
         var ncIcons = { School: "🎓", Hospital: "🏥", Bank: "🏦", "Convenience Store": "🏪", "Gas Station": "⛽", Market: "🛒", Church: "⛪", Restaurant: "🍽", Mall: "🏬", Transit: "🚌" };
-        html += '<div class="field col-12"><label>' + icon("map-pin", 14) + ' Nearby Establishments (within 1 km)</label>';
+        html += '<div class="field col-12"><label>' + icon("pin", 14) + ' Nearby Establishments (within 1 km)</label>';
         html += '<div class="wz-loc-grid">';
         ncKeys.forEach(function (k) {
           var c = nc[k] || 0;
@@ -3368,7 +3565,7 @@ function bindPerView() {
           D.NEARBY_TYPES.map(n => '<button class="opt' + (d.location.nearby[n] ? " on" : "") + '" data-near="' + n + '">' + n + '</button>').join("") + '</div></div>';
       }
       html += '<div class="field col-12"><div class="field-hint">Analyze Location from Map auto-fills the address and scores. You can still refine any result manually below.</div></div>';
-      html += '<div class="field col-12"><label>' + icon("trending-up", 14) + ' Location Scores</label></div>';
+      html += '<div class="field col-12"><label>' + icon("trending", 14) + ' Location Scores</label></div>';
       html += '<div class="field col-12"><div class="wz-score-grid">';
       var scoreData = [["Accessibility", "accessibilityScore", 95], ["Traffic Load", "trafficScore", 90], ["Population", "populationScore", 95], ["Future Development", "futureDevScore", 92], ["Competition", "competitionScore", 85], ["Commercial Growth", "commercialGrowthScore", 95]];
       scoreData.forEach(function (sd) {
@@ -4384,7 +4581,7 @@ function bindPerView() {
     state.presellProjects.push({ id: pid, name: (raw.property.name || "Townhouse") + " — Feasibility", developer: "ES Realty Development", location: loc, lts_no: "", turnover_date: to.toISOString().slice(0, 10), description: "Imported from Feasibility Studio: " + fz.plan.units + " units, " + C.numFmt(fz.plan.floorArea) + " sqm, " + C.money(fz.pnl.unitPrice) + "/unit.", status: "active" });
     for (let i = 1; i <= fz.plan.units; i++) state.presellUnits.push({ id: "psu-" + pid + "-" + i, project_id: pid, unit_no: "TH-" + String(i).padStart(2, "0"), tower: "", floor: 1, unit_type: "Townhouse", price: fz.pnl.unitPrice, status: "available", reserved_for: "", reserved_at: null, notes: "" });
     save();
-    toast("Created <b>" + fz.plan.units + "</b> townhouse units in Pre-Selling");
+    toastHtml("Created <b>" + fz.plan.units + "</b> townhouse units in Pre-Selling");
     navigate("presell");
   }
 
@@ -4450,8 +4647,12 @@ function bindPerView() {
       kpi("Overall Grade", rec.grade, rec.total + "/100", rec.pass ? "green" : "red", "check") + '</div>';
     html += '<div class="card card-pad"><h3 class="mb-16">Risk Register <span class="badge ai">AI</span></h3>';
     risk.risks.forEach(r => {
-      const col = r.level === "high" ? "var(--red)" : r.level === "medium" ? "var(--gold)" : "var(--accent)";
-      html += '<div class="risk-item"><span class="risk-dot ' + r.level + '"></span><div class="grow"><div style="display:flex;justify-content:space-between;gap:10px"><b>' + r.name + '</b><span class="badge ' + (r.level === "high" ? "red" : r.level === "medium" ? "gold" : "green") + '">' + r.level.toUpperCase() + '</span></div><div class="dim tiny mt-8">' + r.mitigation + '</div><div class="faint tiny mt-8">Basis: ' + r.basis + '</div></div></div>';
+      /* Each row already carries an uppercase LOW/MEDIUM/HIGH text badge, so the
+       * level is never colour-only. The dot colours were previously --accent
+       * (orange) for "low" and --gold for "medium" — two near-identical hues for
+       * adjacent severities. Now green / amber / red, plus an inner ring so they
+       * stay distinguishable without relying on hue at all. */
+      html += '<div class="risk-item"><span class="risk-dot ' + r.level + '" aria-hidden="true"></span><div class="grow"><div style="display:flex;justify-content:space-between;gap:10px"><b>' + r.name + '</b><span class="badge ' + (r.level === "high" ? "red" : r.level === "medium" ? "gold" : "green") + '">' + r.level.toUpperCase() + '</span></div><div class="dim tiny mt-8">' + r.mitigation + '</div><div class="faint tiny mt-8">Basis: ' + r.basis + '</div></div></div>';
     });
     html += '</div>';
     html += '<div class="card card-pad mt-24"><h3 class="mb-16">AI Recommendation Summary</h3><div class="ai-banner">' + icon("spark", 14) + '<span>' + esc(rec.verdict) + ' Strengths: ' + esc(rec.strengths.join(" · ") || "—") + '. Weaknesses: ' + esc(rec.weaknesses.join(" · ") || "—") + '. Hidden risks: ' + esc(rec.hiddenRisks.join(" · ") || "None identified.") + '</span></div>' +
@@ -4504,7 +4705,7 @@ function bindPerView() {
   function renderListingAccountDashboard() {
     const saved = cloudSavedListings || [];
     const mine = cloudMyListings || [];
-    let html = '<div class="hero listing-dashboard-hero"><div><span class="sf-eyebrow">MY PROPERTY SPACE</span><h1>Welcome back, ' + esc((currentUser && currentUser.name) || "there") + '</h1><p>Keep your shortlist and property activity in one place.</p></div><div class="actions"><button class="btn btn-ghost" data-view="listings">Browse Listings</button>';
+    let html = '<div class="hero listing-dashboard-hero"><div><span class="ls-eyebrow">MY PROPERTY SPACE</span><h1>Welcome back, ' + esc((currentUser && currentUser.name) || "there") + '</h1><p>Keep your shortlist and property activity in one place.</p></div><div class="actions"><button class="btn btn-ghost" data-view="listings">Browse Listings</button>';
     if (listingCanManage()) html += '<button class="btn btn-primary" data-ls-new>' + icon("plus", 15) + ' New Listing</button>';
     html += '</div></div>';
     html += '<div class="grid grid-3 mb-24">' +
@@ -4512,11 +4713,11 @@ function bindPerView() {
       kpi("Available Listings", String((state.listings || []).filter(lsLive).length), "published inventory", "blue", "home") +
       kpi(listingCanManage() ? "My Listings" : "Account", listingCanManage() ? String(mine.length) : roleLabel(userRole()), listingCanManage() ? "drafts and published" : "approved access", "gold", "briefcase") + '</div>';
     html += '<section class="account-listing-section"><div class="section-title-row"><div><h2>Saved properties</h2><p class="dim">Properties you want to revisit.</p></div><button class="btn btn-ghost btn-sm" data-view="listings">Explore more</button></div>';
-    html += saved.length ? '<div class="ls-grid">' + saved.slice(0, 6).map(listingCard).join("") + '</div>' : '<div class="sf-empty compact"><div>♡</div><h3>Your shortlist is empty</h3><p>Save properties from the listings page to compare them here.</p></div>';
+    html += saved.length ? '<div class="ls-grid">' + saved.slice(0, 6).map(listingCard).join("") + '</div>' : '<div class="ls-empty"><div>♡</div><h3>Your shortlist is empty</h3><p>Save properties from the listings page to compare them here.</p></div>';
     html += '</section>';
     if (listingCanManage()) {
       html += '<section class="account-listing-section mt-24"><div class="section-title-row"><div><h2>My listings</h2><p class="dim">Manage drafts and published inventory.</p></div><button class="btn btn-primary btn-sm" data-ls-new>' + icon("plus", 14) + ' Add listing</button></div>';
-      html += mine.length ? '<div class="ls-grid">' + mine.slice(0, 6).map(listingCard).join("") + '</div>' : '<div class="sf-empty compact"><div>＋</div><h3>No listings yet</h3><p>Create a draft, add property details, then publish when it is ready.</p></div>';
+      html += mine.length ? '<div class="ls-grid">' + mine.slice(0, 6).map(listingCard).join("") + '</div>' : '<div class="ls-empty"><div>＋</div><h3>No listings yet</h3><p>Create a draft, add property details, then publish when it is ready.</p></div>';
       html += '</section>';
     }
     return html;
@@ -6411,7 +6612,7 @@ if(editId){
     const fzPush = $("#fz-push");
     if (fzPush) fzPush.addEventListener("click", () => fzPushToPresell(state.current));
     $$("#content [data-scenario]").forEach(b => b.addEventListener("click", () => {
-      toast("Scenario selected: <b>" + esc(b.getAttribute("data-scenario")) + "</b> — view in Scenarios tab");
+      toastHtml("Scenario selected: <b>" + esc(b.getAttribute("data-scenario")) + "</b> — view in Scenarios tab");
     }));
     const saveDeal = $("#save-deal");
     if (saveDeal) saveDeal.addEventListener("click", () => saveCurrentDeal());
@@ -6625,7 +6826,7 @@ if(editId){
     } else {
       const rec = C.recommend(state.current);
       state.deals.push({ id: "d" + Date.now(), createdAt: Date.now(), status: "acquired", grade: rec.grade, data: JSON.parse(JSON.stringify(state.current)) });
-      toast("Deal saved to portfolio — Grade <b>" + rec.grade + "</b>");
+      toastHtml("Deal saved to portfolio — Grade <b>" + rec.grade + "</b>");
     }
     save();
     render();
@@ -7884,7 +8085,7 @@ premise: "Fee Simple / As Improved",
       if (inp) inp.value = a.cost.depPhysical;
       appraisalAudit("Physical depreciation suggested: EA " + a.cost.bldgAge + " / EL " + a.cost.econLife + " (" + a.cost.condRating + ") → " + a.cost.depPhysical + "%.");
       save(); recalcApproaches();
-      toast("Suggested physical depreciation: <b>" + a.cost.depPhysical + "%</b>");
+      toastHtml("Suggested physical depreciation: <b>" + a.cost.depPhysical + "%</b>");
     });
     const condEl = $("#apc-cond");
     if (condEl) condEl.addEventListener("change", () => { a.cost.condRating = condEl.value; a.updatedAt = Date.now(); save(); });
@@ -9509,7 +9710,7 @@ premise: "Fee Simple / As Improved",
     save(); closePmsModal();
     if (!id) {
       state.usersTab = "pending";
-      toast("Owner saved — account pending approval. Temporary password: <b>" + esc(pmsCreatedPassword) + "</b>");
+      toastHtml("Owner saved — account pending approval. Temporary password: <b>" + esc(pmsCreatedPassword) + "</b>");
       if (!currentUser.demo) loadCloudProfiles(true);
     } else toast("Owner saved");
     render();
@@ -10043,7 +10244,7 @@ premise: "Fee Simple / As Improved",
         localStorage.setItem("esrealty_users", JSON.stringify(auth));
       }
     }
-    save(); toast((kind === "owner" ? "Deleted" : "Archived") + " <b>" + esc(label) + "</b>", "err"); render();
+    save(); toastHtml((kind === "owner" ? "Deleted" : "Archived") + " <b>" + esc(label) + "</b>", "err"); render();
   }
 
   /* ================= MARKET SCAN ================= */
@@ -10079,6 +10280,575 @@ premise: "Fee Simple / As Improved",
   function facebookMarketplaceUrl(query) {
     const terms = [query.type, query.mode === "rent" ? "for rent" : "for sale", query.city, "Philippines"].filter(Boolean).join(" ");
     return "https://www.facebook.com/marketplace/search/?query=" + encodeURIComponent(terms);
+  }
+
+  /* ============================================================
+     VALUE GUIDE (internal)
+     ============================================================
+     A four-stage flow over the SAME estimator the public guide uses, so
+     an operator and a website visitor get the same figure for the same
+     property. Two deliberate differences from the public funnel:
+
+       1. It runs entirely client-side. It never calls the location-report
+          endpoint, which would INSERT a CRM lead and email a PDF. An
+          operator generating a guide for a client must not silently
+          create a lead every time, so this tool has no network writes.
+       2. Nothing is persisted. The result lives in state for the session
+          and leaves as a downloaded PDF. That was an explicit decision.
+
+     Stage 1 property + location, stage 2 property details, stage 3
+     review and calculate, stage 4 the value summary and the PDF.
+     ============================================================ */
+
+  const VG_STAGES = [
+    { n: 1, label: "Property & location" },
+    { n: 2, label: "Property details" },
+    { n: 3, label: "Review & calculate" },
+    { n: 4, label: "Value summary" }
+  ];
+
+  /* Draft lives on state so it survives a re-render, but is deliberately NOT
+     written to localStorage: this is an unsaved working draft, and persisting
+     it would create the "history" this tool was told not to keep.
+
+     save() writes the whole state object in local dev, so `vg` is stripped on
+     every write instead of being saved and then hoped about. Verified by
+     tests/value_guide_internal_node.js. */
+  function stripValueGuideDraft(st) {
+    if (!st || !st.vg) return st;
+    /* Copy first, delete on the copy. This used to delete from `st` itself,
+       which meant every save() wiped the live draft: the wizard re-rendered
+       from a brand-new empty form, so every field read as blank and the flow
+       could never be completed. save() is called from the field handlers, so
+       typing silently discarded the whole draft. */
+    var copy = Object.assign({}, st);
+    delete copy.vg;
+    return copy;
+  }
+  function vgDraft() {
+    if (!state.vg) {
+      state.vg = {
+        stage: 1, result: null, busy: false, error: "",
+        preparedFor: "", preparedBy: "",
+        form: {
+          purpose: "Selling", type: "vacant_lot",
+          municipality: "", barangay: "", streetKey: "", allOther: false,
+          classification: "", area: "", corner: false,
+          construction: "mixed_chb", floorArea: "", floors: "1", ageBand: "0-5",
+          features: [],
+          occupancy: "", titleStatus: "", inheritanceStatus: "",
+          community: "", floodRisk: "", roadAccess: "", frontage: ""
+        }
+      };
+    }
+    if (!state.vg.form.features) state.vg.form.features = [];
+    return state.vg;
+  }
+
+  function vgReset() {
+    const keep = { preparedFor: state.vg ? state.vg.preparedFor : "", preparedBy: state.vg ? state.vg.preparedBy : "" };
+    state.vg = null;
+    const d = vgDraft();
+    d.preparedFor = keep.preparedFor;
+    d.preparedBy = keep.preparedBy;
+    save();
+  }
+
+  function vgEst() { return window.ESREALTY_EST || null; }
+
+  function vgOpts() {
+    const f = vgDraft().form;
+    return {
+      purpose: f.purpose, type: f.type,
+      municipality: f.municipality, barangay: f.barangay,
+      streetKey: f.allOther ? "" : f.streetKey,
+      classification: f.classification, area: Number(f.area) || 0,
+      corner: !!f.corner,
+      construction: f.construction, floorArea: Number(f.floorArea) || 0,
+      floors: f.floors, ageBand: f.ageBand, features: f.features,
+      occupancy: f.occupancy, titleStatus: f.titleStatus, inheritanceStatus: f.inheritanceStatus
+    };
+  }
+
+  function vgMissing() {
+    const f = vgDraft().form;
+    const missing = [];
+    if (!f.municipality) missing.push("municipality");
+    if (!f.barangay) missing.push("barangay");
+    if (!f.allOther && !f.streetKey) missing.push("street");
+    if (!f.classification) missing.push("classification");
+    /* coerce, because a numeric field can hold "200" (string) or a real number and
+       Number("") is 0. A blank-but-present value is still missing, so the
+       empty string is caught before the coercion matters. */
+    if (!(Number(f.area) > 0)) missing.push("lot area");
+    else f.area = Number(f.area);
+    return missing;
+  }
+
+  function vgStepper(d) {
+    return '<ol class="vg-steps">' + VG_STAGES.map(s => {
+      const cls = s.n === d.stage ? " is-current" : (s.n < d.stage ? " is-done" : "");
+      return '<li class="vg-step' + cls + '"><span class="vg-step-no">' + s.n + '</span>'
+        + '<span class="vg-step-label">' + esc(s.label) + '</span></li>';
+    }).join("") + "</ol>";
+  }
+
+  /* `span` is the width in the 12-column wizard grid. Without it every field
+     defaulted to a single column, which is what packed nine inputs into one
+     unusable row. Default is half-width, which is right for a paired select. */
+  function vgField(label, hint, control, span) {
+    return '<div class="field vg-col-' + (span || 6) + '"><label>' + esc(label) + '</label>' + control
+      + (hint ? '<div class="field-hint">' + esc(hint) + "</div>" : "") + "</div>";
+  }
+
+  /* The `selected` attribute only applies to a select that is written to the
+       document in one shot. These selects are re-rendered on every keystroke of
+       an earlier field, and a re-render that happens while the browser still
+       holds focus on the old node can drop the pending selection - the DOM then
+       shows a blank municipality while state believes it is set. Writing the
+       attribute AND restoring the value after insertion keeps them in step. */
+  function vgSelectField(label, hint, attr, options, value, placeholder, span) {
+    return vgField(label, hint, '<select class="input" ' + attr + "><option value=\"\">" + esc(placeholder) + "</option>"
+      + options.map(o => {
+        const v = o.value != null ? o.value : o;
+        const t = o.label != null ? o.label : o;
+        return '<option value="' + esc(v) + '"' + (String(v) === String(value) ? " selected" : "") + ">" + esc(t) + "</option>";
+      }).join("") + "</select>", span);
+  }
+
+  /* A titled block inside a wizard stage. One flat run of nine inputs gave no
+     hint about which fields feed the rate, so location is separated from the
+     description of the property. */
+  function vgGroup(title, note, body) {
+    return '<div class="vg-group"><h4 class="vg-group-title">' + esc(title) + "</h4>"
+      + (note ? '<p class="vg-group-note">' + esc(note) + "</p>" : "")
+      + '<div class="vg-form">' + body + "</div></div>";
+  }
+
+  function renderValueGuide() {
+    const d = vgDraft();
+    const EST = vgEst();
+    if (!EST) {
+      return '<div class="card card-pad"><h3>Value Guide unavailable</h3>'
+        + '<p class="dim">The estimator module did not load, so no reference data is available.</p></div>';
+    }
+
+    /* reference() is null until loadData() resolves, and the dataset is ~4 MB
+       of JSON. Rendering before it arrives threw "config is not defined" and
+       the view silently fell back to the previous screen, so the wizard looked
+       like it had not opened at all. Show an explicit loading state instead and
+       let the data arrival trigger the re-render. */
+    const ref = EST.reference();
+    if (!ref || !ref.config) {
+      /* Kick the load once; the callback re-renders this view when it lands. */
+      EST.loadData().then(function () {
+        if (state.view === "value-guide") render();
+      }).catch(function () {});
+      return '<div class="card card-pad"><h3>Loading reference data…</h3>'
+        + '<p class="dim">Reading the Batangas BIR zonal schedules and the approved factor table.</p></div>';
+    }
+    const config = ref.config;
+    let body = "";
+
+    if (d.stage === 1) body = vgStage1(d, ref);
+    else if (d.stage === 2) body = vgStage2(d, config);
+    else if (d.stage === 3) body = vgStage3(d);
+    else body = vgStage4(d);
+
+    return '<div class="hero"><div><h1>Value Guide</h1><p>Batangas planning estimate from the official BIR zonal reference and the disclosed ES Realty factors</p></div>'
+      + '<div class="actions"><button class="btn btn-ghost btn-sm" data-vg-reset>' + icon("edit", 14) + ' Start over</button></div></div>'
+      + '<div class="notice-banner">' + icon("shield", 14) + ' <span><b>Planning estimate.</b> This is not a certified appraisal, statutory assessment, tax determination or lending valuation. The BIR zonal reference is shown separately from the market guide estimate.</span></div>'
+      + vgStepper(d)
+      + '<div class="mt-16">' + body + '</div>';
+  }
+
+  function vgStage1(d, ref) {
+    const f = d.form;
+    /* ref.config holds the approved factors; reference() returns it as `config`.
+       Reading a bare `config` here threw ReferenceError and took the whole view
+       down with it. */
+    const config = ref.config || {};
+    const munis = (ref.municipalities || []).slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    const classes = Object.keys(ref.classifications || {}).sort();
+    const cornerPct = config.cornerLotPct != null ? Math.round(config.cornerLotPct * 100) : 2.5;
+    let html = '<div class="card card-pad"><h3 class="mb-16">Property and location</h3>';
+
+    /* Location first: these three determine which BIR rate applies, so they are
+       grouped together rather than interleaved with the descriptive fields. */
+    html += vgGroup("Where is the property?",
+      "The street and classification select the BIR zonal rate. The estimate starts from that rate.",
+      vgSelectField("Municipality", "Batangas RDO 58 and 59 coverage.", "data-vg-set=\"municipality\"",
+        munis.map(m => ({ value: m.name, label: m.name })), f.municipality, "— choose a municipality —", 6)
+      + vgSelectField("Barangay", null, "data-vg-set=\"barangay\"",
+        (d.barangayOptions || []).map(b => ({ value: b, label: b })), f.barangay,
+        f.municipality ? "— choose a barangay —" : "choose a municipality first", 6)
+      + vgSelectField("Street", null, "data-vg-set=\"streetKey\"",
+        (d.streetOptions || []).map(s => ({ value: s.key, label: s.name })), f.streetKey,
+        f.barangay ? "— choose a street —" : "choose a barangay first", 12)
+      + vgField("Street not listed", "Uses the all-other-streets rate for the barangay.",
+        '<div class="vg-choice"><label><input type="checkbox" data-vg-check="allOther"' + (f.allOther ? " checked" : "") + "> Use the all-other-streets rate</label></div>", 12));
+
+    html += vgGroup("What is being valued?",
+      "Classification and lot area set the base rate and the amount it is applied to.",
+      vgSelectField("BIR classification", null, "data-vg-set=\"classification\"",
+        classes.map(c => ({ value: c, label: c + " — " + (ref.classifications[c] || "") })), f.classification, "— choose —", 6)
+      + vgField("Lot area (sqm)", "Required.", '<input class="input input-num" data-vg-set="area" inputmode="decimal" value="' + esc(f.area) + '" placeholder="e.g. 200">', 6)
+      + vgField("Property type", "Vacant lots carry no improvement component.",
+        '<div class="vg-choice">'
+        + [["vacant_lot", "Vacant lot"], ["house_lot", "House & lot"]].map(t =>
+          '<label><input type="radio" name="vg-type" data-vg-type="' + t[0] + '"' + (f.type === t[0] ? " checked" : "") + "> " + esc(t[1]) + "</label>").join("")
+        + "</div>", 6)
+      + vgField("Corner lot", "Frontage on more than one road (" + cornerPct + "% adjustment).",
+        '<div class="vg-choice"><label><input type="checkbox" data-vg-check="corner"' + (f.corner ? " checked" : "") + "> Corner lot</label></div>", 6));
+
+    html += vgGroup("Guide details", "These appear on the PDF. Nothing here is sent anywhere.",
+      vgField("Prepared for", "Optional. Printed on the PDF only; never transmitted.",
+        '<input class="input" data-vg-set="preparedFor" value="' + esc(d.preparedFor) + '" placeholder="Client or property name">', 6)
+      + vgSelectField("Purpose", null, "data-vg-set=\"purpose\"", config.purposes || [], f.purpose, "— choose —", 6));
+
+    html += "</div>";
+
+    const missing = vgMissing();
+    /* Name exactly what is outstanding. A disabled button with no reason is
+       indistinguishable from a broken control. */
+    html += '<div class="vg-actions">'
+      + '<span class="vg-actions-note">' + (missing.length ? "Still needed: " + esc(missing.join(", ")) : "Ready to continue.") + "</span>"
+      + '<button class="btn btn-primary" data-vg-next="2"' + (missing.length ? " disabled" : "") + "> Next · Property details →</button></div>";
+    return html;
+  }
+
+  function vgStage2(d, config) {
+    const f = d.form;
+    let html = '<div class="card card-pad"><h3 class="mb-16">Describe the property</h3>';
+
+    if (f.type === "house_lot") {
+      html += vgGroup("House and lot details",
+        "Valued on a replacement cost basis, separate from the land.",
+        vgSelectField("Construction style", "Replacement cost new basis.", "data-vg-set=\"construction\"",
+          (config.construction ? Object.keys(config.construction).map(k => ({ value: k, label: config.construction[k].label })) : []), f.construction, "— choose —", 6)
+        + vgSelectField("Storeys", null, "data-vg-set=\"floors\"", (config.floors || []).map(x => ({ value: x.key, label: x.label })), f.floors, "— choose —", 6)
+        + vgSelectField("Age band", "Straight-line depreciation, capped at " + Math.round(Number((config.depreciation || {}).maxPct || 0.95) * 100) + "%.",
+          "data-vg-set=\"ageBand\"", (config.ageBands || []).map(x => ({ value: x.key, label: x.label })), f.ageBand, "— choose —", 6)
+        + vgField("Floor area (sqm)", "Blank uses 60% of the lot as a guide.",
+          '<input class="input input-num" data-vg-set="floorArea" inputmode="decimal" value="' + esc(f.floorArea) + '" placeholder="auto">', 6)
+        + '<div class="field vg-col-12"><label>Improvements</label><div class="vg-feature-grid">'
+        + Object.keys(config.features || {}).map(k => {
+          const on = f.features.indexOf(k) >= 0;
+          return '<label class="vg-feature"><input type="checkbox" data-vg-feature="' + esc(k) + '"' + (on ? " checked" : "") + ">"
+            + "<span>" + esc(config.features[k].label) + "<small>+" + C.money(config.features[k].cost) + "</small></span></label>";
+        }).join("")
+        + "</div></div>");
+    } else {
+      /* Named explicitly, and with the type change reachable from this stage.
+         The type is chosen on stage 1, so a reader arriving here with a vacant
+         lot selected could otherwise not tell why no house fields appear. */
+      html += '<div class="vg-group"><div class="vg-callout">'
+        + "<div><b>Vacant lot.</b> Valued on land only, with no house component. "
+        + "To value a house and lot, go back to step 1 and change the property type.</div></div></div>";
+    }
+
+    html += vgGroup("Ownership and title",
+      "These change the estimate materially (up to −25% for occupancy and −15% for title status). "
+      + "They are recorded for the buyer's due diligence and are an indicative marketability adjustment, not a change to the BIR zonal value.",
+      vgSelectField("Occupancy", null, "data-vg-set=\"occupancy\"", [
+        { value: "empty", label: "Empty" }, { value: "caretaker", label: "Caretaker or family member" },
+        { value: "tenants", label: "Tenants paying rent" }, { value: "informal_settlers", label: "Informal settlers" },
+        { value: "not_sure", label: "Not sure" }], f.occupancy, "— choose —", 6)
+      + vgSelectField("Title status", null, "data-vg-set=\"titleStatus\"", [
+        { value: "titled_self", label: "Titled, in my name" }, { value: "titled_previous", label: "Titled, previous owner's name" },
+        { value: "tax_declaration", label: "Tax declaration only" }, { value: "not_sure", label: "Not sure" }], f.titleStatus, "— choose —", 6)
+      + vgSelectField("Inheritance", null, "data-vg-set=\"inheritanceStatus\"", [
+        { value: "not_inherited", label: "Not inherited" }, { value: "settled", label: "Inherited, settlement done" },
+        { value: "pending", label: "Inherited, settlement pending" }, { value: "not_sure", label: "Not sure" }], f.inheritanceStatus, "— choose —", 6));
+
+    html += '<div class="vg-actions">'
+      + '<button class="btn btn-ghost" data-vg-next="1">← Back</button>'
+      + '<button class="btn btn-primary" data-vg-next="3">Review &amp; calculate →</button></div>';
+    return html + "</div>";
+  }
+
+  function vgStage3(d) {
+    const f = d.form;
+    const row = vgEst().municipalityRow(f.municipality);
+    const rows = [
+      ["Municipality", f.municipality + (row ? " (RDO " + row.rdo + ")" : "")],
+      ["Barangay", f.barangay],
+      ["Street", f.allOther ? "Street not listed (all-other-streets rate)" : (d.streetOptions || []).filter(s => s.key === f.streetKey).map(s => s.name)[0] || f.streetKey],
+      ["Classification", f.classification],
+      ["Type", f.type === "house_lot" ? "House & lot" : "Vacant lot"],
+      ["Lot area", C.fmtNum(Number(f.area)) + " sqm"],
+      ["Corner lot", f.corner ? "Yes" : "No"]
+    ];
+    if (f.type === "house_lot") {
+      rows.push(["Construction", (vgEst().reference().config.construction || {})[f.construction] ? vgEst().reference().config.construction[f.construction].label : f.construction]);
+      rows.push(["Storeys", (vgEst().reference().config.floors || []).filter(x => x.key === f.floors).map(x => x.label)[0] || f.floors]);
+      rows.push(["Age band", (vgEst().reference().config.ageBands || []).filter(x => x.key === f.ageBand).map(x => x.label)[0] || f.ageBand]);
+      if (f.features.length) rows.push(["Improvements", f.features.length + " selected"]);
+    }
+    /* A label/value list, not a run of badges. As pills the label and value ran
+       together ("Lot area: 300 sqm" with no visual separation) and long values
+       wrapped under their own pill. */
+    return '<div class="card card-pad"><h3 class="mb-16">Check the inputs</h3>'
+      + '<p class="dim small mb-16">Confirm these before calculating. Anything still wrong can be changed on the previous step.</p>'
+      + '<dl class="vg-summary">' + rows.map(r =>
+        '<div class="vg-summary-row"><dt>' + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd></div>").join("") + "</dl>"
+      + (d.busy ? '<p class="dim mt-16">Calculating…</p>' : "")
+      + (d.error ? '<div class="notice-banner mt-16" style="border-color:#E5484D">' + icon("alert", 14) + " " + esc(d.error) + "</div>" : "")
+      + '<div class="vg-actions">'
+      + '<button class="btn btn-ghost" data-vg-next="2">← Back</button>'
+      + '<button class="btn btn-primary" data-vg-calc' + (d.busy ? " disabled" : "") + ">" + icon("spark", 14) + " Calculate value</button></div></div>";
+  }
+
+  function vgStage4(d) {
+    const r = d.result;
+    if (!r) return '<div class="card card-pad"><h3>No result yet</h3><p class="dim">Run the calculation first.</p></div>';
+    if (!r.available) {
+      return '<div class="card card-pad"><h3>No estimate available</h3>'
+        + '<p class="dim">' + esc(vgUnavailableReason(r.reason)) + "</p>"
+        + '<div class="row mt-16"><button class="btn btn-ghost" data-vg-next="1">← Back to inputs</button></div></div>';
+    }
+    const integrity = r.integrity || {};
+    const wrap = "<p><b>How to read these figures:</b> the BIR zonal reference is an official tax reference. The market guide estimate is a planning figure built from disclosed factors. They are not interchangeable, and comparable asking listings are context only — their prices are not calculation inputs.</p>";
+    let html = '<div class="card card-pad"><h3 class="mb-16">Estimated value</h3>'
+      + '<div class="vg-figures">'
+      + '<div class="vg-figure vg-figure-primary"><span>Market guide estimate</span><b>' + C.money(r.recommendedAskingPrice) + "</b>"
+      + "<small>Planning figure from the disclosed ES Realty factors.</small></div>"
+      + '<div class="vg-figure"><span>Official BIR zonal reference</span><b>' + C.money(r.birZonalValue) + "</b>"
+      + "<small>" + C.money(r.birZonalRatePerSqm) + "/sqm · tax reference, separate from the estimate</small></div>"
+      + "</div>"
+      + '<dl class="vg-summary">'
+      + '<div class="vg-summary-row"><dt>Guide range</dt><dd>' + C.money(r.low) + " – " + C.money(r.high) + '</dd></div>'
+      + '<div class="vg-summary-row"><dt>Price per sqm</dt><dd>' + C.money(r.perSqm) + " /sqm</dd></div>"
+      + '<div class="vg-summary-row"><dt>Lot area</dt><dd>' + C.fmtNum(Number(r.area)) + " sqm · " + esc(r.classification) + " · RDO " + esc(r.rdo) + "</dd></div>"
+      + '<div class="vg-summary-row"><dt>Data coverage</dt><dd>' + Math.round(r.source.pct * 100) + "% · " + esc(r.source.label) + "</dd></div>"
+      + '<div class="vg-summary-row"><dt>Figures built from</dt><dd class="dim">' + esc(r.dataVersion) + " · " + esc(r.calculationVersion) + "</dd></div>"
+      + "</dl>"
+      + '<div class="mt-16 dim small">' + wrap + "</div>"
+      + (integrity.ok ? '<div class="notice-banner mt-16">' + icon("check", 14) + " <span>Arithmetic reconciled: land + improvements, range and per-sqm all match.</span></div>"
+        : '<div class="notice-banner mt-16" style="border-color:#E5484D">' + icon("alert", 14) + " <span><b>Integrity check failed.</b> The figures did not reconcile; do not issue this guide. Re-check the inputs.</span></div>")
+      + '<div class="vg-actions">'
+      + '<button class="btn btn-ghost" data-vg-next="1">← Back to inputs</button>'
+      + '<button class="btn btn-primary" data-vg-pdf' + (integrity.ok ? "" : " disabled") + ">" + icon("print", 14) + " Download PDF</button>"
+      + "</div>"
+      + '<p class="dim tiny mt-8">Downloaded locally as a PDF. Nothing is saved to the CRM and no email is sent.</p>'
+      + "</div>";
+    return html;
+  }
+
+  function vgUnavailableReason(reason) {
+    if (reason === "municipality-not-found") return "That municipality is not in the imported BIR set.";
+    if (reason === "no-data") return "The BIR schedule does not publish a rate for this classification, and no municipality or province median exists for it. We do not guess — choose another classification or request an on-ground check.";
+    if (reason === "no-area") return "Enter a lot area above zero.";
+    if (reason === "integrity-fail") return "The calculation could not be reconciled and was stopped.";
+    return "Check the location, classification and lot area.";
+  }
+
+  /* Load barangay + street options for the chosen location. Cached on the draft
+     so re-rendering does not re-read the dataset on every keystroke. */
+  function vgRefreshLocation(d) {
+    const f = d.form;
+    if (!f.municipality) { d.barangayOptions = []; d.streetOptions = []; return Promise.resolve(); }
+    /* Capture the request identity. Switching municipality twice in quick
+       succession starts two loads whose resolutions can interleave, and the
+       slower earlier one used to win - leaving the barangay list belonging to
+       the PREVIOUS municipality under the newly selected one. That feeds the
+       wrong BIR rate into the estimate, so a late response is discarded rather
+       than allowed to overwrite newer state. */
+    const token = (d.locationToken = (d.locationToken || 0) + 1);
+    const slug = vgEst().municipalityRow(f.municipality).slug;
+    /* Defensive, not a demonstrated failure: switching quickly starts two
+       loads, and an earlier one resolving late would overwrite the newer list.
+       Local fetches resolved in order in testing, so this guard has not been
+       observed to fire - it is here because the cost of being wrong is a wrong
+       BIR rate, and the cost of the check is one comparison. */
+    const current = () => d.locationToken === token
+      && f.municipality
+      && vgEst().municipalityRow(f.municipality).slug === slug;
+
+    return vgEst().barangays(slug).then(list => {
+      if (!current()) return;
+      d.barangayOptions = list;
+      if (f.barangay && list.indexOf(f.barangay) < 0) { f.barangay = ""; f.streetKey = ""; }
+      d.streetOptions = [];
+      if (!f.barangay) return null;
+      return vgEst().streets(slug, f.barangay).then(s => {
+        if (!current()) return;
+        d.streetOptions = s.streets;
+        d.streetOther = s.other;
+        if (f.streetKey && !s.other && !s.streets.some(x => x.key === f.streetKey)) f.streetKey = "";
+      });
+    }).catch(() => {
+      if (!current()) return;
+      d.barangayOptions = []; d.streetOptions = [];
+    });
+  }
+
+  async function vgCalculate() {
+    const d = vgDraft();
+    d.busy = true; d.error = ""; save(); render();
+    try {
+      const r = await vgEst().estimate(vgOpts());
+      d.result = r;
+      if (!r.available && r.reason) d.error = vgUnavailableReason(r.reason);
+      d.stage = r.available ? 4 : 3;
+    } catch (e) {
+      d.error = (e && e.message) || "Could not run the calculation.";
+    }
+    d.busy = false; save(); render();
+  }
+
+  async function vgDownloadPdf(btn) {
+    const d = vgDraft();
+    const r = d.result;
+    if (!r || !r.available) return;
+    const pdfMod = window.ESREALTY_VG_PDF;
+    if (!pdfMod) { toast("PDF renderer unavailable", "err"); return; }
+    const original = btn ? btn.innerHTML : "";
+    if (btn) { btn.disabled = true; btn.innerHTML = "Building PDF…"; }
+    try {
+      const lib = await window.ESREALTY_PDF_LIB.ensure();
+      /* The tax reference is fetched here rather than baked into the renderer,
+         so the PDF's rates and legal bases come from the same data file the
+         tax engine is tested against. If it cannot be loaded the PDF still
+         generates - the tax pages say so rather than being silently omitted. */
+      let tax = null;
+      try {
+        const taxMod = window.ESREALTY_TAX;
+        if (taxMod) tax = await taxMod.full(r);
+      } catch (e) {
+        tax = null;
+      }
+      /* The municipality row carries the zonal distribution (min/p25/p50/p75/max
+         per classification), which is what the Market Analysis section needs to
+         say where the property sits locally. Without it that section can only
+         say "no comparables". */
+      let muniRow = null;
+      try {
+        muniRow = vgEst().municipalityRow(r.municipality) || null;
+      } catch (e) {
+        muniRow = null;
+      }
+      const meta = {
+        preparedFor: d.preparedFor || "",
+        preparedBy: d.preparedBy || "",
+        generatedOn: new Date().toISOString().slice(0, 10),
+        provenance: vgEst().provenance(),
+        tax: tax,
+        muniRow: muniRow
+      };
+      const blob = await pdfMod.toBlob(lib, r, meta);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = pdfMod.fileName(r, meta);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      /* Revoke on the next tick so the download has taken the blob. */
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      toast("Value Guide PDF downloaded");
+    } catch (e) {
+      toast("Could not build the PDF: " + ((e && e.message) || e), "err");
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = original; }
+    }
+  }
+
+  /* Set once: the delegated listeners must survive the re-renders they cause. */
+  let vgDelegated = false;
+  function bindValueGuide() {
+    const d = vgDraft();
+    $$("#content [data-vg-next]").forEach(b => b.addEventListener("click", () => {
+      d.stage = Number(b.getAttribute("data-vg-next"));
+      d.error = "";
+      save(); render();
+    }));
+    $$("#content [data-vg-reset]").forEach(b => b.addEventListener("click", () => { vgReset(); render(); }));
+    $$("#content [data-vg-calc]").forEach(b => b.addEventListener("click", () => { vgCalculate(); }));
+    $$("#content [data-vg-pdf]").forEach(b => b.addEventListener("click", () => { vgDownloadPdf(b); }));
+    $$("#content [data-vg-feature]").forEach(el => {
+      el.addEventListener("change", () => {
+        const key = el.getAttribute("data-vg-feature");
+        const list = vgDraft().form.features;
+        const i = list.indexOf(key);
+        if (el.checked && i < 0) list.push(key);
+        if (!el.checked && i >= 0) list.splice(i, 1);
+        save();
+      });
+    });
+
+    /* DELEGATED, bound once to #content.
+     *
+     * Every stage change re-renders the view, which replaces every node inside
+     * #content. A listener bound directly to a field is discarded with that
+     * field, so the first keystroke was recorded and every one after it went
+     * nowhere - the lot area read as "" while the box on screen showed 200, and
+     * the wizard could never be completed. Delegation on the stable container is
+     * the only form that survives a re-render. */
+    if (!vgDelegated) {
+      vgDelegated = true;
+      const content = $("#content");
+
+      const record = ev => {
+        const el = ev.target;
+        const draft = vgDraft();
+        if (!el || !el.getAttribute) return;
+
+        /* The property-type radios and the two checkboxes carry their own
+           attributes rather than data-vg-set, so route them here instead of
+           binding a listener to each node (which a re-render would discard). */
+        if (el.hasAttribute("data-vg-type")) {
+          draft.form.type = el.getAttribute("data-vg-type");
+          save(); render(); return;
+        }
+        if (el.hasAttribute("data-vg-check")) {
+          draft.form[el.getAttribute("data-vg-check")] = el.checked;
+          save(); render(); return;
+        }
+        if (!el.hasAttribute("data-vg-set")) return;
+        const key = el.getAttribute("data-vg-set");
+        if (key === "preparedFor" || key === "preparedBy") { draft[key] = el.value; return; }
+        draft.form[key] = el.type === "checkbox" ? el.checked : el.value;
+        save();
+        if (key === "municipality") {
+          draft.form.barangay = ""; draft.form.streetKey = "";
+          vgRefreshLocation(draft).then(() => render());
+        } else if (key === "barangay") {
+          draft.form.streetKey = "";
+          vgRefreshLocation(draft).then(() => render());
+        } else if (key === "streetKey" || key === "classification" || key === "allOther") {
+          render();
+        }
+      };
+      content.addEventListener("change", record);
+      /* A <select> and a checkbox fire `input` as well as `change`, so a single
+         interaction arrived here twice - and for municipality/barangay that
+         started two concurrent location loads. `record` only acts on the
+         `change` event; `input` is still needed for text and number fields,
+         which fire no change event at all. */
+      content.addEventListener("input", ev => {
+        const el = ev.target;
+        if (el && el.tagName === "SELECT") return;
+        if (el && el.type === "checkbox") return;
+        if (el && el.type === "radio") return;
+        record(ev);
+      });
+
+      /* Numeric fields re-render on blur, so the Next button's gating is only
+         refreshed once focus leaves. Reading on every keystroke would tear the
+         field out from under the caret. */
+      content.addEventListener("blur", ev => {
+        const el = ev.target;
+        if (!el || el.tagName !== "INPUT") return;
+        const key = el.getAttribute("data-vg-set");
+        if (key !== "area" && key !== "floorArea") return;
+        const draft = vgDraft();
+        const n = Number(draft.form[key]);
+        if (isFinite(n)) draft.form[key] = n;
+        save();
+        render();
+      }, true);
+    }
   }
 
   function renderMarketScan() {
@@ -10495,7 +11265,7 @@ premise: "Fee Simple / As Improved",
   function marketIndexCardHtml() {
     const rows = indexRows().sort((a, b) => a.d.localeCompare(b.d));
     const cities = Array.from(new Set(rows.map(r => r.c))).sort();
-    let html = '<div class="card card-pad mt-16"><h3 class="mb-8">' + icon("trending-up", 15) + ' City Price Index <span class="badge blue">₱/sqm medians</span></h3>';
+    let html = '<div class="card card-pad mt-16"><h3 class="mb-8">' + icon("trending", 15) + ' City Price Index <span class="badge blue">₱/sqm medians</span></h3>';
     if (!cities.length) {
       const loading = !Array.isArray(window.ESREALTY_IDX);
       html += '<p class="dim tiny">' + (loading
@@ -10559,7 +11329,7 @@ premise: "Fee Simple / As Improved",
     appraisalAudit("Market Scan listing added as a comparable: " + l.title);
     save();
     state.appraisalTab = "comps";
-    toast('Added <b>' + esc(l.title.slice(0, 60)) + '</b> to the appraisal comparables');
+    toastHtml('Added <b>' + esc(l.title.slice(0, 60)) + '</b> to the appraisal comparables');
     navigate("appraisal");
   }
 
@@ -10602,7 +11372,7 @@ premise: "Fee Simple / As Improved",
       ]);
     });
     exportCSV("market_scan_" + new Date().toISOString().slice(0, 10) + ".csv", lines);
-    toast("Exported <b>" + rows.length + "</b> market listings (CSV)", "ok");
+    toastHtml("Exported <b>" + rows.length + "</b> market listings (CSV)", "ok");
   }
   function marketSaveToListings(i) {
     const st = state.market || {};
@@ -10632,7 +11402,7 @@ premise: "Fee Simple / As Improved",
     if (dup) { toast("This listing is already saved in Listings", "err"); return; }
     state.listings.unshift(rec);
     save();
-    toast("Saved <b>" + esc(rec.title.slice(0, 45)) + "</b> to Listings (draft)");
+    toastHtml("Saved <b>" + esc(rec.title.slice(0, 45)) + "</b> to Listings (draft)");
   }
 
   function bindMarketScan() {
@@ -10685,9 +11455,18 @@ premise: "Fee Simple / As Improved",
       if (holder) {
         const iframe = holder.querySelector("iframe");
         if (!iframe) {
-          holder.innerHTML = '<div class="dim tiny mb-4">' + esc(btn.getAttribute("data-label") || "") + '</div><iframe src="' + esc(btn.getAttribute("data-embed")) + '" style="width:100%;height:220px;border:0" loading="lazy" title="Store map"></iframe>';
+          /* data-embed comes from a third-party response. esc() stops attribute
+           * breakout but does NOT validate the scheme, so a poisoned or
+           * MITM'd "javascript:" URL would execute in our origin. safeHttpsUrl
+           * is the guard used for listing URLs two lines below. */
+          const embedUrl = safeHttpsUrl(btn.getAttribute("data-embed"));
+          if (!embedUrl) {
+            toastHtml("This map could not be shown because the embed address is not a valid https link.", "err");
+            return;
+          }
+          holder.innerHTML = '<div class="dim tiny mb-4">' + esc(btn.getAttribute("data-label") || "") + '</div><iframe src="' + esc(embedUrl) + '" style="width:100%;height:220px;border:0" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups" title="' + esc(btn.getAttribute("data-label") || "Store map") + '"></iframe>';
           holder.style.display = "block";
-          btn.innerHTML = icon("close", 12) + ' Hide map';
+          btn.innerHTML = icon("x", 12) + ' Hide map';
         } else {
           holder.style.display = "none";
           btn.innerHTML = icon("map", 12) + ' Show map';
@@ -10768,7 +11547,7 @@ premise: "Fee Simple / As Improved",
     document.body.appendChild(link);
     link.click();
     link.remove();
-    toast("Payment email prepared for <b>" + esc(email) + "</b>");
+    toastHtml("Payment email prepared for <b>" + esc(email) + "</b>");
   }
 
   let pmsHooked = false;
@@ -11392,7 +12171,7 @@ premise: "Fee Simple / As Improved",
       const dupL = (state.listings || []).find(x => x.id !== rec.id && (
         (rec.title && x.title && String(x.title).toLowerCase() === String(rec.title).toLowerCase() && String(x.city || "") === String(rec.city || "")) ||
         (rec.titleNo && x.titleNo && String(x.titleNo) === String(rec.titleNo))));
-      if (dupL) toast("Possible duplicate of <b>" + esc((dupL.ref || "") + " " + (dupL.title || "")) + "</b> — saved anyway; review after", "err");
+      if (dupL) toastHtml("Possible duplicate of <b>" + esc((dupL.ref || "") + " " + (dupL.title || "")) + "</b> — saved anyway; review after", "err");
     }
     const idx = state.listings.findIndex(x => x.id === (editId || rec.id));
       if (idx >= 0) state.listings[idx] = rec; else state.listings.unshift(rec);
@@ -11601,7 +12380,7 @@ premise: "Fee Simple / As Improved",
     state.inquiryMeta[id] = { status: "converted", leadRef: lead.ref };
     save(); syncLead(lead);
     if (inquiryAd) persistAdToCloud(inquiryAd);
-    toast("Lead <b>" + esc(lead.ref + " " + name) + "</b> created", "ok");
+    toastHtml("Lead <b>" + esc(lead.ref + " " + name) + "</b> created", "ok");
     closeListingInquiries(); render();
   }
   function lsExportCsv() {
@@ -11631,7 +12410,7 @@ premise: "Fee Simple / As Improved",
     a.href = URL.createObjectURL(blob);
     a.download = "esrealty_listings_" + new Date().toISOString().slice(0, 10) + ".csv";
     document.body.appendChild(a); a.click(); a.remove();
-    toast("Exported <b>" + rows.length + "</b> listings (CSV)", "ok");
+    toastHtml("Exported <b>" + rows.length + "</b> listings (CSV)", "ok");
   }
   function ensureListings() {
     if (!state.listings) state.listings = [];
@@ -12138,7 +12917,7 @@ premise: "Fee Simple / As Improved",
     persistTransactionToCloud(tx);
     syncLead(l);
     navigate("transactions");
-    toast("Transaction <b>" + esc(tx.ref) + "</b> created from lead", "ok");
+    toastHtml("Transaction <b>" + esc(tx.ref) + "</b> created from lead", "ok");
   }
   function leadFollowupState(l) {    if (!l.nextFollowUp || l.status === "closed" || l.status === "lost") return null;
     if (l.snoozedUntil) {
@@ -12174,7 +12953,7 @@ premise: "Fee Simple / As Improved",
       (l.listingTitle ? '<div class="lead-card-listing dim tiny">' + icon("home", 11) + " " + esc(l.listingTitle) + "</div>" : "") +
       '<div class="lead-card-foot"><span class="dim tiny">' + icon("calendar", 11) + " " + esc(leadDaysSince(l)) + "</span>" +
       (l.assignedTo ? '<span class="dim tiny">' + icon("users", 11) + " " + esc(l.assignedTo) + "</span>" : "") +
-      ((l.agentNextRecheck || (l.agent && l.agent.nextRecheck)) ? '<span class="dim tiny">' + icon("robot", 11) + " agent " + esc(new Date(l.agentNextRecheck || l.agent.nextRecheck).toLocaleDateString()) + "</span>" : "") + "</div>" +
+      ((l.agentNextRecheck || (l.agent && l.agent.nextRecheck)) ? '<span class="dim tiny">' + icon("spark", 11) + " agent " + esc(new Date(l.agentNextRecheck || l.agent.nextRecheck).toLocaleDateString()) + "</span>" : "") + "</div>" +
     "</div>";
   }
   function leadBoardHTML() {
@@ -12402,7 +13181,7 @@ premise: "Fee Simple / As Improved",
       (can ? '<button class="btn btn-primary" data-lead-new>' + icon("plus", 15) + " Add Lead</button>" : "") +
       (can ? '<button class="btn btn-ghost" data-lead-agent-all title="Run the CRM Autopilot on every lead in scope">' + icon("play", 15) + " Run Agent</button>" : "") +
       '<button class="btn btn-ghost" data-lead-sheet>' + icon("doc", 15) + " Call Sheet</button>" +
-      '<button class="btn btn-ghost" data-lead-digest>' + icon("trending-up", 15) + " Weekly Digest</button>" +
+      '<button class="btn btn-ghost" data-lead-digest>' + icon("trending", 15) + " Weekly Digest</button>" +
       '<button class="btn btn-ghost" data-lead-csv>' + icon("download", 15) + " Export CSV</button></div></div>";
     html += '<div class="lead-stats">' +
       '<div class="ls-stat"><div class="ls-stat-v">' + leads.length + '</div><div class="ls-stat-l dim">Total leads</div></div>' +
@@ -12549,7 +13328,7 @@ premise: "Fee Simple / As Improved",
     l.updatedAt = new Date().toISOString();
     save();
     persistLeadToCloud(l).then(() => {});
-    if (!quiet) toast("Autopilot ran on <b>" + esc(l.name || "lead") + "</b> — " + (res.recheck ? "next recheck " + new Date(res.recheck).toLocaleDateString() : "agent paused"));
+    if (!quiet) toastHtml("Autopilot ran on <b>" + esc(l.name || "lead") + "</b> — " + (res.recheck ? "next recheck " + new Date(res.recheck).toLocaleDateString() : "agent paused"));
     if (state.leadDetail === id) render();
     return steps.length;
   }
@@ -12557,7 +13336,7 @@ premise: "Fee Simple / As Improved",
     const targets = leadScope().slice(0, 40);
     let n = 0, steps = 0;
     for (const l of targets) { if (!leadCanEdit(l)) continue; steps += await agentRunLeadNow(l.id, true); n++; }
-    toast("Autopilot ticked <b>" + n + "</b> leads in scope (" + steps + " steps)");
+    toastHtml("Autopilot ticked <b>" + n + "</b> leads in scope (" + steps + " steps)");
     if (state.view === "leads" && !state.leadDetail) scopedRender("#lead-results", leadBoardHTML());
   }
   function agentStepAt(_tmp) {
@@ -12691,7 +13470,7 @@ premise: "Fee Simple / As Improved",
       "</div>" + (visits.length ? '<div class="table-wrap mt-8"><table class="data"><thead><tr><th>Date / Time</th><th>Location</th><th>Reminder</th><th>Status</th><th></th></tr></thead><tbody>' +
       visits.map(v => "<tr><td>" + esc(v.date) + " " + esc(v.time) + "</td><td>" + esc(v.location || "—") + "</td><td>" + (v.remind === "0" ? "None" : esc(v.remind || "3") + " hr before") + "</td><td>" + visitBadge(v.status) + "</td><td>" + (can && v.status === "scheduled" ? '<button class="btn btn-ghost btn-sm" data-visit-status="done" data-visit-id="' + esc(v.id) + '">Complete</button> <button class="btn btn-ghost btn-sm" data-visit-status="cancelled" data-visit-id="' + esc(v.id) + '">Cancel</button>' : "") + "</td></tr>").join("") +
       "</tbody></table></div>" : '<div class="dim mt-8">No site viewings scheduled.</div>') + "</div>";
-    html += '<div class="card card-pad mb-24"><div class="row spread mb-16" style="flex-wrap:wrap;gap:10px;align-items:flex-start"><div><h3>' + icon("robot", 15) + ' CRM Autopilot</h3><div class="dim tiny mt-8">The agent books its own follow-ups and never guesses — <b>observations</b> are what it saw, <b>suggestions</b> are for you to settle.</div></div>' +
+    html += '<div class="card card-pad mb-24"><div class="row spread mb-16" style="flex-wrap:wrap;gap:10px;align-items:flex-start"><div><h3>' + icon("spark", 15) + ' CRM Autopilot</h3><div class="dim tiny mt-8">The agent books its own follow-ups and never guesses — <b>observations</b> are what it saw, <b>suggestions</b> are for you to settle.</div></div>' +
       (can ? '<button class="btn btn-primary btn-sm" data-agent-run="' + esc(l.id) + '">' + icon("play", 13) + ' Run now</button>' : "") + "</div>" +
       '<div class="row" style="gap:10px;flex-wrap:wrap">' + agentMetaChips(l) + "</div>" +
       '<div class="lead-acts mt-16" id="agent-steps">' + ((l.agentSteps || []).length ? l.agentSteps.slice().reverse().map(agentStepHtml).join("") : '<div class="dim tiny">No steps yet — run the agent on this lead to see its reasoning.</div>') + "</div>" +
@@ -12819,7 +13598,7 @@ premise: "Fee Simple / As Improved",
             (rec.email && l.email && String(l.email).trim().toLowerCase() === String(rec.email).trim().toLowerCase()))) : null;
       if (dup) {
         closeLeadModal();
-        toast("Duplicate contact: <b>" + esc(dup.ref + " " + (dup.name || "")) + "</b> already has this " + (rec.email && dup.email ? "email" : "mobile") + " — open that lead instead.", "err");
+        toastHtml("Duplicate contact: <b>" + esc(dup.ref + " " + (dup.name || "")) + "</b> already has this " + (rec.email && dup.email ? "email" : "mobile") + " — open that lead instead.", "err");
         return;
       }
     }
@@ -12844,7 +13623,7 @@ premise: "Fee Simple / As Improved",
     l.activity.push({ date: l.updatedAt, text: "Status changed: " + prevLabel + " → " + (leadStatusCfg(next) || [0, next])[1] });
     save(); render();
     syncLead(l);
-    toast("Lead → <b>" + esc((leadStatusCfg(next) || [0, next])[1]) + "</b>");
+    toastHtml("Lead → <b>" + esc((leadStatusCfg(next) || [0, next])[1]) + "</b>");
   }
   function leadSetStatus(id, status) {
     const l = (state.leads || []).find(x => x.id === id);
@@ -12929,7 +13708,7 @@ premise: "Fee Simple / As Improved",
     const d = leadDigestData();
     const ov = document.createElement("div");
     ov.className = "modal-overlay"; ov.id = "digest-modal";
-    ov.innerHTML = '<div class="modal-card modal-card-wide"><div class="modal-head"><h3>' + icon("trending-up", 16) + " Weekly Broker Digest</h3>" +
+    ov.innerHTML = '<div class="modal-card modal-card-wide"><div class="modal-head"><h3>' + icon("trending", 16) + " Weekly Broker Digest</h3>" +
       '<button class="icon-btn btn-sm" data-digest-close>' + icon("trash", 14) + "</button></div><div class='digest-body'>" +
       '<p class="dim tiny">Week of ' + esc(d.weekStart.toLocaleDateString()) + " — auto-compiled from your pipeline. Print it or email it to yourself every Monday.</p>" +
       '<div class="lead-stats">' +
@@ -12974,7 +13753,7 @@ premise: "Fee Simple / As Improved",
       });
       const out = await res.json().catch(() => ({}));
       if (!res.ok || out.ok === false) throw new Error(out.error || ("HTTP " + res.status));
-      toast("Digest emailed to <b>" + esc(to) + "</b>", "ok");
+      toastHtml("Digest emailed to <b>" + esc(to) + "</b>", "ok");
     } catch (e) {
       // Fallback: pre-filled mailto so the digest always goes out, no infra needed.
       const d2 = leadDigestData();
@@ -13008,7 +13787,7 @@ premise: "Fee Simple / As Improved",
     a.href = URL.createObjectURL(blob);
     a.download = "esrealty_leads_" + new Date().toISOString().slice(0, 10) + ".csv";
     document.body.appendChild(a); a.click(); a.remove();
-    toast("Exported <b>" + rows.length + "</b> leads (CSV)", "ok");
+    toastHtml("Exported <b>" + rows.length + "</b> leads (CSV)", "ok");
   }
   function leadCallSheet() {
     const rows = leadFiltered();
@@ -13329,7 +14108,7 @@ premise: "Fee Simple / As Improved",
     r.agent = { lastRun: new Date().toISOString(), nextRecheck: res.recheck || "" };
     r.updatedAt = new Date().toISOString();
     save();
-    if (!quiet) toast("Renewer agent ran on <b>" + esc(r.name || "entry") + "</b> — " + (res.recheck ? "next recheck " + new Date(res.recheck).toLocaleDateString() : "agent paused"));
+    if (!quiet) toastHtml("Renewer agent ran on <b>" + esc(r.name || "entry") + "</b> — " + (res.recheck ? "next recheck " + new Date(res.recheck).toLocaleDateString() : "agent paused"));
     return steps.length;
   }
   async function complianceRunAll(quiet) {
@@ -13341,7 +14120,7 @@ premise: "Fee Simple / As Improved",
       steps += await complianceRunNow(r.id, true); n++;
     }
     complianceScheduleRenewals();
-    if (!quiet) toast("Renewal agent ticked <b>" + n + "</b> " + (n === 1 ? "registry entry" : "registry entries") + " (" + steps + " steps)");
+    if (!quiet) toastHtml("Renewal agent ticked <b>" + n + "</b> " + (n === 1 ? "registry entry" : "registry entries") + " (" + steps + " steps)");
     if (state.view === "admin" && state.adminTab === "compliance") render();
   }
   function complianceStepAt(_tmp) {
@@ -13980,8 +14759,8 @@ premise: "Fee Simple / As Improved",
   }
 
   /* ================= BROKERAGE: ROLES, i18n, USERS ================= */
-  const FIL_TITLES = { dashboard: "Dashboard", wizard: "Bagong Investment", deal: "Pagsusuri ng Deal", portfolio: "Portfolio", pms: "Pamamahala ng Ari-arian", assistant: "AI Katulong", reports: "Mga Ulat", appraisal: "Pagtatasa", market: "Market Scan", listings: "Mga Listahan", leads: "CRM / Mga Leads", transactions: "Mga Transaksyon", financing: "Pagpopondo", playbook: "Sales Playbook", users: "Mga User at Access", admin: "Brokerage", settings: "Mga Setting" };
-  const LANG_NAV = { dashboard: ["Dashboard", "Dashboard"], wizard: ["New Investment", "Bagong Investment"], deal: ["Deal Analysis", "Pagsusuri ng Deal"], appraisal: ["Appraisal", "Pagtatasa"], market: ["Market Scan", "Market Scan"], leads: ["CRM / Leads", "CRM / Mga Leads"], listings: ["Listings", "Mga Listahan"], portfolio: ["Portfolio", "Portfolio"], pms: ["Property Manager", "Pamamahala ng Ari-arian"], assistant: ["AI Assistant", "AI Katulong"], reports: ["Reports", "Mga Ulat"], transactions: ["Transactions", "Mga Transaksyon"], financing: ["Financing", "Pagpopondo"], playbook: ["Sales Playbook", "Sales Playbook"], users: ["Users", "Mga User"], admin: ["Brokerage", "Brokerage"], settings: ["Settings", "Mga Setting"] };
+  const FIL_TITLES = { dashboard: "Dashboard", wizard: "Bagong Investment", deal: "Pagsusuri ng Deal", portfolio: "Portfolio", pms: "Pamamahala ng Ari-arian", assistant: "AI Katulong", reports: "Mga Ulat", appraisal: "Pagtatasa", "value-guide": "Value Guide", market: "Market Scan", listings: "Mga Listahan", leads: "CRM / Mga Leads", transactions: "Mga Transaksyon", financing: "Pagpopondo", playbook: "Sales Playbook", users: "Mga User at Access", admin: "Brokerage", settings: "Mga Setting" };
+  const LANG_NAV = { dashboard: ["Dashboard", "Dashboard"], wizard: ["New Investment", "Bagong Investment"], deal: ["Deal Analysis", "Pagsusuri ng Deal"], appraisal: ["Appraisal", "Pagtatasa"], "value-guide": ["Value Guide", "Gabay sa Halaga"], market: ["Market Scan", "Market Scan"], leads: ["CRM / Leads", "CRM / Mga Leads"], listings: ["Listings", "Mga Listahan"], portfolio: ["Portfolio", "Portfolio"], pms: ["Property Manager", "Pamamahala ng Ari-arian"], assistant: ["AI Assistant", "AI Katulong"], reports: ["Reports", "Mga Ulat"], transactions: ["Transactions", "Mga Transaksyon"], financing: ["Financing", "Pagpopondo"], playbook: ["Sales Playbook", "Sales Playbook"], users: ["Users", "Mga User"], admin: ["Brokerage", "Brokerage"], settings: ["Settings", "Mga Setting"] };
   const LANG_SECTIONS = { ANALYSIS: ["ANALYSIS", "PAGSUSURI"], WORKSPACE: ["WORKSPACE", "WORKSPACE"], BROKERAGE: ["BROKERAGE", "BROKERAGE"], ACCOUNT: ["ACCOUNT", "ACCOUNT"] };
   let lang = "en";
   function setLang(l) { lang = (l === "fil") ? "fil" : "en"; state.lang = lang; save(); render(); }
@@ -13997,7 +14776,11 @@ premise: "Fee Simple / As Improved",
     owner: ["pms.view", "settings.view"],
     tenant: ["pms.view", "settings.view"]
   };
-  const VIEW_CAPABILITY = { dashboard: "dashboard.view", wizard: "investments.manage", deal: "investments.manage", appraisal: "appraisal.view", market: "market.view", leads: "leads.view", listings: "listings.view", transactions: "transactions.view", financing: "financing.view", portfolio: "portfolio.view", presell: "presell.view", portal: "buyer.portal.view", pms: "pms.view", assistant: "assistant.view", reports: "reports.view", playbook: "playbook.manage", users: "users.manage", admin: "brokerage.view", settings: "settings.view" };
+  /* value-guide deliberately reuses appraisal.view rather than introducing a new
+ * capability. It is the same professional tool: the same BIR dataset, the same
+ * estimator, the same audience. A separate capability would have been one more
+ * place to grant by accident in a role list. */
+const VIEW_CAPABILITY = { dashboard: "dashboard.view", wizard: "investments.manage", deal: "investments.manage", appraisal: "appraisal.view", "value-guide": "appraisal.view", market: "market.view", leads: "leads.view", listings: "listings.view", transactions: "transactions.view", financing: "financing.view", portfolio: "portfolio.view", presell: "presell.view", portal: "buyer.portal.view", pms: "pms.view", assistant: "assistant.view", reports: "reports.view", playbook: "playbook.manage", users: "users.manage", admin: "brokerage.view", settings: "settings.view" };
   function can(capability) {
     const caps = ROLE_CAPABILITIES[userRole()] || [];
     return caps.indexOf("*") >= 0 || caps.indexOf(capability) >= 0;
@@ -14410,7 +15193,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
           return;
         }
         if (low.indexOf("not deployed") >= 0) {
-          popupNotify("Add Account is blocked because the <b>admin-create-account</b> service is not deployed. Deploy it with: <code>supabase functions deploy admin-create-account</code>, then retry.", "err");
+          popupNotifyHtml("Add Account is blocked because the <b>admin-create-account</b> service is not deployed. Deploy it with: <code>supabase functions deploy admin-create-account</code>, then retry.", "err");
           return;
         }
         popupNotify("Could not create account: " + esc(friendlyErr(error.message)), "err");
@@ -14655,7 +15438,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     if (error) {
       const low = String((error && error.message) || error || "").toLowerCase();
       if (low.indexOf("could not find the function") >= 0 || low.indexOf("schema cache") >= 0 || (low.indexOf("function") >= 0 && low.indexOf("admin_assign_broker") >= 0)) {
-        popupNotify("Assigning a supervising broker is blocked by a missing database function. In the Supabase SQL Editor run <b>patch_admin_create_account.sql</b> (now re-runnable — it adds the <b>admin_assign_broker</b> function and reloads the schema cache), then retry.", "err");
+        popupNotifyHtml("Assigning a supervising broker is blocked by a missing database function. In the Supabase SQL Editor run <b>patch_admin_create_account.sql</b> (now re-runnable — it adds the <b>admin_assign_broker</b> function and reloads the schema cache), then retry.", "err");
       } else {
         toast("Could not assign broker: " + esc(friendlyErr(error.message)), "err");
       }
@@ -14754,7 +15537,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     } catch (err) {
       const low = String(err && err.message || "").toLowerCase();
       if (low.indexOf("could not find the function") >= 0 || low.indexOf("schema cache") >= 0 || low.indexOf("not found") >= 0 && low.indexOf("admin_cancel_password_reset") >= 0) {
-        popupNotify("Cancelling a reset request is blocked by a missing database function. In the Supabase SQL Editor run <b>admin_cancel_password_reset.sql</b> (this single file adds the <b>admin_cancel_password_reset</b> function and reloads the schema cache), then press Retry.", "err");
+        popupNotifyHtml("Cancelling a reset request is blocked by a missing database function. In the Supabase SQL Editor run <b>admin_cancel_password_reset.sql</b> (this single file adds the <b>admin_cancel_password_reset</b> function and reloads the schema cache), then press Retry.", "err");
       } else {
         toast("Could not cancel request: " + esc(friendlyErr(err.message || err)), "err");
       }
@@ -14797,7 +15580,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
     } catch (err) {
       const low = String(err && err.message || "").toLowerCase();
       if (low.indexOf("could not find the function") >= 0 || low.indexOf("schema cache") >= 0 || low.indexOf("not found") >= 0 && low.indexOf("admin_delete_account") >= 0) {
-        popupNotify("Delete account is blocked by a missing database function. In the Supabase SQL Editor run <b>admin_delete_account.sql</b> (this single file adds just the <b>admin_delete_account</b> function and reloads the schema cache), then press Retry.", "err");
+        popupNotifyHtml("Delete account is blocked by a missing database function. In the Supabase SQL Editor run <b>admin_delete_account.sql</b> (this single file adds just the <b>admin_delete_account</b> function and reloads the schema cache), then press Retry.", "err");
       } else {
         toast("Could not delete account: " + esc(friendlyErr(err.message || err)), "err");
       }
@@ -15655,7 +16438,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     if (next === "doas" && !t.doasDate) t.doasDate = new Date().toISOString().slice(0, 10);
     save(); render();
     persistTransactionToCloud(t);
-    toast("Transaction → <b>" + esc(txStageCfg(next).label) + "</b> (" + esc(prevLabel) + " completed)");
+    toastHtml("Transaction → <b>" + esc(txStageCfg(next).label) + "</b> (" + esc(prevLabel) + " completed)");
   }
   async function txDelete(id) {
     if (!txCanManage()) { toast("Transactions shared with agents are read-only", "err"); return; }
@@ -16327,7 +17110,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
             currentUser.name = data.name;
             currentUser.phone = data.phone;
             save();
-            toast("Profile saved. PRC/RESA/agency/phone need column grants — run <b>patch_profile_self_edit.sql</b> in the Supabase SQL Editor once.");
+            toastHtml("Profile saved. PRC/RESA/agency/phone need column grants — run <b>patch_profile_self_edit.sql</b> in the Supabase SQL Editor once.");
             render();
             return;
           }
@@ -16586,12 +17369,12 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     if (!l) return;
     try {
       if (IS_LOCAL_DEV && !currentUser.registrationStatus) {
-        toast("Demo inquiry recorded for <b>" + esc(name) + "</b>");
+        toastHtml("Demo inquiry recorded for <b>" + esc(name) + "</b>");
         return;
       }
       if (!LISTINGS_API) throw new Error("Listings API is unavailable");
       await LISTINGS_API.inquire(id, { full_name: name, phone: phone, email: $v("lq-email"), contact_type: $v("lq-type") || "buyer", message: $v("lq-msg") || "Inquiry from listing page.", consent: true });
-      toast("Inquiry sent — we'll contact you within the day. <b>Thanks, " + esc(name) + "!</b>");
+      toastHtml("Inquiry sent — we'll contact you within the day. <b>Thanks, " + esc(name) + "!</b>");
       render();
     } catch (e) { toast("Could not send inquiry: " + esc(friendlyErr(e.message)), "err"); }
   }

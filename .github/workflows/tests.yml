@@ -1,0 +1,152 @@
+name: tests
+
+# Two jobs with different economics:
+#   node-tests  — runs on every push and PR. Pure Node, no browser, no network.
+#                 ~700 assertions in a few seconds. This is the merge gate.
+#   e2e-tests   — headless Chromium against a local server. Heavier and
+#                 network-sensitive, so it runs on a schedule and on main
+#                 (and on demand), not on every PR.
+#
+# The first job's most important check is build_sync_node: index.html loads
+# js/app.min.js, so without that gate the suite happily validates a bundle that
+# is out of date with js/app.js.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node-tests:
+    name: Node tests + build sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install terser (needed to verify the bundle)
+        run: npm install --no-save terser@5
+
+      - name: Verify js/app.min.js is in sync with js/app.js
+        run: |
+          node build_app.js --check
+          node tests/build_sync_node.js
+
+      - name: Verify the province lookup table matches PH_GEO
+        run: |
+          # market-scan/vercel/lib/ph_geo.js is generated from the PH_GEO table in
+          # js/app.js. If someone edits PH_GEO without regenerating it, the worker
+          # silently resolves provinces against a stale table and a province-scoped
+          # scan starts returning the wrong cities again.
+          node tools/gen_ph_geo.js --check
+
+      # css/storefront-legacy.css is a GENERATED extract, and re-running the
+      # extractor is destructive rather than idempotent: it was run once to move
+      # the storefront rules OUT of styles.css, so a second run finds almost
+      # nothing to extract and would rewrite the legacy file from 88.5 KB / 712
+      # rules down to 6.1 KB, discarding what the parked shophouse and
+      # Project B.T pages still need. The tool refuses to run; this asserts the
+      # refusal is still in place, so the guard cannot be lost in a refactor.
+      - name: Verify the legacy-extract guard still refuses to clobber
+        run: |
+          set -e
+          if node tools/classify_styles.js --apply > /tmp/classify.log 2>&1; then
+            echo "::error::classify_styles.js --apply ran when it should have refused."
+            echo "Re-running it rewrites css/storefront-legacy.css and discards the extracted rules."
+            exit 1
+          fi
+          grep -q "REFUSING TO RUN" /tmp/classify.log \
+            || { echo "::error::--apply failed for an unexpected reason:"; cat /tmp/classify.log; exit 1; }
+          echo "guard intact: --apply refuses to clobber the generated legacy stylesheet"
+
+      - name: Run all *_node.js suites
+        run: |
+          set -e
+          fail=0
+          for t in tests/*_node.js; do
+            echo "===== $t ====="
+            node "$t" || fail=1
+          done
+          exit $fail
+
+  e2e-tests:
+    name: Browser e2e (headless Chromium)
+    runs-on: ubuntu-latest
+    needs: node-tests
+    if: github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.49.1 wait-on@8
+          npx playwright install --with-deps chromium
+
+      - name: Start app server (:8931) and market-scan worker (:8932)
+        run: |
+          node serve.js &
+          node market-scan/worker/server.js &
+          npx wait-on --timeout 60000 http://127.0.0.1:8931/index.html http://127.0.0.1:8932/api/ping
+
+      - name: Run hermetic browser suites (desktop)
+        run: |
+          set -e
+          fail=0
+          for t in estimator_e2e estimator_barangay_select_e2e portfolio_ledger_integrity_e2e portfolio_overview_e2e \
+                   portfolio_filters_e2e portfolio_ledger_ui_e2e compliance_registry_e2e \
+                   agent_crm_e2e crm_core_e2e playbook_e2e presell_upgrade_e2e \
+                   pms_crud_e2e feasibility_e2e ds_summary_e2e listings_upgrade_e2e \
+                   database_backup_e2e ui_preload_flash_e2e \
+ui_storefront_routing_e2e ui_public_nav_e2e ui_properties_e2e \
+                    ui_content_integrity_e2e ui_mobile_nav_e2e ui_type_system_e2e \
+                    value_guide_internal_e2e value_guide_pdf_browser_e2e \
+                    ui_bt_assets_e2e ui_shophouse_tab_e2e; do
+            echo "===== $t ====="
+            pwsh -NoProfile -File tests/run_all.ps1 -Test "$t" || fail=1
+          done
+          exit $fail
+
+      - name: Mobile viewport pass
+        run: pwsh -NoProfile -File tests/run_all.ps1 -Test ui_readability_mobile_e2e -Mobile
+
+      # The mobile nav has to be swept, not sampled. A 901-1050px dead band
+      # shipped before because four different breakpoints were in play and a
+      # single-width test cannot see a band that only exists at some widths.
+      # 13 widths x the full nav contract, including the 667px-tall phone whose
+      # panel used to make the auth actions unreachable.
+      - name: Mobile navigation breakpoint sweep
+        run: pwsh -NoProfile -File tests/run_mobile_nav_sweep.ps1
+
+      # Horizontal overflow also has to be swept, not sampled. Both defects were
+      # 320px-only, and .sf-site clips overflow-x, so the page never gains a
+      # scrollbar - the content is simply cut off at the right edge. A
+      # single-width run at 1280px sees a perfectly healthy page.
+      - name: Horizontal overflow sweep
+        run: pwsh -NoProfile -File tests/run_overflow_sweep.ps1
+
+      # The computed-style snapshot is the instrument that lets a CSS refactor be
+      # proven visually neutral, but it was unusable for a long time: two
+      # captures of the SAME build reported anywhere from 0 to 113 diffs, so a
+      # real regression could not be told apart from the weather. It now reports
+      # 0, and this step is what stops that quietly regressing.
+      #
+      # It has to be a scheduled/run step rather than a node test, because it
+      # drives a real browser against :8931.
+      - name: Computed-style snapshot noise floor
+        run: node tools/snapshot_public_styles.js --selftest

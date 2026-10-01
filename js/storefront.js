@@ -8,13 +8,23 @@
   var requestId = 0;
   var cacheKey = "";
   var viewState = { loading: false, error: "", result: null, mode: "grid" };
-  var siteContact = { eyebrow: "TALK TO A SHOPHOUSE SPECIALIST", title: "Ready to put the ground floor to work?", description: "Tell us your province, budget, and business plan. A shophouse specialist from ES Realty will reply within one business day with listings and next steps.", phone: "", email: "", address: "", hours: "", contactLoaded: false };
+  /* Service-neutral on purpose. These used to be shophouse-branded
+   * ("TALK TO A SHOPHOUSE SPECIALIST" / "Ready to put the ground floor to
+   * work?" / "a shophouse specialist"), and because siteSettings() fails CORS the
+   * defaults are what actually renders - so the closed shophouse campaign was
+   * still the homepage's call to action. The shophouse and Project B.T pages are
+   * parked and must not leak their copy into the live site. */
+  var siteContact = { eyebrow: "LOCAL BATANGAS GUIDANCE", title: "Ready for the next check?", description: "Tell us whether you are buying, selling, valuing, or reviewing a property. We will help you identify the next practical step.", phone: "", email: "", address: "", hours: "", contactLoaded: false };
 
-  function esc(value) {
-    return String(value == null ? "" : value).replace(/[&<>"']/g, function (char) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char];
-    });
-  }
+  /* Shared implementation from js/util.js, with a byte-identical local
+   * fallback so this module can be require()d directly by the Node tests. */
+  var esc = (typeof window !== "undefined" && window.ESREALTY_UTIL && window.ESREALTY_UTIL.esc)
+    ? window.ESREALTY_UTIL.esc
+    : function (value) {
+        return String(value == null ? "" : value).replace(/[&<>"']/g, function (char) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char];
+        });
+      };
 
   function safeImage(value) {
     try {
@@ -39,35 +49,258 @@
     location.hash = path.charAt(0) === "/" ? "#" + path : "#/" + path;
   }
 
+  /* ------------------------------------------------------------------
+   * Navigation model - single source of truth.
+   *
+   * The desktop bar and the mobile panel used to be two hand-maintained
+   * copies of the same five links. They drifted, and there was no way to add
+   * a destination without editing both. Both surfaces are now generated from
+   * these lists, so a new destination is one edit.
+   *
+   * Services and Project B.T have no pages of their own yet, so their items
+   * resolve to the homepage services section and the Project B.T coming-soon
+   * page respectively. Nothing here is a dead link.
+   * ------------------------------------------------------------------ */
+  var NAV = [
+    { href: "#/home", label: "Home" },
+    /* No hard-coded ?state=Batangas here. That link pointed the primary nav at a
+     * query that excluded every live listing, so "Properties" always rendered
+     * "No properties found". The state filter is still available in the form and
+     * as a removable chip; it just must not be applied silently. */
+    { href: "#/search", label: "Properties" },
+    { href: "#/property-value", label: "Get My Property Value", cta: true }
+  ];
+
+  var SERVICES = [
+    { href: "#/search", label: "Buying a property", note: "Shortlists, viewings and offer support." },
+    { href: "#/property-value?service=sell", label: "Selling a property", note: "Free value guide and a pricing review." },
+    { href: "#/search?offer_type=rent", label: "Renting", note: "Tenant matching and lease support." },
+    { href: "#/property-value?service=pre-selling", label: "Pre-selling", note: "Prepare, price and launch with confidence." },
+    { href: "#/home?section=services", label: "Property management", note: "Turnover, collections and repairs handled." },
+    { href: "#/home?section=services", label: "Title and legal", note: "Handover checks and documentary help." },
+    { href: "#/home?section=services", label: "Financing", note: "Introduction to bank and developer options." }
+  ];
+
+  /* Shophouse and Project B.T are temporarily closed and are presented as one
+   * "Project B.T" destination. Both entries resolve to the coming-soon page so
+   * no project detail is exposed. */
+  var PROJECT_BT = [
+    { href: "#/project-bt", label: "Project B.T" },
+    { href: "#/project-bt", label: "Shophouses" }
+  ];
+
+  function navLink(item) {
+    return '<a href="' + esc(item.href) + '"' + (item.cta ? ' class="sf-nav-cta"' : "") + '>' + esc(item.label) + '</a>';
+  }
+
+  function navChevron() {
+    return '<svg class="sf-chev" width="10" height="7" viewBox="0 0 10 7" aria-hidden="true" focusable="false"><path d="M1 1.5l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+
+  function dropDown(label, items, extraClass) {
+    return '<details class="sf-drop ' + (extraClass || "") + '" data-sf-drop><summary class="sf-drop-summary">' +
+      esc(label) + navChevron() + '</summary><div class="sf-drop-panel">' +
+      items.map(function (item) {
+        return '<a href="' + esc(item.href) + '"' + (item.cta ? ' class="sf-drop-cta"' : "") + '><span>' + esc(item.label) +
+          (item.note ? '<small>' + esc(item.note) + '</small>' : '') + '</span></a>';
+      }).join("") + '</div></details>';
+  }
+
+  /* Mobile menu groups are accordions, not flat lists.
+   *
+   * A flat list put 12 rows on screen with no hierarchy, and the auth buttons at
+   * the bottom were unreachable on a 667px-tall phone. <details> is the same
+   * primitive the desktop dropdowns already use, so the existing
+   * closeDrops / outside-click / Escape handlers apply unchanged and the two
+   * surfaces cannot drift apart.
+   *
+   * Uses .sf-menu-acc-* rather than .sf-drop-* so the desktop panel's absolute
+   * positioning does not leak in. */
+  function menuGroup(title, items) {
+    return '<details class="sf-menu-acc" data-sf-drop>' +
+      '<summary class="sf-menu-acc-sum">' + esc(title) + navChevron() + '</summary>' +
+      '<div class="sf-menu-acc-body">' + items.map(navLink).join("") + '</div>' +
+      '</details>';
+  }
+
   function header() {
     return '<header class="sf-header"><a class="sf-brand" href="#/home" aria-label="ES Realty home">' +
       '<span class="sf-brand-mark">ES</span><span><b>ES Realty</b><small>Batangas property guidance.</small></span></a>' +
-      '<nav class="sf-nav"><a href="#/home">Home</a><a href="#/search?state=Batangas">Batangas properties</a><a href="#/shophouse">Shophouse</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>How we help</a></nav>' +
+      '<nav class="sf-nav" aria-label="Primary">' + NAV.map(navLink).join("") +
+      dropDown("Services", SERVICES) + dropDown("Project B.T", PROJECT_BT) + '</nav>' +
       '<div class="sf-header-actions"><button class="sf-link-btn" data-sf-auth="signin">Sign in</button>' +
       '<button class="sf-primary-btn" data-sf-auth="signup">Create account</button>' +
       '<button class="sf-menu-btn" data-sf-menu aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button></div>' +
-      '<div class="sf-menu" data-sf-menu-panel><a href="#/home">Home</a><a href="#/search?state=Batangas">Batangas properties</a><a href="#/shophouse">Shophouse</a><a href="#/project-bt">Project B.T</a><a href="#/home" data-sf-services>How we help</a><button data-sf-auth="signin">Sign in</button><button data-sf-auth="signup">Create account</button></div></header>';
+      '<div class="sf-menu" data-sf-menu-panel>' + NAV.map(navLink).join("") +
+      menuGroup("Services", SERVICES) + menuGroup("Project B.T", PROJECT_BT) +
+      '<button data-sf-auth="signin">Sign in</button><button data-sf-auth="signup">Create account</button></div></header>';
   }
 
   function footer() {
     return '<footer class="sf-footer"><div class="sf-brand"><span class="sf-brand-mark">ES</span><span><b>ES Realty</b><small>Batangas property guidance.</small></span></div>' +
-      '<p>Start with a BIR reference, compare local properties, and get practical guidance. <span class="sf-copyright">&copy; ES Realty ' + new Date().getFullYear() + '</span></p>' +
-      '<div><a href="#/search?state=Batangas">Browse Batangas properties</a><button data-sf-auth="signin">Agent sign in</button></div></footer>';
+      '<p>Start with a BIR reference, compare local properties, and get practical guidance. <span class="sf-copyright">&copy; ES Realty ' + new Date().getFullYear() + '</span><br><small>ES Realty is independent of the BIR. BIR zonal values are shown as tax-reference data.</small></p>' +
+      '<div><a href="#/search">Browse properties</a><a href="#/privacy">Privacy notice</a><button data-sf-auth="signin">Agent sign in</button></div></footer>';
+  }
+
+  /* Research says a persistent bottom action bar is the single most effective
+   * conversion surface on mobile. Desktop hides it via CSS because the header
+   * already carries the actions. The phone link stays hidden until site
+   * settings resolve, so we never render a dead tel: link. */
+  function stickyBar() {
+    return '<div class="sf-sticky" data-sf-sticky>' +
+      '<a class="sf-sticky-primary" href="#/property-value">Get my property value</a>' +
+      '<a class="sf-sticky-ghost" href="#/search">Browse</a>' +
+      '<a class="sf-sticky-ghost" data-sf-sticky-call href="tel:" hidden>Call us</a>' +
+      '</div>';
   }
 
   function shell(content) {
-    return '<div class="sf-site">' + header() + '<main class="sf-main">' + content + '</main>' + footer() + '</div>';
+    return '<div class="sf-site">' + header() + '<main class="sf-main">' + content + '</main>' + footer() + stickyBar() + '</div>';
+  }
+
+  function privacyPage() {
+    return shell('<section class="sf-section sf-privacy-page"><div class="sf-section-head"><div><p class="sf-eyebrow">YOUR INFORMATION</p><h1>Privacy notice</h1></div><p>How ES Realty handles information submitted through this website.</p></div>' +
+      '<div class="sf-privacy-content">' +
+      '<p><b>Who is responsible?</b> ES Realty operates this website and handles the inquiries submitted through it. For a privacy-related request, <a href="#/home?section=contact">contact our team</a> and write “Privacy request” in your message.</p>' +
+      '<h2>Information used by the property guide</h2><p>The guide uses property details you enter, such as municipality, barangay, street, BIR classification, lot area, property type, and optional house, ownership, and selling details. The estimate is calculated in your browser. To look for available listing context, the selected municipality and property type may be queried through the Vercel-hosted market-search service; your name and contact details are not needed for that search.</p>' +
+      '<h2>When you send an inquiry or request a report</h2><p>We receive the contact details and message you submit, together with the property details and estimate snapshot needed to respond. Requests are recorded in ES Realty CRM and inquiry records hosted by Supabase. Where report delivery is configured, your report and email address are sent through Resend so the report can be delivered.</p>' +
+      '<h2>How we use and share information</h2><p>We use submitted information to respond to your request, prepare or deliver a requested report, coordinate a property inquiry with the relevant broker or agent, maintain service records, and protect the service from abuse. Technical request information may also be processed to prevent abuse. We do not sell personal information; Supabase, Vercel, Resend, and any relevant listing agent may process information only to provide the requested service.</p>' +
+      '<h2>Retention and your choices</h2><p>We keep inquiry and report records for as long as needed to respond, maintain business records, and meet applicable legal obligations. Under the Data Privacy Act, you may exercise applicable rights such as access, correction, objection, or deletion by contacting us through the form above. You may also raise a concern with the National Privacy Commission. Some records may need to be retained where the law requires it.</p>' +
+      '<h2>Security and updates</h2><p>We use access controls and reasonable safeguards for the systems that receive inquiry information. This notice may be updated as the website or its service providers change; the date below identifies the latest revision.</p>' +
+      '<p class="sf-privacy-updated">Last updated: 1 October 2026</p></div></section>');
+  }
+
+  /* ------------------------------------------------------------------
+   * Project B.T - coming soon.
+   *
+   * Shophouse and Project B.T are temporarily closed, so this page exposes no
+   * project detail, pricing, floor plans or location claims. It states what is
+   * coming, captures interest, and offers a useful next step. #/shophouse
+   * redirects here so old inbound links do not break.
+   * ------------------------------------------------------------------ */
+  function comingSoonPage() {
+    return shell('<section class="sf-cs">' +
+      '<div class="sf-cs-hero sf-reveal sf-reveal-up">' +
+      '<p class="sf-cs-mark">Project B.T</p>' +
+      '<p class="sf-cs-flag"><span class="sf-cs-dot" aria-hidden="true"></span>Coming soon</p>' +
+      /* No <br> in headings. It read as "Something is being builtin Batangas."
+         to assistive tech and to anything that concatenates text (SEO, share
+         text, plain-text export), and combined with the max-width it orphaned
+         "built" onto a line of its own. The line break is a layout decision, so
+         it belongs in CSS, where the width already controls it. */
+      '<h1>Something is being built in Batangas.</h1>' +
+      '<p class="sf-cs-lede">ES Realty is preparing a new mixed-use project. We are not sharing details before launch &mdash; but you can tell us you are interested and we will contact you first.</p>' +
+      '<div class="sf-cs-actions"><a class="sf-primary-btn" href="#/property-value">Get my property value</a>' +
+      '<a class="sf-outline-btn" href="#/search">Browse properties</a></div>' +
+      '</div>' +
+      '<div class="sf-cs-notify sf-reveal sf-reveal-up"><h2>Be the first to know</h2>' +
+      '<p>Leave your email and we will let you know when Project B.T opens. No other mail from us.</p>' +
+      '<form data-sf-notify>' +
+      /* Visible label, not .sr-only. The label used to wrap the input and carry
+       * .sr-only, which clipped the FIELD as well as the label text: the input
+       * rendered 31px wide inside a 1x1 box, so the notify form could not be
+       * filled in at all. A visible label is also simply better for the 40-75
+       * audience this site targets. */
+      '<label class="sf-field"><span>Email address</span>' +
+      '<input type="email" name="email" required maxlength="254" autocomplete="email" placeholder="you@example.com"></label>' +
+      '<label class="sf-consent"><input type="checkbox" name="consent" required><span>I agree to be contacted about Project B.T. I can unsubscribe at any time. See our <a href="#/privacy">Privacy Notice</a>.</span></label>' +
+      '<button class="sf-primary-btn" type="submit">Notify me</button>' +
+      '<p class="sf-form-status" aria-live="polite"></p></form></div></section>');
+  }
+
+  /* ------------------------------------------------------------------
+   * Get My Property Value - seller lead capture.
+   *
+   * Research guidance applied here: a dedicated landing page with one goal, a
+   * first-person benefit-led headline, only 3-4 form fields (short forms
+   * convert materially better), trust-reducing microcopy next to the button,
+   * and an explicit "what happens next" so people know a human calls them.
+   * ------------------------------------------------------------------ */
+  function propertyValuePage(params) {
+    var service = String((params && params.get("service")) || "").toLowerCase();
+    var isPreSelling = service === "pre-selling";
+    return shell('<section class="sf-pv">' +
+      '<div class="sf-pv-hero sf-reveal sf-reveal-up">' +
+      '<p class="sf-eyebrow">' + (isPreSelling ? "Pre-selling support" : "Free property value guide") + '</p>' +
+      '<h1>' + (isPreSelling ? "Sell with a plan, not a guess." : "Get my property value.") + '</h1>' +
+      '<p class="sf-pv-lede">' + (isPreSelling
+        ? "We help owners prepare, price and launch a property so it sells well from the first week on the market."
+        : "Answer a few questions and get a Batangas property value guide using the selected BIR reference and disclosed property factors. Available asking listings are shown as context; their prices do not directly determine the estimate.") + '</p>' +
+      /* One job per screen. This page is the HUMAN step - talk to a person about
+       * an appraisal - so the primary action is the form, which is right there.
+       *
+       * It used to lead with "Start the value guide" -> #/home#sf-estimator,
+       * which was both a loop (the value guide lives on the home page this
+       * route competes with) and broken: the router splits on "?" only, so
+       * "#/home#sf-estimator" parses to the path "home#sf-estimator", matches no
+       * branch, and renders home without ever scrolling to the estimator.
+       * data-est-services is the estimator's own handler and does the navigate +
+       * scroll properly. */
+      '<div class="sf-pv-actions"><a class="sf-primary-btn" href="#sf-pv-form" data-sf-scroll="sf-pv-form">Request an appraisal consultation</a>' +
+      '<a class="sf-outline-btn" href="#/search">Browse properties</a></div>' +
+      '<p class="sf-pv-reassure">No obligation to sell, and none to list with us.</p>' +
+      '<p class="sf-pv-or"><a href="#/home" data-est-services>Not ready yet? Start with the free value guide</a></p>' +
+      '</div>' +
+
+      '<div class="sf-pv-steps"><h2 class="sf-pv-h2">What happens</h2><ol class="sf-pv-steps-list">' +
+      '<li><span>01</span><div><b>Get your indicative value</b><p>The value guide takes about a minute. You get a BIR zonal reference and an indicative market range immediately.</p></div></li>' +
+      '<li><span>02</span><div><b>Have a short call with our team</b><p>A member of ES Realty reviews your guide with you and asks about your plans, timing and the property itself.</p></div></li>' +
+       '<li><span>03</span><div><b>Discuss a professional valuation</b><p>If a formal valuation fits your needs, we can discuss the scope, documents, site review, and fee before you decide. There is no pressure to list.</p></div></li>' +
+      '</ol></div>' +
+
+      '<div class="sf-pv-form-wrap" id="sf-pv-form"><div class="sf-pv-form-copy"><h2 class="sf-pv-h2">Talk to us about your property</h2>' +
+      '<p>Tell us a little about what you are planning. We reply within one business day.</p>' +
+       '<ul class="sf-pv-list"><li>No obligation to list your property</li><li>A real person reviews your request</li><li>BIR reference and disclosed estimate factors</li><li>Available asking listings are context, not confirmed sale prices</li></ul></div>' +
+      '<form class="sf-pv-form" data-sf-consult><label>Full name<input name="name" required maxlength="160" autocomplete="name" placeholder="Juan dela Cruz"></label>' +
+      '<label>Mobile number<input name="phone" required maxlength="50" autocomplete="tel" placeholder="09xx xxx xxxx"></label>' +
+      '<label>Email<input type="email" name="email" maxlength="254" autocomplete="email" placeholder="you@example.com"></label>' +
+      '<label>What are you planning?<select name="message"><option value="">Choose one</option>' +
+      '<option>Just want to know my property value</option><option>I want to sell soon</option>' +
+      '<option>I am preparing to sell in the future</option><option>I am looking to buy</option><option>Renting out my property</option></select></label>' +
+       '<label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about my property. Read our <a href="#/privacy">Privacy Notice</a>. I can opt out of follow-up at any time.</span></label>' +
+       '<button class="sf-primary-btn" type="submit">Request an appraisal consultation</button>' +
+      '<p class="sf-pv-micro">Takes 30 seconds. No spam. No obligation.</p>' +
+      '<p class="sf-form-status" aria-live="polite"></p></form></div></section>');
+  }
+
+  /* Contact details arrive asynchronously. They used to trigger a full
+   * renderCurrent(), which rebuilt the home page from scratch - wiping the
+   * estimator's in-progress state and throwing away the reader's scroll
+   * position. Only the two contact-dependent regions are patched now. */
+  /* Contact details arrive asynchronously, so patch the two regions that depend
+   * on them.
+   *
+   * It used to rewrite the contact band's eyebrow, heading and description from
+   * siteContact as well. That made the page's own editorial copy unreachable,
+   * and since the settings fetch fails CORS in most environments, whatever the
+   * hard-coded defaults happened to say won - which is how the closed shophouse
+   * campaign became the live homepage's headline.
+   *
+   * Now the page owns its copy and settings only supply contact details. If the
+   * band copy is ever to be CMS-driven that should be an explicit field, not a
+   * side effect of a fetch that may not succeed. */
+  function applyContact() {
+    try {
+      var call = document.querySelector("[data-sf-sticky-call]");
+      if (call && siteContact.phone) {
+        call.href = "tel:" + String(siteContact.phone).replace(/[^\d+]/g, "");
+        call.hidden = false;
+      }
+      var details = document.querySelector("#sf-contact .sf-contact-details");
+      if (details) details.innerHTML = contactDetails();
+    } catch (e) { /* noop */ }
   }
 
   function loadSiteContact() {
     if (!API || !API.siteSettings) {
       siteContact = Object.assign({}, siteContact, { contactLoaded: true });
+      applyContact();
       return;
     }
     API.siteSettings().then(function (result) {
       if (result && result.data) siteContact = Object.assign({}, siteContact, result.data);
       siteContact.contactLoaded = true;
-      if (active && route().path === "home") renderCurrent();
+      applyContact();
     }).catch(function () {
       siteContact = Object.assign({}, siteContact, { contactLoaded: true });
     });
@@ -149,9 +382,16 @@
     return labels[value] || String(value || "Property").replace(/-/g, " ");
   }
 
+  /* Grid/list is a search-results preference only. It used to be read from the
+   * shared view state by every card, so toggling list view on /search left home
+   * and /shophouse rendering the same properties as full-width list rows. */
+  function isListView() {
+    return viewState.mode === "list" && route().path === "search";
+  }
+
   function card(listing) {
     var price = money(listing.display_price, listing.offer_type === "rent" ? "/mo" : "");
-    return '<article class="sf-property-card sf-reveal sf-reveal-up ' + (viewState.mode === "list" ? "is-list" : "") + '">' +
+    return '<article class="sf-property-card sf-reveal sf-reveal-up ' + (isListView() ? "is-list" : "") + '">' +
       '<button class="sf-card-open" data-sf-listing="' + esc(listing.id) + '" aria-label="Open ' + esc(listing.title) + '"></button>' +
       '<div class="sf-card-media">' + cardMedia(listing) +
       '<div class="sf-card-tags"><span>' + esc(listing.offer_type === "rent" ? "For rent" : "For sale") + '</span>' + (listing.featured ? '<span class="featured">Featured</span>' : '') + '</div>' +
@@ -172,16 +412,110 @@
     return html;
   }
 
+  /* ------------------------------------------------------------------
+   * Search filter model - single source of truth.
+   *
+   * The Properties page used to ship a dead end: the nav linked to
+   * "#/search?state=Batangas", but searchFields() only rendered city,
+   * property_type and max_price. The state filter was applied to the query but
+   * appeared nowhere on screen, so the visitor saw "No properties found" with
+   * an empty Location box and no way to tell why or clear it. offer_type
+   * (linked from the Renting service) had the same problem.
+   *
+   * Every parameter that narrows the result set is now declared here, rendered
+   * in the form, shown as a removable chip when active, and dropped by
+   * clearFilters(). Adding a filter means adding one line here.
+   * ------------------------------------------------------------------ */
+  var FILTERS = [
+    { name: "city", label: "Location", kind: "text", placeholder: "City or municipality" },
+    { name: "state", label: "State / province", kind: "text", placeholder: "e.g. Batangas" },
+    { name: "property_type", label: "Property type", kind: "select", options: [
+      ["", "Any property"], ["house-and-lot", "House & Lot"], ["condominium", "Condominium"],
+      ["lot-only", "Land"], ["townhouse", "Townhouse"], ["shophouse", "Shophouse"],
+      ["commercial", "Commercial"], ["industrial", "Industrial"], ["agricultural", "Agricultural"]
+    ] },
+    { name: "offer_type", label: "Listing type", kind: "select", options: [
+      ["", "For sale or rent"], ["sale", "For sale"], ["rent", "For rent"]
+    ] },
+    { name: "max_price", label: "Budget up to", kind: "select", options: [
+      ["", "Any price"], ["3000000", "₱3M"], ["5000000", "₱5M"],
+      ["10000000", "₱10M"], ["20000000", "₱20M"]
+    ] }
+  ];
+
+  /* Sort and paging are not filters - they change presentation, not the result
+     set, so they stay out of the chip list. */
+  var NON_FILTER_PARAMS = ["sort", "page", "per_page", "section", "service"];
+
+  function activeFilters(params) {
+    return FILTERS
+      .map(function (f) { return { def: f, value: params.get(f.name) }; })
+      .filter(function (f) { return f.value !== null && f.value !== ""; });
+  }
+
+  function filterSummary(f) {
+    if (f.def.kind === "select") {
+      var hit = f.def.options.filter(function (o) { return o[0] === f.value; })[0];
+      return hit ? hit[1] : f.value;
+    }
+    return f.value;
+  }
+
+  /* A search link with the named filters removed, so "clear" never has to guess
+     at the current URL. */
+  function clearLink(drop, extra) {
+    var p = new URLSearchParams();
+    forEachParam(function (name, value) {
+      if (NON_FILTER_PARAMS.indexOf(name) > -1) return;
+      if ((drop || []).indexOf(name) > -1) return;
+      p.set(name, value);
+    });
+    var q = p.toString();
+    var hash = (extra || "") + (q ? "?" + q : "");
+    return hash ? "#/search" + hash : "#/search";
+  }
+
+  function forEachParam(fn) {
+    var raw = location.hash.replace(/^#\/?/, "");
+    var parts = raw.split("?");
+    var params = new URLSearchParams(parts.slice(1).join("?"));
+    /* URLSearchParams.forEach invokes fn(value, key) - value FIRST. Reading it
+     * as (key, value) produced links like "#/search?Batangas=state". */
+    params.forEach(function (value, name) { fn(name, value); });
+  }
+
   function searchFields(params, compact) {
-    function selected(name, value) { return params.get(name) === value ? " selected" : ""; }
-    var types = [["", "Any property"], ["house-and-lot", "House & Lot"], ["condominium", "Condominium"], ["lot-only", "Land"], ["townhouse", "Townhouse"], ["shophouse", "Shophouse"], ["commercial", "Commercial"]];
-    var options = types.map(function (item) { return '<option value="' + item[0] + '"' + (params.get("property_type") === item[0] ? " selected" : "") + '>' + item[1] + '</option>'; }).join("");
-    return '<form class="sf-search-form' + (compact ? " compact" : "") + '" data-sf-search>' +
-      '<label><span>Location</span><input name="city" value="' + esc(params.get("city") || "") + '" placeholder="City or municipality"></label>' +
-      '<label><span>Property type</span><select name="property_type">' + options + '</select></label>' +
-      '<label><span>Budget up to</span><select name="max_price"><option value=""' + selected("max_price", "") + '>Any price</option><option value="3000000"' + selected("max_price", "3000000") + '>₱3M</option><option value="5000000"' + selected("max_price", "5000000") + '>₱5M</option><option value="10000000"' + selected("max_price", "10000000") + '>₱10M</option><option value="20000000"' + selected("max_price", "20000000") + '>₱20M</option></select></label>' +
+    var body = FILTERS.map(function (f) {
+      var value = params.get(f.name) || "";
+      if (f.kind === "text") {
+        return '<label><span>' + esc(f.label) + '</span><input name="' + esc(f.name) + '" value="' + esc(value) +
+          '" placeholder="' + esc(f.placeholder || "") + '"></label>';
+      }
+      var opts = f.options.map(function (o) {
+        return '<option value="' + esc(o[0]) + '"' + (value === o[0] ? " selected" : "") + '>' + esc(o[1]) + '</option>';
+      }).join("");
+      return '<label><span>' + esc(f.label) + '</span><select name="' + esc(f.name) + '">' + opts + '</select></label>';
+    }).join("");
+    return '<form class="sf-search-form' + (compact ? " compact" : "") + '" data-sf-search>' + body +
       '<button type="submit">Search properties</button></form>';
   }
+
+  /* Removable chips for whatever is currently narrowing the results. Rendered
+     from the same FILTERS list, so a filter can never be applied without a way
+     to see and undo it. */
+  function activeFilterChips(params) {
+    var active = activeFilters(params);
+    if (!active.length) return "";
+    return '<div class="sf-active-filters"><span class="sf-active-filters-label">Filtered by</span>' +
+      active.map(function (f) {
+        return '<a class="sf-chip" href="' + esc(clearLink([f.def.name])) + '" data-sf-clear-filter="' + esc(f.def.name) + '"' +
+          ' aria-label="Remove filter ' + esc(f.def.label) + ': ' + esc(filterSummary(f)) + '">' + esc(f.def.label) + ': ' + esc(filterSummary(f)) +
+          '<b aria-hidden="true">&times;</b></a>';
+      }).join("") +
+      '<a class="sf-chip-clear" href="' + esc(clearLink(active.map(function (f) { return f.def.name; }))) + '">Clear all</a>' +
+      '</div>';
+  }
+
 
   function contactDetails() {
     var out = [];
@@ -197,27 +531,79 @@
     return out.join("");
   }
 
+  /* Rendered from the same SERVICES array as the nav dropdown, so the two can
+   * never disagree about what services exist or where they lead. */
+  function servicesSection() {
+    return '<section class="sf-section sf-services" id="sf-services"><div class="sf-section-head sf-reveal"><div>' +
+      '<p class="sf-eyebrow">WHAT WE DO</p><h2>Full-service property help, from one team.</h2></div>' +
+      '<p>Buying, selling, renting and managing property in the Philippines. Start with the service you need &mdash; we will point you to the right next step.</p></div>' +
+      '<div class="sf-services-grid">' + SERVICES.map(function (item, i) {
+        return '<a class="sf-service-card sf-reveal sf-reveal-up" href="' + esc(item.href) + '">' +
+          '<span class="sf-service-num">' + (i < 9 ? "0" : "") + (i + 1) + '</span>' +
+          '<h3>' + esc(item.label) + '</h3><p>' + esc(item.note) + '</p>' +
+          '<span class="sf-service-go" aria-hidden="true">&rarr;</span></a>';
+      }).join("") + '</div></section>';
+  }
+
+  /* Obvious placeholder rows - a bare number like "321321", or "sample3" - are
+     seed/test data, not inventory. One definition, used by every public view, so
+     the homepage and the browse list cannot disagree about what exists.
+     The data should be cleaned up in the admin; until then the public site
+     refuses to show a card whose title is just a number. */
+  function isPlaceholderListing(listing) {
+    var t = String((listing && listing.title) || "").trim();
+    if (!t) return true;
+    if (/^\d+$/.test(t)) return true;
+    if (/^sample\d*$/i.test(t)) return true;
+    return false;
+  }
+
+  function publicListings(result) {
+    return ((result && result.data) || []).filter(function (l) { return !isPlaceholderListing(l); });
+  }
+
+  /* The homepage already requested featured listings ("featured=true&per_page=6")
+   * on every load, but home() never rendered them - the response was fetched
+   * and thrown away, leaving a property site with no properties on its front
+   * page. This renders that payload instead of adding another request. */
+  function featuredSection() {
+    var live = publicListings(viewState.result);
+    if (!live.length && !viewState.loading) return "";
+
+    var body = viewState.loading
+      ? skeletons(3)
+      : '<div class="sf-property-grid sf-featured-grid">' + live.slice(0, 6).map(card).join("") + '</div>';
+
+    return '<section class="sf-section sf-featured" id="sf-featured"><div class="sf-section-head sf-reveal"><div>' +
+      '<p class="sf-eyebrow">CURRENT LISTINGS</p><h2>Properties on the market now.</h2></div>' +
+      '<p>Every listing is checked with the team before it appears here.</p></div>' + body +
+      '<div class="sf-featured-more"><a class="sf-outline-btn" href="#/search">See all properties</a></div></section>';
+  }
+
   function home() {
     return shell(
       '<section class="sf-est-hero" id="sf-intro">' +
       '<div class="sf-est-hero-copy sf-reveal">' +
       '<p class="sf-eyebrow">BATANGAS VALUE GUIDE</p>' +
       '<h1>What is your <em>property worth?</em></h1>' +
-      '<p class="sf-est-hero-lede">An instant, free Batangas guide estimate for vacant land and house-and-lot property — showing the official BIR zonal reference separately from an ES Realty market guide estimate. A starting point for a conversation, not a certified appraisal.</p>' +
-      '<div class="sf-est-proof"><span><b>BIR Zonal</b> reference schedules</span><span><b>ES Realty</b> market guide</span><span><b>Free &amp; instant</b> estimate</span></div>' +
-      '<div class="sf-hero-actions sf-est-hero-actions"><a class="sf-hero-btn" href="#sf-estimator" data-est-services>Get My Free Estimate →</a><a class="sf-hero-link" href="#/search?state=Batangas">Browse Batangas Properties</a></div>' +
+      '<p class="sf-est-hero-lede">An instant, free Batangas property value guide. See the selected BIR zonal reference separately from an ES Realty estimate calculated using disclosed location and property factors, with its range and source details.</p>' +
+      '<div class="sf-est-proof"><span><b>BIR Zonal</b> reference schedules</span><span><b>ES Realty</b> factor-based estimate</span><span><b>Free &amp; instant</b> guide</span></div>' +
+      '<p class="sf-est-hero-bir-note">ES Realty is independent of the BIR. BIR values are shown as tax-reference data.</p>' +
+      '<div class="sf-hero-actions sf-est-hero-actions"><a class="sf-hero-btn" href="#sf-estimator" data-est-services>Get My Free Estimate →</a><a class="sf-hero-link" href="#/search">Browse Properties</a></div>' +
       '</div>' +
       (typeof window.ESREALTY_EST === "object" && window.ESREALTY_EST.cardSection ? window.ESREALTY_EST.cardSection() : '<section class="sf-section sf-est" id="sf-estimator" data-est-root><div class="sf-est-card" data-est-card><p class="sf-est-empty">Loading the value guide…</p></div></section>') +
       '</section>' +
 
-      '<section class="sf-section sf-guide-summary"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">WHAT YOU RECEIVE</p><h2>A clearer answer before your next property step.</h2></div><p>Start with the official reference. Ask for a provisional asking-price guide or professional review when the decision needs more evidence.</p></div>' +
+      '<section class="sf-section sf-guide-summary"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">WHAT YOU RECEIVE</p><h2>A clearer answer before your next property step.</h2></div><p>Start with the official reference, then review the factor-based estimate, asking-price guide, data match, and next professional step.</p></div>' +
       '<div class="sf-guide-summary-grid"><article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>01</b><h3>Official BIR reference</h3><p>The published zonal rate for your selected Batangas location and classification.</p></article>' +
-      '<article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>02</b><h3>Asking-price guidance</h3><p>A provisional guide without comparables, or an evidence-backed recommendation when listings are available.</p></article>' +
+      '<article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>02</b><h3>Asking-price guidance</h3><p>A factor-based starting point with its range and calculation details shown. Available asking listings provide context; their prices do not directly set the estimate.</p></article>' +
       '<article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>03</b><h3>Professional next step</h3><p>Request ES Realty guidance or a licensed-appraiser consultation when you need a defensible opinion.</p></article></div></section>' +
-      '<section class="sf-process sf-process-compact" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">HOW IT WORKS</p><h2>Three simple steps to a <em>better decision.</em></h2></div><p>No account is needed to start the guide.</p></div><div class="sf-process-steps"><article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Choose the property</h3><p>Select the municipality, barangay, street, classification, and lot area.</p></article><article class="sf-process-step sf-reveal sf-reveal-up"><b>02</b><h3>Read the reference</h3><p>See the official BIR rate, provisional asking-price guidance, and evidence status.</p></article><article class="sf-process-step sf-reveal sf-reveal-up"><b>03</b><h3>Choose your next step</h3><p>Email the report, browse properties, or request professional appraisal help.</p></article></div></section>' +
+      servicesSection() +
+      featuredSection() +
+      '<section class="sf-process sf-process-compact" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">HOW IT WORKS</p><h2>Three simple steps to a <em>better decision.</em></h2></div><p>No account is needed to start the guide.</p></div><div class="sf-process-steps"><article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Choose the property</h3><p>Select the municipality, barangay, street, classification, and lot area.</p></article><article class="sf-process-step sf-reveal sf-reveal-up"><b>02</b><h3>Review the result</h3><p>See the BIR reference, factor-based estimate, recommended asking price, and data match.</p></article><article class="sf-process-step sf-reveal sf-reveal-up"><b>03</b><h3>Choose your next step</h3><p>Save the guide, browse properties, or request a professional valuation consultation.</p></article></div></section>' +
 
       '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div class="sf-reveal"><p class="sf-eyebrow">LOCAL BATANGAS GUIDANCE</p><h2>Ready for the <em>next check?</em></h2><p>Tell us whether you are buying, selling, valuing, or reviewing a property. We will help you identify the next practical step.</p><div class="sf-contact-details">' + contactDetails() + '</div></div>' +
-      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="Mobile number"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Tell us the property location and what you need..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about this request.</span></label><button type="submit">Talk to a specialist →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>'
+      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="Mobile number"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Tell us the property location and what you need..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about this request. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button type="submit">Talk to a specialist →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>'
     );
   }
 
@@ -344,19 +730,20 @@
     '</div></div></section>';
   }
 
-function shophousePage() {
-    var listings = viewState.result && viewState.result.data || [];
-    // Frontend-only filter: hide obvious placeholder/test listings (numeric titles like 321321, sample)
-    var displayListings = listings.filter(function (l) {
-      var t = String(l.title || "").trim().toLowerCase();
-      if (!t) return false;
-      if (/^\d+$/.test(t)) return false;
-      if (/^sample\d*$/i.test(t)) return false;
-      return true;
-    });
-    if (!displayListings.length && listings.length) displayListings = listings;
-    var cards = viewState.loading ? skeletons(3) : displayListings.length ? displayListings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
-    var heroImage = (displayListings.length ? firstImage(displayListings[0]) : "") || (listings.length ? firstImage(listings[0]) : "");
+  /* ==================================================================
+   * PARKED FOR RELAUNCH - shophousePage() and projectBtPage() below are
+   * no longer routed to. Project B.T and the shophouse campaign are
+   * temporarily closed and both resolve to comingSoonPage().
+   *
+   * The markup is kept, not deleted, so relaunching is a one-line change in
+   * renderCurrent() plus restoring the nav entries in NAV/PROJECT_BT. Their
+   * CSS (sf-marquee, sf-why-grid, sf-roi, sf-construction, bt-*) is still in
+   * css/styles.css for the same reason - do not treat it as dead CSS yet.
+   * ================================================================== */
+  function shophousePage() {
+    var listings = publicListings(viewState.result);
+    var cards = viewState.loading ? skeletons(3) : listings.length ? listings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
+    var heroImage = listings.length ? firstImage(listings[0]) : "";
     var cities = ["Batangas City", "Lipa", "Tanauan", "Santo Tomas", "Imus", "Bacoor", "Dasmariñas", "General Trias", "Santa Rosa", "Calamba", "Biñan", "Angeles", "San Fernando", "Antipolo", "Taytay", "Iloilo City", "Cebu City", "Lapu-Lapu", "Cagayan de Oro", "Davao City", "General Santos"];
     var chips = cities.map(function (city, i) { return '<a class="sf-reveal sf-reveal-zoom" style="--d:' + (Math.min(i, 11) * 0.05).toFixed(2) + 's" href="#/search?city=' + encodeURIComponent(city) + '">' + esc(city) + '</a>'; }).join("");
     return shell('<section class="sf-hero"><div class="sf-hero-copy"><p class="sf-eyebrow">PHILIPPINE SHOPHOUSE SPECIALISTS</p><h1>Shophouses that <em>work</em> harder.</h1>' +
@@ -384,22 +771,16 @@ function shophousePage() {
       '<section class="sf-locations"><div class="sf-locations-wrap"><div class="sf-reveal"><p class="sf-eyebrow">LOCATIONS WE COVER</p><h2>Where shophouse demand is growing.</h2><p>From CALABARZON to Central Visayas, ES Realty tracks live-work listings in the provinces where daily commerce is on the rise. Tap a city to browse its current inventory.</p></div>' +
       '<div class="sf-loc-chips">' + chips + '</div></div></section>' +
 
-      '<section class="sf-testimonials"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">CLIENT VOICES</p><h2>Owners who put the ground floor to work.</h2></div></div><div class="sf-quote-grid">' +
-      '<figure class="sf-quote sf-reveal sf-reveal-up"><blockquote>&ldquo;We run the store downstairs and rent the room upstairs. Two incomes from one lot — that changed our math.&rdquo;</blockquote><figcaption><b>Aling Cora</b><span>Sari-sari store owner · Lipa, Batangas</span></figcaption></figure>' +
-      '<figure class="sf-quote sf-reveal sf-reveal-up"><blockquote>&ldquo;ES Realty walked us through feasibility and financing on the same call. Our clinic signed a five-year lease within months.&rdquo;</blockquote><figcaption><b>Dr. Marquez</b><span>Dental clinic founder · Dasmariñas, Cavite</span></figcaption></figure>' +
-      '<figure class="sf-quote sf-reveal sf-reveal-up"><blockquote>&ldquo;I started with one shophouse and now hold four. The pipeline they showed me is exactly what I bought.&rdquo;</blockquote><figcaption><b>Robert T.</b><span>Repeat investor · Santa Rosa, Laguna</span></figcaption></figure>' +
-      '</div></section>' +
-
       '<section class="sf-roi"><div class="sf-reveal"><p class="sf-eyebrow">THE INVESTOR CASE</p><h2>A shophouse pays you <em>twice.</em></h2><p>Ground-floor trade covers operations while the residence above rents or appreciates. Most of our buyers target returns from both halves of the same building.</p>' +
       '<div class="sf-roi-stats"><div class="sf-roi-stat sf-reveal sf-reveal-up"><b>6–8%</b><span>Indicative gross rental yield on shophouse units</span></div><div class="sf-roi-stat sf-reveal sf-reveal-up"><b data-count="2">2</b><span>Income streams — retail ground floor and residence above</span></div><div class="sf-roi-stat sf-reveal sf-reveal-up"><b data-count="3" data-suffix="+">3+</b><span>Potential tenants a single unit can host over its life</span></div></div></div>' +
       '<div class="sf-guide sf-reveal sf-reveal-right"><h3>Download the Shophouse Investment Guide</h3><p>Financing paths, a location checklist, and unit economics — free for buyers who want the full picture before they view.</p>' +
-      '<form data-sf-guide><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me by email about the guide and relevant listings.</span></label><button type="submit">Send me the guide →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>' +
+      '<form data-sf-guide><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me by email about the guide and relevant listings. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button type="submit">Send me the guide →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>' +
 
       '<section class="sf-process" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">REAL ESTATE SERVICES</p><h2>Local guidance for every <em>property decision.</em></h2></div><p>Practical real estate support for buyers, sellers, landlords, investors, and developers across the Philippines.</p></div><div class="sf-process-steps">' +
       '<article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Property Sales &amp; Acquisition</h3><p>Buy or sell residential, commercial, land, condominium, townhouse, and shophouse properties with transaction guidance.</p></article>' +
       '<article class="sf-process-step sf-reveal sf-reveal-up"><b>02</b><h3>Leasing &amp; Tenant Placement</h3><p>Find suitable spaces, screen tenant requirements, and structure leasing conversations for homes and businesses.</p></article>' +
       '<article class="sf-process-step sf-reveal sf-reveal-up"><b>03</b><h3>Investment &amp; Feasibility</h3><p>Review purchase costs, financing, rental potential, development options, cash flow, and expected returns.</p></article>' +
-      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>04</b><h3>Property Appraisal &amp; Valuation</h3><p>Prepare market-based valuation guidance using location, comparable properties, improvements, and current demand.</p></article>' +
+      '<article class="sf-process-step sf-reveal sf-reveal-up"><b>04</b><h3>Property Appraisal &amp; Valuation</h3><p>Review the BIR reference, disclosed estimate factors, property improvements, and available local listing context; discuss a formal valuation assignment when needed.</p></article>' +
       '<article class="sf-process-step sf-reveal sf-reveal-up"><b>05</b><h3>Property Management</h3><p>Support owners with tenant coordination, rent tracking, maintenance, property records, and day-to-day oversight.</p></article>' +
       '<article class="sf-process-step sf-reveal sf-reveal-up"><b>06</b><h3>Due Diligence Coordination</h3><p>Organize checks for title, zoning, taxes, permits, documents, site condition, and other closing requirements.</p></article>' +
       '<article class="sf-process-step sf-reveal sf-reveal-up"><b>07</b><h3>Project Development Advisory</h3><p>Assess sites, highest and best use, product positioning, unit economics, and development planning.</p></article>' +
@@ -407,7 +788,7 @@ function shophousePage() {
       '</div></section>' +
 
       '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div class="sf-reveal"><p class="sf-eyebrow">' + esc(siteContact.eyebrow) + '</p><h2>' + esc(siteContact.title) + '</h2><p>' + esc(siteContact.description) + '</p><div class="sf-contact-details">' + contactDetails() + '</div></div>' +
-      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="Mobile number"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Province, budget, and business idea..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about this request.</span></label><button type="submit">Request a call →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>');
+      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="Mobile number"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Province, budget, and business idea..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about this request. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button type="submit">Request a call →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>');
   }
 
   function btStars(score) {
@@ -422,7 +803,8 @@ function shophousePage() {
       '<div class="bt-actions"><button class="bt-button bt-button-dark" data-bt-inquire="Project B.T">Inquire About Project B.T <span>↗</span></button><a class="bt-link" href="#bt-concept" data-sf-scroll="#bt-concept">Explore the concept <span>↓</span></a></div>' +
       '<div class="bt-hero-proof"><span><b>01</b> Business below</span><span><b>02</b> Living above</span><span><b>∞</b> Value over time</span></div></div>' +
       '<div class="bt-hero-media"><img src="' + heroImage + '" alt="Modern white and wood two-storey shophouse exterior"><div class="bt-image-label"><span>Mixed-use by design</span><b>Built for business. Made for living.</b></div><div class="bt-hero-stamp">B.T<br><small>BAHAY<br>TINDAHAN</small></div></div></section>' +
-'<section class="bt-intro bt-section"><div class="bt-section-label">01 / THE OPPORTUNITY</div><div class="bt-intro-grid"><div><h2>One address.<br><em>Multiple incomes.</em></h2></div><div class="bt-intro-copy"><p>Project B.T (BahayTindahan) is a modern mixed-use development combining commercial and residential spaces within a single two-storey building. The ground floor is designed for retail and business; the second floor becomes a residence, office, or rental unit.</p><p>It is a practical response to the way growing Philippine communities live and trade: close to home, visible from the road, and flexible enough to evolve with the owner.</p><div class="bt-note"><span>INSPIRATION NOTE</span><b>Informed by proven models like Alfamart-style retail fronts and townhouse-store concepts.</b></div></div></div></section>' +
+
+'<section class="bt-intro bt-section"><div class="bt-section-label">01 / THE OPPORTUNITY</div><div class="bt-intro-grid"><div><h2>One address.<br><em>Multiple incomes.</em></h2></div><div class="bt-intro-copy"><p>Project B.T (BahayTindahan) is a modern mixed-use development combining commercial and residential spaces within a single two-storey building. The ground floor is designed for retail and business; the second floor becomes a residence, office, or rental unit.</p><p>It is a practical response to the way growing Philippine communities live and trade: close to home, visible from the road, and flexible enough to evolve with the owner.</p><div class="bt-note"><span>INSPIRATION NOTE</span><b>Informed by proven models like Alfamart-style retail fronts and townhouse-store concepts.</b></div></div></div></section>' +
 
       '<section class="bt-mission"><div class="bt-mission-image"><img src="' + conceptImage + '" alt="Warm modern mixed-use interior and exterior concept" loading="lazy"><div class="bt-image-caption">A compact footprint with room to grow</div></div><div class="bt-mission-copy"><div class="bt-section-label">02 / OUR NORTH STAR</div><h2>Real estate that works as hard as its owner.</h2><div class="bt-mission-block"><span>MISSION</span><p>Develop modern, affordable, and profitable shophouse communities that support local businesses while creating sustainable long-term real estate investments.</p></div><div class="bt-mission-block"><span>VISION</span><p>Be the leading developer of high-quality mixed-use developments in strategic locations, creating lasting value for business owners, residents, investors, and communities throughout the Philippines.</p></div></div></section>' +
 
@@ -447,17 +829,42 @@ function shophousePage() {
 
       '<section class="bt-highlights bt-section"><div><div class="bt-section-label">09 / INVESTMENT HIGHLIGHTS</div><h2>Not just a building.<br><em>A repeatable model.</em></h2></div><div class="bt-highlight-grid"><article><span>01</span><h3>Rental income</h3><p>Generate income from the upstairs residence, office, or rental unit while the ground floor serves business activity.</p></article><article><span>02</span><h3>Capital appreciation</h3><p>Own a visible, useful asset in a growing community with multiple potential future users.</p></article><article><span>03</span><h3>Scalable investment</h3><p>Start with one unit or a 3-sublot development and build a repeatable shophouse portfolio.</p></article></div></section>' +
 
-      '<section class="bt-contact" id="bt-inquiry"><div class="bt-contact-mark">BT</div><div class="bt-contact-copy"><div class="bt-section-label">10 / START A CONVERSATION</div><h2>Build the next<br><em>Bahay Tindahan.</em></h2><p>Tell us which product direction fits your site, business, or investment plan. ES REALTY will help you explore the right next step.</p></div><form class="bt-inquiry-form" data-bt-inquiry-form><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Interest<select name="interest"><option>Project B.T overview</option><option>Testarossa — Essential</option><option>Carrera — Signature</option><option>Ultima — Prestige</option><option>Site / development partnership</option></select></label><label>Message<textarea name="message" rows="3" maxlength="2000" placeholder="Tell us about your location, business, or investment goal."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about Project B.T and related developments.</span></label><button class="bt-button bt-button-light" type="submit">Send inquiry <span>↗</span></button><p class="bt-form-status" aria-live="polite"></p></form></section>' +
+      '<section class="bt-contact" id="bt-inquiry"><div class="bt-contact-mark">BT</div><div class="bt-contact-copy"><div class="bt-section-label">10 / START A CONVERSATION</div><h2>Build the next<br><em>Bahay Tindahan.</em></h2><p>Tell us which product direction fits your site, business, or investment plan. ES REALTY will help you explore the right next step.</p></div><form class="bt-inquiry-form" data-bt-inquiry-form><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Interest<select name="interest"><option>Project B.T overview</option><option>Testarossa — Essential</option><option>Carrera — Signature</option><option>Ultima — Prestige</option><option>Site / development partnership</option></select></label><label>Message<textarea name="message" rows="3" maxlength="2000" placeholder="Tell us about your location, business, or investment goal."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about Project B.T and related developments. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button class="bt-button bt-button-light" type="submit">Send inquiry <span>↗</span></button><p class="bt-form-status" aria-live="polite"></p></form></section>' +
       '<section class="bt-thanks"><p>ES REALTY</p><h2>Thank you for imagining<br><em>what is possible.</em></h2><a href="#/home">Return to ES Realty <span>↗</span></a></section>');
+  }
+
+  /* Distinguishes the two very different empty cases. Telling someone "no
+   * properties found, try changing your filters" when they never set a filter
+   * and the inventory is simply empty is both wrong and unactionable. */
+  function emptyResults(params) {
+    var active = activeFilters(params);
+    if (active.length) {
+      var chips = active.map(function (f) { return filterSummary(f); }).join(", ");
+      return '<div class="sf-empty"><div>ES</div><h3>No properties match these filters</h3>' +
+        '<p>Nothing matches ' + esc(chips) + ' right now. Clear the filters to see everything we publish.</p>' +
+        '<a class="sf-outline-btn" href="' + esc(clearLink(active.map(function (f) { return f.def.name; }))) + '">Clear all filters</a></div>';
+    }
+    return '<div class="sf-empty"><div>ES</div><h3>No properties published yet</h3>' +
+      '<p>There are no live listings on the site at the moment. Get your property value in the meantime, or tell us what you are looking for and we will come back to you.</p>' +
+      '<div class="sf-empty-actions"><a class="sf-primary-btn" href="#/property-value">Get my property value</a>' +
+      '<a class="sf-outline-btn" href="#/search">Refresh</a></div></div>';
   }
 
   function searchPage(params) {
     var result = viewState.result || { data: [], total: 0, page: 1, total_pages: 0 };
-    var cards = viewState.loading ? skeletons(6) : result.data.length ? result.data.map(card).join("") : empty(viewState.error);
+    /* Same placeholder filter as the homepage, so the two never disagree. */
+    var rows = publicListings(result);
+    var total = rows.length === (result.data || []).length
+      ? Number(result.total || 0)
+      : rows.length;
+    var cards = viewState.loading ? skeletons(6)
+      : rows.length ? rows.map(card).join("")
+      : emptyResults(params);
     var page = Number(result.page || 1), pages = Number(result.total_pages || 0);
     var pager = pages > 1 ? '<div class="sf-pager"><button data-sf-page="' + (page - 1) + '"' + (page <= 1 ? " disabled" : "") + '>Previous</button><span>Page ' + page + ' of ' + pages + '</span><button data-sf-page="' + (page + 1) + '"' + (page >= pages ? " disabled" : "") + '>Next</button></div>' : "";
      return shell('<section class="sf-search-page"><div class="sf-search-intro"><p class="sf-eyebrow">PROPERTY SEARCH</p><h1>Find a property that fits.</h1><p>Browse current property inventory across the Philippines.</p></div>' +
-      '<div class="sf-filter-stick">' + searchFields(params, true) + '</div><div class="sf-results-bar"><p><b>' + esc(result.total || 0) + '</b> properties</p>' +
+      '<div class="sf-filter-stick">' + searchFields(params, true) + '</div>' + activeFilterChips(params) +
+      '<div class="sf-results-bar"><p><b>' + esc(total) + '</b> ' + (Number(total) === 1 ? "property" : "properties") + '</p>' +
       '<div><label class="sf-visually-hidden" for="sf-sort">Sort properties</label><select id="sf-sort" data-sf-sort><option value="date_desc"' + (params.get("sort") === "date_desc" || !params.get("sort") ? " selected" : "") + '>Newest</option><option value="price_asc"' + (params.get("sort") === "price_asc" ? " selected" : "") + '>Price: Low to high</option><option value="price_desc"' + (params.get("sort") === "price_desc" ? " selected" : "") + '>Price: High to low</option></select>' +
       '<button data-sf-mode="grid" aria-pressed="' + (viewState.mode === "grid") + '" class="' + (viewState.mode === "grid" ? "active" : "") + '">Grid</button><button data-sf-mode="list" aria-pressed="' + (viewState.mode === "list") + '" class="' + (viewState.mode === "list" ? "active" : "") + '">List</button><button data-sf-mode="map" aria-pressed="' + (viewState.mode === "map") + '" class="' + (viewState.mode === "map" ? "active" : "") + '">Map</button></div></div>' +
       (viewState.mode === "map"
@@ -540,67 +947,96 @@ function shophousePage() {
       (listing.details && listing.details.license_to_sell ? '<section class="sf-dhsud"><span class="sf-badge">' + esc(listing.details.license_to_sell) + '</span> DHSUD License to Sell number for this property.</section>' : '') +
       '<section><h2>Location</h2><div class="sf-detail-map" id="sf-detail-map"><span>' + esc(locationText(listing)) + '</span></div></section></article>' +
       '<aside class="sf-contact-card"><p>Listed at</p><h2>' + esc(money(listing.display_price, listing.offer_type === "rent" ? "/mo" : "")) + '</h2>' +
-      '<button class="sf-outline-btn" data-sf-save="' + esc(listing.id) + '">♡ Save this property</button><form data-sf-inquiry="' + esc(listing.id) + '"><h3>Request more information</h3><label>Full name<input name="full_name" required maxlength="160"></label><label>Email<input type="email" name="email" maxlength="254"></label><label>Phone<input name="phone" required maxlength="50"></label><label>Message<textarea name="message" rows="4" maxlength="5000" placeholder="I would like to know more about this property."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to the processing of my contact details for this inquiry.</span></label><button type="submit">Send inquiry</button><p class="sf-form-status" aria-live="polite"></p></form></aside></div></section>');
+      '<button class="sf-outline-btn" data-sf-save="' + esc(listing.id) + '">♡ Save this property</button><form data-sf-inquiry="' + esc(listing.id) + '"><h3>Request more information</h3><label>Full name<input name="full_name" required maxlength="160"></label><label>Email<input type="email" name="email" maxlength="254"></label><label>Phone<input name="phone" required maxlength="50"></label><label>Message<textarea name="message" rows="4" maxlength="5000" placeholder="I would like to know more about this property."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to the processing of my contact details for this inquiry. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button type="submit">Send inquiry</button><p class="sf-form-status" aria-live="polite"></p></form></aside></div></section>');
   }
 
-  function patchHome() {
-    var listings = viewState.result && viewState.result.data || [];
-    var displayListings = listings.filter(function (l) {
-      var t = String(l.title || "").trim().toLowerCase();
-      if (!t) return false;
-      if (/^\d+$/.test(t)) return false;
-      if (/^sample\d*$/i.test(t)) return false;
-      return true;
-    });
-    if (!displayListings.length && listings.length) displayListings = listings;
-    var cards = viewState.loading ? skeletons(3) : displayListings.length ? displayListings.slice(0, 6).map(card).join("") : empty(viewState.error || "New listings will appear here once published.");
-    var grid = host.querySelector(".sf-property-grid");
-    if (grid) grid.innerHTML = cards;
+  /* document.title was never set anywhere, so every route shipped the same
+   * title and search engines could not tell the pages apart. */
+  var PAGE_TITLES = {
+    "": "ES Realty | Free Batangas property value guide",
+    "home": "ES Realty | Free Batangas property value guide",
+    "search": "Properties for sale and rent in Batangas | ES Realty",
+    "property-value": "Get My Property Value | ES Realty",
+    "privacy": "Privacy Notice | ES Realty",
+    "project-bt": "Project B.T by ES Realty",
+    "listing": "Property details | ES Realty"
+  };
 
-    var frame = host.querySelector(".sf-hero-frame");
-    if (frame) {
-      var image = frame.querySelector("img");
-      var heroImage = (displayListings.length ? firstImage(displayListings[0]) : "") || (listings.length ? firstImage(listings[0]) : "");
-      if (heroImage) {
-        if (!image) {
-          image = document.createElement("img");
-          image.alt = "Two-storey shophouse with retail below and living space above";
-          image.fetchPriority = "high";
-          image.decoding = "async";
-          frame.insertBefore(image, frame.firstChild);
-        }
-        if (image.src !== heroImage) image.src = heroImage;
-      } else if (image) image.remove();
-    }
+  /* Services have no pages of their own yet. They resolve to the homepage
+   * services section so the nav never exposes a dead link. */
+  function scrollToSection(name) {
+    if (!name) return false;
+    var target = document.getElementById("sf-" + name) || document.getElementById(name);
+    if (!target) return false;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    return true;
+  }
 
-    var contact = host.querySelector("#sf-contact .sf-cta-band > div");
-    if (contact) {
-      var eyebrow = contact.querySelector(".sf-eyebrow");
-      var title = contact.querySelector("h2");
-      var description = contact.querySelector("p:not(.sf-eyebrow)");
-      var dets = contact.querySelector(".sf-contact-details");
-      if (eyebrow) eyebrow.textContent = siteContact.eyebrow;
-      if (title) title.textContent = siteContact.title;
-      if (description) description.textContent = siteContact.description;
-      if (dets) dets.innerHTML = contactDetails();
-    }
+  /* A single scrollIntoView is not enough for a deep link into the homepage.
+   * The value guide card expands asynchronously and the featured grid fills in
+   * after the first paint, both of which push the target further down the page.
+   * Scrolling once landed ~1000px short. Re-run until the target is actually in
+   * view, or we run out of attempts. */
+  function scrollToSectionWhenSettled(name, attemptsLeft) {
+    if (!name) return;
+    var target = document.getElementById("sf-" + name) || document.getElementById(name);
+    if (!target) return;
+    target.scrollIntoView({ behavior: "auto", block: "start" });
+    var box = target.getBoundingClientRect();
+    var inView = box.top >= -8 && box.top < window.innerHeight;
+    if (inView || attemptsLeft <= 0) return;
+    setTimeout(function () { scrollToSectionWhenSettled(name, attemptsLeft - 1); }, 180);
+  }
+
+  function setTitle(path) {
+    try {
+      var key = path.indexOf("listing/") === 0 ? "listing" : path;
+      var next = PAGE_TITLES[key] || PAGE_TITLES.home;
+      if (document.title !== next) document.title = next;
+    } catch (e) { /* noop */ }
   }
 
   function renderCurrent() {
     if (!active || !host) return;
     var current = route();
-    if (current.path === "project-bt") host.innerHTML = projectBtPage();
-    else if (current.path === "shophouse") host.innerHTML = shophousePage();
+    /* Shophouse and Project B.T are temporarily closed and are presented as a
+     * single destination. Keep #/shophouse resolvable so existing inbound links
+     * and bookmarks land on the coming-soon page instead of a 404 or a stale
+     * page, but never render the shophouse marketing content again. */
+    if (current.path === "shophouse") { go("project-bt"); return; }
+    if (current.path === "privacy") host.innerHTML = privacyPage();
+    else if (current.path === "project-bt") host.innerHTML = comingSoonPage();
+    else if (current.path === "property-value") host.innerHTML = propertyValuePage(current.params);
     else if (current.path.indexOf("listing/") === 0) host.innerHTML = detailPage(viewState.result && viewState.result.data);
     else if (current.path === "search") host.innerHTML = searchPage(current.params);
-    else if (host.querySelector(".sf-hero")) patchHome();
     else host.innerHTML = home();
+    setTitle(current.path);
+    /* Listing schema belongs to the detail page only. It used to be injected on
+     * every detail view and only removed by the NEXT detail view, so leaving a
+     * property page for home/search/shophouse left the previous listing's
+     * RealEstateListing JSON-LD sitting in <head>. */
+    if (current.path.indexOf("listing/") !== 0) {
+      var ld = document.getElementById("sf-jsonld");
+      if (ld) ld.remove();
+    }
     mountMap();
     try { if (typeof window.ESREALTY_EST === "object" && window.ESREALTY_EST.mount) window.ESREALTY_EST.mount(); } catch (e) {}
     if (current.path === "search" && viewState.mode === "map") setTimeout(sfInitMap, 60);
     bindHomeMotion();
     bindBtMotion();
-    if (current.path === "home" || current.path === "" || current.path === "shophouse") bindConstruction();
+    if (current.path === "home" || current.path === "") {
+      bindConstruction();
+      /* #/home?section=services needs a second pass: the target does not exist
+       * until home() has been written into the host above. */
+      var section = current.params.get("section");
+      if (section) {
+        var target = section === "services" ? "services" : section;
+        setTimeout(function () {
+          if (!scrollToSection(target)) scrollToSection("process");
+        }, 90);
+        setTimeout(function () { scrollToSectionWhenSettled(target, 12); }, 140);
+      }
+    }
   }
 
   function loadCurrent(force) {
@@ -613,7 +1049,9 @@ function shophousePage() {
     var key = current.path + "?" + current.params.toString();
     if (!force && key === cacheKey) { renderCurrent(); return; }
     cacheKey = key;
-    if (current.path === "project-bt") {
+    /* Static marketing routes. They must not issue a listings request, or the
+     * loading skeleton would flash on a page that has nothing to load. */
+    if (current.path === "project-bt" || current.path === "property-value" || current.path === "privacy") {
       viewState.loading = false; viewState.error = ""; viewState.result = null; renderCurrent(); return;
     }
     var id = ++requestId;
@@ -636,7 +1074,16 @@ function shophousePage() {
     });
   }
 
+  var _detailMap = null;
+
+  function destroyDetailMap() {
+    if (!_detailMap) return;
+    try { _detailMap.remove(); } catch (e) {}
+    _detailMap = null;
+  }
+
   function mountMap() {
+    destroyDetailMap();
     var listing = viewState.result && viewState.result.data;
     var element = document.getElementById("sf-detail-map");
     if (!element || !listing || listing.latitude == null || listing.longitude == null) return;
@@ -645,8 +1092,19 @@ function shophousePage() {
     var map = L.map(element, { scrollWheelZoom: false }).setView([Number(listing.latitude), Number(listing.longitude)], 15);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors" }).addTo(map);
     L.marker([Number(listing.latitude), Number(listing.longitude)], { icon: L.divIcon({ className: "es-pin-icon", html: '<svg width="38" height="48" viewBox="0 0 38 48" aria-hidden="true" focusable="false"><path d="M19 1.5C10.9 1.5 4.3 8.1 4.3 16.2 4.3 27 19 46.5 19 46.5s14.7-19.5 14.7-30.3C33.7 8.1 27.1 1.5 19 1.5z" fill="var(--accent, #F97316)"/><path d="M19 5C12.7 5 7.6 10.1 7.6 16.4c0 8.8 11.4 25.8 11.4 25.8s11.4-17 11.4-25.8C30.4 10.1 25.3 5 19 5z" fill="rgba(255,255,255,0.28)"/><circle cx="19" cy="16.5" r="7.2" fill="#fff"/><circle cx="19" cy="16.5" r="3.8" fill="var(--accent, #F97316)"/></svg>', iconSize: [38, 48], iconAnchor: [19, 47], popupAnchor: [0, -42] })}).addTo(map);
+    _detailMap = map;
   }
 
+  function closeDrops(except) {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-sf-drop]"), function (drop) {
+      if (drop !== except && drop.open) drop.open = false;
+    });
+  }
+
+  /* Opening the mobile panel previously did nothing beyond toggling a class: the
+   * page behind stayed scrollable, any accordion the user had expanded stayed
+   * expanded on reopen, and the sticky CTA bar sat on top of the bottom rows.
+   * All three are handled here so the panel behaves like an overlay. */
   function toggleMenu(open) {
     var btn = document.querySelector("[data-sf-menu]");
     var panel = document.querySelector("[data-sf-menu-panel]");
@@ -655,6 +1113,11 @@ function shophousePage() {
     btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
     btn.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
     panel.classList.toggle("open", isOpen);
+    document.body.classList.toggle("sf-menu-open", isOpen);
+    if (!isOpen) {
+      /* Collapse accordions so the panel always reopens in a known state. */
+      Array.prototype.forEach.call(panel.querySelectorAll("details[data-sf-drop]"), function (d) { d.open = false; });
+    }
   }
 
   var _homeMotionObs = null;
@@ -801,14 +1264,47 @@ function shophousePage() {
   function bind() {
     if (document.documentElement.getAttribute("data-storefront-bound") === "true") return;
     document.documentElement.setAttribute("data-storefront-bound", "true");
-    window.addEventListener("hashchange", function () { if (active) { toggleMenu(false); loadCurrent(); } });
+    window.addEventListener("hashchange", function () { if (active) { toggleMenu(false); closeDrops(null); loadCurrent(); } });
+    /* Dropdown hygiene: only one panel open at a time, close on outside click,
+     * and close on Escape. <details> gives us keyboard opening for free but no
+     * dismissal behaviour, so that part is ours.
+     *
+     * Clicks on links inside a panel are ignored here on purpose - they must
+     * keep navigating normally, and the main handler below closes the panel. */
+    document.addEventListener("click", function (event) {
+      if (event.target.closest("[data-sf-drop] a, [data-sf-drop] button")) return;
+      var drop = event.target.closest("[data-sf-drop]");
+      if (drop) {
+        closeDrops(drop);
+        /* <details> flips on the default action, which runs after dispatch, so
+         * drop.open still holds the pre-click value here. If it was open, cancel
+         * the default flip and close it. */
+        if (drop.open) { event.preventDefault(); drop.open = false; }
+        return;
+      }
+      closeDrops(null);
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape") return;
+      closeDrops(null);
+      toggleMenu(false);
+    });
     document.addEventListener("click", function (event) {
       if (!active) return;
       var menuState = document.querySelector("[data-sf-menu]");
       if (menuState && menuState.getAttribute("aria-expanded") === "true" && !event.target.closest("[data-sf-menu]") && !event.target.closest("[data-sf-menu-panel]")) toggleMenu(false);
       var menuBtn = event.target.closest("[data-sf-menu]");
       if (menuBtn) { toggleMenu(); return; }
-      if (event.target.closest("[data-sf-menu-panel]")) toggleMenu(false);
+      /* Close the panel on navigation, not on every click inside it. This used
+       * to fire on any click within the panel, which meant tapping a Services
+       * accordion header both expanded it and immediately closed the menu
+       * containing it - the two services were unreachable on a phone. Only a
+       * real destination (a link) or an action (a button) should dismiss it; a
+       * <summary> is a disclosure control and must leave the panel open. */
+      if (event.target.closest("[data-sf-menu-panel] a, [data-sf-menu-panel] button")) toggleMenu(false);
+      /* Only one dropdown open at a time, and collapse any open dropdown when a
+       * destination is chosen so the panel does not linger over the new page. */
+      if (event.target.closest("[data-sf-drop] a")) closeDrops(null);
       var auth = event.target.closest("[data-sf-auth]");
       if (auth) { openAuth(auth.getAttribute("data-sf-auth")); return; }
       var services = event.target.closest("[data-sf-services]");
@@ -926,6 +1422,32 @@ function shophousePage() {
         }).finally(function () { guideButton.disabled = false; });
         return;
       }
+      /* Project B.T launch notification. Separate inquiry_type from "guide" so
+       * the team can tell launch subscribers apart from guide downloads. */
+      var notify = event.target.closest("[data-sf-notify]");
+      if (notify) {
+        event.preventDefault();
+        var notifyStatus = notify.querySelector(".sf-form-status");
+        var notifyButton = notify.querySelector("button[type=submit]");
+        var notifyData = new FormData(notify);
+        if (!(API && API.contact)) {
+          if (notifyStatus) { notifyStatus.textContent = "The contact service is unavailable right now. Please try again in a moment."; notifyStatus.className = "sf-form-status error"; }
+          return;
+        }
+        notifyButton.disabled = true;
+        if (notifyStatus) { notifyStatus.textContent = "Sending…"; notifyStatus.className = "sf-form-status"; }
+        API.contact({
+          inquiry_type: "project-bt-notify",
+          email: notifyData.get("email"),
+          consent: notifyData.get("consent") === "on"
+        }).then(function () {
+          notify.reset();
+          if (notifyStatus) { notifyStatus.textContent = "Thank you. We will contact you when Project B.T opens."; notifyStatus.className = "sf-form-status success"; }
+        }).catch(function (error) {
+          if (notifyStatus) { notifyStatus.textContent = error.message || "Could not send. Please try again."; notifyStatus.className = "sf-form-status error"; }
+        }).finally(function () { notifyButton.disabled = false; });
+        return;
+      }
       var consult = event.target.closest("[data-sf-consult]");
       if (consult) {
         event.preventDefault();
@@ -947,7 +1469,7 @@ function shophousePage() {
           consent: consultData.get("consent") === "on"
         }).then(function () {
           consult.reset();
-          if (consultStatus) { consultStatus.textContent = "Thanks — a shophouse specialist will reach out within one business day."; consultStatus.className = "sf-form-status success"; }
+          if (consultStatus) { consultStatus.textContent = "Thanks — a member of our team will reach out within one business day."; consultStatus.className = "sf-form-status success"; }
         }).catch(function (error) {
           if (consultStatus) { consultStatus.textContent = error.message || "Could not send. Please try again."; consultStatus.className = "sf-form-status error"; }
         }).finally(function () { consultButton.disabled = false; });
@@ -958,9 +1480,13 @@ function shophousePage() {
   window.ESREALTY_STOREFRONT = {
     mount: function (options) {
       host = options.host; openAuth = options.openAuth || openAuth; active = true;
-      document.body.classList.add("storefront-active"); bind(); loadSiteContact(); loadCurrent();
+      document.body.classList.add("storefront-active", "sf-has-sticky");
+      bind(); loadSiteContact(); loadCurrent();
     },
-    unmount: function () { active = false; document.body.classList.remove("storefront-active"); },
+    unmount: function () {
+      active = false; destroyDetailMap(); cacheKey = "";
+      document.body.classList.remove("storefront-active", "sf-has-sticky");
+    },
     refresh: function () { cacheKey = ""; loadCurrent(true); }
   };
 })();

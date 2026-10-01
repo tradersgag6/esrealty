@@ -1,0 +1,1417 @@
+@charset "UTF-8";
+/* =====================================================================
+   ES Realty - public storefront design system
+   ---------------------------------------------------------------------
+   Loaded after css/styles.css so it wins on equal specificity. The legacy
+   storefront rules (700+ .sf-* declarations) live in css/storefront-legacy.css;
+   styles.css retains back-office styling plus responsive overrides for legacy
+   components not yet migrated. This file layers the editorial design system on
+   top and owns migrated/new public components. Migrate one component at a time:
+   the parked shophouse/Project B.T pages still depend on the legacy sheet.
+
+   Direction: modern editorial. Restrained palette, one accent, strong type
+   hierarchy, generous whitespace, photography doing the work. No glassmorphism
+   and no neon - the buyer audience skews 40-75 and the brokerage needs to
+   read as trustworthy rather than experimental.
+   ===================================================================== */
+
+.sf-site {
+  /* ---- Colour ---------------------------------------------------- */  --sf-ink:            #14110F;
+  --sf-ink-soft:       #443C36;
+  --sf-ink-mute:       #6B605A;
+  --sf-line:           #E4DDD5;
+  --sf-line-soft:      #F0EAE2;
+  --sf-paper:          #FFFFFF;
+  --sf-paper-warm:     #FBF8F4;
+  --sf-paper-sunk:     #F5F0E9;
+
+  --sf-accent:         #B4521F;
+  --sf-accent-hover:   #97441A;
+  --sf-accent-soft:    #FBEDE5;
+  --sf-accent-line:    #E8C4B0;
+
+  /* Contrast-checked against --sf-paper:
+     --sf-ink on paper 15.9:1, --sf-ink-soft 9.1:1, --sf-ink-mute 5.7:1,
+     --sf-accent on paper 5.6:1. All clear WCAG AA for body text. */
+  --sf-ok:             #1F6B45;
+  --sf-err:            #A32B23;
+
+  /* ---- Type ------------------------------------------------------ */
+  --sf-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --sf-display: clamp(2.1rem, 1.35rem + 3.1vw, 3.6rem);
+  --sf-h2:      clamp(1.55rem, 1.2rem + 1.4vw, 2.15rem);
+  --sf-h3:      clamp(1.1rem, 1rem + 0.45vw, 1.3rem);
+  --sf-lede:    clamp(1.02rem, 0.97rem + 0.28vw, 1.2rem);
+  --sf-body:    1rem;
+  --sf-small:   1rem;         /* 16px - keep in sync with the C1 override below */
+  --sf-micro:   0.8125rem;
+
+  /* ---- Space / shape --------------------------------------------- */
+  --sf-gutter: clamp(1.15rem, 0.7rem + 2.1vw, 2.75rem);
+  --sf-maxw:    74rem;
+  --sf-stack:   clamp(2.75rem, 2rem + 3.2vw, 5rem);
+  --sf-r-sm:    6px;
+  --sf-r:       10px;
+  --sf-r-lg:    16px;
+
+  --sf-shadow-sm: 0 1px 2px rgba(20, 17, 15, .05);
+  --sf-shadow:    0 2px 6px rgba(20, 17, 15, .06), 0 12px 28px rgba(20, 17, 15, .06);
+  --sf-shadow-lg: 0 4px 10px rgba(20, 17, 15, .07), 0 24px 60px rgba(20, 17, 15, .10);
+
+  --sf-ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+/* ---------------------------------------------------------------------
+   Utilities
+   ------------------------------------------------------------------- */
+.sf-site .sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Visible only to assistive tech, and to keyboard users once focused. This is
+   the skip-link pattern; the global one in styles.css stays for the app. */
+.sf-site :focus-visible {
+  outline: 3px solid var(--sf-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* =====================================================================
+   Navigation
+   ===================================================================== */
+.sf-header {
+  background: var(--sf-paper);
+  border-bottom: 1px solid var(--sf-line);
+}
+
+.sf-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(.35rem, .1rem + .9vw, 1.15rem);
+}
+
+.sf-nav > a,
+.sf-drop-summary {
+  /* Comfortable target size for the 40-75 audience without a fat visual. */
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  min-height: 44px;
+  padding: .35rem .2rem;
+  font-size: var(--sf-small);
+  font-weight: 600;
+  letter-spacing: .01em;
+  color: var(--sf-ink-soft);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  border-radius: var(--sf-r-sm);
+  transition: color .18s var(--sf-ease);
+}
+
+.sf-nav > a:hover,
+.sf-drop-summary:hover { color: var(--sf-accent); }
+
+/* The primary lead-gen destination is visually promoted, but not loud enough
+   to fight the hero. One accent, used once. */
+.sf-nav > a.sf-nav-cta {
+  padding: .55rem .95rem;
+  color: var(--sf-accent);
+  border: 1px solid var(--sf-accent-line);
+  border-radius: 100px;
+  background: var(--sf-accent-soft);
+}
+.sf-nav > a.sf-nav-cta:hover {
+  color: var(--sf-paper);
+  background: var(--sf-accent);
+  border-color: var(--sf-accent);
+}
+
+.sf-drop { position: relative; }
+
+.sf-drop-summary {
+  list-style: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.sf-drop-summary::-webkit-details-marker { display: none; }
+
+.sf-chev {
+  flex: none;
+  opacity: .55;
+  transition: transform .2s var(--sf-ease);
+}
+.sf-drop[open] .sf-chev { transform: rotate(180deg); }
+
+/* Dropdown panel ------------------------------------------------------- */
+.sf-drop-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  min-width: 17rem;
+  padding: .5rem;
+  background: var(--sf-paper);
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-r);
+  box-shadow: var(--sf-shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .18s var(--sf-ease), transform .18s var(--sf-ease), visibility .18s;
+  z-index: 60;
+}
+.sf-drop[open] > .sf-drop-panel {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+/* Bridge the 6px gap so the pointer can travel from summary to panel without
+   the panel closing. */
+.sf-drop-panel::before {
+  content: "";
+  position: absolute;
+  top: -7px; left: 0; right: 0;
+  height: 7px;
+}
+
+.sf-drop-panel a {
+  display: block;
+  padding: .6rem .7rem;
+  border-radius: var(--sf-r-sm);
+  text-decoration: none;
+  color: var(--sf-ink);
+  font-size: var(--sf-small);
+  font-weight: 600;
+  line-height: 1.25;
+  transition: background .15s var(--sf-ease);
+}
+.sf-drop-panel a:hover,
+.sf-drop-panel a:focus-visible { background: var(--sf-paper-sunk); }
+
+.sf-drop-panel a small {
+  display: block;
+  margin-top: .18rem;
+  font-weight: 400;
+  font-size: var(--sf-micro);
+  line-height: 1.4;
+  color: var(--sf-ink-mute);
+}
+
+.sf-drop-panel a.sf-drop-cta { color: var(--sf-accent); }
+
+/* Mobile menu accordions ------------------------------------------------ */
+.sf-menu-acc {
+  border-top: 1px solid var(--sf-line-soft);
+}
+.sf-menu-acc-summary,
+.sf-menu-acc-sum {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  /* Comfortable touch target for the 40-75 audience */
+  min-height: 52px;
+  padding: .75rem var(--sf-gutter);
+  font-size: var(--sf-body);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--sf-ink-mute);
+  background: var(--sf-paper-warm);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.sf-menu-acc-sum::-webkit-details-marker { display: none; }
+.sf-menu-acc-sum .sf-chev { transition: transform .2s var(--sf-ease); }
+.sf-menu-acc[open] > .sf-menu-acc-sum { color: var(--sf-ink); }
+.sf-menu-acc[open] > .sf-menu-acc-sum .sf-chev { transform: rotate(180deg); }
+
+.sf-menu-acc-body { background: var(--sf-paper); }
+.sf-menu-acc-body a {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding: .7rem var(--sf-gutter) .7rem calc(var(--sf-gutter) + .5rem);
+  font-size: var(--sf-body);
+  font-weight: 500;
+  color: var(--sf-ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--sf-line-soft);
+}
+.sf-menu-acc-body a:last-child { border-bottom: 0; }
+.sf-menu-acc-body a:active { background: var(--sf-paper-sunk); }
+
+/* =====================================================================
+   Project B.T - coming soon
+   ===================================================================== */
+.sf-cs {
+  display: grid;
+  gap: var(--sf-stack);
+  padding: clamp(2.5rem, 1.6rem + 4vw, 5.5rem) var(--sf-gutter) clamp(3rem, 2rem + 4vw, 6rem);
+  max-width: var(--sf-maxw);
+  margin: 0 auto;
+}
+
+.sf-cs-hero { max-width: 34rem; }
+
+.sf-cs-mark {
+  margin: 0 0 1.1rem;
+  font-size: var(--sf-small);
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--sf-ink-mute);
+}
+
+.sf-cs-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin: 0 0 1.4rem;
+  padding: .35rem .8rem .35rem .6rem;
+  font-size: var(--sf-micro);
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--sf-accent);
+  background: var(--sf-accent-soft);
+  border: 1px solid var(--sf-accent-line);
+  border-radius: 100px;
+}
+.sf-cs-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--sf-accent);
+  animation: sf-cs-pulse 2.4s var(--sf-ease) infinite;
+}
+@keyframes sf-cs-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .35; }
+}
+
+.sf-cs h1 {
+  margin: 0 0 1.15rem;
+  font-size: var(--sf-display);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -.025em;
+  color: var(--sf-ink);
+}
+
+.sf-cs-lede {
+  margin: 0 0 1.9rem;
+  max-width: 32rem;
+  font-size: var(--sf-lede);
+  line-height: 1.62;
+  color: var(--sf-ink-soft);
+}
+
+.sf-cs-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem;
+}
+
+.sf-cs-notify {
+  max-width: 34rem;
+  padding: clamp(1.4rem, 1.1rem + 1vw, 2.1rem);
+  background: var(--sf-paper);
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-r-lg);
+  box-shadow: var(--sf-shadow-sm);
+}
+
+/* Same problem as the property-value hero: .sf-cs is a 1184px container whose
+ * only two children were both capped at 34rem, so they stacked down the left
+ * and left the right 55% of the page empty. Side by side, the signup card also
+ * lands above the fold instead of below two stacked blocks. */
+@media (min-width: 1025px) {
+  .sf-cs {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: clamp(2.5rem, 5vw, 5rem);
+    align-items: start;
+  }
+  .sf-cs-hero,
+  .sf-cs-notify { max-width: none; width: 100%; }
+  /* Centre the card against the headline rather than hanging it off the top. */
+  .sf-cs-notify { margin-top: clamp(1rem, 4vw, 3.5rem); }
+}
+.sf-cs-notify h2 {
+  margin: 0 0 .4rem;
+  font-size: var(--sf-h3);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--sf-ink);
+}
+.sf-cs-notify > p {
+  margin: 0 0 1.1rem;
+  font-size: var(--sf-small);
+  line-height: 1.6;
+  color: var(--sf-ink-mute);
+}
+.sf-cs-notify form { display: grid; gap: .8rem; }
+.sf-cs-notify input[type="email"] {
+  width: 100%;
+  min-height: 48px;
+  padding: .7rem .9rem;
+  font: inherit;
+  font-size: var(--sf-body);
+  color: var(--sf-ink);
+  background: var(--sf-paper-warm);
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-r);
+}
+.sf-cs-notify input[type="email"]:focus-visible {
+  background: var(--sf-paper);
+  border-color: var(--sf-accent);
+}
+.sf-cs-notify button[type="submit"] { justify-self: start; }
+
+/* =====================================================================
+   Get My Property Value
+   ===================================================================== */
+.sf-pv {
+  display: grid;
+  gap: var(--sf-stack);
+  padding: clamp(2.5rem, 1.6rem + 4vw, 5.5rem) var(--sf-gutter) clamp(3rem, 2rem + 4vw, 6rem);
+  max-width: var(--sf-maxw);
+  margin: 0 auto;
+}
+
+.sf-pv-hero { max-width: 36rem; }
+.sf-pv-hero h1 {
+  margin: .5rem 0 1.15rem;
+  font-size: var(--sf-display);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -.025em;
+  color: var(--sf-ink);
+}
+.sf-pv-lede {
+  margin: 0 0 1.8rem;
+  max-width: 33rem;
+  font-size: var(--sf-lede);
+  line-height: 1.62;
+  color: var(--sf-ink-soft);
+}
+.sf-pv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem;
+  margin-bottom: 1rem;
+}
+.sf-pv-reassure {
+  margin: 0;
+  font-size: var(--sf-small);
+  color: var(--sf-ink-mute);
+}
+/* The demoted escape hatch to the value guide. It used to be the page's primary
+   button, which made the page argue with its own form. */
+/* The value guide is the one deliberate "tool" moment on the page, and it was
+ * #fbfaf7 sitting on a #fff section - a difference of two RGB points, so it read
+ * only through its 1px border. One clear elevated surface is calmer than a
+ * near-invisible one, and it removes the muddy near-white-on-white. */
+.sf-est-card {
+  background: var(--sf-paper);
+  border: 1px solid var(--sf-line);
+  box-shadow: var(--sf-shadow);
+  border-radius: var(--sf-r-lg);
+}
+/* The hero faded cream -> white, which implied a separate zone that does not
+ * exist. Inherit the page instead. */
+.sf-est-hero { background: transparent; }
+
+/* The demoted escape hatch to the value guide. It used to be the page's primary
+   button, which made the page argue with its own form. */
+.sf-pv-or {
+  margin: .2rem 0 0;
+  font-size: var(--sf-small);
+}
+.sf-pv-or a {
+  color: var(--sf-ink-mute);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.sf-pv-or a:hover { color: var(--sf-accent); }
+
+/* Scroll target for the hero CTA. Without an offset the sticky header would
+   cover the form's first field. */
+.sf-pv-form-wrap { scroll-margin-top: 5.5rem; }
+/* This wrapper carried a full-width border-top with ~73px of empty space above
+ * and below it and no content attached to either end, so it read as a stray rule
+ * rather than a separator. The steps above it already end on their own rhythm,
+ * and the section gap does the separating. */
+.sf-pv-form-wrap { border-top: 0; }
+
+/* The hero was capped at 36rem inside a 1184px container, so every child sat in
+ * a 576px column with 608px of dead space to its right - the page read as
+ * "unfinished" rather than minimal. On a wide screen the call to action moves
+ * into that space, which also lifts it above the fold: the form this button
+ * scrolls to is three sections down. No copy is added; the buttons and the two
+ * reassurance lines that were already stacked underneath just move across. */
+@media (min-width: 1025px) {
+  .sf-pv-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr);
+    column-gap: clamp(2rem, 4vw, 4.5rem);
+    align-items: start;
+    max-width: none;
+  }
+  .sf-pv-hero > .sf-eyebrow   { grid-area: 1 / 1; }
+  .sf-pv-hero > h1            { grid-area: 2 / 1; }
+  .sf-pv-hero > .sf-pv-lede   { grid-area: 3 / 1; }
+  /* align-self:end levels the buttons with the baseline of the headline block */
+  .sf-pv-hero > .sf-pv-actions  { grid-area: 2 / 2; align-self: end; margin-bottom: 0; }
+  .sf-pv-hero > .sf-pv-reassure { grid-area: 3 / 2; margin: 0; }
+  .sf-pv-hero > .sf-pv-or       { grid-area: 4 / 2; }
+}
+
+.sf-pv-h2 {
+  margin: 0 0 1.6rem;
+  font-size: var(--sf-h2);
+  font-weight: 800;
+  letter-spacing: -.02em;
+  color: var(--sf-ink);
+}
+
+/* What happens ---------------------------------------------------------- */
+.sf-pv-steps-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+  border-top: 1px solid var(--sf-line);
+}
+.sf-pv-steps-list li {
+  display: grid;
+  grid-template-columns: 3.25rem 1fr;
+  gap: clamp(.75rem, .4rem + 1.4vw, 1.75rem);
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--sf-line);
+}
+.sf-pv-steps-list li > span {
+  font-size: var(--sf-micro);
+  font-weight: 800;
+  letter-spacing: .1em;
+  color: var(--sf-accent);
+  padding-top: .28rem;
+}
+/* Every row carries a bottom rule, including the last one, which left a
+ * trailing divider stranded below the final step with the next section's
+ * padding under it - it read as a stray line rather than a list separator. */
+.sf-pv-steps-list li:last-child { border-bottom: 0; }
+.sf-pv-steps-list b {
+  display: block;
+  margin-bottom: .3rem;
+  font-size: var(--sf-h3);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--sf-ink);
+}
+.sf-pv-steps-list p {
+  margin: 0;
+  max-width: 44rem;
+  font-size: var(--sf-body);
+  line-height: 1.6;
+  color: var(--sf-ink-soft);
+}
+
+/* Form ------------------------------------------------------------------ */
+.sf-pv-form-wrap {
+  display: grid;
+  gap: clamp(1.5rem, 1rem + 2.4vw, 3.25rem);
+  padding-top: var(--sf-stack);
+  border-top: 1px solid var(--sf-line);
+}
+
+.sf-pv-form-copy p {
+  margin: 0 0 1.1rem;
+  font-size: var(--sf-body);
+  line-height: 1.62;
+  color: var(--sf-ink-soft);
+}
+
+.sf-pv-list { margin: 0; padding: 0; list-style: none; display: grid; gap: .5rem; }
+/* Four short reassurance lines stacked in one column left half the section
+ * empty. Two columns on a wide screen uses the width without touching the copy. */
+@media (min-width: 1025px) {
+  .sf-pv-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem 2.75rem; max-width: 52rem; }
+}
+.sf-pv-list li {
+  position: relative;
+  padding-left: 1.6rem;
+  font-size: var(--sf-small);
+  line-height: 1.5;
+  color: var(--sf-ink-soft);
+}
+/* Inline SVG-free check using a rotated border box, so there is no glyph
+   dependency and nothing to go missing. */
+.sf-pv-list li::before {
+  content: "";
+  position: absolute;
+  left: .1rem; top: .3rem;
+  width: .42rem; height: .72rem;
+  border-right: 2px solid var(--sf-accent);
+  border-bottom: 2px solid var(--sf-accent);
+  transform: rotate(42deg);
+}
+
+.sf-pv-form {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+  padding: clamp(1.4rem, 1.1rem + 1vw, 2.1rem);
+  background: var(--sf-paper);
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-r-lg);
+  box-shadow: var(--sf-shadow);
+}
+.sf-pv-form label {
+  display: grid;
+  gap: .38rem;
+  font-size: var(--sf-small);
+  font-weight: 600;
+  color: var(--sf-ink-soft);
+}
+.sf-pv-form input,
+.sf-pv-form select {
+  width: 100%;
+  min-height: 48px;
+  padding: .7rem .9rem;
+  font: inherit;
+  font-size: var(--sf-body);
+  font-weight: 400;
+  color: var(--sf-ink);
+  background: var(--sf-paper-warm);
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-r);
+  appearance: none;
+}
+.sf-pv-form select {
+  /* Chevron drawn in CSS so there is no icon font or sprite dependency. */
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--sf-ink-mute) 50%),
+    linear-gradient(135deg, var(--sf-ink-mute) 50%, transparent 50%);
+  background-position: calc(100% - 19px) calc(50% + 1px), calc(100% - 14px) calc(50% + 1px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 2.4rem;
+}
+.sf-pv-form input::placeholder { color: #9A8F88; }
+.sf-pv-form input:focus-visible,
+.sf-pv-form select:focus-visible {
+  background: var(--sf-paper);
+  border-color: var(--sf-accent);
+}
+.sf-pv-form .sf-consent {
+  font-weight: 400;
+}
+.sf-pv-form button[type="submit"] { width: 100%; min-height: 52px; }
+.sf-pv-micro {
+  margin: -.35rem 0 0;
+  font-size: var(--sf-micro);
+  color: var(--sf-ink-mute);
+  text-align: center;
+}
+.sf-pv-form .sf-form-status { margin: 0; }
+
+/* ---------------------------------------------------------------------
+   Consent + status text
+   ---------------------------------------------------------------------
+   styles.css sets .sf-consent to #707a84 at 9px. That is 4.37:1 on white -
+   below the 4.5:1 WCAG AA floor for body text - and 9px is far too small for
+   the 40-75 audience this site targets. The storefront owns its own consent
+   styling so every storefront form passes regardless of the legacy rule, and
+   so a future form cannot accidentally inherit the 9px value.
+   --sf-ink-mute (#6B605A) measures 6.09:1 on --sf-paper. */
+.sf-site .sf-consent {
+  display: flex;
+  gap: .6rem;
+  align-items: flex-start;
+  color: var(--sf-ink-mute);
+  font-size: var(--sf-micro);
+  line-height: 1.5;
+}
+.sf-site .sf-consent input {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  flex: none;
+  margin: 0;
+  justify-self: start;
+  accent-color: var(--sf-accent);
+}
+.sf-site .sf-consent span { min-width: 0; }
+.sf-site .sf-consent a { color: #174b5e; font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
+.sf-site .sf-cta-form .sf-consent a { color: #fff; }
+
+.sf-site .sf-form-status {
+  margin: 0;
+  font-size: var(--sf-small);
+  font-weight: 600;
+  line-height: 1.5;
+  min-height: 1.2em;
+  color: var(--sf-ink-soft);
+}
+.sf-site .sf-form-status.success { color: var(--sf-ok); }
+.sf-site .sf-form-status.error   { color: var(--sf-err); }
+
+/* =====================================================================
+   Search: active filter chips, featured listings, empty states
+   ===================================================================== */
+
+/* Every filter that narrows the results is shown as a removable chip. This
+   exists because the Properties link used to apply ?state=Batangas silently:
+   the query was filtered but the form showed an empty Location box, so the
+   visitor saw "No properties found" with no clue why and no way out. */
+.sf-active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  margin: 0 0 1.1rem;
+  padding: .1rem 0 0;
+}
+.sf-active-filters-label {
+  font-size: var(--sf-micro);
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--sf-ink-mute);
+}
+.sf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  min-height: 36px;
+  padding: .35rem .7rem;
+  font-size: var(--sf-micro);
+  font-weight: 600;
+  color: var(--sf-ink);
+  text-decoration: none;
+  background: var(--sf-paper);
+  border: 1px solid var(--sf-line);
+  border-radius: 100px;
+  transition: background .15s var(--sf-ease), border-color .15s var(--sf-ease);
+}
+.sf-chip:hover { background: var(--sf-paper-sunk); border-color: var(--sf-ink-mute); }
+.sf-chip b {
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--sf-ink-mute);
+}
+.sf-chip-clear {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: .35rem .7rem;
+  font-size: var(--sf-micro);
+  font-weight: 700;
+  color: var(--sf-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  border-radius: 100px;
+}
+.sf-chip-clear:hover { color: var(--sf-accent-hover); }
+
+/* Search filter bar -----------------------------------------------------
+ *
+ * Component-owned layout and control styles live here, not in the generated
+ * legacy extract or the back-office responsive layer. The shared button
+ * primitive, global 16px mobile input floor, and generic label readability
+ * rules remain shared; this block owns the form's layout, surface, fields,
+ * focus state and breakpoints.
+ *
+ * At wide widths the five filters share a row and Search gets a clear, full
+ * width action row. Tablets use two columns (the previous stack-only rule made
+ * this short form almost 600px tall at 800px); small phones keep the safer
+ * single column so labels and options stay readable. */
+.sf-search-form {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr .75fr auto;
+  align-items: end;
+  gap: 0;
+  row-gap: 12px;
+  max-width: 900px;
+  padding: clamp(14px, 1.3vw, 18px);
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-r-lg);
+  background: var(--sf-paper);
+  box-shadow: var(--sf-shadow);
+}
+.sf-search-form.compact { max-width: none; }
+.sf-search-form label {
+  display: block;
+  min-width: 0;
+  padding: 4px 14px;
+  border-right: 1px solid var(--sf-line-soft);
+}
+.sf-search-form label span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--sf-ink-mute);
+  font-size: 13px !important;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.sf-search-form input,
+.sf-search-form select {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: .5rem .7rem;
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-r-sm);
+  outline: 0;
+  background: var(--sf-paper-warm);
+  color: var(--sf-ink);
+  font-family: var(--sf-font);
+  font-size: 16px;
+}
+.sf-search-form input:focus,
+.sf-search-form select:focus {
+  border-color: var(--sf-accent);
+  box-shadow: 0 0 0 3px var(--sf-accent-soft);
+}
+.sf-search-form button {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 52px;
+  height: 52px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  white-space: normal;
+}
+body .sf-search-form button { min-height: 52px !important; height: 52px !important; }
+.sf-search-form label:last-of-type { border-right: 0; }
+
+@media (max-width: 900px) {
+  .sf-search-form { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
+  .sf-search-form label,
+  .sf-search-form label:last-of-type {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--sf-line);
+    border-radius: var(--sf-r);
+    background: var(--sf-paper-warm);
+  }
+  .sf-search-form label span { margin: 0; font-size: 13px; }
+  .sf-search-form input,
+  .sf-search-form select { height: 48px; min-height: 48px; }
+  .sf-search-form button { grid-column: 1 / -1; }
+}
+
+@media (max-width: 600px) {
+  .sf-search-form { grid-template-columns: minmax(0, 1fr); gap: .5rem; }
+  .sf-search-form label,
+  .sf-search-form label:last-of-type {
+    padding: 10px 12px;
+    border: 0;
+    border-bottom: 1px solid var(--sf-line);
+    border-radius: 0;
+    background: transparent;
+  }
+  .sf-search-form button { grid-column: 1; }
+}
+
+/* Featured listings on the homepage ----------------------------------- */
+.sf-featured .sf-featured-more {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 1.5rem;
+}
+
+/* Empty states --------------------------------------------------------- */
+.sf-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem;
+  margin-top: 1.2rem;
+}
+.sf-empty .sf-outline-btn,
+.sf-empty .sf-primary-btn { display: inline-flex; align-items: center; min-height: 48px; }
+
+@media (max-width: 640px) {
+  .sf-active-filters { gap: .4rem; }
+  .sf-chip, .sf-chip-clear { min-height: 40px; }
+  .sf-empty-actions .sf-outline-btn,
+  .sf-empty-actions .sf-primary-btn { flex: 1 1 100%; justify-content: center; }
+}
+
+/* =====================================================================
+   Button primitives used on the new pages
+   =====================================================================
+   Two defects came out of reusing the legacy button classes as <a> elements.
+
+   1. .sf-outline-btn is declared in storefront-legacy.css with `width: 100%`
+      and a vertical margin - a mobile-first "full-width button" rule applied at
+      every width. Inside the .sf-cs-actions / .sf-pv-actions flex rows that
+      stretched the secondary button to 544-576px next to a 180px primary.
+   2. Nothing in any of the button classes set text-decoration, so the user
+      agent's default underline showed on every <a> rendered as a button. The
+      navigation class does set it, which is why only these pages looked wrong.
+
+   Both are corrected here rather than in the legacy file, because these classes
+   are shared with the parked shophouse / Project B.T pages and with the search
+   form, and the parked pages must keep rendering unchanged. */
+.sf-site .sf-primary-btn,
+.sf-site .sf-outline-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Inline by default; the full-width stretch was never the intent on a desktop
+   row of buttons. */
+.sf-site .sf-primary-btn { width: auto; }
+.sf-site .sf-outline-btn {
+  width: auto;
+  margin: 0;
+  padding: 11px 20px;
+}
+
+/* Places that genuinely want a full-width control: stacked mobile actions and
+   the empty-state buttons. */
+.sf-cs-actions,
+.sf-pv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem;
+}
+.sf-cs-actions .sf-primary-btn,
+.sf-cs-actions .sf-outline-btn,
+.sf-pv-actions .sf-primary-btn,
+.sf-pv-actions .sf-outline-btn {
+  width: auto;
+  margin: 0;
+}
+.sf-empty .sf-outline-btn,
+.sf-empty .sf-primary-btn,
+.sf-empty-actions .sf-outline-btn,
+.sf-empty-actions .sf-primary-btn {
+  width: auto;
+  margin: 0;
+}
+
+/* Narrow screens: stack and go full width, which is where the legacy
+   width:100% rule was actually aimed. */
+@media (max-width: 640px) {
+  .sf-cs-actions > *,
+  .sf-pv-actions > *,
+  .sf-empty-actions > * {
+    width: 100%;
+  }
+}
+
+/* =====================================================================
+   Type system - one family, one scale
+   ---------------------------------------------------------------------
+   The storefront was running two type systems. Display copy used
+   `Georgia, 'Times New Roman', serif` in 73 rules across storefront-legacy.css
+   and estimator.css, while body and UI copy used Inter. Georgia has no
+   @font-face anywhere, so it silently resolved to a default serif on Linux
+   and to Georgia on macOS/Windows - the brand rendered differently per
+   platform, and a 100px hairline serif is the opposite of the calm, legible
+   read this audience needs.
+
+   Rather than edit 73 rules (73 chances to break the parked pages and the
+   estimator's audited report), the serif is overridden at element level here.
+   This file loads after both, so it wins at equal specificity.
+
+   Hierarchy now comes from size and weight alone, which is the whole point of
+   a single family. Body copy stays at >=16px - non-negotiable for 40-75.
+   ===================================================================== */
+.sf-site {
+  --sf-font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --sf-display: clamp(2rem, 1.35rem + 2.55vw, 3.15rem);   /* 32 -> 50px */
+  --sf-h2:      clamp(1.375rem, 1.16rem + 0.9vw, 1.875rem); /* 22 -> 30px */
+  --sf-h3:      clamp(1.0625rem, 1.01rem + 0.28vw, 1.1875rem);
+  --sf-h4:      1.0625rem;
+  --sf-body:    1.0625rem;   /* 17px */
+  --sf-lede:    clamp(1.0625rem, 1.01rem + 0.22vw, 1.1875rem);
+    --sf-small:   1rem;         /* 16px - supporting copy floor for 40-75 */
+  --sf-micro:   0.8125rem;
+
+  /* One stack for the whole storefront. The admin's --font-sans is a different
+     variable and is left alone, so the back-office is unaffected. */
+  font-family: var(--sf-font);
+
+  /* The display <em> used to be a SYNTHESISED oblique: only Inter's normal
+     weights were loaded, so the browser skewed the glyphs, and at 50px a
+     synthesised slant reads as a different typeface rather than an accent.
+     The italic axis is now loaded for real, and synthesis is disabled so
+     nothing falls back to a fake slant again. */
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Kill the serif display face everywhere it was applied. */
+.sf-site h1, .sf-site h2, .sf-site h3, .sf-site h4, .sf-site h5, .sf-site h6,
+.sf-site b, .sf-site strong, .sf-site em, .sf-site i, .sf-site small,
+.sf-site blockquote, .sf-site legend, .sf-site th, .sf-site figcaption,
+.sf-site .sf-brand-mark, .sf-site .sf-hero-frame span, .sf-site .sf-image-empty,
+.sf-site .sf-empty > div, .sf-site .sf-est-step-no, .sf-site .sf-est-thumb-empty,
+.sf-site .bt-hero-stamp, .sf-site .bt-contact-mark, .sf-site .bt-image-caption,
+.sf-site .bt-card-index, .sf-site .bt-hero-copy em, .sf-site .bt-thanks em {
+  font-family: var(--sf-font);
+}
+
+/* The scale. Heading sizes were 82px (h1) and up to 54px (h2) in a serif whose
+   thin strokes needed that size to stay legible; the sans is legible far
+   smaller, so the whole scale comes down. */
+.sf-site h1 { font-size: var(--sf-display); font-weight: 800; line-height: 1.08; letter-spacing: -.03em; }
+.sf-site h2 { font-size: var(--sf-h2);      font-weight: 800; line-height: 1.16; letter-spacing: -.02em; }
+.sf-site h3 { font-size: var(--sf-h3);      font-weight: 700; line-height: 1.3;  letter-spacing: -.01em; }
+.sf-site h4 { font-size: var(--sf-h4);      font-weight: 700; line-height: 1.35; }
+.sf-site p  { font-size: var(--sf-body); }
+
+/* The home hero is a centred column, and the rest of the page is left-aligned.
+   That mix is deliberate: the hero is the one moment that introduces the site,
+   and a centred opening reads as an invitation while the sections beneath it
+   stay scannable. Everything inside the hero shares the centre axis - eyebrow,
+   headline, lede, proof strip, buttons and the value-guide card - so the block
+   is symmetrical rather than only the headline appearing centred. */
+.sf-est-hero {
+  text-align: center;
+  padding: clamp(2.25rem, 1.5rem + 2.4vw, 3.5rem) var(--sf-gutter) clamp(2rem, 1.5rem + 1.6vw, 3rem);
+}
+.sf-est-hero-copy {
+  margin: 0 auto clamp(1.5rem, 1.1rem + 1.4vw, 2.25rem);
+  max-width: 44rem;
+}
+.sf-est-hero h1 {
+  margin: 0 auto;
+  max-width: 20ch;
+  font-size: var(--sf-display);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -.03em;
+  text-wrap: balance;
+}
+.sf-est-hero .sf-est-hero-lede,
+.sf-est-hero-copy > p {
+  max-width: 40rem;
+  font-size: var(--sf-lede);
+  line-height: 1.6;
+}
+/* margin/justify must follow the copy block back to centre, or the hero keeps
+   the ragged left edges it had when it was left-aligned. */
+.sf-est-hero .sf-est-hero-lede,
+.sf-est-hero-copy > p { margin-left: auto; margin-right: auto; }
+.sf-est-hero .sf-est-hero-actions { justify-content: center; }
+.sf-est-hero .sf-est-proof { justify-content: center; }
+
+/* =====================================================================
+   Services (homepage section, generated from the SERVICES array)
+   ===================================================================== */
+.sf-services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1px;
+  background: var(--sf-line);
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-r-lg);
+  overflow: hidden;
+}
+
+.sf-service-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  padding: 1.5rem 1.35rem 1.35rem;
+  background: var(--sf-paper);
+  text-decoration: none;
+  color: var(--sf-ink);
+  transition: background .2s var(--sf-ease);
+}
+.sf-service-card:hover,
+.sf-service-card:focus-visible { background: var(--sf-paper-warm); }
+
+.sf-service-num {
+  font-size: var(--sf-micro);
+  font-weight: 800;
+  letter-spacing: .1em;
+  color: var(--sf-accent);
+}
+.sf-service-card h3 {
+  margin: 0;
+  font-size: var(--sf-h3);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  line-height: 1.25;
+}
+.sf-service-card p {
+  margin: 0;
+  flex: 1;
+  font-size: var(--sf-small);
+  line-height: 1.5;
+  color: var(--sf-ink-mute);
+}
+.sf-service-go {
+  margin-top: .35rem;
+  font-size: 1rem;
+  color: var(--sf-ink-mute);
+  transition: transform .2s var(--sf-ease), color .2s var(--sf-ease);
+}
+.sf-service-card:hover .sf-service-go,
+.sf-service-card:focus-visible .sf-service-go {
+  transform: translateX(4px);
+  color: var(--sf-accent);
+}
+
+@media (max-width: 640px) {
+  .sf-services-grid { grid-template-columns: 1fr; }
+}
+
+/* =====================================================================
+   Sticky mobile CTA
+   Research: a persistent bottom action bar is the single most effective
+   conversion surface on mobile. Hidden on desktop where the header already
+   carries the actions.
+   ===================================================================== */
+.sf-sticky {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 55;
+  display: none;
+  gap: .55rem;
+  padding: .6rem var(--sf-gutter) calc(.6rem + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, .96);
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  border-top: 1px solid var(--sf-line);
+  box-shadow: 0 -2px 14px rgba(20, 17, 15, .07);
+}
+.sf-sticky a {
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: .6rem .8rem;
+  font-size: var(--sf-small);
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+.sf-sticky .sf-sticky-primary {
+  color: var(--sf-paper);
+  background: var(--sf-accent);
+}
+.sf-sticky .sf-sticky-primary:hover { background: var(--sf-accent-hover); }
+.sf-sticky .sf-sticky-ghost {
+  flex: 0 0 auto;
+  color: var(--sf-ink);
+  background: var(--sf-paper-sunk);
+}
+
+/* Room for the bar so it never covers the last section of a page. */
+body.storefront-active.sf-has-sticky .sf-main { padding-bottom: 0; }
+
+@media (max-width: 860px) {
+  .sf-sticky { display: flex; }
+  body.storefront-active.sf-has-sticky .sf-main { padding-bottom: 5.5rem; }
+}
+
+/* The sticky primary label was being cut off on every common phone width.
+ * `.sf-sticky a` is `flex: 1 1 0` with `white-space: nowrap`, so the row
+ * squeezed the button below the width its own text needs and the pill clipped
+ * it mid-word:
+ *
+ *     320px  button 104px, text needs 139px
+ *     360px  button 143px, text needs 158px
+ *     390px  button 172px, text needs 173px
+ *
+ * Giving the primary its intrinsic width is not an option either - all three
+ * labels plus padding need ~355px, more than a 320px viewport. So below the
+ * point where the row stops fitting, the labels wrap instead of clipping. A
+ * two-line pill is a smaller problem than an unreadable primary call to
+ * action, and it keeps all three actions reachable. */
+@media (max-width: 430px) {
+  .sf-sticky a {
+    min-width: 0;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.25;
+    padding: .5rem .6rem;
+  }
+  /* Same defect, same cause, in the shared button primitives: `white-space:
+   * nowrap` plus a full-width flex row left "Request my free appraisal" in a
+   * 236px box that needed 241px, so the label was cut. These buttons are the
+   * primary calls to action on every page, so the label wrapping is preferable
+   * to a truncated one. */
+  .sf-site .sf-primary-btn,
+  .sf-site .sf-outline-btn {
+    white-space: normal;
+    text-align: center;
+    line-height: 1.25;
+  }
+}
+
+/* The sticky bar is fixed to the bottom of the viewport, so while the mobile
+   panel is open it sits on top of the panel's last rows - which is exactly
+   where the auth actions are. The panel provides its own actions, so the bar
+   just gets out of the way. */
+body.sf-menu-open .sf-sticky { display: none; }
+
+/* =====================================================================
+   Responsive navigation - see .sf-mnav below
+   ===================================================================== */
+@media (max-width: 1040px) {
+  .sf-nav > a.sf-nav-cta { padding: .5rem .7rem; }
+}
+
+/* =====================================================================
+   Mobile navigation (.sf-mnav)
+
+   This used to live in css/styles.css, inside an @media (max-width:1050px)
+   block, because a classifier bug treated the generic state class `open` as
+   evidence that the admin needed it. app.js never renders .sf-menu, so it did
+   not. Two bugs came out of that: the storefront silently depended on the admin
+   stylesheet, and between 901px and 1050px the hamburger was visible while the
+   panel could never open - tablet users could not navigate at all.
+
+   Driven by ONE breakpoint. The previous code had four in play (1050 legacy,
+   900 here, 760 legacy, 640 here) and the disagreement between them is what
+   produced the dead band. Nothing below may introduce a second one.
+   ===================================================================== */
+.sf-site {
+  --sf-nav-bp: 1024px;   /* nav collapses to the hamburger at and below this */
+  --sf-mnav-h: 64px;     /* fixed header height in the collapsed state */
+}
+
+@media (max-width: 1024px) {
+  /* --- header: brand | hamburger, nothing else ------------------------- */
+  /* The desktop auth actions used to stay in the header at this width, where
+     they fought the brand and the hamburger for ~390px, wrapped "Create
+     account" onto two lines and spilled 13px below the header border. They now
+     live in the panel, which already renders them. */
+  .sf-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    height: var(--sf-mnav-h);
+    min-height: var(--sf-mnav-h);
+    align-items: center;
+    padding-inline: var(--sf-gutter);
+  }
+  /* The desktop auth actions used to stay in the header at this width, where
+     they fought the brand and the hamburger for ~390px, wrapped "Create
+     account" onto two lines and spilled 13px below the header border. They now
+     live in the panel, which already renders them.
+
+     Target the two auth buttons, NOT .sf-header-actions itself: the hamburger
+     is a CHILD of that container, so hiding the container also hid the toggle
+     and left the nav unusable with no way to open the panel. */
+  .sf-header-actions > [data-sf-auth] { display: none; }
+  .sf-header-actions { gap: 0; }
+  .sf-nav { display: none; }
+
+  .sf-brand { min-width: 0; gap: .6rem; }
+  /* Truncate rather than collapse: the brand text was measured at 0px wide at
+     390px and 320px, leaving a bare orange disc with no name. */
+  .sf-brand > span:last-child { min-width: 0; overflow: hidden; }
+  .sf-brand b {
+    font-family: var(--sf-font);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* The strapline is the first thing to go when the bar gets tight. */
+  .sf-brand small { display: none; }
+  .sf-brand-mark {
+    width: 34px; height: 34px;
+    font-family: var(--sf-font);
+    font-size: 13px;
+  }
+
+  /* --- toggle button --------------------------------------------------- */
+  .sf-menu-btn {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border: 1px solid var(--sf-line);
+    border-radius: var(--sf-r);
+    background: var(--sf-paper);
+    cursor: pointer;
+  }
+  /* Two bars, absolutely centred. The previous version relied on grid row
+     auto-placement plus translateY(+-6px), which rendered as a ">" chevron
+     instead of an X when open. Absolute centring makes the closed and open
+     states independent of how the grid resolves the three rows. */
+  .sf-menu-btn span {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 18px; height: 2px;
+    margin: 0;
+    border-radius: 2px;
+    background: var(--sf-ink);
+    transition: transform .2s var(--sf-ease), opacity .15s var(--sf-ease);
+  }
+  .sf-menu-btn span:nth-child(1) { transform: translate(-50%, -50%) translateY(-6px); }
+  .sf-menu-btn span:nth-child(2) { opacity: 0; }
+  .sf-menu-btn span:nth-child(3) { transform: translate(-50%, -50%) translateY(6px); }
+  .sf-menu-btn[aria-expanded="true"] span:nth-child(1) { transform: translate(-50%, -50%) rotate(45deg); }
+  .sf-menu-btn[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .sf-menu-btn[aria-expanded="true"] span:nth-child(3) { transform: translate(-50%, -50%) rotate(-45deg); }
+
+  /* --- panel: a real overlay ------------------------------------------ */
+  /* Was position:absolute with overflow:visible and no height, so on a
+     667px-tall phone the auth buttons at the bottom of a 12-row list were
+     simply unreachable.
+
+     `absolute`, not `fixed`, and the reason is non-obvious: .sf-header carries
+     `transform: translateZ(0)` (a GPU-promotion hint from the legacy CSS). A
+     transformed ancestor BECOMES the containing block for fixed-position
+     descendants, so `position: fixed; top: 64px; bottom: 0` resolved against the
+     64px-tall header and produced a 0px-tall panel. The header is already a
+     positioned element (position: sticky), so absolute + an explicit
+     viewport-relative height is stable regardless of that transform. */
+  .sf-menu {
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    height: calc(100vh - var(--sf-mnav-h));
+    height: calc(100dvh - var(--sf-mnav-h));
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    background: var(--sf-paper);
+    border-top: 1px solid var(--sf-line);
+  }
+  .sf-menu { display: none; }
+  .sf-menu.open { display: flex; }
+
+  /* Lock the page behind the overlay so the panel is not scrolled under it. */
+  body.sf-menu-open { overflow: hidden; }
+
+  .sf-menu > a,
+  .sf-menu > button {
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    padding: .9rem var(--sf-gutter);
+    border: 0;
+    border-bottom: 1px solid var(--sf-line-soft);
+    background: none;
+    color: var(--sf-ink);
+    font: inherit;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .sf-menu > a:active,
+  .sf-menu > button:active { background: var(--sf-paper-sunk); }
+
+  /* Hierarchy: the lead-gen destination is the one thing worth acting on from
+     the menu, so it reads as a button rather than another text row. */
+  .sf-menu > a.sf-nav-cta {
+    margin: .9rem var(--sf-gutter) 1.1rem;
+    min-height: 52px;
+    justify-content: center;
+    padding: .8rem 1rem;
+    font-weight: 700;
+    color: var(--sf-paper);
+    background: var(--sf-accent);
+    border: 0;
+    border-radius: 100px;
+  }
+  .sf-menu > a.sf-nav-cta:active { background: var(--sf-accent-hover); }
+
+  /* Auth actions, last, clearly separated. */
+  .sf-menu > [data-sf-auth] {
+    margin-top: 1rem;
+    border-top: 1px solid var(--sf-line);
+  }
+  .sf-menu > [data-sf-auth="signup"] {
+    font-weight: 700;
+    color: var(--sf-accent);
+  }
+}
+
+/* On anything wider the panel must not exist at all. */
+@media (min-width: 1025px) {
+  .sf-menu { display: none !important; }
+  .sf-menu-btn { display: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-site *,
+  .sf-cs-dot { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  .sf-drop-panel { transition: none; }
+}
+
+/* The old `min-width: 901px -> .sf-menu { display: none !important }` rule is
+   gone. It was the other half of the dead band: with the hamburger revealing at
+   1050px and this hiding the panel above 900px, a 950px viewport showed a
+   working-looking hamburger attached to a panel that could never open. The
+   panel is now controlled solely by --sf-nav-bp in .sf-mnav. */
+
+@media (max-width: 640px) {
+  .sf-pv-steps-list li { grid-template-columns: 2.4rem 1fr; }
+  .sf-cs-actions .sf-primary-btn,
+  .sf-cs-actions .sf-outline-btn,
+  .sf-pv-actions .sf-primary-btn,
+  .sf-pv-actions .sf-outline-btn { flex: 1 1 100%; }
+}
+
+/* =====================================================================
+   Narrow-viewport overflow (320px class devices)
+   ===================================================================== */
+
+/* The results bar is a flex row, and the inner group holding the sort select
+   and the Grid/List/Map buttons had no flex-wrap. At 320px that group is 342px
+   wide, so the "Map" button ended at x=359 in a 320px viewport. `.sf-site` clips
+   overflow-x, so the page did not scroll - the button was simply cut off and
+   partly unclickable. */
+.sf-results-bar > div { flex-wrap: wrap; }
+.sf-results-bar select { flex: 1 1 8rem; min-width: 0; }
+
+/* `.sf-cta-band` is a 1.1fr .9fr two-column grid (copy beside the form) and it
+   never collapsed. On a 320px phone the second column started at x=75 and the
+   form inside it was forced to 249px, running 4px off the right edge - taking
+   the name/email/phone/message fields, the consent checkbox and the submit
+   button with it. */
+@media (max-width: 760px) {
+  .sf-cta-band { grid-template-columns: 1fr; gap: 28px; }
+  .sf-cta-band .sf-cta-form,
+  .sf-cta-form { width: 100%; max-width: 100%; }
+
+  /* The contact form carries .sf-reveal-right, whose resting state is
+   * translateX(38px). Below the fold the IntersectionObserver has not fired, so
+   * that offset is the element's real position - it pushed the form to x=75 in
+   * a 320px viewport and took the name/email/phone/message fields, the consent
+   * checkbox and the submit button off the right edge. `.sf-site` clips
+   * overflow-x, so the page never scrolled; the form was simply cut off. The
+   * horizontal entrance cannot be afforded at this width, so it becomes a rise
+   * like every other reveal. */
+  .sf-reveal.sf-reveal-right { transform: translateY(30px); }
+}
