@@ -37,10 +37,25 @@ const watchdog = setTimeout(function () {
 watchdog.unref();
 
 let chromium = null;
-try {
-  chromium = require("../market-scan/worker/node_modules/playwright-core");
-} catch (e) {
-  chromium = require("playwright-core");
+/* Resolve the Playwright browser driver from whichever install actually exists.
+ * CI installs playwright at the repo root; a developer machine may only have it
+ * nested under market-scan/worker/node_modules (gitignored, so absent in CI).
+ * `playwright` re-exports the same `chromium` launcher as `playwright-core`, so
+ * accepting either makes the driver work in both environments. If none resolve,
+ * fail with a clean JSON line so run_all.ps1 marks it failed instead of the
+ * module crashing on load with no output at all. */
+const PW_CANDIDATES = [
+  "../market-scan/worker/node_modules/playwright-core",
+  "playwright-core",
+  "playwright"
+];
+for (const id of PW_CANDIDATES) {
+  try { chromium = require(id); break; } catch (e) { /* try next */ }
+}
+if (!chromium || !chromium.chromium) {
+  report({ ok: false, checks: [{ name: "driver", ok: false,
+    detail: "playwright not found — run: npm install --no-save playwright" }] });
+  process.exit(1);
 }
 const { chromium: pw } = chromium;
 
