@@ -71,6 +71,16 @@ foreach ($name in $browser) {
             $mark = if ($c.ok) { "PASS" } else { "FAIL" }
             $color = if ($c.ok) { "Green" } else { "Red" }
             Write-Host ("  [{0}] {1} {2}" -f $mark, $c.name, $c.detail) -ForegroundColor $color
+            # On CI a failing suite otherwise only says the suite name; the
+            # individual check that broke is what identifies the bug, and it is
+            # already being printed, so surface it as an annotation too.
+            if (-not $c.ok) {
+                $msg = "{0} :: {1} ({2})" -f $name, $c.name, $c.detail
+                Write-Host "::error::$msg"
+                if ($env:GITHUB_STEP_SUMMARY) {
+                    Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ("- [{0}]({1}) **{2}** - {3}" -f $name, "https://github.com/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID", $c.name, $c.detail)
+                }
+            }
         }
     } elseif (-not $pass) {
         Write-Host ($out | Select-Object -First 5) -ForegroundColor Yellow
