@@ -26,12 +26,22 @@ const OUT = path.join(ROOT, "js", "app.min.js");
 const STAMP_GLOBAL = "__ESREALTY_APP_HASH__";
 const CODE_STAMP_GLOBAL = "__ESREALTY_CODE_HASH__";
 
+/* Hash the NORMALIZED source (LF line endings), never the raw on-disk bytes.
+ * This repo is developed on Windows with core.autocrlf=true, so the working
+ * copy of js/app.js is CRLF while git stores and CI checks out the LF blob. A
+ * byte hash of the working copy therefore never matches the LF checkout, and
+ * build_sync_node fails on every fresh CI run. Normalizing to LF makes the
+ * stamp line-ending-independent and identical on Windows, Linux, and CI. */
+function normalizeEol(text) {
+  return String(text).replace(/\r\n/g, "\n");
+}
+
 function sourceHash() {
-  return crypto.createHash("sha256").update(fs.readFileSync(SRC)).digest("hex").slice(0, 16);
+  return crypto.createHash("sha256").update(normalizeEol(fs.readFileSync(SRC, "utf8"))).digest("hex").slice(0, 16);
 }
 
 function codeHash(code) {
-  return crypto.createHash("sha256").update(code).digest("hex").slice(0, 16);
+  return crypto.createHash("sha256").update(normalizeEol(code)).digest("hex").slice(0, 16);
 }
 
 function terser() {

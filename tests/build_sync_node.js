@@ -30,8 +30,13 @@ function check(name, ok, detail) {
   return ok;
 }
 function readOr(p) { try { return fs.readFileSync(p, "utf8"); } catch (e) { return null; } }
-function sourceHash() { return crypto.createHash("sha256").update(fs.readFileSync(SRC)).digest("hex").slice(0, 16); }
-function codeHash(code) { return crypto.createHash("sha256").update(code).digest("hex").slice(0, 16); }
+/* Normalize line endings before hashing, exactly like build_app.js. The repo is
+ * developed on Windows with core.autocrlf=true, so the working copy is CRLF while
+ * git/CI check out the LF blob. A raw byte hash would only ever match on the
+ * machine that built it and fail everywhere else. */
+function normalizeEol(text) { return String(text).replace(/\r\n/g, "\n"); }
+function sourceHash() { return crypto.createHash("sha256").update(normalizeEol(fs.readFileSync(SRC, "utf8"))).digest("hex").slice(0, 16); }
+function codeHash(code) { return crypto.createHash("sha256").update(normalizeEol(code)).digest("hex").slice(0, 16); }
 function stampIn(code, global) {
   const m = new RegExp("window\\." + global + '\\s*=\\s*"([0-9a-f]+)"').exec(code || "");
   return m ? m[1] : "";
