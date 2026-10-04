@@ -189,7 +189,18 @@
     // factor-based estimate. Without comparables, the result remains visible
     // with an explicit factor-only evidence status rather than being hidden or
     // silently capped to an arbitrary BIR multiple.
-    var landPerSqm = Math.round(base * (1 + cornerPct) * proxy * band * adj);
+    /* Named, not inlined: this is the multiple between the BIR zonal reference
+       and the market estimate. A later disclosure shows it to the reader, and an
+       unreviewed planning assumption should be stated as one number rather than
+       left for someone to reverse-engineer from the two rates. Full precision is
+       kept here; presentation rounding belongs to the formatter.
+       Grouping the product re-associates the floating-point multiply: across
+       every rate in data/bir-batangas the whole-peso result is unchanged for
+       non-corner parcels, and moves by at most 1 peso on some corner lots. The
+       stack stays the single source for the rate so the disclosed multiple and
+       the applied one cannot drift apart. */
+    var factorStack = (1 + cornerPct) * proxy * band * adj;
+    var landPerSqm = Math.round(base * factorStack);
     var landValue = Math.round(landPerSqm * area);
     var factorLandValue = landValue;
     var timeIndex = null;
@@ -293,6 +304,11 @@
         rdo: muniRow.rdo
       },
       factors: { proxyFactor: proxy, bandMid: band, regionalAdj: adj },
+      /* The one number linking the BIR zonal reference to the market estimate:
+         (1 + corner) x property-use proxy x market band x regional adjustment.
+         Null under the indexed land method, which stacks no market factor at all. */
+      factorStack: landMethod === "factor" ? factorStack : null,
+      appliedMultiple: landMethod === "factor" ? factorStack : null,
       factorSettingsVersion: cfg.factorSettingsVersion || cfg.calculationVersion,
       marketGuide: {
         value: total,
