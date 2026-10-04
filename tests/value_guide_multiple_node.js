@@ -22,7 +22,8 @@ const ROOT = path.join(__dirname, "..");
 const read = path => JSON.parse(fs.readFileSync(path, "utf8"));
 const config = read("data/zonal-config.json"), index = read("data/batangas-zonal.json"), md = read("data/bir-batangas/municipalities/bauan.json");
 let count = 0;
-function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
+async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] " + name); }
+  function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
 (async () => {
   const options = { municipality: "BAUAN", barangay: "POBLACION III", streetKey: "binay st ressurreccion st", classification: "RR", area: 100, type: "vacant_lot" };
 
@@ -861,6 +862,383 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
     assert.ok(siteBlock, "css/storefront.css no longer declares a .sf-site block");
     assert.ok(/--sf-ink-mute\s*:\s*#6B605A\s*;/.test(siteBlock[1]),
       "--sf-ink-mute is no longer declared inside .sf-site, so the estimator rules cannot inherit it");
+  });
+
+  /* ===================================================================
+     Task 4 - the PDF.
+
+     pdfText() below is a copy of the helper in
+     tests/value_guide_reference_node.js:11-20. That file exports nothing, so
+     the helper cannot be imported from it, and the alternative - adding an
+     export to a file this task must not touch - is worse. It is a harness,
+     not part of the feature: it inflates the content streams and reads the
+     hex text runs back out. Nothing inside the renderer is replaced.
+
+     Every PDF below comes from VG.toBlob() with the vendored pdf-lib bundle,
+     the same call tests/value_guide_reference_node.js:80-82 makes inside its
+     --capture branch. meta carries no tax figures: the disclosure is not a tax
+     output, and a fixture that dragged the tax engine in would be testing the
+     tax path instead.
+
+     Mutations, run against this file on 2026-10-04, each applied to
+     js/value_guide_pdf.js and then reverted. The run aborts at the first
+     throw, so only the check named in each entry was OBSERVED red - later
+     checks that would also have fired were not exercised to failure:
+        M20. the label hardcoded as a byte-identical literal
+          -> "the PDF prints the builder's own strings, once each" FAILS,
+             "expected the builder's 6 interpolated fields to be marked, found
+             5". Nothing before it turned red.
+        M21. the assumption paragraph dropped
+          -> "the PDF land build-up prints the label, the factor and both
+             published sentences" FAILS, "the assumption sentence is not printed
+             verbatim"
+        M22. the limitation paragraph dropped
+          -> the same check FAILS, "the limitation sentence is not printed
+             verbatim"
+        M23. the summary line dropped
+          -> "the PDF summary names the applied multiple under the BIR figure"
+             FAILS, "the summary never prints the label", and only that one
+        M24. the build-up row's value hardcoded as "x 2.5"
+          -> "the printed multiple reconciles with the printed BIR base and
+             land rate" FAILS, "commercial corner: the build-up prints 2.5 where
+             the builder returns 4.35625". The vacant lot and house lot vectors
+             on the same check stayed green - a 2.5 hardcode is correct for
+             those two, which is why that check reads three fixtures.
+        M25. the summary guard dropped and a locally forged disclosure
+          substituted whenever the builder returns null
+          -> "a time-indexed result renders no disclosure anywhere in the PDF"
+             FAILS, "the indexed PDF still names the factor" (index 440)
+        M25b. the same forgery, restricted to factor-mode results
+          -> "the factor build-up prints nothing when the builder returns null"
+             FAILS, "the silenced PDF still names the factor anywhere"
+             (index 435), with the indexed check green - which is the point of
+             running both variants
+        M26, M27, M28. see the note on the static source guard below
+        M29. the browser branch bound to the wrong global
+          (window.ESREALTY_REFERENCE -> window.ESREALTY_FINANCE, a global that
+          does exist in that context)
+          -> the browser-branch check fails with "TypeError:
+             referenceTools.appliedMultipleDisclosure is not a function", after
+             every text assertion above it stayed green. It is the only check
+             that executes the window branch at all.
+     =================================================================== */
+  const VG = require("../js/value_guide_pdf.js"), PDFLib = require("../vendor/pdf-lib/pdf-lib.min.js"), zlib = require("zlib");
+
+  function pdfText(bytes) {
+    const buffer = Buffer.from(bytes), text = [];
+    for (let at = 0; (at = buffer.indexOf("stream", at)) >= 0;) {
+      let start = at + 6; if (buffer[start] === 13) start++; if (buffer[start] === 10) start++;
+      const end = buffer.indexOf("endstream", start); if (end < 0) break;
+      try {
+        const ops = zlib.inflateSync(buffer.subarray(start, end)).toString("latin1");
+        for (const match of ops.matchAll(/<([0-9A-Fa-f]+)>\s*Tj/g)) text.push(Buffer.from(match[1], "hex").toString("latin1"));
+      } catch (_) {}
+      at = end + 9;
+    }
+    return text.join(" ");
+  }
+
+  const PDF_META = { preparedFor: "multiple disclosure", preparedBy: "SEA ESTATES", generatedOn: "2026-10-02" };
+  const PDF_PARTS = VG.PARTS.map(p => p.title);
+  const MARK = " SENTINEL";
+  const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  /* Whitespace-collapsed, so a sentence the renderer wrapped across two lines
+     still reads back as the sentence the builder returned. The layout is
+     deterministic - fixed fixture, fixed fonts, no randomness - so this is not
+     a source of flakiness; if a page break ever lands mid-sentence the run
+     below goes red and says which string was broken. */
+  async function renderPdf(opts) {
+    const result = EST.core.computeEstimate(config, index, md, opts);
+    const blob = await VG.toBlob(PDFLib, result, PDF_META);
+    return { result: result, text: pdfText(Buffer.from(await blob.arrayBuffer())).replace(/\s+/g, " ").trim() };
+  }
+  /* The only seam: the disclosure builder itself, through the same module
+     object js/value_guide_pdf.js holds. Everything else in the renderer runs
+     unmodified. */
+  async function renderPdfWithStub(stub) {
+    const real = REF.appliedMultipleDisclosure;
+    REF.appliedMultipleDisclosure = stub;
+    try { return await renderPdf(options); } finally { REF.appliedMultipleDisclosure = real; }
+  }
+
+  /* A running header reads "SEA ESTATES <municipality> - RDO <n>" then the part
+     title, so the part title only appears as a section START in that form. The
+     contents table on the cover also names every part, which is why a plain
+     indexOf on the title cannot scope a section. */
+  function pdfSection(text, result, title) {
+    const at = text.indexOf("RDO " + result.rdo + " " + title);
+    if (at < 0) return "";
+    const next = PDF_PARTS.indexOf(title) + 1;
+    const stop = next < PDF_PARTS.length ? text.indexOf("RDO " + result.rdo + " " + PDF_PARTS[next], at) : -1;
+    return text.slice(at, stop < 0 ? text.length : stop);
+  }
+  function sliceBetween(text, from, to) {
+    const at = text.indexOf(from);
+    if (at < 0) return "";
+    const end = text.indexOf(to, at + from.length);
+    return text.slice(at, end < 0 ? text.length : end);
+  }
+
+  const houseOptions = Object.assign({}, options, { type: "house_lot", area: 300, floorArea: 180, ageBand: "6-10", floors: "2", construction: "mixed_chb" });
+  const lotPdf = await renderPdf(options);
+  const cornerCommercialPdf = await renderPdf(Object.assign({}, options, { classification: "CR", corner: true }));
+  const housePdf = await renderPdf(houseOptions);
+  const indexedPdf = await renderPdf(indexed);
+  const silencedPdf = await renderPdfWithStub(function () { return null; });
+  const pdfRealDisclosure = REF.appliedMultipleDisclosure;
+  const markedPdf = await renderPdfWithStub(function (result) {
+    const d = pdfRealDisclosure(result);
+    if (!d) return null;
+    return {
+      multiple: d.multiple + MARK, multipleLabel: d.multipleLabel + MARK, text: d.text + MARK,
+      assumption: d.assumption + MARK, limitation: d.limitation + MARK, factors: d.factors
+    };
+  });
+
+  /* Every later check reads a fixture through one of these, so a vector that
+     quietly stopped resolving cannot turn the rest of this block vacuous. */
+  check("the PDF fixtures are the vectors the checks below assume", () => {
+    [["vacant lot", lotPdf, "factor", "2.5", "vacant_lot"],
+     ["commercial corner", cornerCommercialPdf, "factor", "4.35625", "vacant_lot"],
+     ["house lot", housePdf, "factor", "2.5", "house_lot"],
+     ["time-indexed", indexedPdf, "time-indexed", null, "vacant_lot"]].forEach(v => {
+      assert.ok(v[1].result.available, v[0] + " produced no estimate, so its PDF is empty");
+      assert.strictEqual(v[1].result.landMethod, v[2], v[0] + " land method");
+      assert.strictEqual(v[1].result.type, v[4], v[0] + " property type");
+      const d = REF.appliedMultipleDisclosure(v[1].result);
+      assert.strictEqual(d ? d.multiple : null, v[3], v[0] + " disclosed multiple");
+    });
+    [lotPdf, cornerCommercialPdf, housePdf, indexedPdf, silencedPdf, markedPdf].forEach(pdf => {
+      assert.ok(pdf.text.length > 8000, "a fixture rendered only " + pdf.text.length + " chars; the checks on it would pass vacuously");
+    });
+  });
+
+  /* ---- the summary site ---- */
+
+  const lotSummary = pdfSection(lotPdf.text, lotPdf.result, PDF_PARTS[0]);
+  const lotCalc = pdfSection(lotPdf.text, lotPdf.result, PDF_PARTS[1]);
+
+  check("the PDF summary names the applied multiple under the BIR figure", () => {
+    const d = REF.appliedMultipleDisclosure(lotPdf.result);
+    assert.ok(lotSummary.length > 400, "the summary section did not render (" + lotSummary.length + " chars)");
+    const at = lotSummary.indexOf(LABEL);
+    assert.ok(at > -1, "the summary never prints the label " + JSON.stringify(LABEL));
+    assert.strictEqual(lotSummary.split(LABEL).length - 1, 1, "the label appears " + (lotSummary.split(LABEL).length - 1) + " times in the summary");
+    assert.ok(lotSummary.indexOf(d.text) > at, "the summary does not follow the label with the multiple sentence");
+    /* Under the BIR figure, which is the relationship the label explains and
+       the same position the web result screen puts it in. */
+    const birAt = lotSummary.indexOf("PHP 1,150,000");
+    assert.ok(birAt > -1 && birAt < at, "the label is not printed after the BIR reference figure on the summary");
+  });
+
+  /* ---- the land build-up site ---- */
+
+  check("the PDF land build-up prints the label, the factor and both published sentences", () => {
+    const d = REF.appliedMultipleDisclosure(lotPdf.result);
+    assert.ok(lotCalc.length > 800, "the computation section did not render (" + lotCalc.length + " chars)");
+    assert.strictEqual(lotCalc.split(LABEL).length - 1, 1, "the label appears " + (lotCalc.split(LABEL).length - 1) + " times in the build-up");
+    /* Label and value are adjacent text runs in one table row. "x 2.5" alone
+       would not isolate it: the market band row above prints "x 2.50". */
+    assert.ok(lotCalc.indexOf(LABEL + " x " + d.multiple) > -1, "the build-up row does not print the factor next to the label");
+    assert.ok(lotCalc.indexOf("Land value") > -1 && lotCalc.indexOf("Land value") < lotCalc.indexOf(LABEL), "the disclosure row does not follow the land value it explains");
+    assert.ok(lotCalc.indexOf(ASSUMPTION) > -1, "the assumption sentence is not printed verbatim");
+    assert.ok(lotCalc.indexOf(LIMITATION) > -1, "the limitation sentence is not printed verbatim");
+    assert.ok(lotCalc.indexOf(ASSUMPTION) > lotCalc.indexOf(LABEL), "the assumption does not follow the disclosure row");
+    assert.ok(lotCalc.indexOf(LIMITATION) > lotCalc.indexOf(ASSUMPTION), "the limitation does not follow the assumption");
+  });
+
+  /* The printed number has to multiply out to the printed rate, on the page
+     that prints all three. A hardcoded 2.5 passes every presence check above
+     and fails here on the commercial corner vector. */
+  check("the printed multiple reconciles with the printed BIR base and land rate", () => {
+    [["vacant lot", lotPdf], ["commercial corner", cornerCommercialPdf], ["house lot", housePdf]].forEach(pair => {
+      const name = pair[0], calc = pdfSection(pair[1].text, pair[1].result, PDF_PARTS[1]);
+      const d = REF.appliedMultipleDisclosure(pair[1].result);
+      const base = /BIR zonal base (PHP [\d,]+)/.exec(calc);
+      const rate = /Effective land rate (PHP [\d,]+)/.exec(calc);
+      const shown = new RegExp(escapeRe(LABEL) + " x ([\\d.]+)").exec(calc);
+      assert.ok(base && rate && shown, name + ": could not read the base, the effective rate and the printed multiple off the build-up");
+      const peso = s => Number(String(s).replace(/[^\d.]/g, ""));
+      assert.strictEqual(shown[1], d.multiple, name + ": the build-up prints " + shown[1] + " where the builder returns " + d.multiple);
+      /* Half a peso: the rate is rounded to whole pesos for printing. */
+      assert.ok(Math.abs(Number(shown[1]) * peso(base[1]) - peso(rate[1])) <= 0.5,
+        name + ": the build-up prints " + shown[1] + " x " + peso(base[1]) + " = " + (Number(shown[1]) * peso(base[1])) + " but " + peso(rate[1]) + "/sqm");
+    });
+  });
+
+  check("a house lot renders the disclosure from the same build-up path", () => {
+    /* The web task pinned only vacant_lot. house_lot enters the same Step 2
+       branch - the split is on r.timeIndex, not on the property type - so this
+       check exists to prove it rather than to assume it. */
+    const calc = pdfSection(housePdf.text, housePdf.result, PDF_PARTS[1]);
+    const sum = pdfSection(housePdf.text, housePdf.result, PDF_PARTS[0]);
+    const d = REF.appliedMultipleDisclosure(housePdf.result);
+    assert.ok(calc.indexOf("replacement cost") > -1, "the house fixture did not take the house path in this PDF");
+    assert.strictEqual(calc.split(LABEL).length - 1, 1, "the label appears " + (calc.split(LABEL).length - 1) + " times in a house lot build-up");
+    assert.ok(calc.indexOf(LABEL + " x " + d.multiple) > -1, "the house lot build-up row does not print the factor");
+    assert.ok(calc.indexOf(ASSUMPTION) > -1 && calc.indexOf(LIMITATION) > -1, "a house lot PDF drops the assumption or the limitation");
+    assert.ok(sum.indexOf(d.text) > -1, "a house lot PDF drops the summary line");
+  });
+
+  /* ---- a null disclosure renders nothing ---- */
+
+  check("a time-indexed result renders no disclosure anywhere in the PDF", () => {
+    assert.ok(indexedPdf.text.indexOf("Indexed land reference") > -1, "the indexed PDF did not render its own land table");
+    assert.ok(indexedPdf.text.indexOf("Factor guide comparison") > -1, "the indexed PDF did not render its own land table");
+    assert.strictEqual(indexedPdf.text.indexOf(LABEL), -1, "the indexed PDF still names the factor");
+    assert.strictEqual(indexedPdf.text.indexOf("the BIR reference"), -1, "the indexed PDF still states the multiple sentence");
+    assert.strictEqual(indexedPdf.text.indexOf("planning assumption"), -1, "the indexed PDF still prints the assumption");
+    assert.strictEqual(indexedPdf.text.indexOf("likely too high for rural locations"), -1, "the indexed PDF still prints the limitation");
+    assert.strictEqual(/\bx 0(\.0+)?\b/.test(indexedPdf.text), false, "the indexed PDF prints a zero factor");
+  });
+
+  /* The same guard seen from the other side. The indexed fixture above reaches
+     a different table branch, so on its own it cannot show that the row and
+     the two paragraphs in THIS branch are gated on the builder's return value.
+     Forcing a null on a factor-mode result does: the build-up survives and the
+     disclosure does not. */
+  check("the factor build-up prints nothing when the builder returns null", () => {
+    const d = REF.appliedMultipleDisclosure(lotPdf.result);
+    assert.ok(d, "the vacant lot fixture is supposed to disclose");
+    const calc = pdfSection(silencedPdf.text, silencedPdf.result, PDF_PARTS[1]);
+    assert.ok(calc.indexOf("Effective land rate") > -1 && calc.indexOf("Land value") > -1, "the land build-up itself vanished, so the assertions below would pass vacuously");
+    [LABEL, d.text, ASSUMPTION, LIMITATION].forEach(needle =>
+      assert.strictEqual(calc.indexOf(needle), -1, "the silenced build-up still prints " + JSON.stringify(needle)));
+    assert.strictEqual(silencedPdf.text.indexOf(LABEL), -1, "the silenced PDF still names the factor anywhere");
+    assert.strictEqual(silencedPdf.text.indexOf(ASSUMPTION), -1, "the silenced PDF still prints the assumption anywhere");
+  });
+
+  /* ---- the PDF prints the builder's words, not a second copy ---- */
+
+  check("the PDF prints the builder's own strings, once each", () => {
+    const d = REF.appliedMultipleDisclosure(markedPdf.result);
+    const sum = pdfSection(markedPdf.text, markedPdf.result, PDF_PARTS[0]);
+    const calc = pdfSection(markedPdf.text, markedPdf.result, PDF_PARTS[1]);
+    /* Six interpolated fields: label and text in the summary line, label and
+       multiple in the build-up row, the assumption, the limitation. A renderer
+       carrying its own copy - or one byte-identical to the builder's, which is
+       what M20 planted - drops a mark and the count moves. */
+    const marks = markedPdf.text.split(MARK).length - 1;
+    assert.strictEqual(marks, 6, "expected the builder's 6 interpolated fields to be marked, found " + marks);
+    assert.ok(sum.indexOf(LABEL + MARK) > -1, "the summary line does not print the builder's label");
+    assert.ok(sum.indexOf(d.text + MARK) > -1, "the summary line does not print the builder's multiple sentence");
+    assert.ok(calc.indexOf(LABEL + MARK + " x " + d.multiple + MARK) > -1, "the build-up row does not print the builder's label and factor");
+    assert.ok(calc.indexOf(ASSUMPTION + MARK) > -1, "the assumption paragraph does not print the builder's sentence");
+    assert.ok(calc.indexOf(LIMITATION + MARK) > -1, "the limitation paragraph does not print the builder's sentence");
+  });
+
+  /* ---- the accuracy rule, applied to what the PDF actually prints ----
+
+     Scoped to the two blocks the disclosure occupies, delimited by MARKER
+     anchors and the next block's own first string. It cannot run over the
+     whole document: the summary callout already publishes a sentence denying
+     that match depth is a statistical score (js/value_guide_pdf.js line 600,
+     asserted by tests/value_guide_pdf_node.js) and the regex rejects it on the
+     word alone. Widening the guard to cover that would refuse a sentence this
+     project publishes on purpose, so the rule is enforced where the renderer
+     owns the words - and only the builder's strings reach it. */
+  check("no PDF text added for the multiple claims accuracy", () => {
+    const sum = pdfSection(markedPdf.text, markedPdf.result, PDF_PARTS[0]);
+    const calc = pdfSection(markedPdf.text, markedPdf.result, PDF_PARTS[1]);
+    const blocks = [
+      sliceBetween(sum, LABEL + MARK, "Source match:"),
+      sliceBetween(calc, LABEL + MARK, "Step 3 - house value")
+    ];
+    blocks.forEach((block, i) => {
+      assert.ok(block.length > 40, "disclosure block " + i + " did not render (" + block.length + " chars)");
+      assert.strictEqual(BANNED.test(block), false, "accuracy language printed into the PDF: " + block);
+    });
+  });
+
+/* ---- the browser branch of the binding ----
+
+     js/value_guide_pdf.js binds the disclosure builder the way
+     js/estimator.js does - require() under Node, window.ESREALTY_REFERENCE in
+     the browser. Every PDF above went through the require() branch, so the
+     browser branch is never executed by any suite in this file, and
+     tests/value_guide_pdf_browser_e2e only proves that clicking Download still
+     produces a PDF: a browser build whose referenceTools came back undefined
+     would fail at the first call, and that suite's text assertions would never
+     reach the disclosure either way.
+
+     So the browser branch is executed here, for real: the three scripts the
+     renderer needs are loaded into a context with no module and no exports, in
+     index.html's order (value_guide_finance, value_guide_reference,
+     value_guide_pdf - the first is there because the renderer requires it for
+     the transaction-costs row), and the renderer is asked for a PDF through its
+     own global.
+
+     pdf-lib is evaluated inside that context too, and the reason is a harness
+     one, recorded rather than worked around: pdf-lib's option type checks use
+     instanceof, and the renderer's A4 page-size literal is an Array belonging
+     to the context that loaded the renderer. Handed a pdf-lib from this realm,
+     addPage() rejects it with "`page` must be of type ... but was actually of
+     type `NaN`" - a realm artefact, not a renderer error. This is the same
+     arrangement tests/value_guide_reference_node.js:41-44 already uses, for
+     the same reason. */
+  const browserSandbox = { console: console, Blob: Blob };
+  browserSandbox.window = browserSandbox; browserSandbox.self = browserSandbox;
+  vm.createContext(browserSandbox);
+  vm.runInContext("globalThis.window = globalThis; globalThis.self = globalThis;", browserSandbox);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, "vendor/pdf-lib/pdf-lib.min.js"), "utf8"), browserSandbox, { filename: "vendor/pdf-lib/pdf-lib.min.js" });
+  ["js/value_guide_finance.js", "js/value_guide_reference.js", "js/value_guide_pdf.js"].forEach(file =>
+    vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), browserSandbox, { filename: file }));
+  const browserVG = browserSandbox.ESREALTY_VG_PDF, browserPDFLib = browserSandbox.PDFLib;
+
+  await checkAsync("the PDF renders the disclosure through the browser branch of the binding", async () => {
+    assert.ok(browserSandbox.ESREALTY_REFERENCE, "js/value_guide_reference.js did not publish its global in the browser shape");
+    assert.ok(browserVG && typeof browserVG.toBlob === "function", "js/value_guide_pdf.js did not publish its global in the browser shape");
+    assert.ok(browserPDFLib && browserPDFLib.PDFDocument, "the vendored pdf-lib did not publish its global in the context");
+    /* No module in the context, so the renderer took the window branch. Had it
+       bound nothing, appliedMultipleDisclosure would throw a TypeError on the
+       first call rather than return. */
+    assert.strictEqual(typeof browserSandbox.ESREALTY_REFERENCE.appliedMultipleDisclosure, "function");
+    const blob = await browserVG.toBlob(browserPDFLib, lotPdf.result, PDF_META);
+    const text = pdfText(Buffer.from(await blob.arrayBuffer())).replace(/\s+/g, " ").trim();
+    const d = REF.appliedMultipleDisclosure(lotPdf.result);
+    assert.ok(text.length > 8000, "the browser-branch PDF rendered only " + text.length + " chars");
+    assert.strictEqual(text.split(LABEL).length - 1, 2, "the browser-branch PDF does not carry the label at both sites");
+    assert.ok(text.indexOf(ASSUMPTION) > -1 && text.indexOf(LIMITATION) > -1, "the browser-branch PDF drops the assumption or the limitation");
+    assert.ok(text.indexOf(d.text) > -1, "the browser-branch PDF drops the summary line");
+  });
+
+  /* ---- the brief's static source guard, kept alongside the real ones ----
+     A shape check, not behavioural coverage, and labelled as such: it can only
+     see that the characters exist in the file. What is printed is pinned by the
+     assertions above. It is here for the one defect text extraction is blind to,
+     and blindness was measured rather than assumed.
+
+     Two mutations, both applied to js/value_guide_pdf.js on 2026-10-04:
+       M26. drop `.filter(...)` and hand landRows to table() unfiltered
+            -> the render THROWS: "TypeError: Cannot read properties of null
+               (reading 'length')" at js/value_guide_pdf.js:347, on the first
+               fixture that reaches the branch with a null disclosure. So the
+               filter is load-bearing and the silenced fixture above exercises
+               it for real - the crash is the coverage.
+       M27. keep the filter but make the falsy branch `[null]` instead of
+            `null` -> ALL GREEN (63 checks). table() accepts a one-element row,
+            wrap() renders an empty cell as no ink at all, the row is at an even
+            index so no shade band is drawn either, and the cost is 17.46pt of
+            blank vertical space that no extracted text can show.
+
+     M27 is the reason the falsy branch is pinned here rather than trusted. It
+     is the only defect in this feature that behavioural assertions cannot see.
+
+     M28. add a second, unreachable resolution site
+          -> "expected exactly one resolution site in js/value_guide_pdf.js,
+             found 2". A renderer that called the builder per printed field
+             would pass every presence check above, because the words would
+             still be the builder's - this is the only thing that sees it. */
+  check("source: the PDF resolves the disclosure once and guards both emissions", () => {
+    const src = fs.readFileSync(path.join(ROOT, "js/value_guide_pdf.js"), "utf8");
+    assert.strictEqual(src.split("referenceTools.appliedMultipleDisclosure(").length - 1, 1,
+      "expected exactly one resolution site in js/value_guide_pdf.js, found " + (src.split("referenceTools.appliedMultipleDisclosure(").length - 1));
+    assert.ok(/var multipleDisclosure = referenceTools\.appliedMultipleDisclosure\(/.test(src), "the disclosure is not resolved into a named local");
+    assert.ok(/if \(multipleDisclosure\) line\(multipleDisclosure\.multipleLabel, multipleDisclosure\.text/.test(src), "the summary emission is not guarded on the disclosure being truthy");
+    assert.ok(/multipleDisclosure \? \[multipleDisclosure\.multipleLabel, "x " \+ multipleDisclosure\.multiple\] : null/.test(src), "the build-up row is not a conditional entry whose falsy branch is null");
+    assert.ok(/landRows\.filter\(function \(row\) \{ return row; \}\)/.test(src), "the conditional row is not filtered out of the table array");
+    assert.ok(/if \(multipleDisclosure\) \{\s*para\(multipleDisclosure\.assumption, 8, gray\);\s*para\(multipleDisclosure\.limitation, 8, gray\);/.test(src), "the two sentences are not emitted together under a guard");
   });
 
   console.log("ALL GREEN (" + count + " checks)");

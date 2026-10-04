@@ -45,6 +45,11 @@
 })(typeof self !== "undefined" ? self : this, function () {
   "use strict";
   var finance = typeof module === "object" && module.exports ? require("./value_guide_finance.js") : globalThis.ESREALTY_FINANCE;
+  /* The applied multiple, and every word published about it, is owned by
+     js/value_guide_reference.js. Bound here exactly as js/estimator.js binds
+     it, so the HTML result screen, the report build-up and this PDF all read
+     one disclosure and cannot word it three different ways. */
+  var referenceTools = typeof module === "object" && module.exports ? require("./value_guide_reference.js") : window.ESREALTY_REFERENCE;
 
   /* The standard PDF fonts are WinAnsi-encoded and cannot represent U+20B1.
      Every peso figure is written as "PHP " for the same reason the emailed
@@ -549,6 +554,11 @@
 
       var tax = (meta && meta.tax) || null;
       var muniRow = (meta && meta.muniRow) || null;
+      /* Resolved once per layout pass, never per printed field. render() lays
+         the document out twice (page count, then the real pass), so this is
+         called twice per PDF and the two calls must agree - which they do,
+         because both take the same result object. */
+      var multipleDisclosure = referenceTools.appliedMultipleDisclosure(r);
       var reportId = (meta && meta.generatedOn ? meta.generatedOn.replace(/-/g, "") : "") + "-" + esc(r.municipality || "").slice(0, 3).toUpperCase() + "-" + (r.rdo || "");
       var midpoint = (Number(r.low || 0) + Number(r.high || 0)) / 2;
 
@@ -576,6 +586,14 @@
         { label: "Guide range", value: fmtMoney(r.low) + " - " + fmtMoney(r.high), sub: "85%-130% planning scenarios", accent: tan, small: true },
         { label: r.birReferenceConfirmed === false ? "Derived locality reference" : "Official BIR zonal reference", value: fmtMoney(r.birZonalValue), sub: fmtMoney(r.birZonalRatePerSqm) + "/sqm, " + (r.birReferenceConfirmed === false ? "derived fallback" : "tax reference"), accent: cool }
       ]);
+
+      /* The three figures above are printed side by side with nothing
+         connecting the BIR reference to the estimate, so the factor that
+         connects them is named directly under them - the same place the web
+         result screen puts it. Both strings come from the disclosure builder;
+         this module contributes no wording of its own. A null disclosure (the
+         indexed scenario applies no factor stack at all) prints no line. */
+      if (multipleDisclosure) line(multipleDisclosure.multipleLabel, multipleDisclosure.text, { labelW: 200 });
 
       var cov = r.source || {};
       box([
@@ -638,7 +656,19 @@
         table(null, [["Original reference rate", fmtNum(ti.originalRate) + " PHP/sqm (unchanged)"], ["Selected scenario", "Indexed land reference; market/corner multipliers not stacked"], ["Annual change", fmtNum(ti.annualPct) + "% / " + ti.source], ["Base / target dates", ti.baseDate + " / " + ti.targetDate], ["Elapsed years", fmtNum(ti.elapsedYears, 6)], ["Indexed rate (display rounded)", fmtNum(ti.rawRate) + " PHP/sqm"], ["Indexed land amount", fmtMoney(ti.landAmount)], ["Factor guide comparison", fmtMoney(r.factorBaseline.total) + " (not selected)"]], [200, 300], { padY: 4 });
         para(ti.formula + ". " + ti.note + " Full precision used before final rounding.", 8, gray);
       } else {
-      table(null, [
+      /* The rows above multiply out to the effective land rate but never say
+         what the product was, so a reader holding the BIR schedule in one hand
+         cannot check the estimate in the other. The last row names that
+         product, and the two paragraphs after the table say what it is and
+         where it does not reach. All four strings are the disclosure builder's.
+
+         The row is appended conditionally and the conditional entry is FILTERED
+         out, rather than left in the array. Both halves are load-bearing, and
+         they fail differently: table() reads rows[ri].length, so an unfiltered
+         null throws and no document is produced at all, while a one-element
+         [null] row is accepted, draws no ink and silently costs a blank band
+         of vertical space. Filtered out, the array holds the eight real rows. */
+      var landRows = [
         ["BIR zonal base", fmtMoney(r.reference ? r.reference.value : r.birZonalRatePerSqm) + "/sqm"],
         ["Corner adjustment", r.corner && r.corner.applied
            ? "x " + (1 + Number(r.corner.pct || 0)).toFixed(4) + "   (+" + fmtNum(Number(r.corner.pct) * 100) + "%)"
@@ -648,8 +678,14 @@
         ["Regional adjustment", "x " + fmtNum(r.factors.regionalAdj)],
         ["Effective land rate", fmtMoney(r.landPerSqm) + "/sqm"],
         ["Lot area", fmtArea(r.area)],
-        ["Land value", fmtMoney(r.landValue)]
-      ], [200, 300], { boldFirstCol: true, padY: 4 });
+        ["Land value", fmtMoney(r.landValue)],
+        multipleDisclosure ? [multipleDisclosure.multipleLabel, "x " + multipleDisclosure.multiple] : null
+      ];
+      table(null, landRows.filter(function (row) { return row; }), [200, 300], { boldFirstCol: true, padY: 4 });
+      if (multipleDisclosure) {
+        para(multipleDisclosure.assumption, 8, gray);
+        para(multipleDisclosure.limitation, 8, gray);
+      }
       }
 
       if (r.type === "house_lot") {
