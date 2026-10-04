@@ -56,6 +56,16 @@ The current guide uses SEA ESTATES-approved factors. The BIR reference remains s
 - Do not add PVS-compliance, "evaluation standards", certified-accuracy, or value-loss claims to
   public copy until a reviewer signs off on the factor model.
 - Re-review the factors after any change to `data/zonal-config.json` market bands or proxies.
+- The calculator now publishes the applied multiple alongside the BIR reference, as a disclosed
+  SEA ESTATES market band factor. It is derived from the factor stack the estimate already
+  applies — `(1 + cornerPct) x proxy x band x regionalAdj` — and not hardcoded, so it changes
+  with `data/zonal-config.json` and with the corner answer, and it is `null` (disclosed
+  nothing) in time-indexed mode where no factor stack runs. Because the multiple is the same
+  unreviewed planning assumption described above, it is published with the assumption and the
+  limitation attached, not as a validated ratio. The accuracy-language rule above — no
+  PVS-compliance, certified-accuracy or value-loss language in public copy — is enforced as a
+  test in `tests/value_guide_multiple_node.js`, which fails if any banned accuracy term appears
+  in the disclosure strings.
 
 ## LandValuePH comparison (reviewed 2026-09-30)
 

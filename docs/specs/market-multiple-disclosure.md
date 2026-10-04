@@ -92,8 +92,25 @@ three surfaces consume it:
 
 ```js
 referenceTools.appliedMultipleDisclosure(result)
-// -> null | { multiple, label, assumption, limitation, text }
+// -> null | { multiple, multipleLabel, text, assumption, limitation, factors }
 ```
+
+The field is `multipleLabel`, not `label`: this module already returns a `label`
+from `status()` and from each `lookup().relatedSchedules[]` entry for the BIR
+reference, and a bare `label` on a provenance object with siblings reads as the
+BIR one. `factors` is passed through so a renderer can show the stack beside
+the multiple.
+
+The multiple is formatted by `formatMultiple(n)`, which rounds to **5 decimals**
+and trims trailing zeros (`2.5`, not `2.50000`) — no `toFixed`, which would pad
+and fail the pinned `2.5` assertion. Five, not four: corner x commercial is
+`1.025 x 1.7 x 2.5 = 4.35625` and corner x agricultural is
+`1.025 x 0.5 x 1.5 = 0.76875`, and at four decimals the site would publish
+`4.3562` / `0.7687` while those exact values were applied. Five decimals covers
+all eight combinations the shipped factors can produce. This is a property of
+today's factors, not a general losslessness guarantee: if a future factor
+carries more precision the published multiple stops reconciling with the
+estimate, which is the intended signal, not a silent truncation.
 
 `estimator.js` already holds `referenceTools` for `.lookup()` and
 `.timeScenario()`, so this adds no new dependency.
@@ -115,14 +132,15 @@ block at `:577`. Public and internal PDFs share this renderer.
 ### 4. Copy
 
 ```
-label      SEA ESTATES market band factor
-text       <multiple>x the BIR reference
-assumption A SEA ESTATES planning assumption. It is not derived from
-           completed sales and has not been reviewed by an independent
-           qualified appraiser.
-limitation The same factor is applied across all Batangas municipalities.
-           It is not adjusted for local demand and is likely too high for
-           rural locations.
+multipleLabel SEA ESTATES market band factor
+multiple      2.5 (already formatted; the renderer must not re-round)
+text          2.5x the BIR reference
+assumption    A SEA ESTATES planning assumption. It is not derived from
+              completed sales and has not been reviewed by an independent
+              qualified appraiser.
+limitation    The same factor is applied across all Batangas municipalities.
+              It is not adjusted for local demand and is likely too high for
+              rural locations.
 ```
 
 State the limitation rather than hide it: a flat factor is wrong by the
