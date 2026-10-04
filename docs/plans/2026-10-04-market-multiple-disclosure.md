@@ -234,7 +234,18 @@ Expected: FAIL — `appliedMultipleDisclosure is not a function`.
 
 - [ ] **Step 6: Implement `formatMultiple` in `js/value_guide_reference.js`**
 
-Signature `formatMultiple(n: any) -> string`. Round to 4 decimals and return via `String(...)` so trailing zeros drop — `2.5`, not `2.5000`. Do not use `toFixed`, which would keep them and fail Step 4.
+Signature `formatMultiple(n: any) -> string`. Round to **5 decimals** and return via
+`String(...)` so trailing zeros drop — `2.5`, not `2.50000`. Do not use `toFixed`,
+which would keep them and fail Step 4.
+
+Five, not four: corner × commercial is `1.025 × 1.7 × 2.5 = 4.35625` and
+corner × agricultural is `1.025 × 0.5 × 1.5 = 0.76875`. At four decimals the site
+publishes `4.3562` and `0.7687` while those exact values were applied, so a reader
+multiplying the disclosed multiple by the BIR rate does not land on the estimate —
+the exact mismatch this feature exists to remove. Five decimals covers all eight
+combinations the shipped factors can produce. It is a property of today's factors,
+not a general losslessness guarantee: if `regionalAdj` or any future factor carries
+more precision, the reconciliation check goes red, which is the intended signal.
 
 - [ ] **Step 7: Implement `appliedMultipleDisclosure`**
 
