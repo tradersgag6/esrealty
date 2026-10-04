@@ -143,8 +143,12 @@ ok(/RA 12001/.test(MANIFEST.provenance.records[0].currencyNote),
 ok(/DO 034-2022/.test(DOCS), "the docs cite DO 034-2022");
 ok(/RA 12001/.test(DOCS), "the docs cite RA 12001");
 /* The docs deliberately name the old citation inside the correction note, so
-   only the substantive references are checked. */
-const docsBody = DOCS.replace(/Correcting an earlier error:[\s\S]*?(?=\n\n)/, "");
+   only the substantive references are checked. The blank-line lookahead must
+   tolerate CRLF: with core.autocrlf=true a fresh Windows clone checks the file
+   out with \r\n, a bare \n\n never matches there, the correction note survives
+   the strip, and this assertion fails on a clean clone while passing in a
+   working tree that happens to hold LF. */
+const docsBody = DOCS.replace(/Correcting an earlier error:[\s\S]*?(?=\r?\n\r?\n)/, "");
 ok(!/RA 12000/.test(docsBody), "the docs no longer cite RA 12000 outside the correction note");
 ok(/RA 12001.*Real Property Valuation and Assessment Reform Act/s.test(DOCS),
   "the docs spell out RA 12001's short title");
