@@ -65,10 +65,14 @@
      locations") is the reason this disclosure is worth publishing. No accuracy
      claim - no "accurate", "guaranteed", "\u00b1", "within N%", "error margin"
      or "precision" - may appear in anything returned from here. The rule in
-     docs/batangas-value-guide-sources.md:50-58 is enforced as a test in
-     tests/value_guide_multiple_node.js rather than by rewriting the copy at
-     runtime: silently editing published wording would hide the defect instead
-     of failing the build. */
+     docs/batangas-value-guide-sources.md:56-57 is only partly machine-enforced,
+     by the banned-term regex in tests/value_guide_multiple_node.js rather than
+     by rewriting the copy at runtime: silently editing published wording would
+     hide the defect instead of failing the build. The regex catches an `accur`
+     stem - which is how certified-accuracy is caught - plus `guarantee`,
+     "\u00b1", `within N %`/`percent`, `error margin`, a `precis` stem,
+     `close to` and `exact match`. PVS-compliance, value-loss and evaluation
+     standards are NOT matched by it; those terms rest on reviewer convention. */
   var MULTIPLE_LABEL = "SEA ESTATES market band factor";
   var MULTIPLE_ASSUMPTION = "A SEA ESTATES planning assumption. It is not derived from completed sales and has not been reviewed by an independent qualified appraiser.";
   var MULTIPLE_LIMITATION = "The same factor is applied across all Batangas municipalities. It is not adjusted for local demand and is likely too high for rural locations.";

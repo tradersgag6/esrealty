@@ -22,8 +22,8 @@ target price band, not a measurement. That is already stated honestly in
 reaches the calculator.
 
 Comparable listing prices are explicitly excluded from the formula
-(`js/estimator.js:187-191`, `comparablePricesUsed: false`), so the market figure
-cannot be defended by appeal to market data.
+(`js/estimator.js:187-191`, `comparablePricesUsed: false` at `:326`), so the
+market figure cannot be defended by appeal to market data.
 
 ## Decision
 
@@ -50,7 +50,7 @@ Compute the factor stack as a named value where the unrounded product already
 exists, so the disclosure cannot drift from the arithmetic:
 
 ```js
-// js/estimator.js:192  (behaviour-identical refactor)
+// js/estimator.js:202  (behaviour-identical refactor)
 var factorStack = (1 + cornerPct) * proxy * band * adj;
 var landPerSqm = Math.round(base * factorStack);
 ```
@@ -59,7 +59,7 @@ var landPerSqm = Math.round(base * factorStack);
 rounded `birZonalRatePerSqm` instead would introduce up to ~0.4% error at low
 rates, and the report prints a build-up a reader may try to reproduce.
 
-Add to the result object beside the existing `factors` field (`:295`):
+Add to the result object beside the existing `factors` field (`:306`):
 
 ```js
 factorStack: landMethod === "factor" ? factorStack : null,
@@ -67,7 +67,7 @@ appliedMultiple: landMethod === "factor" ? factorStack : null,
 ```
 
 `null` in `time-indexed` mode, where `landPerSqm` is replaced by the indexed
-rate (`:199`) and corner is forced to 0 (`:279`). The existing indexed
+rate (`:210`) and corner is forced to 0 (`:290`). The existing indexed
 disclosure already covers that path; a multiple would be meaningless there.
 
 Test vectors from the shipped config:
@@ -85,10 +85,11 @@ A hardcoded "2.5" would be wrong for three of these.
 ### 2. One source of truth for the copy
 
 HTML, report and PDF are separate renderers and their wording has already
-drifted elsewhere (the PDF build-up at `value_guide_pdf.js:646-648` omits the
-corner row that the HTML build-up shows). Add a single disclosure builder in
-`js/value_guide_reference.js`, the existing provenance module, and have all
-three surfaces consume it:
+drifted elsewhere - the PDF land build-up used to omit the corner row the
+report build-up shows (`js/estimator.js:1321`). That past divergence is why the
+disclosure copy is owned in one place rather than written per surface. Add a
+single disclosure builder in `js/value_guide_reference.js`, the existing
+provenance module, and have all three surfaces consume it:
 
 ```js
 referenceTools.appliedMultipleDisclosure(result)
@@ -120,17 +121,19 @@ estimate, which is the intended signal, not a silent truncation.
 
 ### 3. Surfaces
 
-**Result screen**, in the existing BIR block (`estimator.js:1362`), so the
-relationship is visible at the moment of reading:
+**Result screen**, in the existing BIR block (`js/estimator.js:1412`), so the
+relationship is visible at the moment of reading — the disclosure element is
+interpolated immediately after it (`:1413`):
 
 > BIR zonal reference - P11,500/sqm · P1,150,000
-> **SEA ESTATES market band factor: 2.5× this reference**
+> **SEA ESTATES market band factor: 2.5× the BIR reference**
 
-**Report - "Land value build-up"** (`:1287-1296`), appended after the existing
-factor rows.
+**Report - "Land value build-up"** (`js/estimator.js:1318-1328`), appended after
+the existing factor rows and the effective-land-rate line.
 
-**PDF** - `value_guide_pdf.js:642-651`, the same section, plus the summary
-block at `:577`. Public and internal PDFs share this renderer.
+**PDF** — `js/value_guide_pdf.js:682`, the multiple row in the same build-up
+table, plus the line under the summary tiles (`:584`, the multiple line itself
+at `:596`). Public and internal PDFs share this renderer.
 
 ### 4. Copy
 
@@ -154,15 +157,21 @@ out by a broker who knows the area.
 ### 5. Accuracy-language guard
 
 The disclosure must never claim accuracy. `tests/` gains a guard that fails if
-these appear in the disclosure strings:
+these appear in the disclosure strings (`tests/value_guide_multiple_node.js:401`):
 
 ```
-/\baccur\w*|\bguarantee|\u00b1|\bwithin \d+\s*%|\berror margin|\bprecision\b/i
+/\b(?:in)?accur\w*|\bguarantee|\u00b1|\bwithin \d+\s*(?:%|percent)|\berror margin|\bprecis\w*|\bclose to\b|\bexact match\b/i
 ```
 
-`docs/batangas-value-guide-sources.md:50-58` already forbids PVS-compliance,
-certified-accuracy and value-loss claims until an appraiser signs off. This
-makes that a test rather than a convention.
+`docs/batangas-value-guide-sources.md:56-57` already forbids PVS-compliance,
+certified-accuracy and value-loss claims until an appraiser signs off. The guard
+turns most of that into a test rather than a convention, but not all of it: the
+regex fails on an `accur` stem — which is how `certified-accuracy` and
+`certified accuracy` are caught — plus `guarantee`, `±`, `within N %`/`percent`,
+`error margin`, a `precis` stem, `close to` and `exact match`. It does not match
+`PVS-compliant`, `PVS compliance`, `value-loss`/`value loss` or
+`evaluation standards`; those spellings are held by reviewer convention only.
+Closing that gap needs a change to the regex, which this task does not make.
 
 ## Testing
 
@@ -192,9 +201,10 @@ Regression: the existing 100/100 suite must stay green, including
 | `tests/value_guide_multiple_node.js` | new |
 | `docs/batangas-value-guide-sources.md` | record the new public disclosure |
 
-`js/app.js` internal wizard calls the same `computeEstimate` (`:2378`), so it
-receives the field automatically. Surfacing it in the internal UI is a
-follow-up, not required here.
+`js/app.js:10735` calls the same estimator entry point (`estimate`, a thin
+wrapper over `computeEstimate` at `js/estimator.js:131`), so it receives the
+field automatically. Surfacing it in the internal UI is a follow-up, not
+required here.
 
 ## Risks
 
