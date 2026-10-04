@@ -237,10 +237,22 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
                                                multipleLabel assertion, NOT at
                                                the accuracy guard - see the
                                                note below
-      13. round to 4 decimals               -> "disclosure multiple for
-                                               commercial + corner" and
-                                               "agricultural + corner" FAIL
-                                               (added in fix round 1)
+      13. round to 4 decimals               -> RED at "disclosure multiple
+                                                for commercial + corner", the
+                                                FIRST vector that needs five
+                                                decimals, actual '4.3562' vs
+                                                expected '4.35625'. The run
+                                                aborts at the first throw, so
+                                                nothing after it was observed
+                                                failing in that run - in
+                                                particular the two checks with
+                                                the most teeth,
+                                                "every disclosed multiple
+                                                reconciles with the applied
+                                                factor stack" and "formatMultiple
+                                                rounds to 5 decimals", were not
+                                                exercised to failure here.
+                                                (added in fix round 1)
 
      Mutation 2 was GREEN on the first run. Every check then present was also
      satisfied by a deny-list on "time-indexed", because the indexed path and
@@ -253,8 +265,10 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
      On mutation 12: the accuracy guard has NO discriminating power over
      today's code. Every banned term is planted in one of the three fixed
      strings, and the verbatim assertions on `multipleLabel`, `assumption`
-     and `limitation` fire first - roughly 185 lines before the guard is
-     reached - so the run goes RED without the guard ever executing. That is
+     and `limitation` fire first - 285 lines before the guard is reached
+     (measured, not estimated: the assertion below is at line 422 and the
+     verbatim `multipleLabel` assertion at line 137) - so the run goes RED
+     without the guard ever executing. That is
      correct behaviour, not a defect: a banned term cannot reach the copy. But
      it does mean the guard proves nothing yet. Its value is forward-looking,
      for the sentences Tasks 3 and 4 compose, which are NOT pinned verbatim
