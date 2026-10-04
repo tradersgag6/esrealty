@@ -1389,17 +1389,17 @@ var displayRange = '';
     /* The BIR zonal reference and the market estimate are printed one after the
      * other with nothing connecting them, so the factor that connects them is
      * named here. Every word comes from referenceTools.appliedMultipleDisclosure;
-     * this module never restates the assumption or the limitation, so the HTML,
-     * the report and the PDF cannot word it three different ways.
+     * this module never restates the assumption or the limitation, so the result
+     * screen and the report build-up cannot word it two different ways.
      *
      * Resolved ONCE, above the concatenation. This screen is assembled by string
      * concatenation, so calling the builder per interpolated field would rebuild
      * the disclosure once per field.
      *
-     * The guard is the honest part: appliedMultipleDisclosure returns null for
-     * the time-indexed land method (no factor stack was ever applied), and a null
-     * must leave nothing behind - not an empty element, not "0x the BIR
-     * reference". */
+     * The guard is the honest part: appliedMultipleDisclosure refuses every land
+     * method other than "factor" (time-indexed applies no factor stack at all),
+     * so a null disclosure must leave nothing behind - not an empty element, not
+     * "0x the BIR reference". */
     var multipleDisclosure = referenceTools.appliedMultipleDisclosure(r);
     var multipleHtml = multipleDisclosure
       ? '<div class="sf-est-result-multiple"><b>' + esc(multipleDisclosure.multipleLabel) + '</b><span>' + esc(multipleDisclosure.text) + '</span><small>' + esc(multipleDisclosure.assumption) + '</small></div>'

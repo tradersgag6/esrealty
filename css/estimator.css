@@ -405,6 +405,23 @@
 .sf-est-result-bir b { grid-column: 2; grid-row: 1 / span 2; color: #174b2b; font-family: Georgia, serif; font-size: 27px; font-variant-numeric: tabular-nums; }
 .sf-est-result-bir small { color: #4d7b5a; font-size: 12px; }
 .sf-est-result-bir-note { padding-top: 5px; border-top: 1px solid #e1e9e5; }
+/* ---- applied market multiple ----
+ * The factor that turns the BIR zonal reference printed above it into the
+ * market estimate (on a house_lot the estimate also carries construction and
+ * depreciation). It is a planning assumption, so it is set in the muted token
+ * rather than given a panel of its own - it must not read as another headline
+ * figure. --sf-ink-mute is declared on .sf-site in css/storefront.css, which
+ * wraps this markup (js/storefront.js:156), so the custom property inherits
+ * into this sheet whatever the load order is; that file's own contrast note
+ * records it at 5.7:1 on paper. No second token is introduced. */
+.sf-est-result-multiple { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+.sf-est-result-multiple b { font-size: 14px; }
+.sf-est-result-multiple small,
+.sf-est-multiple-note,
+.sf-est-multiple-limit { color: var(--sf-ink-mute); }
+.sf-est-result-multiple small { font-size: 12px; line-height: 1.5; }
+.sf-est-multiple-note { margin: 8px 0 0; font-size: 14px; line-height: 1.75; }
+.sf-est-multiple-limit { margin: 4px 0 0; font-size: 12px; line-height: 1.6; }
 /* ---- primary conversion block (result screen) ---- */
 .sf-est-nextstep { display: grid; gap: 16px; margin: 0 0 26px; padding: clamp(20px, 3vw, 28px); border: 1px solid #b9d5dc; border-radius: 14px; background: linear-gradient(140deg, #eaf6f9 0%, #fffdf8 62%, #fff 100%); }
 .sf-est-nextstep-badge { display: inline-block; margin-bottom: 10px; padding: 5px 11px; border-radius: 999px; background: #17647c; color: #fff; font-size: 11px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }

@@ -213,33 +213,35 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
      verbatim further down, but they are not the teeth.
 
      Mutation proof, run on 2026-10-04 against this file, each mutation
-     applied to js/value_guide_reference.js and then reverted:
-       1. drop `!result`                    -> "no result at all" THROWS
-       2. `!== "factor"` becomes `=== "time-indexed"` (deny-list)
-                                           -> "unrecognised or absent land
-                                               method" FAILS
-       3. drop the isFinite check           -> "non-finite multiple" FAILS
-       4. drop the `> 0` check              -> "zero multiple" and
-                                               "negative multiple" FAIL
-       5. drop the `|| {}` on factors       -> "defaults the factors object"
-                                               FAILS
-       6. copy factors instead of passing the result's own object through
-                                           -> "carries the result's own
-                                               factors" FAILS
-       7. hardcode `shown = "2.5"`          -> the commercial, agricultural,
-                                               industrial and corner vector
-                                               checks FAIL
-       8. round to 2 decimals               -> the corner vector check FAILS
-       9. toFixed(5) instead of String()    -> "drops trailing zeros" FAILS
-      10. no rounding at all                -> "rounds to 5 decimals" FAILS
-      11. reword, soften or drop either fixed sentence
-                                           -> "verbatim copy" FAILS
-      12. plant "accurate to +/-3%" in the label
-                                           -> RED, but at the verbatim
-                                               multipleLabel assertion, NOT at
-                                               the accuracy guard - see the
-                                               note below
-      13. round to 4 decimals               -> RED at "disclosure multiple
+     applied to js/value_guide_reference.js and then reverted. Prefixed G so
+     they cannot be confused with the M-numbered estimator/CSS mutations
+     further down, which are a separate ledger:
+        G1.  drop `!result`                    -> "no result at all" THROWS
+        G2.  `!== "factor"` becomes `=== "time-indexed"` (deny-list)
+                                            -> "unrecognised or absent land
+                                                method" FAILS
+        G3.  drop the isFinite check           -> "non-finite multiple" FAILS
+        G4.  drop the `> 0` check              -> "zero multiple" and
+                                                "negative multiple" FAIL
+        G5.  drop the `|| {}` on factors       -> "defaults the factors object"
+                                                FAILS
+        G6.  copy factors instead of passing the result's own object through
+                                            -> "carries the result's own
+                                                factors" FAILS
+        G7.  hardcode `shown = "2.5"`          -> the commercial, agricultural,
+                                                industrial and corner vector
+                                                checks FAIL
+        G8.  round to 2 decimals               -> the corner vector check FAILS
+        G9.  toFixed(5) instead of String()    -> "drops trailing zeros" FAILS
+        G10. no rounding at all                -> "rounds to 5 decimals" FAILS
+        G11. reword, soften or drop either fixed sentence
+                                            -> "verbatim copy" FAILS
+        G12. plant "accurate to +/-3%" in the label
+                                            -> RED, but at the verbatim
+                                                multipleLabel assertion, NOT at
+                                                the accuracy guard - see the
+                                                note below
+        G13. round to 4 decimals               -> RED at "disclosure multiple
                                                 for commercial + corner", the
                                                 FIRST vector that needs five
                                                 decimals, actual '4.3562' vs
@@ -256,15 +258,15 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
                                                 exercised to failure here.
                                                 (added in fix round 1)
 
-     Mutation 2 was GREEN on the first run. Every check then present was also
+     G2 was GREEN on the first run. Every check then present was also
      satisfied by a deny-list on "time-indexed", because the indexed path and
      every unavailable result are separately refused by the value guards. The
      "unrecognised or absent land method" check was added to close that, and
-     mutation 2 re-run to confirm it is now RED. Recorded because the whole
+     G2 re-run to confirm it is now RED. Recorded because the whole
      point of this file is that a guard nobody can distinguish from its
      opposite is not a guard.
 
-     On mutation 12: the accuracy guard has NO discriminating power over
+     On G12: the accuracy guard has NO discriminating power over
      today's code. Every banned term is planted in one of the three fixed
      strings, and the verbatim assertions on `multipleLabel`, `assumption`
      and `limitation` fire first - 285 lines before the guard is reached
@@ -376,7 +378,7 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
      the regex actually bites (a guard that can never match is a green lie),
      and the negative assertion on the real copy.
 
-     Widened in fix round 1. Three gaps let real variants through:
+     Widened in Task 2 fix round 1. Three gaps let real variants through:
        - `\baccur\w*` has no word boundary inside "inaccurate", so the most
          natural way to break the rule - denying accuracy - was unguarded.
        - `\bprecision\b` missed "precise" and "precisely".
@@ -385,21 +387,31 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
      The published copy is fixed and contains none of these, so widening
      cannot produce a false positive today; it matters because Tasks 3 and 4
      introduce prose that is NOT pinned verbatim and can only be policed by
-     this regex. */
-  const BANNED = /\b(?:in)?accur\w*|\bguarantee|\u00b1|\bwithin \d+\s*(?:%|percent)|\berror margin|\bprecis\w*/i;
+     this regex.
+
+     Widened again in Task 3 fix round 1, adding `close to` and `exact match`.
+     Task 2 declined them deliberately; Task 3 is the first task whose
+     RENDERER owns prose, so the guard has to police it. Task 2's reason for
+     declining - "they are not asserted, so the gap is invisible" - was the
+     defect: a term the regex cannot catch looks identical to a clean copy
+     until the day someone writes the phrase. Both are now asserted in the
+     positive control below. Neither occurs in the fixed copy, so this cannot
+     false-positive today. */
+  const BANNED = /\b(?:in)?accur\w*|\bguarantee|\u00b1|\bwithin \d+\s*(?:%|percent)|\berror margin|\bprecis\w*|\bclose to\b|\bexact match\b/i;
 
   check("accuracy guard rejects every forbidden term (positive control)", () => {
     ["accurate", "accuracy", "accurately", "inaccurate", "inaccurately", "guarantee", "guaranteed",
      "\u00b1 5%", "within 5%", "within 10 %", "within 5 percent", "within 10 percent",
-     "error margin", "precision", "precise", "precisely"].forEach(phrase => {
+     "error margin", "precision", "precise", "precisely",
+     "close to", "exact match"].forEach(phrase => {
       assert.ok(BANNED.test(phrase), "guard failed to catch " + JSON.stringify(phrase));
     });
   });
 
-  /* One check per gap the fix round 1 widened, so the widened pattern is
-     itself pinned rather than merely present. Each asserts the specific
-     variant that the pre-fix pattern missed, which is the only way to catch
-     a future well-meaning "simplification" back to `\baccur\w*`. */
+  /* One check per gap a fix round widened, so the widened pattern is itself
+     pinned rather than merely present. Each asserts the specific variant the
+     pre-fix pattern missed, which is the only way to catch a future
+     well-meaning "simplification" back to the narrower regex. */
   check("accuracy guard catches the variants the narrow pattern missed", () => {
     /* Pre-fix `\baccur\w*` did not match: "in" runs straight into "accurate"
        with no word boundary. */
@@ -411,6 +423,11 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
     /* Pre-fix `within \d+\s*%` did not match the spelled-out unit. */
     assert.ok(BANNED.test("within 5 percent"), "missed: within 5 percent");
     assert.ok(BANNED.test("within 10 percent"), "missed: within 10 percent");
+    /* Never in the pattern at all, so nothing caught them until Task 3's fix
+       round added the two alternatives. Both are ways of claiming closeness
+       or exactness without using a word on the earlier list. */
+    assert.ok(BANNED.test("The estimate is close to the BIR reference"), "missed: close to");
+    assert.ok(BANNED.test("an exact match"), "missed: exact match");
   });
 
   check("no disclosure string claims accuracy", () => {
@@ -553,7 +570,7 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
   /* ---- the accuracy rule, applied to what is actually rendered ----
      FIRST, deliberately. Over the published copy the verbatim assertions
      elsewhere in this file fire long before any regex, so the guard never
-     executes (see the mutation-12 note above). The connective prose around the
+     executes (see the G12 note above). The connective prose around the
      three blocks below is the RENDERER's, and this is the only check that reads
      it, so this has to run before the verbatim pins or it can never be reached.
 
@@ -579,10 +596,12 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
 
   /* ---- the result screen ---- */
 
-  check("result screen renders the multiple inside the BIR block", () => {
+  check("result screen renders the multiple immediately after the BIR block", () => {
     assert.ok(/sf-est-result-bir/.test(factorHtml), "the BIR block is gone from the result screen");
-    /* A sibling of the BIR block, not a child: the disclosure qualifies the
-       BIR figure, so it must not be nested inside the BIR card. */
+    /* A SIBLING of the BIR block, not a child: the disclosure qualifies the BIR
+       figure, so it must not be nested inside the BIR card. The assertion is
+       the closing </div> immediately followed by the opening <div>, which is
+       what makes it a sibling rather than merely adjacent. */
     assert.ok(/<\/div><div class="sf-est-result-multiple">/.test(factorHtml),
       "the disclosure is not emitted immediately after the BIR block");
   });
@@ -640,7 +659,7 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
        only assertion here that can see a screen whose figures no longer
        multiply out.
 
-       Teeth: mutation 12 on 2026-10-04 scaled the printed BIR base by 1.5 in
+       Teeth: M12 on 2026-10-04 scaled the printed BIR base by 1.5 in
        js/estimator.js. Every verbatim pin, the sentinel count and the escaping
        checks all stayed green - the words really are the builder's - and this
        check went red on the arithmetic alone.
@@ -664,10 +683,36 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
     });
   });
 
+  /* The precondition the reconciliation above silently assumes.
+     js/estimator.js prints the build-up's base from r.reference.value, but the
+     reader multiplies by the CARD's r.birZonalRatePerSqm - two different result
+     fields, two different places on the screen. They are equal for this fixture
+     (11,500 === 11,500) and nothing else in this file said so, so if they ever
+     diverged the arithmetic in the sentence above the disclosure would silently
+     become wrong while every other check stayed green: the reconciliation would
+     still be internally consistent (it multiplies the build-up base by the
+     disclosed multiple), and every verbatim pin would still pass.
+
+     This is asserted on the RENDERED strings, not on the result object, because
+     the thing that can diverge is the two render sites. Both screens are
+     checked, and both figures are produced by the same money(), so the printed
+     forms must be identical strings - a numeric tolerance would hide a
+     formatting drift that changes what the reader reads. */
+  check("the build-up's BIR base is the same figure the card prints as its per-sqm rate", () => {
+    [["residential", factorHtml], ["commercial + corner", cornerCommercialHtml]].forEach(pair => {
+      const name = pair[0], html = pair[1];
+      const card = /sf-est-result-bir"><span>[^<]*<\/span><b>[^<]*<\/b><small>\u20b1([\d,.]+)\/sqm/.exec(html);
+      const buildUp = /sf-est-breakdown"><span>\u20b1([\d,.]+)\/sqm BIR base/.exec(html);
+      assert.ok(card && buildUp, name + ": could not read both BIR figures off the rendered screen");
+      assert.strictEqual(buildUp[1], card[1],
+        name + ": the build-up multiplies by " + buildUp[1] + "/sqm but the card shows the reader " + card[1] + "/sqm");
+    });
+  });
+
   /* ---- Review Focus 3: a null disclosure renders NOTHING ---- */
 
   check("a time-indexed result renders no disclosure element at all", () => {
-    /* Teeth: mutation 2 on 2026-10-04 replaced the null branch of the result
+    /* Teeth: M2 on 2026-10-04 replaced the null branch of the result
        block with an empty <div class="sf-est-result-multiple"></div> - exactly
        the Review Focus 3 defect, "no element at all" quietly becoming "an empty
        element". This check went red on it and nothing before it. */
@@ -687,7 +732,7 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
        own copy of the words - or recomputed the multiple - the marker would be
        missing, and if it dropped or duplicated a field the count would be off.
        This is the check that would catch Task 3 quietly forking the copy from
-       Task 2, and the verbatim pins above cannot see it: mutation 4 on
+       Task 2, and the verbatim pins above cannot see it: M4 on
        2026-10-04 replaced the label with a hardcoded literal that happened to
        be byte-identical, so every verbatim check stayed green and this one went
        red on 6 of 7. */
@@ -712,7 +757,7 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
   });
 
   check("every interpolated disclosure value is escaped", () => {
-    /* Teeth: mutation 5 on 2026-10-04 dropped the esc() on one field only -
+    /* Teeth: M5 on 2026-10-04 dropped the esc() on one field only -
        multipleDisclosure.text - and this check went red on it. */
     disclosure.appliedMultipleDisclosure = function (result) {
       const d = realDisclosure(result);
@@ -743,7 +788,7 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
        scores 5 here - once for the guard plus once per field - and the count
        grows every time the markup gains an interpolation.
 
-       Teeth: mutation 3 on 2026-10-04 moved the call inside the concatenation
+       Teeth: M3 on 2026-10-04 moved the call inside the concatenation
        in js/estimator.js, exactly as described, and this check went red with
        "resolved the disclosure 5 times". */
     assert.strictEqual(disclosureCalls, 2,
@@ -752,19 +797,23 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
 
   /* ---- the brief's static source guards, kept alongside the real ones ---- */
 
-  /* These are shape checks, not behavioural coverage, and are labelled as
-     such. They earn their place for two things the rendered screen cannot see:
-     a disclosure resolved somewhere the screen never reaches, and the build-up
-     section losing its heading. Everything about WHAT is printed is pinned by
-     the assertions above.
+  /* A shape check, not behavioural coverage, and labelled as such. It earns
+     its place for one thing the rendered screen cannot see: a disclosure
+     resolved somewhere the screen never reaches. Everything about WHAT is
+     printed is pinned by the assertions above.
 
-     Teeth: mutation 13 on 2026-10-04 rewrote the build-up emission as
+     Teeth: M13 on 2026-10-04 rewrote the build-up emission as
      `var multipleNoteHtml = (true ? multipleDisclosure : multipleDisclosure)`
      - behaviourally identical, no longer matching the guarded shape - and the
-     guard assertion below turned red on it. The resolution-COUNT assertion is
-     redundant with the behavioural call-count check above, which catches a
-     third site first (mutation 14); it is kept because it names the number
-     rather than inferring it. */
+     guard assertion below turned red on it.
+
+     The resolution-COUNT assertion is the STRONGER of the two count checks,
+     not the weaker. The behavioural check above only counts calls made while
+     rendering screen 4, so a third resolution site anywhere else in
+     js/estimator.js - a function no screen reaches, or one reached by a route
+     this harness does not drive - leaves it at 2 and turns only this
+     assertion red (M14). This one counts the sites in the file itself, so it
+     fails on that mutation on its own. */
   const estSrc = fs.readFileSync(path.join(ROOT, "js/estimator.js"), "utf8");
   check("source: both render sites resolve the disclosure and guard on it", () => {
     const resolutions = estSrc.split("referenceTools.appliedMultipleDisclosure(").length - 1;
@@ -773,17 +822,17 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
     assert.ok(/var multipleHtml = multipleDisclosure\s*\n?\s*\?/.test(estSrc), "the result-screen emission is not guarded on the disclosure being truthy");
     assert.ok(/var multipleNoteHtml = multipleDisclosure\s*\n?\s*\?/.test(estSrc), "the build-up emission is not guarded on the disclosure being truthy");
   });
-  check("source: the build-up still carries its heading and its effective land rate row", () => {
-    assert.ok(/Land value build-up/.test(estSrc), "js/estimator.js no longer names the land build-up section");
-    assert.ok(/sf-est-coverage/.test(estSrc), "the effective land rate row is gone");
-  });
 
   /* ---- the stylesheet ---- */
 
   check("the disclosure styles reuse the existing muted token and add none", () => {
-    const css = fs.readFileSync(path.join(ROOT, "css", "storefront.css"), "utf8");
+    /* The rules live beside .sf-est-result-bir in css/estimator.css, which is
+       where css/styles.css:7-8 documents the value guide belongs. The token is
+       declared in the other sheet, which is why the read below is not enough
+       on its own - see the next check. */
+    const css = fs.readFileSync(path.join(ROOT, "css", "estimator.css"), "utf8");
     const lines = css.split(/\r?\n/).filter(line => /sf-est-result-multiple|sf-est-multiple-note|sf-est-multiple-limit/.test(line));
-    assert.ok(lines.length >= 4, "expected the disclosure rules in css/storefront.css, found " + lines.length);
+    assert.ok(lines.length >= 4, "expected the disclosure rules in css/estimator.css, found " + lines.length);
     const coloured = lines.filter(line => /color\s*:/.test(line));
     assert.ok(coloured.length >= 1, "no colour rule for the disclosure at all");
     coloured.forEach(line => assert.ok(/var\(--sf-ink-mute/.test(line),
@@ -791,7 +840,27 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
     /* A second token would be a new --sf-* declaration on one of these lines. */
     lines.forEach(line => assert.strictEqual(/--sf-[a-z-]+\s*:/.test(line), false,
       "a second muted token was declared: " + line.trim()));
-    assert.ok(/--sf-ink-mute\s*:/.test(css), "the reused token does not exist in css/storefront.css");
+    assert.strictEqual(/var\(--sf-ink-mute,/.test(css), false,
+      "the token has a var() fallback here; --sf-ink-mute is declared on an ancestor, so a fallback is dead weight that hides a broken inheritance");
+  });
+
+  /* The move to css/estimator.css separated the consuming rules from the
+     token's declaration, so "it still resolves" stops being obvious and has to
+     be pinned. Custom properties inherit, so the only thing that matters is
+     that the declaration is on a selector that wraps this markup - it is not
+     load-order dependent, because inheritance has no ordering rule. If the
+     declaration ever moves below the consuming rules' common ancestor, this
+     goes red. */
+  check("the muted token the disclosure consumes is declared on an ancestor of it", () => {
+    const storefront = fs.readFileSync(path.join(ROOT, "css", "storefront.css"), "utf8");
+    /* .sf-site opens the token block (css/storefront.css:18-21) and is also the
+       wrapper js/storefront.js:156 puts around the whole storefront, the
+       estimator included. Asserting the declaration sits inside that block is
+       what makes the inheritance claim true rather than hopeful. */
+    const siteBlock = /\.sf-site\s*\{([^}]*)\}/.exec(storefront);
+    assert.ok(siteBlock, "css/storefront.css no longer declares a .sf-site block");
+    assert.ok(/--sf-ink-mute\s*:\s*#6B605A\s*;/.test(siteBlock[1]),
+      "--sf-ink-mute is no longer declared inside .sf-site, so the estimator rules cannot inherit it");
   });
 
   console.log("ALL GREEN (" + count + " checks)");
