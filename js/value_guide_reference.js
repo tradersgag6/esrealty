@@ -74,12 +74,26 @@
   var MULTIPLE_LIMITATION = "The same factor is applied across all Batangas municipalities. It is not adjusted for local demand and is likely too high for rural locations.";
 
   /* Presentation only. The value itself is applied unrounded by
-     js/estimator.js; this rounds for display to 4 decimals, which is the most
-     the factor stack can carry (the corner lot adds 1.025, so 2.5 x 1.025 =
-     2.5625 exactly), then String() drops the trailing zeros. toFixed is NOT
-     used: it would return "2.5000". */
+     js/estimator.js. This rounds for display to 5 decimals and then String()
+     drops the trailing zeros, so 2.5 prints as "2.5" and not "2.50000".
+
+     5 is what the SHIPPED factors require, not a general claim of
+     losslessness. A corner lot multiplies by 1.025, and on the non-residential
+     bands that lands on 4.35625 (commercial) and 0.76875 (agricultural) - five
+     decimals, not four. At 4 decimals this module published "4.3562x the BIR
+     reference" for a commercial corner lot while applying 4.35625, so a reader
+     who multiplied the disclosed multiple by the BIR rate did not get the
+     estimate back. Reconciling the disclosed number against the printed
+     build-up is the entire purpose of this disclosure, so the divisor covers
+     every use-group x corner combination the current factors can produce.
+
+     A different regionalAdj, or any future factor set carrying more decimals,
+     can still exceed 5 - when it does, the corner x non-residential vectors in
+     tests/value_guide_multiple_node.js are where it surfaces.
+
+     toFixed is NOT used: it pads, and would return "2.50000". */
   function formatMultiple(n) {
-    return String(Math.round(Number(n) * 10000) / 10000);
+    return String(Math.round(Number(n) * 100000) / 100000);
   }
 
   /* Returns null when there is nothing honest to disclose, so callers can

@@ -143,14 +143,23 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
   /* Review Focus 1 and 2: the multiple is derived per result, never hardcoded.
      A corner lot is 2.5625, not 2.5, and agricultural is 0.75 - BELOW 1, which
      is why the copy must never imply the estimate is always the higher number.
-     The text is built from whatever the stack resolved to, so all five vectors
-     are checked rather than just the residential one. */
+     The text is built from whatever the stack resolved to, so all eight vectors
+     are checked rather than just the residential one.
+
+     The corner x non-residential vectors are here because that is the class
+     that broke. 4 decimals renders 2.5 x 1.025 fine, so a formatter pinned
+     only against residential+corner passed while publishing "4.3562x" for a
+     commercial corner lot whose applied multiple was 4.35625. See the
+     reconciliation check below. */
   const vectors = [
     ["residential", options, "2.5"],
     ["residential + corner", { ...options, corner: true }, "2.5625"],
     ["commercial", { ...options, classification: "CR" }, "4.25"],
+    ["commercial + corner", { ...options, classification: "CR", corner: true }, "4.35625"],
     ["agricultural", { ...options, classification: "A50" }, "0.75"],
-    ["industrial", { ...options, classification: "I" }, "2.7"]
+    ["agricultural + corner", { ...options, classification: "A50", corner: true }, "0.76875"],
+    ["industrial", { ...options, classification: "I" }, "2.7"],
+    ["industrial + corner", { ...options, classification: "I", corner: true }, "2.7675"]
   ];
   vectors.forEach(([name, opts, expected]) => {
     check("disclosure multiple for " + name + " is " + expected, () => {
@@ -158,6 +167,30 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
       assert.ok(d, "expected a disclosure");
       assert.strictEqual(d.multiple, expected);
       assert.strictEqual(d.text, expected + "\u00d7 the BIR reference");
+    });
+  });
+
+  /* The point of publishing the multiple at all: a reader multiplies it by the
+     BIR rate shown beside it and must land on the estimate. This pins that
+     property directly instead of trusting the display strings above, so it
+     catches a formatter that loses a digit the moment a new vector appears.
+
+     Tolerance is 1e-12, far above the noise but far below the defect. The
+     stack is built by multiplication in IEEE-754, so the stored factorStack
+     for a commercial corner lot is 4.356249999999999 - binary approximation
+     noise, observed at ~9e-16 against the disclosed 4.35625, which is why the
+     assertion cannot be strictEqual. The defect this exists to catch is
+     orders of magnitude larger: 4 decimals gave a delta of 5e-5, which fails
+     here by seven orders of magnitude. */
+  check("every disclosed multiple reconciles with the applied factor stack", () => {
+    vectors.forEach(([name, opts]) => {
+      const r = EST.core.computeEstimate(config, index, md, opts);
+      const d = REF.appliedMultipleDisclosure(r);
+      const shown = Number(d.multiple);
+      assert.ok(Math.abs(shown - r.factorStack) < 1e-12,
+        name + ": disclosed " + shown + " does not reconcile with applied " + r.factorStack);
+      assert.ok(Math.abs(shown * r.birZonalRatePerSqm - r.factorStack * r.birZonalRatePerSqm) < 1e-6,
+        name + ": disclosed multiple x BIR rate does not reconcile with the applied build-up");
     });
   });
 
@@ -170,7 +203,7 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
     assert.deepStrictEqual(d.factors, { proxyFactor: 1, bandMid: 2.5, regionalAdj: 1 });
   });
 
-/* ------------------------------------------------------------------
+  /* ------------------------------------------------------------------
      The refusal guards. Each check below hands the builder an input that
      ONLY the guard named in the comment can refuse, so removing that guard
      turns the check red. Inputs the brief lists but that several guards could
@@ -195,13 +228,19 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
                                                industrial and corner vector
                                                checks FAIL
        8. round to 2 decimals               -> the corner vector check FAILS
-       9. toFixed(4) instead of String()    -> "drops trailing zeros" FAILS
-      10. no rounding at all                -> "rounds to 4 decimals" FAILS
+       9. toFixed(5) instead of String()    -> "drops trailing zeros" FAILS
+      10. no rounding at all                -> "rounds to 5 decimals" FAILS
       11. reword, soften or drop either fixed sentence
                                            -> "verbatim copy" FAILS
       12. plant "accurate to +/-3%" in the label
-                                           -> "no disclosure string claims
-                                               accuracy" FAILS
+                                           -> RED, but at the verbatim
+                                               multipleLabel assertion, NOT at
+                                               the accuracy guard - see the
+                                               note below
+      13. round to 4 decimals               -> "disclosure multiple for
+                                               commercial + corner" and
+                                               "agricultural + corner" FAIL
+                                               (added in fix round 1)
 
      Mutation 2 was GREEN on the first run. Every check then present was also
      satisfied by a deny-list on "time-indexed", because the indexed path and
@@ -209,7 +248,17 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
      "unrecognised or absent land method" check was added to close that, and
      mutation 2 re-run to confirm it is now RED. Recorded because the whole
      point of this file is that a guard nobody can distinguish from its
-     opposite is not a guard. */
+     opposite is not a guard.
+
+     On mutation 12: the accuracy guard has NO discriminating power over
+     today's code. Every banned term is planted in one of the three fixed
+     strings, and the verbatim assertions on `multipleLabel`, `assumption`
+     and `limitation` fire first - roughly 185 lines before the guard is
+     reached - so the run goes RED without the guard ever executing. That is
+     correct behaviour, not a defect: a banned term cannot reach the copy. But
+     it does mean the guard proves nothing yet. Its value is forward-looking,
+     for the sentences Tasks 3 and 4 compose, which are NOT pinned verbatim
+     and therefore can only be policed by the regex. */
 
   // Guard 1: no result object at all.
   check("guard: no result at all discloses nothing", () => {
@@ -309,14 +358,43 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
      docs/batangas-value-guide-sources.md:50-58 enforceable instead of
      aspirational. Two halves, and both matter: a positive control proving
      the regex actually bites (a guard that can never match is a green lie),
-     and the negative assertion on the real copy. */
-  const BANNED = /\baccur\w*|\bguarantee|\u00b1|\bwithin \d+\s*%|\berror margin|\bprecision\b/i;
+     and the negative assertion on the real copy.
+
+     Widened in fix round 1. Three gaps let real variants through:
+       - `\baccur\w*` has no word boundary inside "inaccurate", so the most
+         natural way to break the rule - denying accuracy - was unguarded.
+       - `\bprecision\b` missed "precise" and "precisely".
+       - `within \d+\s*%` missed "within 5 percent", which is the spelled-out
+         form a human writing prose is likelier to reach for.
+     The published copy is fixed and contains none of these, so widening
+     cannot produce a false positive today; it matters because Tasks 3 and 4
+     introduce prose that is NOT pinned verbatim and can only be policed by
+     this regex. */
+  const BANNED = /\b(?:in)?accur\w*|\bguarantee|\u00b1|\bwithin \d+\s*(?:%|percent)|\berror margin|\bprecis\w*/i;
 
   check("accuracy guard rejects every forbidden term (positive control)", () => {
-    ["accurate", "accuracy", "accurately", "guarantee", "guaranteed", "\u00b1 5%",
-     "within 5%", "within 10 %", "error margin", "precision"].forEach(phrase => {
+    ["accurate", "accuracy", "accurately", "inaccurate", "inaccurately", "guarantee", "guaranteed",
+     "\u00b1 5%", "within 5%", "within 10 %", "within 5 percent", "within 10 percent",
+     "error margin", "precision", "precise", "precisely"].forEach(phrase => {
       assert.ok(BANNED.test(phrase), "guard failed to catch " + JSON.stringify(phrase));
     });
+  });
+
+  /* One check per gap the fix round 1 widened, so the widened pattern is
+     itself pinned rather than merely present. Each asserts the specific
+     variant that the pre-fix pattern missed, which is the only way to catch
+     a future well-meaning "simplification" back to `\baccur\w*`. */
+  check("accuracy guard catches the variants the narrow pattern missed", () => {
+    /* Pre-fix `\baccur\w*` did not match: "in" runs straight into "accurate"
+       with no word boundary. */
+    assert.ok(BANNED.test("The estimate is not inaccurate"), "missed: inaccurate");
+    assert.ok(BANNED.test("derived inaccurately"), "missed: inaccurately");
+    /* Pre-fix `\bprecision\b` did not match. */
+    assert.ok(BANNED.test("precise"), "missed: precise");
+    assert.ok(BANNED.test("computed precisely"), "missed: precisely");
+    /* Pre-fix `within \d+\s*%` did not match the spelled-out unit. */
+    assert.ok(BANNED.test("within 5 percent"), "missed: within 5 percent");
+    assert.ok(BANNED.test("within 10 percent"), "missed: within 10 percent");
   });
 
   check("no disclosure string claims accuracy", () => {
@@ -330,20 +408,27 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
     assert.strictEqual(BANNED.test(blob), false, "accuracy language leaked into: " + blob);
   });
 
-  /* The formatter. Two independent teeth: the first check fails if the
-     formatter pads (toFixed) or drops precision, the second fails if it does
-     not round at all - 2.123456789 must come back as 2.1235. */
+  /* The formatter. Three independent teeth: it pads (toFixed) if the first
+     check is broken, it drops precision if the first or second is, and it
+     stops rounding entirely if the third is. The 5-decimal divisor is pinned
+     by the corner x non-residential vectors above - 4.35625 and 0.76875 need
+     five digits, and 2.5 x 1.025 alone would have passed at four. */
   check("formatMultiple drops trailing zeros and keeps corner precision", () => {
     assert.strictEqual(REF.formatMultiple(2.5), "2.5");
     assert.strictEqual(REF.formatMultiple(4.25), "4.25");
     assert.strictEqual(REF.formatMultiple(0.75), "0.75");
     assert.strictEqual(REF.formatMultiple(2.7), "2.7");
     assert.strictEqual(REF.formatMultiple(2.5625), "2.5625");
+    assert.strictEqual(REF.formatMultiple(2.7675), "2.7675");
   });
-  check("formatMultiple rounds to 4 decimals", () => {
-    assert.strictEqual(REF.formatMultiple(2.123456789), "2.1235");
+  check("formatMultiple rounds to 5 decimals", () => {
+    assert.strictEqual(REF.formatMultiple(2.123456789), "2.12346");
     assert.strictEqual(REF.formatMultiple(2.562500001), "2.5625");
-    assert.strictEqual(REF.formatMultiple(2.99999), "3");
+    assert.strictEqual(REF.formatMultiple(2.999999), "3");
+    /* The lossy case that motivated the divisor: at 4 decimals these both
+       truncated. */
+    assert.strictEqual(REF.formatMultiple(4.356249999999999), "4.35625");
+    assert.strictEqual(REF.formatMultiple(0.7687499999999999), "0.76875");
   });
 
   console.log("ALL GREEN (" + count + " checks)");
