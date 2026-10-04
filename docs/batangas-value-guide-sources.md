@@ -61,11 +61,20 @@ The current guide uses SEA ESTATES-approved factors. The BIR reference remains s
   applies — `(1 + cornerPct) x proxy x band x regionalAdj` — and not hardcoded, so it changes
   with `data/zonal-config.json` and with the corner answer, and it is `null` (disclosed
   nothing) in time-indexed mode where no factor stack runs. Because the multiple is the same
-  unreviewed planning assumption described above, it is published with the assumption and the
-  limitation attached, not as a validated ratio. The accuracy-language rule above — no
-  PVS-compliance, certified-accuracy or value-loss language in public copy — is enforced as a
-  test in `tests/value_guide_multiple_node.js`, which fails if any banned accuracy term appears
-  in the disclosure strings.
+  unreviewed planning assumption described above, it is published as an assumption, not as a
+  validated ratio. The strings are not identical on every surface: the result screen renders
+  `multipleLabel`, `text` and `assumption` only (`js/estimator.js:1405`), while the limitation
+  appears on the report build-up (`js/estimator.js:1266-1267`) and in the PDF
+  (`js/value_guide_pdf.js:686-687`). That asymmetry is deliberate — the result-screen element is
+  pinned to those three strings, with the limitation excluded, by
+  `tests/value_guide_multiple_node.js:610`.
+- The accuracy-language rule above is only partly machine-enforced. Its banned-term regex
+  (`tests/value_guide_multiple_node.js:401`) fails the suite on an `accur` stem — which is how
+  `certified-accuracy` and `certified accuracy` are caught — plus `guarantee`, `±`,
+  `within N %`/`percent`, `error margin`, a `precis` stem, `close to` and `exact match`. It does
+  not match `PVS-compliant`, `PVS compliance`, `value-loss`/`value loss` or
+  `evaluation standards`; those four terms are held by reviewer convention only. Closing that
+  gap needs a code change to the regex, which this documentation change does not make.
 
 ## LandValuePH comparison (reviewed 2026-09-30)
 

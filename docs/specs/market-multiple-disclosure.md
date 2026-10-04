@@ -105,8 +105,11 @@ The multiple is formatted by `formatMultiple(n)`, which rounds to **5 decimals**
 and trims trailing zeros (`2.5`, not `2.50000`) — no `toFixed`, which would pad
 and fail the pinned `2.5` assertion. Five, not four: corner x commercial is
 `1.025 x 1.7 x 2.5 = 4.35625` and corner x agricultural is
-`1.025 x 0.5 x 1.5 = 0.76875`, and at four decimals the site would publish
-`4.3562` / `0.7687` while those exact values were applied. Five decimals covers
+`1.025 x 0.5 x 1.5 = 0.76875`. Both equalities idealise: IEEE-754 holds those
+products as `4.356249999999999` and `0.7687499999999999`, and it is the 5-decimal
+rounding that recovers the exact decimal. At four decimals the site would
+publish `4.3562` / `0.7687`, a counterfactual reachable only from the float
+product, while those exact decimals were applied. Five decimals covers
 all eight combinations the shipped factors can produce. This is a property of
 today's factors, not a general losslessness guarantee: if a future factor
 carries more precision the published multiple stops reconciling with the
@@ -121,7 +124,7 @@ estimate, which is the intended signal, not a silent truncation.
 relationship is visible at the moment of reading:
 
 > BIR zonal reference - P11,500/sqm · P1,150,000
-> **SEA ESTATES market band factor: 2.5x this reference**
+> **SEA ESTATES market band factor: 2.5× this reference**
 
 **Report - "Land value build-up"** (`:1287-1296`), appended after the existing
 factor rows.
@@ -134,7 +137,7 @@ block at `:577`. Public and internal PDFs share this renderer.
 ```
 multipleLabel SEA ESTATES market band factor
 multiple      2.5 (already formatted; the renderer must not re-round)
-text          2.5x the BIR reference
+text          2.5× the BIR reference
 assumption    A SEA ESTATES planning assumption. It is not derived from
               completed sales and has not been reviewed by an independent
               qualified appraiser.
