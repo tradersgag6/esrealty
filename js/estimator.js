@@ -306,7 +306,12 @@
       factors: { proxyFactor: proxy, bandMid: band, regionalAdj: adj },
       /* The one number linking the BIR zonal reference to the market estimate:
          (1 + corner) x property-use proxy x market band x regional adjustment.
-         Null under the indexed land method, which stacks no market factor at all. */
+         Null under the indexed land method. factorStack is still computed above
+         for that path - it is computed unconditionally, before the branch - but
+         the branch replaces the rate with the time scenario, so the factor
+         product is never applied to this result and there is nothing to
+         disclose. Disclosed as null rather than as a value the reader would
+         reasonably assume was applied. */
       factorStack: landMethod === "factor" ? factorStack : null,
       appliedMultiple: landMethod === "factor" ? factorStack : null,
       factorSettingsVersion: cfg.factorSettingsVersion || cfg.calculationVersion,

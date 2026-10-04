@@ -57,9 +57,34 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
     assert.strictEqual(r.appliedMultiple, 2.7);
   });
 
-  check("factorStack is the product of the disclosed factors", () => {
+  /* The identity is pinned on the corner vector FIRST. On a non-corner result
+     corner.pct is 0, so (1 + corner) collapses to 1 and the identity holds no
+     matter what the corner term does - it cannot tell a correct stack from one
+     with the corner term deleted, or from one that divides the corner term by
+     100. The corner vector is the only one where the term is non-zero, so it
+     is the only one that has teeth.
+
+     corner.pct is a FRACTION (0.025), not a percentage (2.5):
+     data/zonal-config.json carries cornerLotPct: 0.025, js/estimator.js:169
+     reads it straight into cornerPct, and :290 copies it into the result
+     unscaled. Renderers scale it themselves (js/estimator.js:1306 rounds
+     pct * 1000 / 10; js/value_guide_pdf.js:644 uses pct * 100). Dividing by 100
+     here would be wrong twice over and is pinned by the corner.pct assertion.
+
+     Teeth checked by mutation on 2026-10-04 (each mutation run against this
+     file, then reverted): deleting the corner term from `expected` makes the
+     corner check below FAIL, and restoring the `/ 100` makes it FAIL. Neither
+     mutation is visible to the old non-corner-only assertion. */
+  check("factorStack is the product of the disclosed factors, corner term included", () => {
+    const r = EST.core.computeEstimate(config, index, md, { ...options, corner: true });
+    assert.strictEqual(r.corner.pct, 0.025);
+    const expected = (1 + r.corner.pct) * r.factors.proxyFactor * r.factors.bandMid * r.factors.regionalAdj;
+    assert.ok(Math.abs(r.factorStack - expected) < 1e-12);
+  });
+  check("factorStack is the product of the disclosed factors, no corner term", () => {
     const r = EST.core.computeEstimate(config, index, md, options);
-    const expected = (1 + r.corner.pct / 100) * r.factors.proxyFactor * r.factors.bandMid * r.factors.regionalAdj;
+    assert.strictEqual(r.corner.pct, 0);
+    const expected = (1 + r.corner.pct) * r.factors.proxyFactor * r.factors.bandMid * r.factors.regionalAdj;
     assert.ok(Math.abs(r.factorStack - expected) < 1e-12);
   });
 
