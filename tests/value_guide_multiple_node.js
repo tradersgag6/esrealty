@@ -7,11 +7,16 @@
  * stack for every use group the engine can reach, so a later disclosure task can
  * render it without re-deriving it.
  *
+ * It then pins the disclosure itself: the builder in js/value_guide_reference.js
+ * that owns the public copy, the multiple formatter, the guards that make it
+ * refuse to speak at all when there is no usable multiple, and the
+ * accuracy-language rule from docs/batangas-value-guide-sources.md:50-58.
+ *
  * Fixture: the Bauan Poblacion III street rate already asserted by
  * tests/value_guide_reference_node.js:22 (birZonalRatePerSqm === 11500).
  */
 const assert = require("assert"), fs = require("fs");
-const EST = require("../js/estimator.js");
+const EST = require("../js/estimator.js"), REF = require("../js/value_guide_reference.js");
 const read = path => JSON.parse(fs.readFileSync(path, "utf8"));
 const config = read("data/zonal-config.json"), index = read("data/batangas-zonal.json"), md = read("data/bir-batangas/municipalities/bauan.json");
 let count = 0;
@@ -106,6 +111,239 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
   check("factorStack and appliedMultiple are the same disclosed number", () => {
     const r = EST.core.computeEstimate(config, index, md, options);
     assert.strictEqual(r.appliedMultiple, r.factorStack);
+  });
+
+  /* ===================================================================
+     Task 2 - the disclosure builder and the accuracy-language guard.
+
+     The builder is the single source of the public copy. The HTML result
+     screen, the report build-up and the PDF all read this object and none of
+     them restate the wording, so the three surfaces cannot drift apart.
+
+     The copy is fixed by docs/specs/market-multiple-disclosure.md section 4
+     and is reproduced here character for character. It is not paraphrased
+     here, and it must not be paraphrased in js/value_guide_reference.js
+     either: the limitation sentence ("likely too high for rural locations")
+     is deliberately unflattering and softening it into vagueness would make
+     the disclosure worthless. */
+  const LABEL = "SEA ESTATES market band factor";
+  const ASSUMPTION = "A SEA ESTATES planning assumption. It is not derived from completed sales and has not been reviewed by an independent qualified appraiser.";
+  const LIMITATION = "The same factor is applied across all Batangas municipalities. It is not adjusted for local demand and is likely too high for rural locations.";
+
+  check("disclosure publishes the multiple and the verbatim copy", () => {
+    const r = EST.core.computeEstimate(config, index, md, options);
+    const d = REF.appliedMultipleDisclosure(r);
+    assert.strictEqual(d.multiple, "2.5");
+    assert.strictEqual(d.multipleLabel, LABEL);
+    assert.strictEqual(d.text, "2.5\u00d7 the BIR reference");
+    assert.strictEqual(d.assumption, ASSUMPTION);
+    assert.strictEqual(d.limitation, LIMITATION);
+  });
+
+  /* Review Focus 1 and 2: the multiple is derived per result, never hardcoded.
+     A corner lot is 2.5625, not 2.5, and agricultural is 0.75 - BELOW 1, which
+     is why the copy must never imply the estimate is always the higher number.
+     The text is built from whatever the stack resolved to, so all five vectors
+     are checked rather than just the residential one. */
+  const vectors = [
+    ["residential", options, "2.5"],
+    ["residential + corner", { ...options, corner: true }, "2.5625"],
+    ["commercial", { ...options, classification: "CR" }, "4.25"],
+    ["agricultural", { ...options, classification: "A50" }, "0.75"],
+    ["industrial", { ...options, classification: "I" }, "2.7"]
+  ];
+  vectors.forEach(([name, opts, expected]) => {
+    check("disclosure multiple for " + name + " is " + expected, () => {
+      const d = REF.appliedMultipleDisclosure(EST.core.computeEstimate(config, index, md, opts));
+      assert.ok(d, "expected a disclosure");
+      assert.strictEqual(d.multiple, expected);
+      assert.strictEqual(d.text, expected + "\u00d7 the BIR reference");
+    });
+  });
+
+  /* The builder hands back the result's own factor object so the renderers can
+     print the build-up that produced the multiple without recomputing it. */
+  check("disclosure carries the result's own factors", () => {
+    const r = EST.core.computeEstimate(config, index, md, { ...options, corner: true });
+    const d = REF.appliedMultipleDisclosure(r);
+    assert.strictEqual(d.factors, r.factors);
+    assert.deepStrictEqual(d.factors, { proxyFactor: 1, bandMid: 2.5, regionalAdj: 1 });
+  });
+
+/* ------------------------------------------------------------------
+     The refusal guards. Each check below hands the builder an input that
+     ONLY the guard named in the comment can refuse, so removing that guard
+     turns the check red. Inputs the brief lists but that several guards could
+     each catch (a bare {} has no landMethod AND no multiple) are kept
+     verbatim further down, but they are not the teeth.
+
+     Mutation proof, run on 2026-10-04 against this file, each mutation
+     applied to js/value_guide_reference.js and then reverted:
+       1. drop `!result`                    -> "no result at all" THROWS
+       2. `!== "factor"` becomes `=== "time-indexed"` (deny-list)
+                                           -> "unrecognised or absent land
+                                               method" FAILS
+       3. drop the isFinite check           -> "non-finite multiple" FAILS
+       4. drop the `> 0` check              -> "zero multiple" and
+                                               "negative multiple" FAIL
+       5. drop the `|| {}` on factors       -> "defaults the factors object"
+                                               FAILS
+       6. copy factors instead of passing the result's own object through
+                                           -> "carries the result's own
+                                               factors" FAILS
+       7. hardcode `shown = "2.5"`          -> the commercial, agricultural,
+                                               industrial and corner vector
+                                               checks FAIL
+       8. round to 2 decimals               -> the corner vector check FAILS
+       9. toFixed(4) instead of String()    -> "drops trailing zeros" FAILS
+      10. no rounding at all                -> "rounds to 4 decimals" FAILS
+      11. reword, soften or drop either fixed sentence
+                                           -> "verbatim copy" FAILS
+      12. plant "accurate to +/-3%" in the label
+                                           -> "no disclosure string claims
+                                               accuracy" FAILS
+
+     Mutation 2 was GREEN on the first run. Every check then present was also
+     satisfied by a deny-list on "time-indexed", because the indexed path and
+     every unavailable result are separately refused by the value guards. The
+     "unrecognised or absent land method" check was added to close that, and
+     mutation 2 re-run to confirm it is now RED. Recorded because the whole
+     point of this file is that a guard nobody can distinguish from its
+     opposite is not a guard. */
+
+  // Guard 1: no result object at all.
+  check("guard: no result at all discloses nothing", () => {
+    assert.strictEqual(REF.appliedMultipleDisclosure(null), null);
+    assert.strictEqual(REF.appliedMultipleDisclosure(undefined), null);
+  });
+
+  /* Guard 2: only the factor land method has a multiple to disclose.
+     The value is 2.5 - finite and positive - so neither value guard can
+     explain this refusal; removing the landMethod clause makes the builder
+     announce a market band factor for an indexed scenario that never applied
+     one. */
+  check("guard: land method other than factor refuses even a usable multiple", () => {
+    assert.strictEqual(REF.appliedMultipleDisclosure({ landMethod: "time-indexed", appliedMultiple: 2.5 }), null);
+  });
+  /* The landMethod guard is an allow-list, not a deny-list: an UNRECOGNISED
+     method is refused too, and so is a missing one. Without this check the
+     guard has no teeth - flipping `!== "factor"` to `=== "time-indexed"` keeps
+     every other check green, because the indexed path and every unavailable
+     result are separately caught by the value guards. What separates the two
+     implementations is a result that carries a usable multiple under a land
+     method that is not "factor", which is exactly what a future third method
+     (one that does not apply the market band) would look like. For such a
+     result "SEA ESTATES market band factor x the BIR reference" would be a
+     false sentence, so the builder must stay silent. */
+  check("guard: unrecognised or absent land method refuses even a usable multiple", () => {
+    assert.strictEqual(REF.appliedMultipleDisclosure({ landMethod: "time-evidence", appliedMultiple: 2.5 }), null);
+    assert.strictEqual(REF.appliedMultipleDisclosure({ landMethod: "", appliedMultiple: 2.5 }), null);
+    assert.strictEqual(REF.appliedMultipleDisclosure({ appliedMultiple: 2.5 }), null);
+  });
+  check("guard: land method is absent on a real unavailable result", () => {
+    const r = EST.core.computeEstimate(config, index, md, { ...options, classification: "ZZ" });
+    assert.strictEqual(r.available, false);
+    assert.strictEqual(r.reason, "no-data");
+    assert.strictEqual(r.landMethod, undefined);
+    assert.strictEqual(r.factors, undefined);
+    assert.strictEqual(REF.appliedMultipleDisclosure(r), null); // must not throw
+  });
+  check("guard: a real time-indexed result discloses nothing", () => {
+    const r = EST.core.computeEstimate(config, index, md, indexed);
+    assert.strictEqual(REF.appliedMultipleDisclosure(r), null);
+  });
+
+  /* Guard 3: a non-finite multiple is refused. Infinity is the isolating
+     input - Number(Infinity) > 0 is TRUE, so the positivity guard cannot
+     catch it and only isFinite can. (NaN falls out of the positivity guard
+     instead, which is why the NaN case is asserted separately below.) */
+  check("guard: non-finite multiple is refused", () => {
+    assert.strictEqual(REF.appliedMultipleDisclosure({ landMethod: "factor", appliedMultiple: Infinity }), null);
+    assert.strictEqual(REF.appliedMultipleDisclosure({ landMethod: "factor", appliedMultiple: -Infinity }), null);
+  });
+
+  /* Guard 4: zero is not a usable multiple - "0x the BIR reference" is a
+     number the reader would take literally. A negative multiple is refused
+     for the same reason; the shipped engine cannot produce one, but the
+     builder is a public entry point and must not render it if it ever did. */
+  check("guard: zero multiple is refused", () => {
+    assert.strictEqual(REF.appliedMultipleDisclosure({ landMethod: "factor", appliedMultiple: 0 }), null);
+  });
+  check("guard: negative multiple is refused", () => {
+    assert.strictEqual(REF.appliedMultipleDisclosure({ landMethod: "factor", appliedMultiple: -1 }), null);
+  });
+  check("guard: absent multiple is refused", () => {
+    assert.strictEqual(REF.appliedMultipleDisclosure({ landMethod: "factor" }), null);
+  });
+
+  /* Guard 5: missing factors are tolerated, not fatal. The brief's guard
+     table reads as if absent factors should return null, but the same
+     section says `factors` is "defaulted to {}" - and an unavailable result
+     is already refused by guard 2, which the real no-data case above
+     proves. So a factor-mode result still discloses; it just has no
+     build-up to show. Deleting the `|| {}` fails the next check. */
+  check("guard: a factor-mode result with no factors still discloses", () => {
+    const d = REF.appliedMultipleDisclosure({ landMethod: "factor", appliedMultiple: 2.5 });
+    assert.ok(d);
+    assert.strictEqual(d.multiple, "2.5");
+  });
+  check("disclosure defaults the factors object to an empty object", () => {
+    const d = REF.appliedMultipleDisclosure({ landMethod: "factor", appliedMultiple: 2.5 });
+    assert.deepStrictEqual(d.factors, {});
+  });
+
+  /* The brief's hostile-input list, verbatim. Each of these returns null, but
+     for the landMethod reason rather than the value reason - see the
+     isolating guards above for the ones that pin the value guards. */
+  check("hostile inputs from the brief disclose nothing", () => {
+    assert.strictEqual(REF.appliedMultipleDisclosure({ landMethod: "time-indexed", appliedMultiple: null }), null);
+    assert.strictEqual(REF.appliedMultipleDisclosure({}), null);
+    assert.strictEqual(REF.appliedMultipleDisclosure({ appliedMultiple: null }), null);
+    assert.strictEqual(REF.appliedMultipleDisclosure({ appliedMultiple: 0 }), null);
+    assert.strictEqual(REF.appliedMultipleDisclosure({ appliedMultiple: NaN }), null);
+    assert.strictEqual(REF.appliedMultipleDisclosure({ appliedMultiple: Infinity }), null);
+  });
+
+  /* ------------------------------------------------------------------
+     The accuracy-language guard. This is what makes the rule in
+     docs/batangas-value-guide-sources.md:50-58 enforceable instead of
+     aspirational. Two halves, and both matter: a positive control proving
+     the regex actually bites (a guard that can never match is a green lie),
+     and the negative assertion on the real copy. */
+  const BANNED = /\baccur\w*|\bguarantee|\u00b1|\bwithin \d+\s*%|\berror margin|\bprecision\b/i;
+
+  check("accuracy guard rejects every forbidden term (positive control)", () => {
+    ["accurate", "accuracy", "accurately", "guarantee", "guaranteed", "\u00b1 5%",
+     "within 5%", "within 10 %", "error margin", "precision"].forEach(phrase => {
+      assert.ok(BANNED.test(phrase), "guard failed to catch " + JSON.stringify(phrase));
+    });
+  });
+
+  check("no disclosure string claims accuracy", () => {
+    const strings = [];
+    vectors.forEach(([name, opts]) => {
+      const d = REF.appliedMultipleDisclosure(EST.core.computeEstimate(config, index, md, opts));
+      assert.ok(d, "expected a disclosure for " + name);
+      strings.push(d.multiple, d.multipleLabel, d.text, d.assumption, d.limitation);
+    });
+    const blob = strings.join(" ");
+    assert.strictEqual(BANNED.test(blob), false, "accuracy language leaked into: " + blob);
+  });
+
+  /* The formatter. Two independent teeth: the first check fails if the
+     formatter pads (toFixed) or drops precision, the second fails if it does
+     not round at all - 2.123456789 must come back as 2.1235. */
+  check("formatMultiple drops trailing zeros and keeps corner precision", () => {
+    assert.strictEqual(REF.formatMultiple(2.5), "2.5");
+    assert.strictEqual(REF.formatMultiple(4.25), "4.25");
+    assert.strictEqual(REF.formatMultiple(0.75), "0.75");
+    assert.strictEqual(REF.formatMultiple(2.7), "2.7");
+    assert.strictEqual(REF.formatMultiple(2.5625), "2.5625");
+  });
+  check("formatMultiple rounds to 4 decimals", () => {
+    assert.strictEqual(REF.formatMultiple(2.123456789), "2.1235");
+    assert.strictEqual(REF.formatMultiple(2.562500001), "2.5625");
+    assert.strictEqual(REF.formatMultiple(2.99999), "3");
   });
 
   console.log("ALL GREEN (" + count + " checks)");

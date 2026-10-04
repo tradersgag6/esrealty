@@ -52,5 +52,63 @@
       formula: "Published/derived reference × (1 + annual percentage / 100) ^ (elapsed UTC days / 365.2425) × lot area",
       note: "Indexed land-reference scenario, not updated official BIR/SMV or verified market value. No property-use, market-band, region or corner multiplier stacked. Buildings are computed separately." };
   }
-  return { lookup: lookup, status: status, timeScenario: timeScenario, day: day };
+  /* The applied market multiple, disclosed as a planning assumption.
+
+     The public calculator shows a BIR zonal reference and a market estimate
+     with nothing connecting them. This module owns the one piece of copy that
+     connects them, so the HTML result screen, the report build-up and the PDF
+     cannot word it three different ways.
+
+     Copy is fixed by docs/specs/market-multiple-disclosure.md section 4. The
+     assumption and limitation sentences are reproduced character for character
+     and must not be softened: the limitation ("likely too high for rural
+     locations") is the reason this disclosure is worth publishing. No accuracy
+     claim - no "accurate", "guaranteed", "\u00b1", "within N%", "error margin"
+     or "precision" - may appear in anything returned from here. The rule in
+     docs/batangas-value-guide-sources.md:50-58 is enforced as a test in
+     tests/value_guide_multiple_node.js rather than by rewriting the copy at
+     runtime: silently editing published wording would hide the defect instead
+     of failing the build. */
+  var MULTIPLE_LABEL = "SEA ESTATES market band factor";
+  var MULTIPLE_ASSUMPTION = "A SEA ESTATES planning assumption. It is not derived from completed sales and has not been reviewed by an independent qualified appraiser.";
+  var MULTIPLE_LIMITATION = "The same factor is applied across all Batangas municipalities. It is not adjusted for local demand and is likely too high for rural locations.";
+
+  /* Presentation only. The value itself is applied unrounded by
+     js/estimator.js; this rounds for display to 4 decimals, which is the most
+     the factor stack can carry (the corner lot adds 1.025, so 2.5 x 1.025 =
+     2.5625 exactly), then String() drops the trailing zeros. toFixed is NOT
+     used: it would return "2.5000". */
+  function formatMultiple(n) {
+    return String(Math.round(Number(n) * 10000) / 10000);
+  }
+
+  /* Returns null when there is nothing honest to disclose, so callers can
+     guard on the object itself and emit no element at all rather than a "0x"
+     or an empty block. The four refusals:
+       - no result, or a land method that never applied the factor stack. The
+         time-indexed path replaces the land rate with an indexed rate and
+         stacks no market, band, regional or corner factor, and an unavailable
+         result returns early from computeEstimate carrying no landMethod at
+         all - both land here.
+       - a non-finite multiple.
+       - a multiple of zero or less.
+       - missing factors are NOT a refusal; they are tolerated below. */
+  function appliedMultipleDisclosure(result) {
+    if (!result || result.landMethod !== "factor") return null;
+    var multiple = Number(result.appliedMultiple);
+    if (!isFinite(multiple)) return null;
+    if (!(multiple > 0)) return null;
+    var shown = formatMultiple(multiple);
+    return {
+      multiple: shown,
+      multipleLabel: MULTIPLE_LABEL,
+      text: shown + "\u00d7 the BIR reference",
+      assumption: MULTIPLE_ASSUMPTION,
+      limitation: MULTIPLE_LIMITATION,
+      factors: result.factors || {}
+    };
+  }
+
+  return { lookup: lookup, status: status, timeScenario: timeScenario, day: day,
+    formatMultiple: formatMultiple, appliedMultipleDisclosure: appliedMultipleDisclosure };
 });
