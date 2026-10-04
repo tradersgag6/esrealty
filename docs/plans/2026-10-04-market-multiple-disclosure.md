@@ -107,7 +107,12 @@ check("factorStack is the product of the disclosed factors", () => {
 });
 ```
 
-Note `corner.pct` is stored as a percentage (`2.5`), not a fraction, while `factorStack` folds it as `(1 + 0.025)`. Divide by 100 in the assertion.
+Note `corner.pct` is carried through as the raw **fraction** `cfg.cornerLotPct`
+(`0.025`), not the percentage `2.5`. Existing renderers scale it themselves
+(`js/estimator.js:1306` does `Math.round(r.corner.pct * 1000) / 10 + "%"`), so the
+assertion must use `r.corner.pct` **undivided**, and must run on a corner-enabled
+result — on a non-corner result `cornerPct` is `0`, so any `/100` is inert and the
+assertion passes even with the corner term deleted entirely.
 
 - [ ] **Step 4: `time-indexed` returns null**
 
