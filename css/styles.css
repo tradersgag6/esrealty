@@ -330,6 +330,16 @@ body .card-pad { padding: 22px; }
 .mt-8 { margin-top: 8px; } .mt-16 { margin-top: 16px; } .mt-24 { margin-top: 24px; }
 .mb-8 { margin-bottom: 8px; } .mb-16 { margin-bottom: 16px; } .mb-24 { margin-bottom: 24px; }
 
+/* Bootstrap 5.3.3's spacing scale stops at .mt-5/.mb-5, and it renamed the
+   logical-margin utilities (.ml-auto -> .ms-auto). These three classes are
+   emitted by js/app.js but had no rule anywhere, so they rendered with zero
+   margin. .ml-auto in particular left the "Regenerate Schedule" button
+   (app.js "btn btn-ghost btn-sm ml-auto") un-aligned in the presell unit row.
+   Kept as an alias rather than renaming 16 call sites in the bundle source. */
+.mt-12 { margin-top: 12px; }
+.mb-12 { margin-bottom: 12px; }
+.ml-auto { margin-left: auto; }
+
 /* ============ FORMS ============ */
 .field { display: flex; flex-direction: column; gap: 6px; width: 100%; min-width: 0; }
 .field label { font-size: 14px; font-weight: 600; color: var(--text-dim); overflow-wrap: anywhere; }
@@ -2205,6 +2215,20 @@ body .chip, body .sf-chip { font-size: 12px !important; }
   font-size: 14px; line-height: 1.55; color: var(--text-dim);
 }
 .vg-callout b { color: var(--text); }
+
+/* One collapsed block replaces three always-expanded groups on wizard stage 1.
+   The facts list is the readable state of the estimate; the nested disclosures
+   keep the full inputs one click away. */
+.vg-about { margin-top: 24px; border: 1px solid var(--stroke); border-radius: 12px; padding: 4px 16px 16px; background: var(--surface-2); }
+.vg-about > summary { min-height: 44px; padding: 12px 0; cursor: pointer; font-size: 15px; font-weight: 700; color: var(--text); }
+.vg-about-facts { list-style: none; margin: 0 0 12px; padding: 0; }
+.vg-about-facts li { display: grid; grid-template-columns: minmax(0, 180px) minmax(0, 1fr); gap: 4px 16px; padding: 9px 0; border-top: 1px solid var(--stroke); font-size: 13px; line-height: 1.55; overflow-wrap: anywhere; }
+.vg-about-facts b { color: var(--text); font-weight: 600; }
+.vg-about-facts span { color: var(--text-dim); }
+.vg-about-section { margin-top: 12px; border: 1px solid var(--stroke); border-radius: 10px; padding: 2px 14px 14px; background: var(--surface); }
+.vg-about-section > summary { min-height: 44px; padding: 11px 0; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text); }
+.vg-about-section .vg-callout { margin: 0 0 12px; }
+@media (max-width: 640px) { .vg-about-facts li { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
 
 /* The "still needed" line and the step actions share a row; on narrow
    screens the button goes full width rather than sitting beside text. */

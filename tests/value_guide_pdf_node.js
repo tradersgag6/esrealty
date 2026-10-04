@@ -96,7 +96,7 @@ const M = (n) => "PHP " + new Intl.NumberFormat("en-PH", { maximumFractionDigits
      section needs. Omitting it is a real failure mode, not a hypothetical. */
   const muniRow = EST.municipalityRow(r.municipality);
   const meta = {
-    kind: "internal-value-guide", preparedFor: "Verification Run", preparedBy: "ES Realty",
+    kind: "internal-value-guide", preparedFor: "Verification Run", preparedBy: "SEA ESTATES",
     generatedOn: "2026-10-01", reference: r.reference, provenance: EST.provenance(),
     tax: tax, muniRow: muniRow
   };
@@ -117,12 +117,12 @@ const M = (n) => "PHP " + new Intl.NumberFormat("en-PH", { maximumFractionDigits
      run to a second sheet, so the flow is asserted by finding which page each
      section starts on rather than by index. */
   const SECTIONS = VG.PARTS.map(p => p.title);
-  const starts = SECTIONS.map(s => texts.findIndex(t => new RegExp("ES REALTY\\s+.{0,40}" + s.replace(/ /g, "\\s")).test(t.replace(/\s+/g, " "))));
+  const starts = SECTIONS.map(s => texts.findIndex(t => new RegExp("SEA ESTATES\\s+.{0,40}" + s.replace(/ /g, "\\s")).test(t.replace(/\s+/g, " "))));
   chk("all six parts are present", starts.every(v => v >= 0), SECTIONS.map((s, i) => s + "@" + (starts[i] + 1)).join(", "));
   chk("the parts appear in the reference report's order",
     starts.every((v, i) => i === 0 || v > starts[i - 1]), starts.join(" < "));
 
-  chk("every page carries a header", texts.every(t => /ES REALTY/.test(t)), "");
+  chk("every page carries a header", texts.every(t => /SEA ESTATES/.test(t)), "");
   const total = pages.length;
   chk("every page is numbered 1..N with N equal to the real page count",
     pages.every((p, i) => p.runs.join(" ").includes("Page " + (i + 1) + " of " + total)),
@@ -140,10 +140,10 @@ const M = (n) => "PHP " + new Intl.NumberFormat("en-PH", { maximumFractionDigits
     (total - SECTIONS.length) + " continuation sheet(s)");
 
   const secText = (name) => {
-    /* Match the page header, which reads "ES REALTY  <municipality>  ·  RDO n
+    /* Match the page header, which reads "SEA ESTATES  <municipality>  ·  RDO n
        <part title>". The municipality sits between the brand and the title, so
        allow a short gap rather than assuming they are adjacent. */
-    const re = new RegExp("ES REALTY.{0,44}" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, "\\s"));
+    const re = new RegExp("SEA ESTATES.{0,44}" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/ /g, "\\s"));
     const i = texts.findIndex(t => re.test(t.replace(/\s+/g, " ")));
     if (i < 0) return "";
     /* A section continues onto later sheets, so gather from its first page to
@@ -164,10 +164,9 @@ const M = (n) => "PHP " + new Intl.NumberFormat("en-PH", { maximumFractionDigits
   chk("summary shows the market guide estimate", SUM.includes(M(r.marketGuideEstimate)), M(r.marketGuideEstimate));
   chk("summary shows the BIR zonal reference", SUM.includes(M(r.birZonalValue)), M(r.birZonalValue));
   chk("summary labels the estimate a planning figure", /MARKET GUIDE ESTIMATE/.test(SUM), "");
-  chk("summary labels BIR a tax reference", /OFFICIAL BIR ZONAL REFERENCE/.test(SUM), "");
-  chk("data confidence appears on page 1, not just page 6",
-    /How much weight this figure carries/.test(SUM) && new RegExp(Math.round(r.source.pct * 100) + "%").test(SUM),
-    Math.round(r.source.pct * 100) + "%");
+  chk("summary labels reference according to actual source", (r.birReferenceConfirmed ? /OFFICIAL BIR ZONAL REFERENCE/ : /DERIVED LOCALITY REFERENCE/).test(SUM), "");
+  chk("source match appears on page 1 without false confidence",
+    /Source match:/.test(SUM) && /not a statistical valuation accuracy score/.test(SUM), r.source.label);
   chk("page 1 shows the guide range", SUM.includes(M(r.low)) && SUM.includes(M(r.high)), "");
   chk("page 1 states it is not a certified appraisal", /not a certified appraisal/i.test(SUM), "");
 
@@ -182,23 +181,23 @@ const M = (n) => "PHP " + new Intl.NumberFormat("en-PH", { maximumFractionDigits
   // ---- page 3 tax
   const s = tax.selling;
   chk("tax page warns the BIR decides the amount", /BIR, the LGU and the Registry of Deeds/.test(TAXPG), "");
-  chk("tax page states the higher-of-price-or-FMV base", /HIGHER of the selling price and the fair market value/i.test(TAXPG), "");
+  chk("tax page states the higher-of-price-or-FMV base", /HIGHER applicable selling price or statutory fair market value/i.test(TAXPG), "");
   chk("tax page prints the base it used", TAXPG.includes(M(s.taxBase)), M(s.taxBase));
   chk("capital gains tax is listed", /Capital gains tax/.test(TAXPG), "");
-  chk("CGT base is the excess, labelled with the statute", /24\(D\)/.test(TAXPG), "");
+  chk("CGT base is full applicable value, with statute", /24\(D\)/.test(TAXPG) && !/excess of the price/.test(TAXPG), "");
   chk("documentary stamp tax is listed", /Documentary stamp tax/.test(TAXPG), "");
   chk("transfer tax is listed and names the LGC", /Local transfer tax/.test(TAXPG) && /Local Government Code/.test(TAXPG), "");
   chk("registration and notarial fees are listed", /[Rr]egistration fee/.test(TAXPG) && /[Nn]otarial fee/.test(TAXPG), "");
   chk("broker commission is shown as a band, not a fixed figure", /3% to 5%/.test(TAXPG), "");
   chk("net proceeds before commission", TAXPG.includes(M(s.netProceeds.beforeCommission)), M(s.netProceeds.beforeCommission));
   chk("net proceeds after commission, as a band", TAXPG.includes(M(s.netProceeds.atHighCommission)), "");
-  chk("inheritance section is present", /inherited/i.test(TAXPG), "");
-  chk("estate threshold printed as 10,000,000", /10,000,000/.test(TAXPG), "");
-  chk("tax page carries the floor-not-ceiling warning", /floor rather than a payable amount/i.test(TAXPG), "");
+  chk("inheritance section is present", /Inheritance/i.test(TAXPG), "");
+  chk("conditional family-home limit not universal exemption", /family-home limit is conditional/.test(TAXPG), "");
+  chk("tax page discloses classification and missing assessor FMV", /capital-asset/.test(TAXPG) && /Assessor FMV not supplied/.test(TAXPG), "");
 
   // ---- page 4 deadlines
   chk("deadline page explains the trigger", /notarisation/.test(DLPG), "");
-  chk("deadline page lists DST at 5 days", /Documentary stamp tax/.test(DLPG) && /5 days/.test(DLPG), "");
+  chk("deadline page lists DST at 10 days after document month", /Documentary stamp tax/.test(DLPG) && /10 days/.test(DLPG) && /close of the month/.test(DLPG), "");
   chk("deadline page lists CGT at 30 days", /Capital gains tax/.test(DLPG) && /30 days/.test(DLPG), "");
   chk("deadline page lists transfer tax at 60 days", /60 days/.test(DLPG), "");
   chk("deadline page lists the estate return at 365 days", /365 days/.test(DLPG), "");
@@ -214,7 +213,7 @@ const M = (n) => "PHP " + new Intl.NumberFormat("en-PH", { maximumFractionDigits
   chk("checklist warns requirements vary", /Registry of Deeds will reject/i.test(CHKPG), "");
 
   // ---- page 6
-  chk("page 6 says the range width is not confidence", /wider range means a weaker match/i.test(GUIDE), "");
+  chk("page 6 says scenario range is not confidence", /planning scenarios, not statistical confidence/i.test(GUIDE), "");
   chk("page 6 says zonal is a tax floor not a negotiable price", /tax floor in practice, not a negotiable one/i.test(GUIDE), "");
   chk("page 6 flags the governing instrument", /APPLIES/.test(GUIDE), "");
   chk("page 6 cites RA 12001", /RA 12001/.test(GUIDE), "");
@@ -255,14 +254,12 @@ const M = (n) => "PHP " + new Intl.NumberFormat("en-PH", { maximumFractionDigits
   chk("pricing strategy section exists", /Pricing strategy/.test(GUIDE), "");
   chk("ladder: lower end of guide range", /LOWER END OF GUIDE RANGE/.test(GUIDE) && GUIDE.indexOf(M(r.low)) >= 0, M(r.low));
   chk("ladder: lower end caption", /A reference point for reviewing offers/.test(GUIDE), "");
-  chk("ladder: midpoint of guide range", /MIDPOINT OF GUIDE RANGE/.test(GUIDE), "");
-  chk("ladder: midpoint is the arithmetic midpoint",
-    GUIDE.indexOf(M(Math.round((Number(r.low) + Number(r.high)) / 2))) >= 0,
-    M(Math.round((Number(r.low) + Number(r.high)) / 2)));
-  chk("ladder: midpoint caption", /arithmetic midpoint of this estimate range/.test(GUIDE), "");
+  chk("ladder: central estimate", /CENTRAL PLANNING ESTIMATE/.test(GUIDE), "");
+  chk("ladder: central estimate is not asymmetric range midpoint", GUIDE.indexOf(M(r.marketGuideEstimate)) >= 0, M(r.marketGuideEstimate));
+  chk("ladder: central estimate caption", /factor-based estimate/.test(GUIDE), "");
   chk("ladder: taxes and fees", /TAXES AND FEES/.test(GUIDE), "");
-  chk("ladder: tax caption names CGT, DST, broker and transfer", /CGT, DST, broker and transfer/.test(GUIDE), "");
-  chk("ladder: tax caption warns a higher price raises CGT and DST", /higher selling price raises CGT and DST/i.test(GUIDE), "");
+  chk("ladder: seller and buyer allocation disclosed", /Seller-paid CGT, broker/.test(GUIDE) && /buyer-paid/.test(GUIDE), "");
+  chk("ladder: tax caption warns a higher price can raise CGT and DST", /higher selling price can raise CGT and DST/i.test(GUIDE), "");
   chk("ladder: cash you would receive", /CASH YOU WOULD RECEIVE/.test(GUIDE), "");
   chk("ladder: cash caption ties to net proceeds after seller costs", /net proceeds at the guide estimate after those seller costs/i.test(GUIDE), "");
   if (tax && tax.selling) {
@@ -296,8 +293,8 @@ const M = (n) => "PHP " + new Intl.NumberFormat("en-PH", { maximumFractionDigits
   // ---- legal basis (part 02)
   chk("legal and regulatory basis section exists", /Legal and regulatory basis/.test(CALC), "");
   chk("basis cites the BIR authority", /RA 12001/.test(CALC), "");
-  chk("basis cites the CGT statute", /Sec\. 24\(D\), National Internal Revenue Code/.test(CALC), "");
-  chk("basis cites the Local Government Code", /Sec\. 561, Local Government Code/.test(CALC), "");
+  chk("basis cites the CGT statute", /Sec\. 24\(D\) NIRC/.test(CALC), "");
+  chk("basis cites provincial and city transfer rules", /135 and 151 LGC/.test(CALC), "");
   chk("basis cites the TRAIN estate threshold", /RA 10963/.test(CALC), "");
 
   // ---- the two-number distinction survives the whole document

@@ -1,6 +1,6 @@
 "use strict";
 /* ============================================================
-   ES Realty - transaction and estate tax estimates
+   SEA ESTATES - transaction and estate tax estimates
    ------------------------------------------------------------
    Separate from js/estimator.js on purpose. The estimate answers
    "what is the property worth"; this answers "what would it cost
@@ -14,21 +14,10 @@
    pretend to. Every figure here is an orientation aid for a broker
    planning a conversation with a client.
 
-   THE TAX BASE IS NOT THE ESTIMATE
-   Capital gains tax and documentary stamp tax are charged on the
-   HIGHER of the selling price and fair market value. This guide
-   knows neither with certainty: the sale has not happened, and the
-   BIR determines fair market value - which under Sec. 24(D) NIRC may
-   be taken as 50% of the zonal value. So the base used is the
-   higher of the guide estimate and 50% of the BIR zonal value, and
-   it is reported alongside the components that produced it.
-
-   A FATHERLY WARNING about the direction of error
-   Because FMV is taken as 50% of zonal value and zonal values sit
-   well below market, the base used here is usually the estimate.
-   If the eventual selling price lands ABOVE the estimate, both CGT
-   and DST rise with it. These figures are therefore a floor, not a
-   ceiling, and understating them costs the seller money.
+   Shared arithmetic uses the highest supplied selling price, BIR zonal
+   reference and assessor schedule FMV. Without a selling price, the guide
+   value is an explicitly assumed transaction price, not statutory FMV.
+   The 6% CGT scenario applies to qualifying capital-asset transactions.
 
    Rates and legal bases: data/tax/ph-estate-tax-reference.json
    ============================================================ */
@@ -37,8 +26,12 @@
   else root.ESREALTY_TAX = factory();
 })(typeof self !== "undefined" ? self : this, function () {
   "use strict";
+  var finance = typeof module === "object" && module.exports ? require("./value_guide_finance.js") : globalThis.ESREALTY_FINANCE;
 
   function loadJSON(url) {
+    if (typeof module === "object" && module.exports && typeof window === "undefined") {
+      return Promise.resolve(JSON.parse(require("fs").readFileSync(require("path").resolve(__dirname, "..", url), "utf8")));
+    }
     if (typeof fetch === "function") {
       return fetch(url, { cache: "no-cache" }).then(function (r) {
         if (!r.ok) throw new Error("tax reference unavailable (" + r.status + ")");
@@ -46,12 +39,12 @@
       });
     }
     /* Node, for the test suites. */
-    return Promise.resolve(require("fs").readFileSync(url, "utf8").then(JSON.parse));
+    return Promise.resolve(JSON.parse(require("fs").readFileSync(url, "utf8")));
   }
 
   var refPromise = null;
   function reference() {
-    if (!refPromise) refPromise = loadJSON("data/tax/ph-estate-tax-reference.json");
+    if (!refPromise) refPromise = loadJSON("data/tax/ph-estate-tax-reference.json").catch(function (e) { refPromise = null; throw e; });
     return refPromise;
   }
 
@@ -69,75 +62,55 @@
     ref = ref || {};
     var txn = ref.transaction || [];
 
-    /* The basis the BIR would actually use: higher of the price and an FMV
-       proxy of 50% zonal. Exposed so the caller can state it, because
-       "PHP 172,500" without its base is not a usable number. */
+    estimate = estimate || {};
     var estimateValue = num(estimate.marketGuideEstimate || estimate.recommendedAskingPrice);
-    var zonal = num(estimate.birZonalValue);
-    var fmvProxy = zonal * 0.5;
-    var taxBase = Math.max(estimateValue, fmvProxy);
+    var zonal = num(estimate.taxReferenceValue != null ? estimate.taxReferenceValue : estimate.birZonalValue);
 
     function byKey(k) {
       for (var i = 0; i < txn.length; i++) if (txn[i].key === k) return txn[i];
       return null;
     }
 
-    /* CGT is charged on the EXCESS of the price over fair market value, and
-       only where that excess is positive (Sec. 24(D) NIRC). Reading it as a
-       flat 6% of the price - which is what a percentage-on-base shortcut
-       gives - overstates CGT substantially, because the base for DST is the
-       full price but the base for CGT is only the excess over FMV.
-       The FMV used here is the 50%-of-zonal proxy, so a street where zonal
-       is high relative to market yields no CGT at all. */
-    var cgtExcess = Math.max(0, estimateValue - fmvProxy);
     var cgtDef = byKey("capital_gains");
-    var cgt = cgtExcess * num(cgtDef && cgtDef.ratePct) / 100;
-
     var dstDef = byKey("documentary_stamp");
-    var dst = taxBase * num(dstDef && dstDef.ratePct) / 100;
-
     var transferDef = byKey("transfer");
-    var transfer = taxBase * num(transferDef && transferDef.ratePct) / 100;
-
     var regDef = byKey("registration");
-    var registration = taxBase * num(regDef && regDef.ratePct) / 100;
-
     var notaryDef = byKey("notarial");
-    var notarial = num(notaryDef && notaryDef.amount);
-
     var brokerDef = byKey("broker");
-    var brokerMin = estimateValue * num(brokerDef && brokerDef.ratePctMin) / 100;
-    var brokerMax = estimateValue * num(brokerDef && brokerDef.ratePctMax) / 100;
-
-    /* Total excludes the broker: commission is a negotiated contractual cost,
-       not a statutory one, and folding it into "selling costs" would blur the
-       line between what the law requires and what the deal agreed. */
-    var statutory = cgt + dst + transfer + registration + notarial;
+    var costs = finance.transaction({ tax: { cgtPct: num(cgtDef && cgtDef.ratePct) / 100, dstPct: num(dstDef && dstDef.ratePct) / 100, transferPct: num(transferDef && transferDef.ratePct) / 100, registrationPct: num(regDef && regDef.ratePct) / 100 } }, estimateValue, Object.assign({}, estimate.costOptions || {}, {
+      marketGuideEstimate: estimateValue, salePrice: estimate.salePrice, birZonalValue: zonal,
+      fairMarketValue: estimate.fairMarketValue || (estimate.costOptions || {}).fairMarketValue, transactionPrice: estimateValue, notarial: estimate.notarialFee || (estimate.costOptions || {}).notarial
+    }));
+    if (costs.quotationRequired) return { quotationRequired: true, available: false, direction: costs.note, quotedDeveloperFees: costs.quotedDeveloperFees, buyerTotal: costs.buyerTotal, transactionPrice: costs.projectedTransactionPrice };
+    var taxBase = costs.base, cgt = costs.cgt, dst = costs.dst, transfer = costs.transfer, registration = costs.registration, notarial = costs.notarial;
+    var transactionPrice = costs.projectedTransactionPrice;
+    var suppliedBroker = estimate.costOptions && estimate.costOptions.brokerPct != null ? Number(estimate.costOptions.brokerPct) : null;
+    var brokerMin = money(transactionPrice * (suppliedBroker != null ? suppliedBroker : num(brokerDef && brokerDef.ratePctMin) / 100));
+    var brokerMax = money(transactionPrice * (suppliedBroker != null ? suppliedBroker : num(brokerDef && brokerDef.ratePctMax) / 100));
+    var statutory = costs.total;
 
     return {
       taxBase: money(taxBase),
-      taxBaseBasis: taxBase >= estimateValue
-        ? "Higher of the guide estimate and 50% of the BIR zonal value - the estimate, because the estimate exceeds the FMV proxy."
-        : "Higher of the guide estimate and 50% of the BIR zonal value - the FMV proxy, because it exceeds the estimate.",
+      taxBaseBasis: "Highest of the entered/assumed selling price, BIR zonal reference and supplied assessor schedule FMV. Selected: " + costs.baseBasis + ". " + (costs.assessorValueSupplied ? "Assessor FMV supplied." : "Assessor FMV not supplied; confirm before filing."),
       estimateValue: money(estimateValue),
       zonalValue: money(zonal),
-      fmvProxy: money(fmvProxy),
+      transactionPrice: transactionPrice,
+      sellerCosts: costs.sellerCosts,
+      buyerCosts: costs.buyerCosts,
 
       items: [
         {
           key: "capital_gains", label: (cgtDef && cgtDef.label) || "Capital gains tax",
           amount: money(cgt),
-          base: "excess of the price over fair market value (Sec. 24(D) NIRC)",
-          baseAmount: money(cgtExcess),
+          base: "higher of selling price or statutory fair market value (Sec. 24(D) NIRC)",
+          baseAmount: money(taxBase),
           rateLabel: num(cgtDef && cgtDef.ratePct) + "%",
           billedBy: cgtDef && cgtDef.billedBy,
           legalBasis: cgtDef && cgtDef.legalBasis,
           deadlineDays: cgtDef && cgtDef.deadlineDays,
           deadlineFrom: cgtDef && cgtDef.deadlineFrom,
           penalty: cgtDef && cgtDef.penalty,
-          note: cgtExcess === 0
-            ? "No excess over fair market value at this price, so no capital gains tax is indicated. The BIR determines fair market value and may assess differently."
-            : cgtDef && cgtDef.note
+          note: cgtDef && cgtDef.note
         },
         {
           key: "documentary_stamp", label: (dstDef && dstDef.label) || "Documentary stamp tax",
@@ -164,8 +137,8 @@
         },
         {
           key: "notarial", label: (notaryDef && notaryDef.label) || "Notarial fee",
-          amount: money(notarial), base: "charged per notarial act, not on the price",
-          baseAmount: null, rateLabel: "fixed",
+          amount: money(notarial), base: "optional quoted notarial fee; excluded when not supplied",
+          baseAmount: null, rateLabel: notarial ? "quoted" : "not supplied",
           billedBy: notaryDef && notaryDef.billedBy, legalBasis: notaryDef && notaryDef.legalBasis,
           deadlineDays: null, deadlineFrom: null, penalty: null, note: notaryDef && notaryDef.note
         }
@@ -176,21 +149,22 @@
       broker: {
         label: (brokerDef && brokerDef.label) || "Broker's commission",
         min: money(brokerMin), max: money(brokerMax),
-        rateLabel: num(brokerDef && brokerDef.ratePctMin) + "% to " + num(brokerDef && brokerDef.ratePctMax) + "%",
+        rateLabel: suppliedBroker != null ? (suppliedBroker * 100) + "% supplied" : num(brokerDef && brokerDef.ratePctMin) + "% to " + num(brokerDef && brokerDef.ratePctMax) + "%",
         note: brokerDef && brokerDef.note
       },
 
       netProceeds: {
         /* Both ends of the commission band, because commission is the one
            line the two parties actually negotiate. */
-        atLowCommission: money(estimateValue - statutory - brokerMin),
-        atHighCommission: money(estimateValue - statutory - brokerMax),
-        beforeCommission: money(estimateValue - statutory)
+        atLowCommission: money(transactionPrice - cgt - brokerMin - notarial),
+        atHighCommission: money(transactionPrice - cgt - brokerMax - notarial),
+        beforeCommission: money(transactionPrice - statutory),
+        sellerBeforeCommission: money(transactionPrice - cgt - notarial)
       },
 
-      direction: "These figures use the guide estimate as the sale price. A HIGHER selling price raises capital gains tax and documentary stamp tax, so treat the totals as a floor rather than a payable amount.",
+      direction: "Assumes a capital-asset sale. CGT, broker and quoted notarial costs are seller-paid; DST, transfer and registration buyer-paid. Allocation is negotiable. A higher selling price can raise CGT and DST; verify assessor FMV, exemptions and local fees.",
 
-      available: true
+      available: costs.available
     };
   }
 
@@ -200,19 +174,18 @@
   function inheritance(estimate, ref) {
     ref = ref || {};
     var e = ref.estate || {};
-    var gross = num(estimate.birZonalValue) * 0.5;
+    estimate = estimate || {};
+    var gross = num(estimate.birZonalValue);
     /* Where the BIR accepts the market value instead, the exposure is larger.
        Both are shown rather than picking one, because which applies is the
        family's and the BIR's decision, not this tool's. */
     var grossMarket = num(estimate.marketGuideEstimate);
     var deduction = num(e.standardDeduction);
-    var threshold = num(e.taxThreshold);
+    var threshold = 0;
     var pct = num(e.taxPct);
 
     function assess(g) {
-      var net = Math.max(0, g - deduction);
-      var taxable = Math.max(0, net - threshold);
-      return { gross: money(g), afterDeduction: money(net), taxable: money(taxable), tax: money(taxable * pct / 100) };
+      return finance.estate(g, estimate.estateInputs || {});
     }
 
     var onZonal = assess(gross);
@@ -226,8 +199,8 @@
       taxPct: pct,
       onZonalBasis: onZonal,
       onMarketBasis: onMarket,
-      /* Estate tax is payable only above the threshold. Below it the answer is
-         "none", and saying so plainly is more useful than a computed zero. */
+      scenarioOnly: !estimate.estateInputs || !(estimate.estateInputs.grossEstate > 0),
+      wholeEstate: estimate.estateInputs && estimate.estateInputs.grossEstate > 0 ? assess(estimate.estateInputs.grossEstate) : null,
       likelyPayable: onMarket.tax > 0,
       basis: e.taxBasis,
       deductionBasis: e.standardDeductionBasis,
@@ -256,7 +229,7 @@
     var e = ref.estate || {};
     if (e.deadlineDays != null) {
       out.push({
-        label: "Estate tax return, if estate tax is payable", days: e.deadlineDays,
+          label: "Estate tax return (filing may be required even with zero tax)", days: e.deadlineDays,
         from: e.deadlineFrom, penalty: e.penalty, billedBy: "BIR"
       });
     }

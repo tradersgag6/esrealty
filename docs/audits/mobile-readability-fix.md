@@ -226,7 +226,7 @@ Relevant files:
 - `js/storefront.js:546-577,800-893` public list/detail/contact/inquiry states.
 - `js/app.js:7285-7581,7866-7953` Market Scan and Store Locator requests.
 - `market-scan/worker/server.js:253-347` route contract reference.
-- `BACKEND_DESIGN_FIXTURE_PROMPT.md` for API contract and parity constraints.
+- `docs/specs/backend-fixture-testing.md` for API contract and parity constraints.
 
 Required repair:
 

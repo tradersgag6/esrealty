@@ -11,7 +11,17 @@ market-scan/worker/store/
 # scratch / analysis / media (kept locally, not committed)
 APPLE_DESIGN_ANALYSIS_PROMPT.md
 APPLE_DESIGN_FEASIBILITY_REPORT.md
-BACKEND_UX_FLOW_REPORT.md
 assets/listings/bt*.png
 screenshots/
 tests/zz_*.js
+
+# Design-review evidence is regenerable by tools/, so it stays local. Without
+# this, docs/ held 239 files / 60 MB of which exactly one was tracked, and a
+# single `git add -A` committed 63 MB of screenshots. The batch README.md files
+# remain trackable because they are the actual written record.
+docs/**/*.png
+docs/**/*.log
+
+# Agent skill bundles installed by `uipro init --ai universal --global`, and the
+# project-scoped variant. Reproducible on any machine; ~4 MB each.
+.opencode/

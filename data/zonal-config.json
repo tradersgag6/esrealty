@@ -1,6 +1,8 @@
 {
   "version": 2,
-  "calculationVersion": "2026.09.5",
+  "calculationVersion": "2026.10.3",
+  "riskPolicy": "Evidence-led: unverified occupancy/title/site flags are conditions, not automatic price discounts",
+  "scenarioRange": { "lowFactor": 0.85, "highFactor": 1.30, "meaning": "Planning scenarios, not statistical accuracy" },
   "dataVersion": "bir-2022-rdo58-59",
   "asOf": "2022-07-23",
   "note": "Engine + data versions stamped on every estimate output. Deterministic and reconcilable.",
@@ -28,19 +30,19 @@
     "wood_prefab": {
       "label": "Wood / Pre-fab",
       "costPerSqm": 16000,
-      "sourceType": "ES Realty appraisal RCN table (2026 PH mid-range)",
+      "sourceType": "SEA ESTATES appraisal RCN table (2026 PH mid-range)",
       "sourceDate": "2026"
     },
     "mixed_chb": {
       "label": "Mixed / CHB",
       "costPerSqm": 25000,
-      "sourceType": "ES Realty appraisal RCN table (2026 PH mid-range)",
+      "sourceType": "SEA ESTATES appraisal RCN table (2026 PH mid-range)",
       "sourceDate": "2026"
     },
     "rca_steel": {
       "label": "Reinforced Concrete / Steel",
       "costPerSqm": 32000,
-      "sourceType": "ES Realty appraisal RCN table (2026 PH mid-range)",
+      "sourceType": "SEA ESTATES appraisal RCN table (2026 PH mid-range)",
       "sourceDate": "2026"
     }
   },
@@ -170,9 +172,9 @@
     }
   },
   "marketGuide": {
-    "label": "ES Realty Market Guide Estimate",
-    "sourceType": "ES Realty approved factors",
-    "comparablePolicy": "Use ES Realty listings first; external asking-price evidence only when internal data is unavailable.",
+    "label": "SEA ESTATES Market Guide Estimate",
+    "sourceType": "SEA ESTATES approved factors",
+    "comparablePolicy": "Use SEA ESTATES listings first; external asking-price evidence only when internal data is unavailable.",
     "factorApproval": "Admin approval required",
     "status": "assumption-backed",
     "note": "The factor-based guide is separate from official BIR reference values. Comparable asking-listing prices are shown as context and do not directly determine the calculation."
@@ -184,7 +186,7 @@
     "registrationPct": 0.001,
     "brokerPct": 0.03
   },
-  "disclaimer": "ES Realty Property Value Guide — a planning estimate using the imported BIR zonal reference, disclosed ES Realty factors, and disclosed improvement-cost assumptions where applicable. Comparable asking-listing prices are reported as context and are not direct calculation inputs. Review the selected schedule, match level, factors, and assumptions; confirm current BIR/LGU references and property details before a transaction. A site and document review can further refine the estimate.",
+  "disclaimer": "SEA ESTATES Property Value Guide — a planning estimate using the imported BIR zonal reference, disclosed SEA ESTATES factors, and disclosed improvement-cost assumptions where applicable. Comparable asking-listing prices are reported as context and are not direct calculation inputs. Review the selected schedule, match level, factors, and assumptions; confirm current BIR/LGU references and property details before a transaction. A site and document review can further refine the estimate.",
   "labels": {
     "reference": "BIR zonal reference",
     "locality": "Locality",

@@ -34,7 +34,7 @@ function ok(cond, label, detail) {
 /* ---- dataset + manifest reconciliation ---- */
 eq(index.municipalities.length, 34, "dataset municipality count 34");
 eq(index.dataVersion, "bir-2022-rdo58-59", "dataset dataVersion");
-eq(config.calculationVersion, "2026.09.5", "config calculationVersion 2026.09.5");
+eq(config.calculationVersion, "2026.10.3", "config calculationVersion 2026.10.3");
 eq(manifest.status, "valid", "manifest status valid");
 eq(manifest.counts.municipalities, 34, "manifest municipality count");
 eq(manifest.counts.streets, 3710, "manifest street count 3710");
@@ -96,8 +96,8 @@ eq(d1.landPerSqm, 14875, "d1 landPerSqm equals BIR × use × market-band factors
 eq(d1.landValue, 200 * 14875, "d1 landValue 2,975,000");
 eq(d1.total, 2975000, "d1 factor-based total remains available without comparables");
 eq(d1.perSqm, Math.round(2975000 / 200), "d1 perSqm");
-eq(d1.low, Math.round(2975000 * 0.95), "d1 low ±5%");
-eq(d1.high, Math.round(2975000 * 1.05), "d1 high ±5%");
+eq(d1.low, Math.round(2975000 * 0.85), "d1 low 85%");
+eq(d1.high, Math.round(2975000 * 1.30), "d1 high 130%");
 eq(d1.use, "commercial", "d1 use commercial");
 ok(core.integrityCheck(d1).ok, "d1 reconciles");
 
@@ -117,8 +117,8 @@ eq(hl.kind, "built", "hl kind built");
 eq(hl.floorArea, 160, "hl explicit floorArea 160");
 eq(hl.floorsMultiplier, 1.05, "hl floors 2 multiplier 1.05");
 eq(hl.ageMidpoint, 25, "hl age midpoint 25");
-eq(hl.depreciatedPct, 63, "hl dep 25/40 = 63%");
-eq(hl.improvement, Math.round(25000 * 160 * 1.05 * (1 - 0.63)) + 700000, "hl improvement = build + features");
+eq(hl.depreciatedPct, 62.5, "hl dep 25/40 = 62.5%");
+eq(hl.improvement, Math.round(25000 * 160 * 1.05 * (1 - 0.625)) + 700000, "hl improvement = build + features with precise depreciation");
 eq(hl.featuresTotal, 700000, "hl features 500000 + 200000");
 eq(hl.total, hl.landValue + hl.improvement, "hl total = land + improvement");
 ok(core.integrityCheck(hl).ok, "hl reconciles");

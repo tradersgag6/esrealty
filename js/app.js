@@ -1,5 +1,5 @@
 /* ============================================================
-   ES Realty — Application layer
+   SEA ESTATES — Application layer
    Auth (demo), navigation, wizard, analysis, portfolio, reports,
    assistant. Vanilla JS SPA, localStorage persistence.
    ============================================================ */
@@ -287,7 +287,7 @@
   }
 
   function defaultState() {
-    return { deals: [], current: null, view: "dashboard", wizardStep: 1, theme: "light", dealTab: "overview", appraisal: null, appraisalTab: "setup", appraisals: [], market: null, pms: { properties: [], units: [], owners: [], tenants: [], leases: [], payments: [], maintenance: [], expenses: [], documents: [] }, pmsTab: "properties", listings: [], favorites: [], listingFilters: {}, listingDetail: null, lsTab: "catalog", leads: [], leadFilters: {}, leadDetail: null, leadMode: "pipeline", leadCalendarMonth: "", lang: "en", users: [], transactions: [], financingScenarios: [], financingDraft: null, salesPlaybooks: [], playbookFilters: { q: "", stage: "", category: "", propertyType: "", status: "" }, commission: { settings: { grossPct: 3, brokerShare: 40, agentShare: 50, referralShare: 10 }, payouts: [] }, docVault: [], siteVisits: [], campaigns: [], listingStats: {}, valueGuide: { version: "2026.09.4", approvedBy: "", approvedAt: "", proxyFactors: { residential: 1, commercial: 1.7, agricultural: 0.5, industrial: 1.35 }, marketBandMid: { residential: 2.5, commercial: 2.5, agricultural: 1.5, industrial: 2 }, construction: { wood_prefab: 16000, mixed_chb: 25000, rca_steel: 32000 } }, siteContact: { eyebrow: "TALK TO A SHOPHOUSE SPECIALIST", title: "Ready to put the ground floor to work?", description: "Tell us your province, budget, and business plan. A shophouse specialist from ES Realty will reply within one business day with listings and next steps.", phone: "+63 900 000 0000", email: "hello@esrealty.ph", address: "Batangas, Philippines", hours: "Monday–Saturday, 9:00 AM–6:00 PM" }, adminTab: "overview", txDetail: null, usersTab: "pending",
+    return { deals: [], current: null, view: "dashboard", wizardStep: 1, theme: "light", dealTab: "overview", appraisal: null, appraisalTab: "setup", appraisals: [], market: null, pms: { properties: [], units: [], owners: [], tenants: [], leases: [], payments: [], maintenance: [], expenses: [], documents: [] }, pmsTab: "properties", listings: [], favorites: [], listingFilters: {}, listingDetail: null, lsTab: "catalog", leads: [], leadFilters: {}, leadDetail: null, leadMode: "pipeline", leadCalendarMonth: "", lang: "en", users: [], transactions: [], financingScenarios: [], financingDraft: null, salesPlaybooks: [], playbookFilters: { q: "", stage: "", category: "", propertyType: "", status: "" }, commission: { settings: { grossPct: 3, brokerShare: 40, agentShare: 50, referralShare: 10 }, payouts: [] }, docVault: [], siteVisits: [], campaigns: [], listingStats: {}, valueGuide: { version: "2026.09.4", approvedBy: "", approvedAt: "", proxyFactors: { residential: 1, commercial: 1.7, agricultural: 0.5, industrial: 1.35 }, marketBandMid: { residential: 2.5, commercial: 2.5, agricultural: 1.5, industrial: 2 }, construction: { wood_prefab: 16000, mixed_chb: 25000, rca_steel: 32000 } }, siteContact: { eyebrow: "PROPERTY GUIDANCE", title: "What are you planning next?", description: "Tell SEA ESTATES whether you are buying, selling, renting, or reviewing a property. Include the location and any questions you would like us to help with.", phone: "+63 900 000 0000", email: "hello@esrealty.ph", address: "Batangas, Philippines", hours: "Monday–Saturday, 9:00 AM–6:00 PM" }, adminTab: "overview", txDetail: null, usersTab: "pending",
       portfolioAccounts: [], cashEntries: [], constructionProjects: [], constructionPhases: [], constructionVendors: [], constructionInvoices: [], changeOrders: [], portfolioTab: "overview", portfolioAuditEvents: [] };
   }
   function loadState() {
@@ -673,7 +673,7 @@ if (IS_LOCAL_DEV && !(currentUser && currentUser.id)) {
     const today = new Date();
     if (!state.presellProjects.length) {
       state.presellProjects.push({ id: "psp-seed-1", name: "Solstice Residences", developer: "Villanueva Land Corp.", location: "Bacoor, Cavite", lts_no: "LTS-0324-001", turnover_date: "2027-12-31", description: "Mid-rise condo community near CALAX exit.", status: "active" });
-      state.presellProjects.push({ id: "psp-seed-2", name: "Harbor Row Shophouses", developer: "ES Realty Development", location: "Davao City", lts_no: "LTS-0325-014", turnover_date: "2026-12-31", description: "Three-storey commercial shophouse strip.", status: "active" });
+      state.presellProjects.push({ id: "psp-seed-2", name: "Harbor Row Shophouses", developer: "SEA ESTATES Development", location: "Davao City", lts_no: "LTS-0325-014", turnover_date: "2026-12-31", description: "Three-storey commercial shophouse strip.", status: "active" });
     }
     if (!state.presellUnits.length) {
       const mk = (pid, no, tw, fl, ty, pr, st, rf) => ({ id: "psu-" + pid + "-" + no, project_id: pid, unit_no: no, tower: tw, floor: fl, unit_type: ty, price: pr, status: st, reserved_for: rf || "", reserved_at: st === "reserved" ? today.toISOString() : null, notes: "" });
@@ -948,7 +948,7 @@ if (IS_LOCAL_DEV && !(currentUser && currentUser.id)) {
     save(); render();
   }
   async function psSetUnitStatusForBuyer(unitId) {
-    if (!currentUser || !currentUser.id) { toast("Sign in with your ES Realty account first", "err"); return; }
+    if (!currentUser || !currentUser.id) { toast("Sign in with your SEA ESTATES account first", "err"); return; }
     const u = (state.presellUnits || []).find(x => x.id === unitId);
     if (!u || u.status !== "available") return;
     const patch = { status: "reserved", reserved_for: (currentUser.name || currentUser.email || "Buyer"), reserved_by: currentUser.id, reserved_at: new Date().toISOString(), client_email: String(currentUser.email || "").toLowerCase() };
@@ -1167,7 +1167,6 @@ if (IS_LOCAL_DEV && !(currentUser && currentUser.id)) {
 
   /* ================= BUYER PORTAL ================= */
   let portalLoadedKey = "";
-  function portalIsMe(u) { return currentUser && currentUser.email && String(u.client_email || "").toLowerCase() === String(currentUser.email).toLowerCase(); }
   function seedPortalSample() {
     psEnsure();
     if (!state.presellProjects.some(p => p.id === "psp-portal")) {
@@ -1855,13 +1854,11 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
       if (mIdx >= OVERPASS_MIRRORS.length) {
         NEARBY_CATEGORY_QUERIES.forEach(function (c) { if (res.found[c[0]] > 0) res.present++; });
         if (statusEl) statusEl.textContent = res.present > 0 ? "Scan complete — " + res.present + " nearby type(s) found." : "Scan complete — no nearby data found for this location.";
-        console.log("[ESRealty Scan] mirrors exhausted. present=" + res.present, JSON.stringify(res.found));
         if (res.present > 0) cb(res); else if (errCb) errCb(); else cb(res);
         return;
       }
       var mirrorNames = ["Overpass", "Kumi", "LZ4"];
       if (statusEl) statusEl.textContent = "Scanning nearby via " + (mirrorNames[mIdx] || "mirror " + mIdx) + "…";
-      console.log("[ESRealty Scan] trying " + OVERPASS_MIRRORS[mIdx] + " query_len=" + query.length);
       var ctl = new AbortController();
       var timer = setTimeout(function () { ctl.abort(); }, 35000);
       fetch(OVERPASS_MIRRORS[mIdx], {
@@ -1872,7 +1869,6 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
       }).then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
         .then(function (j) {
           var els = (j && j.elements) || [];
-          console.log("[ESRealty Scan] " + OVERPASS_MIRRORS[mIdx] + " returned " + els.length + " count elements");
           els.forEach(function (el, k) {
             if (k >= NEARBY_CATEGORY_QUERIES.length) return;
             var count = 0;
@@ -1880,30 +1876,15 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
             res.found[NEARBY_CATEGORY_QUERIES[k][0]] = count;
           });
           NEARBY_CATEGORY_QUERIES.forEach(function (c) { if (res.found[c[0]] > 0) res.present++; });
-          console.log("[ESRealty Scan] present=" + res.present, JSON.stringify(res.found));
           if (statusEl) statusEl.textContent = "Scan complete — " + res.present + " nearby type(s) found.";
           cb(res);
         })
         .catch(function (e) {
           clearTimeout(timer);
-          console.log("[ESRealty Scan] " + OVERPASS_MIRRORS[mIdx] + " failed: " + e.message);
           tryMirror(mIdx + 1);
         });
     }
     tryMirror(0);
-  }
-  function parseOverpassResults(j, cb) {
-    var els = (j && j.elements) || [];
-    var res = { found: {}, present: 0 };
-    NEARBY_CATEGORY_QUERIES.forEach(function (c, i) {
-      var el = els[i];
-      var count = 0;
-      if (el && el.groups) el.groups.forEach(function (g) { count += (g.count || 0); });
-      else if (el && el.tags) count = (parseInt(el.tags.nodes || 0) + parseInt(el.tags.ways || 0) + parseInt(el.tags.relations || 0)) || parseInt(el.tags.total || 0);
-      res.found[c[0]] = count;
-      if (count > 0) res.present++;
-    });
-    cb(res);
   }
   function applyWizardLocationAnalysis(d, rev, counts) {
     const p = d.property, loc = d.location;
@@ -2500,7 +2481,7 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
     if (main) main.classList.remove("public-main");
     hideAuth();
     const title = { dashboard: "Dashboard", wizard: "New Investment", deal: "Deal Analysis", portfolio: "Portfolio", pms: "Property Management", assistant: "AI Assistant", reports: "Reports", appraisal: "Appraisal", "value-guide": "Value Guide", market: "Market Scan", listings: "Listings", leads: "CRM / Leads", transactions: "Transactions", financing: "Financing", presell: "Pre-Selling", portal: "Buyer Portal", playbook: "Sales Playbook", users: "Users & Access", admin: "Brokerage", settings: "Settings" };
-    $("#topbar-title").textContent = (lang === "fil" ? (FIL_TITLES[state.view] || title[state.view]) : title[state.view]) || "ES Realty";
+    $("#topbar-title").textContent = (lang === "fil" ? (FIL_TITLES[state.view] || title[state.view]) : title[state.view]) || "SEA ESTATES";
     $$("#nav .nav-item").forEach(b => b.classList.toggle("active", b.getAttribute("data-view") === state.view));
     $$("#nav .nav-dropdown-item").forEach(b => {
       b.classList.toggle("active", b.getAttribute("data-view") === state.view);
@@ -2674,16 +2655,6 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
     const cfg = statusCfg(s);
     return '<span class="badge ' + (cfg ? cfg.color : "cyan") + '">' + esc(cfg ? cfg.label : (s || "—")) + '</span>';
   }
-  function statusSelect(d) {
-    return '<select class="input st-select" data-status-deal="' + d.id + '">' +
-      DEAL_STATUSES.map(s => '<option value="' + s.value + '"' + (statusKey(d.status) === s.value ? " selected" : "") + '>' + s.label + '</option>').join("") +
-      '</select>';
-  }
-  function statusSummary() {
-    const counts = {};
-    state.deals.forEach(d => { const k = statusKey(d.status) || "—"; counts[k] = (counts[k] || 0) + 1; });
-    return DEAL_STATUSES.map(s => '<span class="badge ' + s.color + '">' + s.label + " " + (counts[s.value] || 0) + "</span>").join(" ");
-  }
 
   /* ================= PORTFOLIO STATS ================= */
   function dealValue(d) {
@@ -2740,7 +2711,7 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
       mode = m;
       const signup = m === "signup";
       const forgot = m === "forgot";
-      title.textContent = forgot ? "Reset your password" : (signup ? "Create your ES Realty account" : "Sign in to ES Realty");
+      title.textContent = forgot ? "Reset your password" : (signup ? "Create your SEA ESTATES account" : "Sign in to SEA ESTATES");
       sub.textContent = forgot ? "Request Reset" : (signup ? "Create Account" : "Login");
       $("#auth-tab-login").classList.toggle("active", m === "signin");
       $("#auth-tab-register").classList.toggle("active", signup);
@@ -2757,7 +2728,7 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
       clearAllErrs();
       hideFormMsg();
     };
-    $("#auth-note").textContent = IS_LOCAL_DEV ? "Local test mode is enabled. Production accounts use Supabase Auth." : "Your account role is assigned securely by ES Realty.";
+    $("#auth-note").textContent = IS_LOCAL_DEV ? "Local test mode is enabled. Production accounts use Supabase Auth." : "Your account role is assigned securely by SEA ESTATES.";
     setMode("signin");
     const close = $("#auth-close");
     if (close) close.addEventListener("click", () => { hideAuth(); if (!currentUser) render(); });
@@ -2810,7 +2781,7 @@ development: { goal: "custom", devType: "Townhouse", constCostPerSqm: 38000, far
         try {
           if (!SB) throw new Error("Supabase client could not load");
           await withTimeout(SB.rpc("admin_request_password_reset", { p_email: email }), 20000);
-          showFormMsg("If <b>" + esc(email) + "</b> has an ES Realty account, a password reset request was sent to the Super Admin. They will generate a new temporary password and share it with you.", "ok");
+          showFormMsg("If <b>" + esc(email) + "</b> has a SEA ESTATES account, a password reset request was sent to the Super Admin. They will generate a new temporary password and share it with you.", "ok");
         } catch (err) {
           if (/could not load/i.test(String(err.message || ""))) showFormMsg("Local demo mode has no password reset. Contact your administrator.", "err");
           else if (/querying schema|failed to fetch schema|database error/i.test(String(err.message || ""))) showFormMsg("Please contact the administrator.", "err");
@@ -3811,7 +3782,6 @@ function bindPerView() {
 
     // cascading region → province → city
     const region = $("#wz-region");
-    const provinceWrap = () => { state.current = gatherDeal(); render(); };
     if (region) {
       region.addEventListener("change", () => {
         state.current = gatherDeal();
@@ -4578,7 +4548,7 @@ function bindPerView() {
     const loc = [raw.property.city, raw.property.province].filter(Boolean).join(", ") || "Philippines";
     const to = new Date();
     to.setMonth(to.getMonth() + (C.num(raw.development.buildMonths, 14) || 14) + 12);
-    state.presellProjects.push({ id: pid, name: (raw.property.name || "Townhouse") + " — Feasibility", developer: "ES Realty Development", location: loc, lts_no: "", turnover_date: to.toISOString().slice(0, 10), description: "Imported from Feasibility Studio: " + fz.plan.units + " units, " + C.numFmt(fz.plan.floorArea) + " sqm, " + C.money(fz.pnl.unitPrice) + "/unit.", status: "active" });
+    state.presellProjects.push({ id: pid, name: (raw.property.name || "Townhouse") + " — Feasibility", developer: "SEA ESTATES Development", location: loc, lts_no: "", turnover_date: to.toISOString().slice(0, 10), description: "Imported from Feasibility Studio: " + fz.plan.units + " units, " + C.numFmt(fz.plan.floorArea) + " sqm, " + C.money(fz.pnl.unitPrice) + "/unit.", status: "active" });
     for (let i = 1; i <= fz.plan.units; i++) state.presellUnits.push({ id: "psu-" + pid + "-" + i, project_id: pid, unit_no: "TH-" + String(i).padStart(2, "0"), tower: "", floor: 1, unit_type: "Townhouse", price: fz.pnl.unitPrice, status: "available", reserved_for: "", reserved_at: null, notes: "" });
     save();
     toastHtml("Created <b>" + fz.plan.units + "</b> townhouse units in Pre-Selling");
@@ -4662,7 +4632,7 @@ function bindPerView() {
 
   /* ================= DASHBOARD ================= */
   function siteContactDefaults() {
-    return { eyebrow: "TALK TO A SHOPHOUSE SPECIALIST", title: "Ready to put the ground floor to work?", description: "Tell us your province, budget, and business plan. A shophouse specialist from ES Realty will reply within one business day with listings and next steps.", phone: "+63 900 000 0000", email: "hello@esrealty.ph", address: "Batangas, Philippines", hours: "Monday–Saturday, 9:00 AM–6:00 PM" };
+    return { eyebrow: "PROPERTY GUIDANCE", title: "What are you planning next?", description: "Tell SEA ESTATES whether you are buying, selling, renting, or reviewing a property. Include the location and any questions you would like us to help with.", phone: "+63 900 000 0000", email: "hello@esrealty.ph", address: "Batangas, Philippines", hours: "Monday–Saturday, 9:00 AM–6:00 PM" };
   }
   function siteContactData() {
     state.siteContact = Object.assign(siteContactDefaults(), state.siteContact || {});
@@ -4894,7 +4864,7 @@ function bindPerView() {
     // LEDGER
     if (state.portfolioTab==="ledger") {
       const entries=(state.cashEntries||[]).slice().sort((a,b)=> String(b.entry_date||b.created_at).localeCompare(String(a.entry_date||a.created_at)));
-      html += '<div class="card card-pad pf-ledger-shell"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h3>Cash Ledger (Investor)</h3><p class="dim tiny">Record actual ES Realty cash movements. Posted entries update the account balance immediately.</p></div><div class="row" style="gap:8px;flex-wrap:wrap">'+(pfRO?'':'<button class="btn btn-primary" data-pf-new-entry>'+icon("plus",14)+' New Cash Entry</button>')+(pfRO?'':'<button class="btn btn-ghost" data-pf-migrate-presell title="Backfill paid presell collections into the ledger">'+icon("download",13)+' Import Presell</button>')+'<button class="btn btn-ghost" data-pf-export-ledger>Export CSV</button></div></div>';
+      html += '<div class="card card-pad pf-ledger-shell"><div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h3>Cash Ledger (Investor)</h3><p class="dim tiny">Record actual SEA ESTATES cash movements. Posted entries update the account balance immediately.</p></div><div class="row" style="gap:8px;flex-wrap:wrap">'+(pfRO?'':'<button class="btn btn-primary" data-pf-new-entry>'+icon("plus",14)+' New Cash Entry</button>')+(pfRO?'':'<button class="btn btn-ghost" data-pf-migrate-presell title="Backfill paid presell collections into the ledger">'+icon("download",13)+' Import Presell</button>')+'<button class="btn btn-ghost" data-pf-export-ledger>Export CSV</button></div></div>';
       html += '<div class="pf-ledger-summary"><div><span>Posted entries</span><b>'+postedEntries.length+'</b></div><div><span>Cash In</span><b class="pf-in">'+C.money(cashIn)+'</b></div><div><span>Cash Out</span><b class="pf-out">'+C.money(cashOut)+'</b></div><div><span>Current cash</span><b>'+C.money(totalCash)+'</b></div></div>';
 const FL=(state.cashLedgerFilters)||{};
       html += '<div class="pf-ledger-filters" aria-label="Ledger filters"><label class="field"><span>Account</span><select class="input" id="pf-filter-acc"><option value="">All accounts</option>'+(state.portfolioAccounts||[]).map(a=>'<option value="'+esc(a.id)+'"'+(String(FL.accountId||"")===a.id?' selected':'')+'>'+esc(a.label)+'</option>').join("")+'</select></label><label class="field"><span>Direction</span><select class="input" id="pf-filter-dir"><option value="">Cash In & Out</option><option value="in"'+(FL.direction==="in"?' selected':'')+'>Cash In</option><option value="out"'+(FL.direction==="out"?' selected':'')+'>Cash Out</option></select></label><label class="field"><span>Status</span><select class="input" id="pf-filter-status"><option value="">All statuses</option><option value="draft"'+(FL.status==="draft"?' selected':'')+'>Draft</option><option value="pending"'+(FL.status==="pending"?' selected':'')+'>Pending</option><option value="posted"'+(FL.status==="posted"?' selected':'')+'>Posted</option><option value="reversed"'+(FL.status==="reversed"?' selected':'')+'>Reversed</option><option value="voided"'+(FL.status==="voided"?' selected':'')+'>Voided</option></select></label><label class="field pf-ledger-search"><span>Search</span><input class="input" id="pf-search" value="'+esc(FL.search||"")+'" placeholder="Description, counterparty, reference"></label><label class="field"><span>From</span><input class="input" id="pf-date-from" type="date" value="'+esc(FL.from||"")+'"></label><label class="field"><span>To</span><input class="input" id="pf-date-to" type="date" value="'+esc(FL.to||"")+'"></label><button class="btn btn-ghost" type="button" data-pf-clear-filters>Clear filters</button></div>';
@@ -4994,7 +4964,6 @@ let actions;
         if(selProj.presell_link){
           html+='<div class="row mt-8" style="gap:10px;flex-wrap:wrap"><div class="notice-banner mt-8" style="flex:1;min-width:260px">'+icon("link",12)+' <span>Presell link: <b>'+esc(selProj.presell_link.scope==="project"? (()=>{const pp=(state.presellProjects||[]).find(x=>x.id===selProj.presell_project_id); return pp?pp.name:selProj.presell_project_id;})() : selProj.presell_link.scope+' · '+selProj.presell_link.value)+'</b> — cost per unit and collections roll into Overview.</span></div></div>';
         }
-        const totalCommitted=phases.reduce((s,p)=>s+Number(p.committed||0),0);
         const totalPaid=phases.reduce((s,p)=>s+Number(p.paid||0),0);
         html+='<div class="row mt-8" style="gap:8px;flex-wrap:wrap">'+(pfRO?'':'<button class="btn btn-ghost btn-sm" data-pf-add-phase="'+selProj.id+'">'+icon("plus",12)+' Add Phase</button><button class="btn btn-ghost btn-sm" data-pf-new-vendor="'+selProj.id+'">'+icon("plus",12)+' Vendor</button><button class="btn btn-ghost btn-sm" data-pf-new-invoice="'+selProj.id+'">'+icon("plus",12)+' Invoice</button><button class="btn btn-ghost btn-sm" data-pf-new-change="'+selProj.id+'">'+icon("plus",12)+' Change Order</button>')+'</div>';
         html+='<h4 class="mt-16 mb-8">Phases <span class="dim tiny">('+phases.length+')</span></h4>';
@@ -6453,7 +6422,7 @@ if(editId){
     const secs = sections.map(s => (s.cover ? "" : "<h2>" + esc(s.title) + "</h2>") + (s.html || "")).join("");
     return '<div class="rpt" style="font-family:Georgia,serif;color:#16202E;line-height:1.6;max-width:820px;margin:0 auto;padding:32px">' +
       '<h1 style="color:' + (/^#[0-9A-Fa-f]{6}$/.test(accent || "") ? accent : "#EA580C") + ';font-size:26px">' + esc(title) + '</h1>' +
-      '<p style="font-size:11px;color:#98A5B8">ES Realty Investment Intelligence · ' + new Date().toLocaleString() + '</p>' +
+      '<p style="font-size:11px;color:#98A5B8">SEA ESTATES Investment Intelligence · ' + new Date().toLocaleString() + '</p>' +
       '<table>' + rows + '</table>' + secs +
       '<p style="font-size:10px;color:#98A5B8;margin-top:28px;border-top:1px solid #E3E8EF;padding-top:8px">This is an automated analysis for informational purposes only and does not constitute licensed financial, legal, or investment advice.</p></div>';
   }
@@ -6692,7 +6661,7 @@ if(editId){
 
     const head =
       '<div class="ds-head">' +
-        '<div class="ds-brand">ES Realty <em>· Investment Intelligence</em></div>' +
+        '<div class="ds-brand">SEA ESTATES <em>· Investment Intelligence</em></div>' +
         '<div class="ds-title"><h1>Investment Deal Summary</h1>' +
           '<div class="ds-grade"><div class="g">' + esc(rec.grade) + '</div><div class="v">' + esc(rec.total) + '/100 · ' + esc(rec.verdict) + '</div></div>' +
         '</div>' +
@@ -6813,7 +6782,7 @@ if(editId){
       SEC("Location & Risk Register", sRiskScores + sRiskTable) +
       SEC("Recommendation", sRec) +
       SEC("Comparables", sSix) +
-      '<div class="ds-foot">ES Realty Investment Intelligence · This is an automated analysis for informational purposes only and does not constitute licensed financial, legal, or investment advice.</div>' +
+      '<div class="ds-foot">SEA ESTATES Investment Intelligence · This is an automated analysis for informational purposes only and does not constitute licensed financial, legal, or investment advice.</div>' +
       "</div>";
   }
 
@@ -7703,7 +7672,7 @@ premise: "Fee Simple / As Improved",
     // Bank-format cover page (own printed page)
     sections.push({ cover: true, title: "", html:
       "<div style='text-align:center;padding-top:60px'>" +
-      "<div style='letter-spacing:.3em;font-size:12px;color:#98A5B8'>ES REALTY · VALUATION SERVICES</div>" +
+      "<div style='letter-spacing:.3em;font-size:12px;color:#98A5B8'>SEA ESTATES · VALUATION SERVICES</div>" +
       "<h1 style='font-size:34px;margin:18px 0 6px'>BANK VALUATION REPORT</h1>" +
       "<div style='font-size:13px;color:#667;margin-bottom:36px'>Summary of Appraisal &amp; Final Value Opinion — BSP-aligned credit format</div>" +
       "<table style='max-width:640px;margin:0 auto 28px'>" +
@@ -8482,9 +8451,6 @@ premise: "Fee Simple / As Improved",
     if (daysLeft <= 30) return "expiring";
     return "active";
   }
-  function syncLeaseStatuses() {
-    pmsActiveLeases().forEach(l => { l.status = pmsAutoStatus(l); });
-  }
   function syncUnitFromLeases() {
     pmsActiveUnits().forEach(u => {
       const names = pmsUnitTenants(u.id);
@@ -9241,7 +9207,7 @@ premise: "Fee Simple / As Improved",
       '<table class="print-pays"><tr><th>Date</th><th>Period</th><th class="num">Amount</th><th>Method</th><th>Status</th><th>Notes</th></tr>' + (payRows || '<tr><td colspan="6">No payments recorded</td></tr>') + '</table>' +
       '<table class="print-sum"><tr><th>Total</th><th>Paid</th><th>Balance</th></tr>' +
       '<tr><td class="num">' + C.money(p.total) + '</td><td class="num">' + C.money(p.paidTotal) + '</td><td class="num"><b>' + C.money(p.total - p.paidTotal) + '</b></td></tr></table>' +
-      '<div class="print-foot"><span>Prepared by ES Realty · Property Management System</span></div>' +
+      '<div class="print-foot"><span>Prepared by SEA ESTATES · Property Management System</span></div>' +
       '</div>';
     pmsPrintModal("Tenant Payable — " + pmsTenantName(l.tenant_id), body);
   }
@@ -9297,7 +9263,7 @@ premise: "Fee Simple / As Improved",
       '<table class="print-pays"><tr><th>Tenant</th><th>Unit</th><th>Lease Term</th><th class="num">Rent</th><th>Status</th></tr>' + (tenantRows || '<tr><td colspan="5">No tenants</td></tr>') + '</table>' +
       '<h3>Payments</h3>' +
       '<table class="print-pays"><tr><th>Date</th><th>Period</th><th>Tenant</th><th class="num">Amount</th><th>Method</th><th>Status</th><th>Notes</th></tr>' + (payRows || '<tr><td colspan="7">No payments</td></tr>') + '</table>' +
-      '<div class="print-foot"><span>Prepared by ES Realty · Property Management System</span></div>' +
+      '<div class="print-foot"><span>Prepared by SEA ESTATES · Property Management System</span></div>' +
       '</div>';
     pmsPrintModal("Property Report — " + p.title, body);
   }
@@ -10332,6 +10298,9 @@ premise: "Fee Simple / As Improved",
         preparedFor: "", preparedBy: "",
         form: {
           purpose: "Selling", type: "vacant_lot",
+          salePrice: "", saleContext: "private-resale", developerFees: "",
+          landMethod: "factor", timeSource: "manual", timeAnnualPct: "",
+          timeBaseDate: "", timeTargetDate: new Date().toISOString().slice(0, 10), timeEvidenceId: "",
           municipality: "", barangay: "", streetKey: "", allOther: false,
           classification: "", area: "", corner: false,
           construction: "mixed_chb", floorArea: "", floors: "1", ageBand: "0-5",
@@ -10363,6 +10332,12 @@ premise: "Fee Simple / As Improved",
       municipality: f.municipality, barangay: f.barangay,
       streetKey: f.allOther ? "" : f.streetKey,
       classification: f.classification, area: Number(f.area) || 0,
+      salePrice: f.salePrice === "" || f.salePrice == null ? null : Number(f.salePrice),
+      saleContext: f.saleContext || "private-resale",
+      developerFees: f.developerFees === "" || f.developerFees == null ? null : Number(f.developerFees),
+      landMethod: f.landMethod || "factor", timeSource: f.timeSource || "manual",
+      timeAnnualPct: f.timeAnnualPct === "" || f.timeAnnualPct == null ? null : Number(f.timeAnnualPct),
+      timeBaseDate: f.timeBaseDate, timeTargetDate: f.timeTargetDate, timeEvidenceId: f.timeEvidenceId,
       corner: !!f.corner,
       construction: f.construction, floorArea: Number(f.floorArea) || 0,
       floors: f.floors, ageBand: f.ageBand, features: f.features,
@@ -10382,6 +10357,19 @@ premise: "Fee Simple / As Improved",
        empty string is caught before the coercion matters. */
     if (!(Number(f.area) > 0)) missing.push("lot area");
     else f.area = Number(f.area);
+    if (f.salePrice != null && f.salePrice !== "" && (!Number.isFinite(Number(f.salePrice)) || Number(f.salePrice) < 0)) missing.push("valid price scenario");
+    if (f.landMethod === "time-indexed") {
+      /* An indexed scenario is only meaningful with an explicit rate and a valid
+         date pair. There is deliberately no default rate: an invented growth
+         figure would be indistinguishable from a real one in the output, and the
+         government register cannot supply one. */
+      const row = vgEst().municipalityRow(f.municipality), cfg = vgEst().reference()?.config;
+      const check = vgEst().core.referenceTools.timeScenario(1, 1, {
+        baseDate: f.timeBaseDate || row?.effectivityDate, targetDate: f.timeTargetDate,
+        annualPct: f.timeAnnualPct, source: f.timeSource || "manual", evidenceId: f.timeEvidenceId
+      }, cfg?.governmentReferenceRegister, { municipality: f.municipality, useGroup: vgEst().core.useOfClassification(cfg, f.classification) });
+      if (!check.available) missing.push(check.reason === "time-evidence-unavailable" ? "reviewed local evidence or manual assumption" : "explicit valid annual rate and indexing dates");
+    }
     return missing;
   }
 
@@ -10425,6 +10413,24 @@ premise: "Fee Simple / As Improved",
       + '<div class="vg-form">' + body + "</div></div>";
   }
 
+  /* One collapsed "About this estimate" block for the three decisions that used
+     to be three always-expanded groups: government reference status, the land
+     planning method and the transaction scenario. The plain-language facts come
+     first so an operator can read the state of the estimate without expanding
+     anything; the full inputs stay one click away and keep every data-vg-set
+     hook, so saving, validation and PDF output are unchanged. */
+  function vgAboutGroup(facts, body) {
+    return '<details class="vg-about"><summary>About this estimate</summary>'
+      + '<ul class="vg-about-facts">' + facts.map(f =>
+        '<li><b>' + esc(f[0]) + "</b><span>" + esc(f[1]) + "</span></li>").join("") + "</ul>"
+      + '<p class="vg-group-note">Planning inputs, not a certified appraisal. Expanding a section below never changes an official government schedule.</p>'
+      + body + "</details>";
+  }
+
+  function vgDisclosure(title, body) {
+    return '<details class="vg-about-section"><summary>' + esc(title) + "</summary>" + body + "</details>";
+  }
+
   function renderValueGuide() {
     const d = vgDraft();
     const EST = vgEst();
@@ -10455,7 +10461,7 @@ premise: "Fee Simple / As Improved",
     else if (d.stage === 3) body = vgStage3(d);
     else body = vgStage4(d);
 
-    return '<div class="hero"><div><h1>Value Guide</h1><p>Batangas planning estimate from the official BIR zonal reference and the disclosed ES Realty factors</p></div>'
+    return '<div class="hero"><div><h1>Value Guide</h1><p>Batangas planning estimate from the official BIR zonal reference and the disclosed SEA ESTATES factors</p></div>'
       + '<div class="actions"><button class="btn btn-ghost btn-sm" data-vg-reset>' + icon("edit", 14) + ' Start over</button></div></div>'
       + '<div class="notice-banner">' + icon("shield", 14) + ' <span><b>Planning estimate.</b> This is not a certified appraisal, statutory assessment, tax determination or lending valuation. The BIR zonal reference is shown separately from the market guide estimate.</span></div>'
       + vgStepper(d)
@@ -10506,6 +10512,40 @@ premise: "Fee Simple / As Improved",
         '<input class="input" data-vg-set="preparedFor" value="' + esc(d.preparedFor) + '" placeholder="Client or property name">', 6)
       + vgSelectField("Purpose", null, "data-vg-set=\"purpose\"", config.purposes || [], f.purpose, "— choose —", 6));
 
+    const sourceStatus = vgEst().core.referenceTools.lookup(config.governmentReferenceRegister, vgEst().municipalityRow(f.municipality)?.rdo, f.municipality, new Date().toISOString().slice(0, 10));
+    const landTimeEvidence = Array.isArray(config.governmentReferenceRegister?.landTimeEvidence) ? config.governmentReferenceRegister.landTimeEvidence : [];
+    html += vgAboutGroup([
+      ["Government reference", sourceStatus.label + (sourceStatus.scheduleEffectiveDate ? " · schedule effective " + sourceStatus.scheduleEffectiveDate : "")],
+      ["Land method", f.landMethod === "time-indexed"
+        ? "Indexed land scenario · " + (f.timeAnnualPct === "" || f.timeAnnualPct == null
+          ? "annual change not set yet"
+          : f.timeAnnualPct + "% a year, " + (f.timeSource === "evidence" ? "reviewed local history" : "manual assumption") + ", separate from the factor guide")
+        : "Factor-based guide · no annual change assumed"],
+      ["Transaction costs", f.saleContext === "developer"
+        ? "Developer purchase · uses quoted charges, no blanket CGT"
+        : f.saleContext === "unknown"
+          ? "Not determined · a written quotation is required"
+          : "Standard resale illustration · CGT, DST, transfer and registration"]
+    ],
+      vgDisclosure("Government schedule and verification status",
+        '<div class="vg-callout" data-vg-reference-status><b>Government reference: ' + esc(sourceStatus.label) + '</b><p>Schedule effectivity, dataset generation and legal applicability are separate. Last attempt: ' + esc(sourceStatus.lastAttemptedCheck || "not recorded") + '; successful verification: ' + esc(sourceStatus.successfullyVerifiedOn || "not verified") + '.</p></div>'
+        + (sourceStatus.relatedSchedules || []).map(s => '<p class="vg-group-note">' + esc(s.id + ": " + s.label + (s.proposedPeriod ? " (" + s.proposedPeriod + ")" : "")) + '. ' + esc(s.note || "") + "</p>").join(""))
+      + vgDisclosure("Land method and optional time scenario",
+        '<div class="vg-form">'
+        + vgSelectField("Land method", null, "data-vg-set=\"landMethod\"", [{ value: "factor", label: "Existing factor guide" }, { value: "time-indexed", label: "Indexed land-reference scenario" }], f.landMethod || "factor", "— choose —", 6)
+        + vgSelectField("Adjustment source", landTimeEvidence.length ? "A reviewed local trend can be applied automatically." : "Automatic annual change is unavailable. No reviewed local land-price history is registered for this property.", "data-vg-set=\"timeSource\"", [{ value: "manual", label: "Manual assumption" }, { value: "evidence", label: "Reviewed local history" }], f.timeSource || "manual", "— choose —", 6)
+        + vgSelectField("Reviewed history", null, "data-vg-set=\"timeEvidenceId\"", landTimeEvidence.map(record => ({ value: record.id, label: record.id + " — " + record.municipality })), f.timeEvidenceId || "", landTimeEvidence.length ? "No applicable reviewed record selected" : "No reviewed local land-price history available", 6)
+        + vgField("Annual change (%)", "No default; may increase or decrease.", '<input class="input" type="number" step="0.01" data-vg-set="timeAnnualPct" value="' + esc(f.timeAnnualPct == null ? "" : f.timeAnnualPct) + '">', 6)
+        + vgField("Reference/base date", "Blank uses imported schedule date.", '<input class="input" type="date" data-vg-set="timeBaseDate" value="' + esc(f.timeBaseDate || "") + '">', 6)
+        + vgField("Target date", "Required only for indexed scenario.", '<input class="input" type="date" data-vg-set="timeTargetDate" value="' + esc(f.timeTargetDate || "") + '">', 6)
+        + '</div><p class="vg-group-note">Indexed references are alternative scenarios, never stacked with market/corner multipliers or used as updated official rates. Buildings stay separate.</p>')
+      + vgDisclosure("Transaction type and optional costs",
+        '<div class="vg-form">'
+        + vgField("Asking / offer / selling price (PHP)", "Optional.", '<input class="input" data-vg-set="salePrice" inputmode="decimal" value="' + esc(f.salePrice || "") + '">', 6)
+        + vgSelectField("Transaction type", "No universal CGT assumed for developer purchases.", "data-vg-set=\"saleContext\"", [{ value: "private-resale", label: "Qualifying capital-asset resale" }, { value: "developer", label: "Developer / ordinary-asset purchase" }, { value: "unknown", label: "Unknown, quotation required" }], f.saleContext || "private-resale", "— choose —", 6)
+        + vgField("Quoted developer charges (PHP)", "Outside price only; no double-counting included taxes.", '<input class="input" data-vg-set="developerFees" inputmode="decimal" value="' + esc(f.developerFees || "") + '">', 6)
+        + '</div><p class="vg-group-note">Price changes party costs, not the underlying property guide.</p>'));
+
     html += "</div>";
 
     const missing = vgMissing();
@@ -10548,8 +10588,7 @@ premise: "Fee Simple / As Improved",
     }
 
     html += vgGroup("Ownership and title",
-      "These change the estimate materially (up to −25% for occupancy and −15% for title status). "
-      + "They are recorded for the buyer's due diligence and are an indicative marketability adjustment, not a change to the BIR zonal value.",
+      "Unverified ownership and possession are review conditions. No unsupported flat deductions are applied; unknown answers do not establish clear title.",
       vgSelectField("Occupancy", null, "data-vg-set=\"occupancy\"", [
         { value: "empty", label: "Empty" }, { value: "caretaker", label: "Caretaker or family member" },
         { value: "tenants", label: "Tenants paying rent" }, { value: "informal_settlers", label: "Informal settlers" },
@@ -10584,7 +10623,13 @@ premise: "Fee Simple / As Improved",
       rows.push(["Storeys", (vgEst().reference().config.floors || []).filter(x => x.key === f.floors).map(x => x.label)[0] || f.floors]);
       rows.push(["Age band", (vgEst().reference().config.ageBands || []).filter(x => x.key === f.ageBand).map(x => x.label)[0] || f.ageBand]);
       if (f.features.length) rows.push(["Improvements", f.features.length + " selected"]);
+      rows.push(["Built-up area", (f.floorArea ? f.floorArea : Math.round(Number(f.area) * 0.6) + " (assumed)") + " sqm"]);
     }
+    rows.push(["Transaction", f.saleContext || "private-resale"]);
+    rows.push(["Price scenario", f.salePrice || "Not supplied"]);
+    rows.push(["Occupancy / title / inheritance", [f.occupancy || "unknown", f.titleStatus || "unknown", f.inheritanceStatus || "unknown"].join(" / ")]);
+    rows.push(["Land method", f.landMethod || "factor"]);
+    if (f.landMethod === "time-indexed") rows.push(["Time scenario", (f.timeBaseDate || row.effectivityDate) + " to " + f.timeTargetDate + "; " + (f.timeSource || "manual") + "; " + f.timeAnnualPct + "%"]);
     /* A label/value list, not a run of badges. As pills the label and value ran
        together ("Lot area: 300 sqm" with no visual separation) and long values
        wrapped under their own pill. */
@@ -10611,8 +10656,8 @@ premise: "Fee Simple / As Improved",
     const wrap = "<p><b>How to read these figures:</b> the BIR zonal reference is an official tax reference. The market guide estimate is a planning figure built from disclosed factors. They are not interchangeable, and comparable asking listings are context only — their prices are not calculation inputs.</p>";
     let html = '<div class="card card-pad"><h3 class="mb-16">Estimated value</h3>'
       + '<div class="vg-figures">'
-      + '<div class="vg-figure vg-figure-primary"><span>Market guide estimate</span><b>' + C.money(r.recommendedAskingPrice) + "</b>"
-      + "<small>Planning figure from the disclosed ES Realty factors.</small></div>"
+      + '<div class="vg-figure vg-figure-primary"><span>' + (r.landMethod === "time-indexed" ? "Indexed-reference planning scenario" : "Market guide estimate") + "</span><b>" + C.money(r.marketGuideEstimate) + "</b>"
+      + "<small>Planning figure from the disclosed SEA ESTATES factors.</small></div>"
       + '<div class="vg-figure"><span>Official BIR zonal reference</span><b>' + C.money(r.birZonalValue) + "</b>"
       + "<small>" + C.money(r.birZonalRatePerSqm) + "/sqm · tax reference, separate from the estimate</small></div>"
       + "</div>"
@@ -13749,7 +13794,7 @@ premise: "Fee Simple / As Improved",
       const res = await fetch(cfg.supabaseUrl + "/functions/v1/notify-dispatch", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: "Bearer " + token, apikey: cfg.supabaseKey || "" },
-        body: JSON.stringify({ to: to, subject: "ES Realty weekly broker digest", html: html })
+        body: JSON.stringify({ to: to, subject: "SEA ESTATES weekly broker digest", html: html })
       });
       const out = await res.json().catch(() => ({}));
       if (!res.ok || out.ok === false) throw new Error(out.error || ("HTTP " + res.status));
@@ -13765,7 +13810,7 @@ premise: "Fee Simple / As Improved",
         "Overdue follow-ups (" + d2.overdue.length + "):\n" +
         (d2.overdue.map(x => " • " + x.l.ref + " " + (x.l.name || "") + " — " + x.s.label).join("\n") || " • None") + "\n\n" +
         "(Sent via mailto fallback — edge dispatch unavailable: " + String(e && e.message || e) + ")";
-      const mailto = "mailto:" + encodeURIComponent(to) + "?subject=" + encodeURIComponent("ES Realty weekly broker digest") + "&body=" + encodeURIComponent(txt);
+      const mailto = "mailto:" + encodeURIComponent(to) + "?subject=" + encodeURIComponent("SEA ESTATES weekly broker digest") + "&body=" + encodeURIComponent(txt);
       toast("Edge email failed (" + esc(String(e && e.message || e)) + ") — opening your mail app instead", "info");
       setTimeout(() => { window.location.href = mailto; }, 600);
     }
@@ -13794,7 +13839,7 @@ premise: "Fee Simple / As Improved",
     if (!rows.length) { toast("No leads match the current filters", "err"); return; }
     const root = $("#print-root");
     const today = new Date().toLocaleDateString();
-    let body = '<div class="print-brand"><h2 style="margin:0">Call Sheet — ' + today + "</h2><span>ES Realty</span></div>";
+    let body = '<div class="print-brand"><h2 style="margin:0">Call Sheet — ' + today + "</h2><span>SEA ESTATES</span></div>";
     LEAD_STATUSES.forEach(s => {
       const grp = rows.filter(l => l.status === s[0]);
       if (!grp.length) return;
@@ -13877,7 +13922,7 @@ premise: "Fee Simple / As Improved",
         if (digPrint) {
           const body = (document.querySelector("#digest-modal .digest-body") || {}).innerHTML || "";
           const root = $("#print-root");
-          root.innerHTML = '<div class="rpt" style="font-family:Georgia,serif;color:#16202E;line-height:1.6;padding:28px"><h1 style="font-size:22px">ES Realty — Weekly Broker Digest</h1>' + body + "</div>";
+          root.innerHTML = '<div class="rpt" style="font-family:Georgia,serif;color:#16202E;line-height:1.6;padding:28px"><h1 style="font-size:22px">SEA ESTATES — Weekly Broker Digest</h1>' + body + "</div>";
           root.style.display = "block";
           window.print();
           setTimeout(() => { root.innerHTML = ""; root.style.display = "none"; }, 2500);
@@ -13982,9 +14027,9 @@ premise: "Fee Simple / As Improved",
     const d = ms => new Date(Date.now() + ms * 86400000).toISOString().slice(0, 10);
     return [
       { id: "cmp-seed-1", type: "broker_license", name: "PRC Real Estate Broker License", number: "L-000123", holder: "Broker Name", issuedAt: d(-800), expiresAt: d(38), status: "active", notes: "CPE hours current through renewal window." },
-      { id: "cmp-seed-2", type: "entity_reg", name: "SEC Corporation Registration", number: "CS2019-012345", holder: "ES Realty Brokerage", issuedAt: d(-2000), expiresAt: "", status: "active", notes: "Amended Corporate name filed 2025." },
-      { id: "cmp-seed-3", type: "mayors_permit", name: "Business / Mayor's Permit", number: "MP-2026-8841", holder: "ES Realty Brokerage", issuedAt: d(-320), expiresAt: d(45), status: "active", notes: "Renew before year-end deadline." },
-      { id: "cmp-seed-4", type: "bir_reg", name: "BIR Registration (Non-VAT)", number: "ORN 234-5678", holder: "ES Realty Brokerage", issuedAt: d(-1500), expiresAt: "", status: "active", notes: "1601-E and 1702Q filing deadlines tracked." },
+      { id: "cmp-seed-2", type: "entity_reg", name: "SEC Corporation Registration", number: "CS2019-012345", holder: "SEA ESTATES Brokerage", issuedAt: d(-2000), expiresAt: "", status: "active", notes: "Amended Corporate name filed 2025." },
+      { id: "cmp-seed-3", type: "mayors_permit", name: "Business / Mayor's Permit", number: "MP-2026-8841", holder: "SEA ESTATES Brokerage", issuedAt: d(-320), expiresAt: d(45), status: "active", notes: "Renew before year-end deadline." },
+      { id: "cmp-seed-4", type: "bir_reg", name: "BIR Registration (Non-VAT)", number: "ORN 234-5678", holder: "SEA ESTATES Brokerage", issuedAt: d(-1500), expiresAt: "", status: "active", notes: "1601-E and 1702Q filing deadlines tracked." },
       { id: "cmp-seed-5", type: "dhsud_lts", name: "DHSUD License-to-Sell — Pre-selling Project", number: "LTS-6622-01", holder: "Developer (Pre-Selling)", issuedAt: d(-120), expiresAt: d(90), status: "active", notes: "Pre-selling of the project halts if this lapses." },
       { id: "cmp-seed-6", type: "buyer_bond", name: "Buyer Protection Bond", number: "BOND-88310", holder: "Surety Co.", issuedAt: d(-110), expiresAt: d(-4), status: "expired", notes: "Bond lapsed — renew before next project launch." }
     ];
@@ -14192,7 +14237,7 @@ premise: "Fee Simple / As Improved",
     return l.status === "pre-selling" || l.rfo === "pre-selling" || l.rfo === "preselling" || l.rfo === "pre-sell";
   }
   function listingDisclosure(l) {
-    const firm = BIZ_FIRM || "ES Realty Brokerage";
+    const firm = BIZ_FIRM || "SEA ESTATES Brokerage";
     const brokerName = l.brokerName || BIZ_BROKER_NAME || firm;
     const brokerLic = l.brokerLicense || BIZ_BROKER_LICENSE || "";
     const presell = listingIsPresell(l);
@@ -14227,9 +14272,6 @@ premise: "Fee Simple / As Improved",
     const done = () => toast("Ad caption + disclosure copied — paste into Lamudi / FB / TikTok", "ok");
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(caption).then(done).catch(() => { toast(caption, "info"); });
     else { const ta = document.createElement("textarea"); ta.value = caption; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); done(); }
-  }
-  function adCaptionsHtml(l) {
-    return ["standard", "hook", "taglish"].map(st => '<div class="card card-pad mb-8"><div class="dim tiny">' + st.toUpperCase() + " caption</div><p class='mt-4'>" + listingAdCaption(l, st) + "</p></div>").join("");
   }
   function openAdEditor(listingId) {
     const l = (state.listings || []).find(x => x.id === listingId);
@@ -14787,7 +14829,6 @@ const VIEW_CAPABILITY = { dashboard: "dashboard.view", wizard: "investments.mana
   }
   function canManageUsers() { return can("users.manage"); }
   function canBroker() { return can("brokerage.view"); }
-  function canSell() { return can("listings.manage"); }
   function navAllowed(view) {
     return can(VIEW_CAPABILITY[view] || "dashboard.view");
   }
@@ -15021,7 +15062,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
   function seedUsers() {
     const ago = d => new Date(Date.now() - d * 86400000).toISOString();
     return [
-      { id: "u-super", name: "Elena Santos", email: "elena@esrealty.ph", role: "super-admin", prc: "", resa: "", agency: "ES Realty Group", active: true, createdAt: ago(120) },
+      { id: "u-super", name: "Elena Santos", email: "elena@esrealty.ph", role: "super-admin", prc: "", resa: "", agency: "SEA ESTATES Group", active: true, createdAt: ago(120) },
       { id: "u-broker", name: "Marco Villanueva", email: "broker@esrealty.ph", role: "broker", prc: "0012345", prcVerified: true, resa: "RESA-2024-0881", agency: "Villanueva & Co.", active: true, createdAt: ago(100) },
       { id: "u-anna", name: "Anna Dela Cruz", email: "anna@esrealty.ph", role: "agent", broker: "u-broker", prc: "", agency: "Villanueva & Co.", active: true, createdAt: ago(80) },
       { id: "u-joshua", name: "Joshua Reyes", email: "josh@esrealty.ph", role: "agent", broker: "u-broker", prc: "", agency: "Villanueva & Co.", active: true, createdAt: ago(70) },
@@ -15228,7 +15269,7 @@ if (!Array.isArray(state.portfolioAuditEvents)) state.portfolioAuditEvents = [];
       let cloudHtml = '<section class="users-access"><div class="hero"><div><h1>Users &amp; Access</h1><p>Approve registrations and assign server-enforced roles. ' + srcBadge + '</p></div>' +
         '<div class="actions"><button class="btn btn-primary" data-cloud-user-new>' + icon("plus", 15) + " Add Account</button></div></div>" +
         '<div class="ls-stat-row">' + lsStat("Registrations", remoteProfiles.length) + lsStat("Pending approval", pending) + lsStat("Approved", approved) + lsStat("Rejected", rejected) + '</div>' +
-        '<div class="notice-banner mt-16">' + icon("shield", 14) + ' <span>New accounts cannot access ES Realty until a Super Admin assigns a role and approves the registration.</span></div>';
+        '<div class="notice-banner mt-16">' + icon("shield", 14) + ' <span>New accounts cannot access SEA ESTATES until a Super Admin assigns a role and approves the registration.</span></div>';
       cloudHtml += '<div class="users-directory card">' + tabsHtml + toolsHtml + '</div>';
       let gridHtml;
       if (remoteProfilesError) {
@@ -16120,14 +16161,18 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     const cgt = price * 0.06;
     const dst = price * 0.015;
     const transferTax = price * (C.num(t.transferPct, 0.5) / 100);
-    const registration = Math.min(price * 0.01, 50000) + 2000;
+    /* Registration was min(price * 0.01, 50000) + 2000, which is ~10x the
+       project's own registrationPct of 0.001 (data/zonal-config.json and
+       market-scan/build-batangas-data.js) on a typical base: PHP 52,000 against
+       PHP 5,000 on a PHP 5,000,000 transaction. It also carried a fixed PHP 2,000
+       fee that exists in no other rate in the codebase, and it disagreed with
+       the in-app closing-cost calculator's own labelled 0.25%. Follow the same
+       percent-override pattern as transferPct, defaulting to the canonical rate. */
+    const registrationPct = C.num(t.registrationPct, 0.1);
+    const registration = price * (registrationPct / 100);
     const notarial = C.num(t.notarialFee, 5000);
     const total = cgt + dst + transferTax + registration + notarial;
-    return { cgt: cgt, dst: dst, transferTax: transferTax, transferPct: C.num(t.transferPct, 0.5), registration: registration, notarial: notarial, total: total, price: price };
-  }
-  function ensureTransactions() {
-    if (!state.transactions) state.transactions = [];
-    if (!state.transactions.length && (!currentUser || currentUser.demo || (IS_LOCAL_DEV && !currentUser.id))) state.transactions = seedTransactions();
+    return { cgt: cgt, dst: dst, transferTax: transferTax, transferPct: C.num(t.transferPct, 0.5), registrationPct: registrationPct, registration: registration, notarial: notarial, total: total, price: price };
   }
   function seedTransactions() {
     const mk = (o, i) => Object.assign({
@@ -16320,8 +16365,8 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     const checklistRows = checklist.map(item => '<tr><td>' + esc(item.label) + '</td><td>' + (done.indexOf(item.k) >= 0 ? 'Collected' : 'Pending') + '</td></tr>').join("");
     const documentRows = docs.map(d => '<tr><td>' + esc(d.name || "Document") + '</td><td>' + esc(d.category || "Other") + '</td><td>' + esc(d.size || "—") + '</td><td>' + esc(d.uploadedAt ? new Date(d.uploadedAt).toLocaleDateString() : "—") + '</td></tr>').join("");
     const scheduleRows = c.dpSchedule.map(r => '<tr><td>' + r.m + '</td><td>' + esc(C.money(r.amount)) + '</td><td>' + esc(C.money(Math.max(r.balance, 0))) + '</td></tr>').join("");
-    const html = '<div class="rpt tx-print-report"><div class="print-brand"><h1>Transaction Report</h1><div>ES Realty</div></div>' +
-      '<div class="print-meta"><div><b>Reference:</b> ' + esc(t.ref || "—") + '</div><div><b>Stage:</b> ' + esc(stage ? stage.label : t.stage || "—") + '</div><div><b>Generated:</b> ' + esc(new Date().toLocaleString()) + '</div><div><b>Prepared by:</b> ' + esc((currentUser && currentUser.name) || "ES Realty") + '</div></div>' +
+    const html = '<div class="rpt tx-print-report"><div class="print-brand"><h1>Transaction Report</h1><div>SEA ESTATES</div></div>' +
+      '<div class="print-meta"><div><b>Reference:</b> ' + esc(t.ref || "—") + '</div><div><b>Stage:</b> ' + esc(stage ? stage.label : t.stage || "—") + '</div><div><b>Generated:</b> ' + esc(new Date().toLocaleString()) + '</div><div><b>Prepared by:</b> ' + esc((currentUser && currentUser.name) || "SEA ESTATES") + '</div></div>' +
       '<h1>' + esc(t.title || "Transaction") + '</h1>' +
       '<h2>Parties and Property</h2><table>' + row("Linked Listing", txLinkedTitle(t) || "—") + row("Buyer / Client", t.buyerName) + row("Seller / Developer", t.sellerName) + row("Handling Agent", t.agentName) + row("Referral", t.referralName) + row("Reservation Date", t.reservationDate) + row("Contract to Sell Date", t.ctsDate) + row("Deed of Absolute Sale Date", t.doasDate) + '</table>' +
       '<h2>Transaction Computation</h2><table>' + moneyRow("Property Price", c.price) + moneyRow("Reservation Fee", c.reservationFee) + row("Down Payment", c.dpPct + "%") + moneyRow("Total Down Payment", c.dpTotal) + moneyRow("Monthly DP", c.dpMonthly) + moneyRow("Loan Balance", c.loan) + row("Financing", c.rate + "% annually · " + c.years + " years") + moneyRow("Estimated Monthly Amortization", c.monthly) + moneyRow("Estimated Total Interest", c.totalInterest) + '</table>' +
@@ -17208,7 +17253,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
       const workspace = JSON.parse(JSON.stringify(state || {}));
       backupStripObject(workspace);
       const payload = {
-        meta: { app: "ES Realty", exportedAt: exportedAt, exportedBy: currentUser ? (currentUser.email || currentUser.name || "") : "", role: userRole(), source: "Super Admin backup" },
+        meta: { app: "SEA ESTATES", exportedAt: exportedAt, exportedBy: currentUser ? (currentUser.email || currentUser.name || "") : "", role: userRole(), source: "Super Admin backup" },
         workspace: workspace,
         localUsers: backupLocalUsers(),
         cloud: await backupCloud()
@@ -17234,7 +17279,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
       try {
         const parsed = JSON.parse(String(reader.result || ""));
         if (!parsed || typeof parsed !== "object" || !parsed.workspace || typeof parsed.workspace !== "object" || Array.isArray(parsed.workspace)) {
-          throw new Error("Not an ES Realty backup file (missing workspace object)");
+          throw new Error("Not a SEA ESTATES backup file (missing workspace object)");
         }
         const ws = parsed.workspace;
         if (!Array.isArray(ws.deals) && (ws.deals === undefined || ws.deals === null)) {
@@ -17346,7 +17391,7 @@ const ccBtn = e.target.closest("[data-cc-calc]");
       '<div class="field"><label>I am a</label><select class="input" id="lq-type"><option value="buyer">Buyer / Client</option><option value="renter">Renter</option><option value="investor">Investor</option><option value="seller">Seller</option></select></div>' +
       '<div class="field" style="grid-column:span 2"><label>Budget / message</label><textarea class="input" id="lq-msg" rows="3" placeholder="Hi, I would like to know more about this property…"></textarea></div>' +
       "</div>" +
-      '<label class="ms-chk mt-8" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="lq-consent"> <span>I consent to ES Realty processing my contact details to respond to this inquiry, per the Data Privacy Act of 2012 (RA 10173). *</span></label>' +
+      '<label class="ms-chk mt-8" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="lq-consent"> <span>I consent to SEA ESTATES processing my contact details to respond to this inquiry, per the Data Privacy Act of 2012 (RA 10173). *</span></label>' +
       '<button class="btn btn-primary mt-8" data-ls-inquire="' + esc(l.id) + '">' + icon("mail", 15) + " Send Inquiry</button>" +
       '<div class="row mt-16" style="gap:8px">' +
       '<a class="btn btn-ghost btn-sm" href="https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(location.href) + '" target="_blank" rel="noopener">' + icon("share", 14) + " Facebook</a>" +

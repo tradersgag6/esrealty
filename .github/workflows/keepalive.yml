@@ -8,12 +8,49 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: false
+
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping listing-api (keeps the free Supabase project active)
+      # Every ping used to end in `|| true`, which made this job green even when
+      # all three endpoints were dead. It could never alert on the thing it
+      # exists to watch. The failure is now recorded and the step fails if any
+      # endpoint stops answering, so the scheduled run actually turns red.
+      - name: Ping endpoints (keeps the free Supabase project active)
+        env:
+          # Supabase project ref, previously repeated in four unrelated files
+          # (this workflow, robots.txt, js/supabase-config.js and an index.html
+          # preconnect). Keep the literal here, but name it once so a project
+          # migration is a single edit in this file.
+          SUPABASE_REF: mrngaqtbaseewzcsogqi
+          # Public host of the Market Scan micro-backend. Not a secret.
+          MARKET_SCAN_URL: https://esrealty-market-scan.vercel.app
         run: |
-          curl -sS -o /dev/null -w "site-settings: %{http_code}\n" "https://mrngaqtbaseewzcsogqi.supabase.co/functions/v1/listing-api/api/site-settings" || true
-          curl -sS -o /dev/null -w "listings: %{http_code}\n" "https://mrngaqtbaseewzcsogqi.supabase.co/functions/v1/listing-api/api/listings?limit=1" || true
-          curl -sS -o /dev/null -w "vercel-market-scan: %{http_code}\n" "https://esrealty-market-scan.vercel.app/api/ping" || true
+          set -uo pipefail
+          failed=0
+
+          check() {
+            local label="$1" url="$2"
+            local code
+            code=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 30 "$url" 2>/dev/null) || code="000"
+            printf '%-22s %s\n' "$label" "$code"
+            case "$code" in
+              2*|3*) ;;
+              *) failed=1 ;;
+            esac
+          }
+
+          check "listing-api/settings" "https://${SUPABASE_REF}.supabase.co/functions/v1/listing-api/api/site-settings"
+          check "listing-api/listings"  "https://${SUPABASE_REF}.supabase.co/functions/v1/listing-api/api/listings?limit=1"
+          check "vercel-market-scan"   "${MARKET_SCAN_URL}/api/ping"
+
+          if [ "$failed" -ne 0 ]; then
+            echo "One or more endpoints are unhealthy. A free-tier project that goes" >&2
+            echo "fully idle can be paused, which is what this job exists to prevent." >&2
+            exit 1
+          fi
+          echo "All endpoints healthy."

@@ -1,12 +1,13 @@
 {
   "id": "ph-estate-tax-reference",
   "title": "Philippine real estate transaction and estate tax reference",
-  "version": "2026.09.1",
-  "checkedOn": "2026-09-30",
+  "version": "2026.10.1",
+  "checkedOn": "2026-10-02",
+  "sources": ["https://lawphil.net/statutes/repacts/ra1997/ra_8424_1997.html", "https://lawphil.net/statutes/repacts/ra2017/ra_10963_2017.html", "https://lawphil.net/statutes/repacts/ra2024/ra_11976_2024.html", "https://lawphil.net/statutes/repacts/ra1991/ra_7160_1991.html"],
   "nextReview": "2026-12-31",
   "scope": "Illustrative orientation for Batangas residential and vacant-land transactions.",
   "authorityNote": "Statutory rates published by the BIR, the Registry of Deeds, the LGU and the National Treasury. Rates are reproduced here for orientation only. The BIR and the LGU determine the actual amounts payable, and any figure in this file may be superseded by a later circular or statute.",
-  "taxBaseNote": "For capital gains tax and documentary stamp tax the base is the HIGHER of the selling price and the fair market value, whichever is greater. This guide cannot know either with certainty: the selling price has not happened yet and the BIR determines fair market value, which under Sec. 24(D) of the NIRC may be taken as 50% of the zonal value. Figures below therefore use the higher of the guide estimate and 50% of the BIR zonal value, and are stated as a floor for planning rather than a payable amount.",
+  "taxBaseNote": "For the illustrated qualifying capital-asset sale, CGT uses the higher of selling price and statutory fair market value; statutory FMV considers the BIR zonal reference and assessor schedule values. Without an entered price, the planning estimate is an assumed selling price, not statutory FMV. Missing assessor values, asset classification and exemptions must be confirmed. There is no 50%-of-zonal proxy or excess-only CGT in this model.",
   "transaction": [
     {
       "key": "capital_gains",
@@ -15,10 +16,10 @@
       "base": "higher_of_selling_price_or_fmv",
       "billedBy": "BIR",
       "legalBasis": "Sec. 24(D), National Internal Revenue Code",
-      "note": "On the excess of the selling price over the fair market value, where positive. Where the selling price does not exceed fair market value there is no CGT, but the guide cannot confirm which applies because the BIR sets fair market value.",
+      "note": "6% of the higher applicable gross selling price or statutory FMV for qualifying capital-asset real property. Ordinary-asset sales and exemptions require a different assessment.",
       "deadlineDays": 30,
       "deadlineFrom": "date of notarisation of the deed of sale",
-      "penalty": "25% surcharge plus 12% interest per annum on the unpaid tax"
+      "penalty": "Surcharge and interest depend on taxpayer classification and circumstances; confirm current BIR rules"
     },
     {
       "key": "documentary_stamp",
@@ -26,11 +27,11 @@
       "ratePct": 1.5,
       "base": "higher_of_selling_price_or_fmv",
       "billedBy": "BIR",
-      "legalBasis": "Sec. 247, National Internal Revenue Code, as amended by RA 11315",
-      "note": "Imposed on the deed of sale itself. Payable to the BIR within 5 days of notarisation.",
-      "deadlineDays": 5,
-      "deadlineFrom": "date of notarisation of the deed of sale",
-      "penalty": "25% surcharge plus 12% interest per annum"
+      "legalBasis": "Sec. 196 NIRC; filing under Sec. 200(B), as amended by RA 11976 Sec. 30",
+      "note": "1.5% planning approximation; the statutory document calculation and applicable exemptions must be checked. General filing deadline is 10 days after the close of the month the taxable document was made, signed, issued, accepted or transferred, subject to applicable rules.",
+      "deadlineDays": 10,
+      "deadlineFrom": "close of the month the taxable document was made, signed, issued, accepted or transferred",
+      "penalty": "Surcharge and interest depend on taxpayer classification and circumstances; confirm current BIR rules"
     },
     {
       "key": "transfer",
@@ -38,8 +39,8 @@
       "ratePct": 0.5,
       "base": "higher_of_original_price_or_fmv",
       "billedBy": "City or Municipal Treasurer",
-      "legalBasis": "Sec. 561, Local Government Code",
-      "note": "Local. Outside the National Capital Region the LGU may impose up to 0.5% of the higher of the original purchase price, current value or fair market value. Batangas is outside NCR, so 0.5% is the ceiling here.",
+      "legalBasis": "Secs. 135 and 151, Local Government Code (RA 7160)",
+      "note": "0.5% is an illustrative provincial rate. Cities may impose up to 50% more under Sec. 151 (up to 0.75%); verify the relevant LGU ordinance and valuation basis.",
       "deadlineDays": 60,
       "deadlineFrom": "date of the deed of transfer",
       "penalty": "Interest and penalties fixed by local ordinance"
@@ -60,11 +61,11 @@
       "key": "notarial",
       "label": "Notarial fee (estimate)",
       "ratePct": null,
-      "amount": 10000,
+      "amount": 0,
       "base": "fixed_by_notary",
       "billedBy": "Notary Public",
-      "legalBasis": "Notarial rates fixed by the Supreme Court",
-      "note": "Charged per notarial act, not as a percentage of the price. Shown as an allowance only; ask the notary.",
+      "legalBasis": "Quoted professional fee; no universal amount assumed",
+      "note": "Not supplied and excluded by default. Obtain a written quote; fees may depend on the act and agreement.",
       "deadlineDays": null,
       "deadlineFrom": null,
       "penalty": null
@@ -77,7 +78,7 @@
       "base": "agreed_selling_price",
       "billedBy": "Negotiated between the parties",
       "legalBasis": "Contractual; no statutory rate",
-      "note": "Customarily 3% to 5% of the agreed price. Conventionally split between seller and buyer; confirm in writing.",
+      "note": "Illustrative negotiated 3% to 5% of the agreed price, assumed seller-paid here; confirm rate and allocation in writing.",
       "deadlineDays": null,
       "deadlineFrom": null,
       "penalty": null
@@ -86,19 +87,20 @@
   "estate": {
     "grossEstateBasis": "The value of the estate at the time of death, typically the BIR zonal value or the market value, whichever the BIR accepts.",
     "standardDeduction": 5000000,
-    "standardDeductionBasis": "Art. 236, National Internal Revenue Code",
-    "taxThreshold": 10000000,
+    "standardDeductionBasis": "Sec. 86(A)(1) NIRC, as amended by RA 10963 Sec. 23 (citizen/resident estate)",
+    "taxThreshold": 0,
+    "familyHomeDeductionLimit": 10000000,
     "taxPct": 6,
-    "taxBasis": "Sec. 28(E) of the TRAIN Law (RA 10963), which raised the taxable threshold to PHP 10,000,000 of net estate",
-    "penalty": "25% surcharge plus 12% interest per annum",
+    "taxBasis": "Secs. 84 and 86 NIRC, as amended by RA 10963 Secs. 22-23: 6% of net taxable estate",
+    "penalty": "Surcharge and interest depend on circumstances; confirm current BIR rules",
     "deadlineDays": 365,
-    "deadlineFrom": "date of death",
-    "note": "Estate tax applies only to the portion of the net estate that exceeds PHP 10,000,000 after the PHP 5,000,000 standard deduction. Most ordinary residential property in Batangas falls below that threshold, so no estate tax is ordinarily payable. Confirm with a lawyer or tax practitioner before relying on that."
+    "deadlineFrom": "date of death (one calendar year, not always exactly 365 days)",
+    "note": "These property-only scenarios assume the property were the entire citizen/resident estate. Actual liability requires all estate assets, applicable death-date values, liabilities and deductions. The PHP 10M family-home limit is conditional, not an additional universal exemption. Registrable property may require an estate return even when estimated tax is zero."
   },
   "steps": [
     { "n": 1, "label": "Execute the deed of absolute sale", "where": "Notary Public", "deadline": "Before any filing" },
     { "n": 2, "label": "Pay capital gains tax", "where": "BIR RDO", "deadline": "Within 30 days of notarisation" },
-    { "n": 3, "label": "Pay documentary stamp tax", "where": "BIR RDO", "deadline": "Within 5 days of notarisation" },
+    { "n": 3, "label": "Pay documentary stamp tax", "where": "BIR RDO", "deadline": "Generally within 10 days after the close of the document month; confirm applicable rules" },
     { "n": 4, "label": "Obtain Certificate Authorizing Registration", "where": "BIR RDO", "deadline": "After CGT and DST are settled" },
     { "n": 5, "label": "Pay local transfer tax", "where": "City or Municipal Treasurer", "deadline": "Within 60 days of the deed" },
     { "n": 6, "label": "Register the transfer of title", "where": "Registry of Deeds", "deadline": "After CAR release" },

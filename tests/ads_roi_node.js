@@ -1,4 +1,4 @@
-/* Per-ad ROI math — the node counterpart to the Ad ROI card (PHASE_0_1_BUILD.md
+/* Per-ad ROI math — the node counterpart to the Ad ROI card (docs/specs/phase-0-1-compliance-and-leadgen.md
  * 1.3). Exercises the exact shipped js/attribution.js adRoi() so the card's
  * numbers cannot drift from the model the CRM renders. */
 const A = require("../js/attribution.js");

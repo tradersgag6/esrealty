@@ -1,0 +1,264 @@
+{
+  "capturedAt": "2026-10-02T09:50:17.442Z",
+  "checks": [
+    {
+      "name": "calculator-start 320 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "review focus 320",
+      "ok": true
+    },
+    {
+      "name": "calculator-review 320 heading clears sticky header",
+      "ok": true
+    },
+    {
+      "name": "calculator-review 320 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "edit retains ownership answers 320",
+      "ok": true
+    },
+    {
+      "name": "central estimate matches reference 320",
+      "ok": true
+    },
+    {
+      "name": "scenario range matches reference 320",
+      "ok": true
+    },
+    {
+      "name": "open pricing outputs 320",
+      "ok": true
+    },
+    {
+      "name": "calculator-results 320 heading clears sticky header",
+      "ok": true
+    },
+    {
+      "name": "calculator-results 320 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "email form has optional phone 320",
+      "ok": true
+    },
+    {
+      "name": "email is a distinct request 320",
+      "ok": true
+    },
+    {
+      "name": "property-comparison 320 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "comparison survives refresh 320",
+      "ok": true
+    },
+    {
+      "name": "calculator-start 390 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "review focus 390",
+      "ok": true
+    },
+    {
+      "name": "calculator-review 390 heading clears sticky header",
+      "ok": true
+    },
+    {
+      "name": "calculator-review 390 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "edit retains ownership answers 390",
+      "ok": true
+    },
+    {
+      "name": "central estimate matches reference 390",
+      "ok": true
+    },
+    {
+      "name": "scenario range matches reference 390",
+      "ok": true
+    },
+    {
+      "name": "open pricing outputs 390",
+      "ok": true
+    },
+    {
+      "name": "calculator-results 390 heading clears sticky header",
+      "ok": true
+    },
+    {
+      "name": "calculator-results 390 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "email form has optional phone 390",
+      "ok": true
+    },
+    {
+      "name": "email is a distinct request 390",
+      "ok": true
+    },
+    {
+      "name": "property-comparison 390 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "comparison survives refresh 390",
+      "ok": true
+    },
+    {
+      "name": "calculator-start 768 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "review focus 768",
+      "ok": true
+    },
+    {
+      "name": "calculator-review 768 heading clears sticky header",
+      "ok": true
+    },
+    {
+      "name": "calculator-review 768 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "edit retains ownership answers 768",
+      "ok": true
+    },
+    {
+      "name": "central estimate matches reference 768",
+      "ok": true
+    },
+    {
+      "name": "scenario range matches reference 768",
+      "ok": true
+    },
+    {
+      "name": "open pricing outputs 768",
+      "ok": true
+    },
+    {
+      "name": "calculator-results 768 heading clears sticky header",
+      "ok": true
+    },
+    {
+      "name": "calculator-results 768 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "email form has optional phone 768",
+      "ok": true
+    },
+    {
+      "name": "email is a distinct request 768",
+      "ok": true
+    },
+    {
+      "name": "property-comparison 768 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "comparison survives refresh 768",
+      "ok": true
+    },
+    {
+      "name": "calculator-start 1440 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "review focus 1440",
+      "ok": true
+    },
+    {
+      "name": "calculator-review 1440 heading clears sticky header",
+      "ok": true
+    },
+    {
+      "name": "calculator-review 1440 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "edit retains ownership answers 1440",
+      "ok": true
+    },
+    {
+      "name": "central estimate matches reference 1440",
+      "ok": true
+    },
+    {
+      "name": "scenario range matches reference 1440",
+      "ok": true
+    },
+    {
+      "name": "open pricing outputs 1440",
+      "ok": true
+    },
+    {
+      "name": "calculator-results 1440 heading clears sticky header",
+      "ok": true
+    },
+    {
+      "name": "calculator-results 1440 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "email form has optional phone 1440",
+      "ok": true
+    },
+    {
+      "name": "email is a distinct request 1440",
+      "ok": true
+    },
+    {
+      "name": "property-comparison 1440 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "comparison survives refresh 1440",
+      "ok": true
+    },
+    {
+      "name": "no uncaught browser exceptions",
+      "ok": true
+    }
+  ],
+  "captures": [
+    "calculator-start-320.png",
+    "calculator-review-320.png",
+    "calculator-review-320-viewport.png",
+    "calculator-results-320.png",
+    "calculator-results-320-viewport.png",
+    "property-comparison-320.png",
+    "property-comparison-320-viewport.png",
+    "calculator-start-390.png",
+    "calculator-review-390.png",
+    "calculator-review-390-viewport.png",
+    "calculator-results-390.png",
+    "calculator-results-390-viewport.png",
+    "property-comparison-390.png",
+    "property-comparison-390-viewport.png",
+    "calculator-start-768.png",
+    "calculator-review-768.png",
+    "calculator-review-768-viewport.png",
+    "calculator-results-768.png",
+    "calculator-results-768-viewport.png",
+    "property-comparison-768.png",
+    "property-comparison-768-viewport.png",
+    "calculator-start-1440.png",
+    "calculator-review-1440.png",
+    "calculator-review-1440-viewport.png",
+    "calculator-results-1440.png",
+    "calculator-results-1440-viewport.png",
+    "property-comparison-1440.png",
+    "property-comparison-1440-viewport.png"
+  ],
+  "errors": []
+}

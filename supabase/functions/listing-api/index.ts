@@ -27,7 +27,7 @@ const MANAGED_LISTING_COLUMNS = [
 const DEFAULT_SITE_CONTACT = {
   eyebrow: "TALK TO A SHOPHOUSE SPECIALIST",
   title: "Ready to put the ground floor to work?",
-  description: "Tell us your province, budget, and business plan. A shophouse specialist from ES Realty will reply within one business day with listings and next steps.",
+  description: "Tell SEA ESTATES whether you are buying, selling, renting, or reviewing a property. Include the location and any questions you would like us to help with.",
   phone: "+63 900 000 0000",
   email: "hello@esrealty.ph",
   address: "Batangas, Philippines",

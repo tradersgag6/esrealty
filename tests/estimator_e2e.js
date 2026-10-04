@@ -57,7 +57,7 @@ function chooseOwnershipNotSure() {
     const pt = q('[data-est-muni]') ? q('[data-est-muni]').options.length : 0;
     chk("sf-estimator-section-present", !!q('#sf-estimator') && !!q('[data-est-card]') && !!q('.sf-est'), "root ok");
     chk("funnel-brand-eyebrow", /BATANGAS VALUE GUIDE/.test(document.body.innerText), "");
-    chk("homepage-primary-estimate-cta", !!q('.sf-est-hero-actions [data-est-services]') && /Get My Free Estimate/.test(q('.sf-est-hero-actions [data-est-services]').textContent), "");
+    chk("homepage-primary-estimate-cta", !!q('.sf-est-hero-actions [data-est-services]') && /Start My Value Guide/.test(q('.sf-est-hero-actions [data-est-services]').textContent), "");
     /* Was: a[href*="state=Batangas"] on the hero. That link applied a filter the
        filter form did not expose, so it always rendered "No properties found"
        with no visible way to undo it. The secondary CTA now points at the
@@ -66,7 +66,7 @@ function chooseOwnershipNotSure() {
        filter remains available as a visible, removable chip. */
     chk("homepage-secondary-browse-cta", !!q('.sf-est-hero-actions a[href="#/search"]'), "hrefs=" + Array.prototype.map.call(document.querySelectorAll('.sf-est-hero-actions a'), function (a) { return a.getAttribute('href'); }).join(','));
     chk("homepage-secondary-cta-has-no-hidden-filter", !q('.sf-est-hero-actions a[href*="state="]'), "hero still ships an unexposed state filter");
-    chk("homepage-guide-summary-heading", /A clearer answer before your next property step/.test(document.body.innerText), "");
+    chk("homepage-guide-summary-heading", /What your guide includes/.test(document.body.innerText), "");
     chk("screen1-rendered", !!q('[data-est-screen="1"]'), "");
     chk("screen1-guides-inputs", /START WITH THE DETAILS/.test(q('[data-est-screen="1"]').textContent) && /match the right BIR reference/.test(q('[data-est-screen="1"]').textContent), "");
     chk("region-fixed-batangas", !!q('.sf-est-loc-fixed') && /CALABARZON.*Batangas/.test(q('.sf-est-loc-fixed').textContent), "txt=" + (q('.sf-est-loc-fixed') && q('.sf-est-loc-fixed').textContent));
@@ -121,7 +121,11 @@ function chooseOwnershipNotSure() {
     chk("ownership-title-questions-present", qa('[data-est-ownership]').length === 13, "options=" + qa('[data-est-ownership]').length);
     chooseOwnershipNotSure();
     q('[data-est-next]').click();
-    await waitFor(() => q('[data-est-screen="3"]'), 30, ESP);
+    chk("review-before-calculate", !!q('[data-est-screen="5"]') && /Check your inputs/.test(q('[data-est-screen="5"]').textContent), "");
+    chk("review-explains-unknowns-and-range", /remains unknown/.test(q('[data-est-screen="5"]').textContent) && /85%–130%/.test(q('[data-est-screen="5"]').textContent), "");
+    estApi().mount(); await wait(40);
+    chk("same-home-rerender-keeps-review-stage", !!q('[data-est-screen="5"]') && /200 sqm/.test(q('[data-est-screen="5"]').textContent), "");
+    q('[data-est-next]').click();
     const screen3 = q('[data-est-screen="3"]');
     chk("screen3-no-rotating-indicator", !q('[data-est-screen="3"] [data-est-spin]') && !q('[data-est-screen="3"] [data-est-anim-mark]'), "");
     chk("screen3-progress-design", !!q('[data-est-screen="3"] .sf-est-anim-panel') && qa('[data-est-screen="3"] [data-est-stage]').length === 3 && /Calculating your property value/.test(q('[data-est-screen="3"] .sf-est-anim-title').textContent), "");
@@ -136,12 +140,12 @@ function chooseOwnershipNotSure() {
     chk("result-heading-is-clear", !!q('#sf-est-result-heading') && /Your guide is ready\./.test(q('#sf-est-result-heading').textContent), "");
     chk("selling-result-design", !!q('.sf-est-selling-result') && /YOUR PROPERTY VALUE GUIDE/.test(q('.sf-est-result-eyebrow').textContent) && !!q('.sf-est-nextstep') && /04/.test(q('.sf-est-step-no').textContent), "");
     chk("result-scroll-cue", !!q('[data-est-scroll-report]') && /Explore calculation details/.test(q('[data-est-scroll-report]').textContent), "");
-    chk("result-data-strip", !!q('.sf-est-result-data') && /BIR street data/.test(q('.sf-est-result-data').textContent) && /2022-07-23/.test(q('.sf-est-result-data').textContent), "");
+    chk("result-data-strip", !!q('.sf-est-result-data') && /BIR source match/.test(q('.sf-est-result-data').textContent) && /2022-07-23/.test(q('.sf-est-result-data').textContent), "");
     chk("analysis-summary", !!q('.sf-est-analysis-summary') && /Analysis complete/.test(q('.sf-est-analysis-summary').textContent) && /Vacant lot/i.test(q('.sf-est-analysis-summary').textContent), "");
     chk("next-step-card-above-report", !!q('.sf-est-nextstep') && !!q('[data-est-lead-open]') &&
         q('.sf-est-nextstep').compareDocumentPosition(q('.sf-est-report')) & Node.DOCUMENT_POSITION_FOLLOWING &&
         /no obligation/i.test(q('.sf-est-nextstep').textContent) &&
-        /Pricing details, unlocked/.test(q('.sf-est-nextstep').textContent) &&
+         /Your results are open/.test(q('.sf-est-nextstep').textContent) &&
         /one business day/i.test(q('.sf-est-nextstep').textContent), "");
 
     const rD1 = estApi()._state().result;
@@ -164,21 +168,21 @@ function chooseOwnershipNotSure() {
     chk("provenance-order-numbered", qa('.sf-est-prov-steps li').length >= 5, "steps=" + qa('.sf-est-prov-steps li').length);
     chk("provenance-avoids-pvs-claim", !/PVS\s*105/.test(provTxt) && !/PVS[- ]compliant/i.test(provTxt), "");
     chk("per-sqm-shown", !!q('.sf-est-per') && /sqm/.test(q('.sf-est-per').textContent), "");
-    chk("bir-value-shown-separately", !!q('.sf-est-bir-primary') && /Official BIR zonal reference/.test(q('.sf-est-bir-primary').textContent) && /tax floor/.test(q('.sf-est-bir-primary').textContent), "");
-chk("only-asking-price-in-summary", !!q('.sf-est-result-summary') && !!q('.sf-est-result-value') && /Recommended asking price/.test(q('.sf-est-result-summary').textContent) && !/Factor-based guide estimate/.test(q('.sf-est-result-summary').textContent) && !/Indicative guide range/.test(q('.sf-est-result-summary').textContent), "");
-    chk("asking-price-clearly-shown", !!q('.sf-est-result-value') && /Recommended asking price/.test(q('.sf-est-result-summary').textContent) && /₱/.test(q('.sf-est-result-value').textContent), "");
+    chk("bir-value-shown-separately", !!q('.sf-est-bir-primary') && /Official BIR zonal reference/.test(q('.sf-est-bir-primary').textContent) && /tax reference/.test(q('.sf-est-bir-primary').textContent), "");
+chk("central-estimate-and-range-in-summary", !!q('.sf-est-result-summary') && !!q('.sf-est-result-value') && /Central planning estimate/.test(q('.sf-est-result-summary').textContent) && /85%–130%/.test(q('.sf-est-result-summary').textContent), "");
+    chk("central-estimate-amount-matches-core", q('.sf-est-result-value').textContent === MONEY(rD1.marketGuideEstimate), q('.sf-est-result-value').textContent);
     chk("estimate-result-is-large", !!q('.sf-est-result-value') && parseFloat(getComputedStyle(q('.sf-est-result-value')).fontSize) >= 40, "font=" + (q('.sf-est-result-value') && getComputedStyle(q('.sf-est-result-value')).fontSize));
     chk("asking-price-amount-is-large", !!q('.sf-est-result-value') && parseFloat(getComputedStyle(q('.sf-est-result-value')).fontSize) >= 32, "font=" + (q('.sf-est-result-value') && getComputedStyle(q('.sf-est-result-value')).fontSize));
     const reportText = (q('.sf-est-report') || { textContent: "" }).textContent;
      chk("guide-section-label", /YOUR GUIDE, SECTION BY SECTION/.test(document.body.innerText), "");
      chk("pricing-strategy-has-no-duplicate-asking-card", qa('[data-est-pricing-body] .sf-est-recommended-ask').length === 0 && qa('.sf-est-result-summary .sf-est-recommended-ask').length === 0, "pricing-body cards=" + qa('[data-est-pricing-body] .sf-est-recommended-ask').length);
-     chk("locked-cards-state-purpose", qa('.sf-est-pricing-preview .sf-est-price-lock').length === 4 && !/Available after review/.test((q('[data-est-pricing-body]') || { textContent: "" }).textContent), "");
+      chk("computed-cards-open-without-contact", qa('.sf-est-price-lock').length === 0 && /Transaction taxes/.test(q('[data-est-pricing-body]').textContent) && /₱/.test(q('[data-est-pricing-body]').textContent), "");
     chk("taxes-fees-commissions-shown", /Taxes, fees & commissions/.test(reportText) && /Broker commission/.test(reportText), "");
     chk("tax-base-disclosed", /Illustrative tax base/.test(reportText), "");
-    chk("coverage-good-tag", !!q('.sf-est-tag-good') && /BIR street data/.test(q('.sf-est-tag-good').textContent), "");
-chk("report-17-sections", qa('.sf-est-rsec').length === 17, "n=" + qa('.sf-est-rsec').length);
-      chk("report-sections-are-accessible", qa('.sf-est-rsec details').length === 0 && qa('.sf-est-rsec > summary').length === 17, "summaries=" + qa('.sf-est-rsec > summary').length);
-    chk("report-summary-priority", qa('.sf-est-rsec[open]').length >= 3, "open=" + qa('.sf-est-rsec[open]').length);
+    chk("source-match-not-inferred-from-municipality-coverage", q('.sf-est-result-data').textContent.includes(rD1.source.label), "");
+chk("report-six-groups", qa('.sf-est-rsec').length === 6, "n=" + qa('.sf-est-rsec').length);
+      chk("report-sections-are-accessible", qa('.sf-est-rsec > summary').length === 6 && qa('.sf-est-project-context > summary').length === 1, "summaries=" + qa('.sf-est-rsec > summary').length);
+    chk("report-summary-priority", qa('.sf-est-rsec[open]').length === 1 && /Summary/.test(q('.sf-est-rsec[open] summary').textContent), "open=" + qa('.sf-est-rsec[open]').length);
     q('[data-est-prev]').click();
     await wait(40);
     chk("report-adjust-inputs-returns-to-start", !!q('[data-est-screen="1"]'), "");
@@ -198,7 +202,7 @@ chk("report-17-sections", qa('.sf-est-rsec').length === 17, "n=" + qa('.sf-est-r
     form.querySelector('[name=email]').value = "e2e@example.com";
     form.querySelector('[name=phone]').value = "09171234567";
     form.querySelector('[name=consent]').checked = true;
-    window.ESREALTY_LISTINGS_API = { contact: () => Promise.resolve({ emailSent: false }) };
+    window.ESREALTY_LISTINGS_API = { contact: () => Promise.resolve({ id: "saved-inquiry-test", emailSent: false }) };
     form.querySelector('button[type=submit]').click();
      await waitFor(() => /saved/.test((q('[data-est-lead-status]') || { textContent: "" }).textContent), 40, ESP);
      chk("lead-submit-success-saved", /saved/.test((q('[data-est-lead-status]') || { textContent: "" }).textContent), (q('[data-est-lead-status]') || { textContent: "" }).textContent);
@@ -221,6 +225,7 @@ chk("report-17-sections", qa('.sf-est-rsec').length === 17, "n=" + qa('.sf-est-r
     await waitFor(() => q('[data-est-screen="2"]'), 30, ESP);
     chooseOwnershipNotSure();
     q('[data-est-next]').click();
+    q('[data-est-screen="5"] [data-est-next]').click();
     await waitFor(() => q('[data-est-screen="4"]'), 90, ESP);
     const rD2 = estApi()._state().result;
     chk("depth2-available", rD2 && rD2.available, "");
@@ -243,12 +248,14 @@ chk("report-17-sections", qa('.sf-est-rsec').length === 17, "n=" + qa('.sf-est-r
     if (wg) { wg.checked = true; wg.dispatchEvent(new Event("change", { bubbles: true })); }
     chooseOwnershipNotSure();
     q('[data-est-next]').click();
+    q('[data-est-screen="5"] [data-est-next]').click();
     await waitFor(() => q('[data-est-screen="4"]'), 90, ESP);
     const rH = estApi()._state().result;
     const eH = await estimateExpected(stateOpts());
     chk("house-available", rH && rH.available, "");
     chk("house-total-matches-core", MONEY(rH.total) === MONEY(eH.total), "dom=" + MONEY(rH.total) + " core=" + MONEY(eH.total));
     chk("house-improvement-included", rH && rH.improvement === eH.improvement && rH.improvement > 0, "imp=" + (rH && rH.improvement));
+    qa('.sf-est-rsec')[1].open = true;
     chk("house-report-shows-house-value", /House value/.test(document.body.innerText), "");
     chk("seller-net-proceeds-shown", /estimated net proceeds/.test((q('.sf-est-report') || { textContent: "" }).textContent), "");
 

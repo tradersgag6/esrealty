@@ -182,7 +182,7 @@ async function pagesOf(bytes) {
     if (!captured.bytes) { finish(); return; }
     var magic = latin1(captured.bytes.subarray(0, 5));
     chk("the bytes are a real PDF", magic === "%PDF-", magic);
-    chk("the filename is unchanged", /ES-Realty-Value-Guide-.*\.pdf/.test(captured.name || ""), captured.name || "");
+    chk("the filename uses the current brand", /SEA-ESTATES-Value-Guide-.*\.pdf/.test(captured.name || ""), captured.name || "");
 
     var pages = await pagesOf(captured.bytes);
     var all = pages.join("\n").replace(/\s+/g, " ");
@@ -214,10 +214,10 @@ async function pagesOf(bytes) {
     /* The pricing ladder and the market analysis, the two new blocks. */
     chk("pricing strategy ladder present", /Pricing strategy/.test(all), "");
     chk("ladder: lower end of guide range", /LOWER END OF GUIDE RANGE/.test(all), "");
-    chk("ladder: midpoint of guide range", /MIDPOINT OF GUIDE RANGE/.test(all), "");
+    chk("ladder: central planning estimate", /CENTRAL PLANNING ESTIMATE/.test(all), "");
     chk("ladder: taxes and fees", /TAXES AND FEES/.test(all), "");
     chk("ladder: cash you would receive", /CASH YOU WOULD RECEIVE/.test(all), "");
-    chk("ladder: tax caption names CGT, DST, broker and transfer", /CGT, DST, broker and transfer/.test(all), "");
+    chk("ladder: cost allocation separates seller and buyer", /Seller-paid CGT, broker/.test(all) && /buyer-paid/.test(all), "");
     chk("market analysis section present", /Market Analysis and Comparables/.test(all), "");
     chk("match level reported", /Match level/.test(all), "");
     chk("local distribution or an explicit gap", /25th percentile|No municipality distribution is published/.test(all), "");
@@ -230,11 +230,11 @@ async function pagesOf(bytes) {
     chk("transfer tax is printed with the Local Government Code basis", /Local transfer tax/.test(all) && /Local Government Code/.test(all), "");
     chk("the 24(D) statutory basis for CGT is visible", /24\(D\)/.test(all), "");
     chk("net proceeds are printed", /net proceeds/i.test(all), "");
-    chk("estate tax section is printed", /inherit/i.test(all) && /10,000,000/.test(all), "");
-    chk("filing deadlines printed: 5 / 30 / 60 days", /5 days/.test(all) && /30 days/.test(all) && /60 days/.test(all), "");
+    chk("estate tax section is printed with conditional deductions", /inherit/i.test(all) && /family-home limit is conditional/.test(all), "");
+    chk("filing deadlines printed: 10 after month / 30 / 60 days", /10 days/.test(all) && /close of the month/.test(all) && /30 days/.test(all) && /60 days/.test(all), "");
     chk("filing steps printed", /Certificate Authorizing Registration/.test(all), "");
     chk("seller and buyer checklists printed", /Certificate of Title/.test(all) && /TIN/.test(all), "");
-    chk("tax reference version recorded", /2026\.09\.1/.test(all), "");
+    chk("tax reference version recorded", /2026\.10\.1/.test(all), "");
     chk("states the tax figures are not payable", /not a computation of tax payable/i.test(all), "");
     chk("no PVS 105 compliance is ever claimed", !/FMV per PVS|PVS 105 compliant|PVS 105-compliant|compliant methodology|per PVS 105 standards/i.test(all), "");
     chk("the PVS 105 denial is explicit", /makes no claim of PVS 105 compliance|not a certified appraisal/i.test(all), "");

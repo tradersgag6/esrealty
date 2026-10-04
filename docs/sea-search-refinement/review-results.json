@@ -1,0 +1,142 @@
+{
+  "capturedAt": "2026-10-02T08:05:59.852Z",
+  "checks": [
+    {
+      "name": "search-mobile-closed: no horizontal page overflow",
+      "ok": true
+    },
+    {
+      "name": "Enter opens native disclosure",
+      "ok": true
+    },
+    {
+      "name": "search-mobile-open: no horizontal page overflow",
+      "ok": true
+    },
+    {
+      "name": "Enter closes native disclosure",
+      "ok": true
+    },
+    {
+      "name": "closed controls skipped by keyboard navigation",
+      "ok": true
+    },
+    {
+      "name": "Space opens native disclosure",
+      "ok": true
+    },
+    {
+      "name": "opening panel makes province the next Tab stop",
+      "ok": true
+    },
+    {
+      "name": "600px: all unsaved values retained",
+      "ok": true
+    },
+    {
+      "name": "600px: focus retained after moving control",
+      "ok": true
+    },
+    {
+      "name": "600px: appropriate layout",
+      "ok": true
+    },
+    {
+      "name": "601px: all unsaved values retained",
+      "ok": true
+    },
+    {
+      "name": "601px: focus retained after moving control",
+      "ok": true
+    },
+    {
+      "name": "601px: appropriate layout",
+      "ok": true
+    },
+    {
+      "name": "768px: all unsaved values retained",
+      "ok": true
+    },
+    {
+      "name": "768px: focus retained after moving control",
+      "ok": true
+    },
+    {
+      "name": "768px: appropriate layout",
+      "ok": true
+    },
+    {
+      "name": "390px: all unsaved values retained",
+      "ok": true
+    },
+    {
+      "name": "390px: focus retained after moving control",
+      "ok": true
+    },
+    {
+      "name": "390px: appropriate layout",
+      "ok": true
+    },
+    {
+      "name": "1440px: all unsaved values retained",
+      "ok": true
+    },
+    {
+      "name": "1440px: focus retained after moving control",
+      "ok": true
+    },
+    {
+      "name": "1440px: appropriate layout",
+      "ok": true
+    },
+    {
+      "name": "390px: all unsaved values retained",
+      "ok": true
+    },
+    {
+      "name": "390px: focus retained after moving control",
+      "ok": true
+    },
+    {
+      "name": "390px: appropriate layout",
+      "ok": true
+    },
+    {
+      "name": "search-mobile-applied: no horizontal page overflow",
+      "ok": true
+    },
+    {
+      "name": "search-768: no horizontal page overflow",
+      "ok": true
+    },
+    {
+      "name": "search-1440: no horizontal page overflow",
+      "ok": true
+    },
+    {
+      "name": "empty focused advanced field stays exposed after shrinking",
+      "ok": true
+    },
+    {
+      "name": "disappearing summary transfers focus to advanced field on desktop",
+      "ok": true
+    },
+    {
+      "name": "no uncaught browser exceptions",
+      "ok": true
+    }
+  ],
+  "captures": [
+    "search-mobile-closed-viewport.png",
+    "search-mobile-closed.png",
+    "search-mobile-open-viewport.png",
+    "search-mobile-open.png",
+    "search-mobile-applied-viewport.png",
+    "search-mobile-applied.png",
+    "search-768-viewport.png",
+    "search-768.png",
+    "search-1440-viewport.png",
+    "search-1440.png"
+  ],
+  "errors": []
+}

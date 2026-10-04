@@ -8,13 +8,23 @@
   var requestId = 0;
   var cacheKey = "";
   var viewState = { loading: false, error: "", result: null, mode: "grid" };
+  var compareIds = [], compareRecords = Object.create(null), compareErrors = Object.create(null);
+  var compareReturn = "#/search", compareMessage = "", compareFocused = false;
+  try {
+    var restored = JSON.parse(sessionStorage.getItem("esrealty_compare_v1") || "[]");
+    if (Array.isArray(restored)) compareIds = restored.filter(function (id, i) { return typeof id === "string" && /^[\w-]{1,100}$/.test(id) && restored.indexOf(id) === i; }).slice(0, 2);
+  } catch (e) { /* Storage is optional; comparison still works in memory. */ }
+  try {
+    var restoredReturn = sessionStorage.getItem("esrealty_compare_return_v1");
+    if (restoredReturn && restoredReturn.length <= 4096 && /^#\/search(?:\?|$)/.test(restoredReturn)) compareReturn = restoredReturn;
+  } catch (e) { /* Return to the unfiltered search when storage is unavailable. */ }
   /* Service-neutral on purpose. These used to be shophouse-branded
    * ("TALK TO A SHOPHOUSE SPECIALIST" / "Ready to put the ground floor to
    * work?" / "a shophouse specialist"), and because siteSettings() fails CORS the
    * defaults are what actually renders - so the closed shophouse campaign was
    * still the homepage's call to action. The shophouse and Project B.T pages are
    * parked and must not leak their copy into the live site. */
-  var siteContact = { eyebrow: "LOCAL BATANGAS GUIDANCE", title: "Ready for the next check?", description: "Tell us whether you are buying, selling, valuing, or reviewing a property. We will help you identify the next practical step.", phone: "", email: "", address: "", hours: "", contactLoaded: false };
+  var siteContact = { eyebrow: "PROPERTY GUIDANCE", title: "What are you planning next?", description: "Tell us whether you are buying, selling, renting, or reviewing a property. Share the location and your questions so we can help with the next step.", phone: "", email: "", address: "", hours: "", contactLoaded: false };
 
   /* Shared implementation from js/util.js, with a byte-identical local
    * fallback so this module can be require()d directly by the Node tests. */
@@ -72,13 +82,13 @@
   ];
 
   var SERVICES = [
-    { href: "#/search", label: "Buying a property", note: "Shortlists, viewings and offer support." },
-    { href: "#/property-value?service=sell", label: "Selling a property", note: "Free value guide and a pricing review." },
+    { href: "#/search", label: "Buying a property", note: "Find listings, arrange viewings and review offers." },
+    { href: "#/property-value?service=sell", label: "Selling a property", note: "Review your value guide and discuss a sale." },
     { href: "#/search?offer_type=rent", label: "Renting", note: "Tenant matching and lease support." },
     { href: "#/property-value?service=pre-selling", label: "Pre-selling", note: "Prepare, price and launch with confidence." },
-    { href: "#/home?section=services", label: "Property management", note: "Turnover, collections and repairs handled." },
-    { href: "#/home?section=services", label: "Title and legal", note: "Handover checks and documentary help." },
-    { href: "#/home?section=services", label: "Financing", note: "Introduction to bank and developer options." }
+    { href: "#/home?section=services", label: "Property management", note: "Support with rent, tenants and property upkeep." },
+    { href: "#/home?section=services", label: "Title and legal", note: "Coordinate title and document checks." },
+    { href: "#/home?section=services", label: "Financing", note: "Explore bank and developer financing options." }
   ];
 
   /* Shophouse and Project B.T are temporarily closed and are presented as one
@@ -124,8 +134,8 @@
   }
 
   function header() {
-    return '<header class="sf-header"><a class="sf-brand" href="#/home" aria-label="ES Realty home">' +
-      '<span class="sf-brand-mark">ES</span><span><b>ES Realty</b><small>Batangas property guidance.</small></span></a>' +
+    return '<header class="sf-header"><a class="sf-brand" href="#/home" aria-label="SEA ESTATES home">' +
+      '<span class="sf-brand-mark">S.E</span><span><b>SEA ESTATES</b><small>Property &amp; local guidance.</small></span></a>' +
       '<nav class="sf-nav" aria-label="Primary">' + NAV.map(navLink).join("") +
       dropDown("Services", SERVICES) + dropDown("Project B.T", PROJECT_BT) + '</nav>' +
       '<div class="sf-header-actions"><button class="sf-link-btn" data-sf-auth="signin">Sign in</button>' +
@@ -137,33 +147,21 @@
   }
 
   function footer() {
-    return '<footer class="sf-footer"><div class="sf-brand"><span class="sf-brand-mark">ES</span><span><b>ES Realty</b><small>Batangas property guidance.</small></span></div>' +
-      '<p>Start with a BIR reference, compare local properties, and get practical guidance. <span class="sf-copyright">&copy; ES Realty ' + new Date().getFullYear() + '</span><br><small>ES Realty is independent of the BIR. BIR zonal values are shown as tax-reference data.</small></p>' +
+    return '<footer class="sf-footer"><div class="sf-brand"><span class="sf-brand-mark">S.E</span><span><b>SEA ESTATES</b><small>Property &amp; local guidance.</small></span></div>' +
+      '<p>Browse properties, review a value guide, and plan your next step. <span class="sf-copyright">&copy; SEA ESTATES ' + new Date().getFullYear() + '</span><br><small>SEA ESTATES is independent of the BIR. BATANGAS VALUE GUIDE currently covers Batangas; BIR values are tax references.</small></p>' +
       '<div><a href="#/search">Browse properties</a><a href="#/privacy">Privacy notice</a><button data-sf-auth="signin">Agent sign in</button></div></footer>';
   }
 
-  /* Research says a persistent bottom action bar is the single most effective
-   * conversion surface on mobile. Desktop hides it via CSS because the header
-   * already carries the actions. The phone link stays hidden until site
-   * settings resolve, so we never render a dead tel: link. */
-  function stickyBar() {
-    return '<div class="sf-sticky" data-sf-sticky>' +
-      '<a class="sf-sticky-primary" href="#/property-value">Get my property value</a>' +
-      '<a class="sf-sticky-ghost" href="#/search">Browse</a>' +
-      '<a class="sf-sticky-ghost" data-sf-sticky-call href="tel:" hidden>Call us</a>' +
-      '</div>';
-  }
-
   function shell(content) {
-    return '<div class="sf-site">' + header() + '<main class="sf-main">' + content + '</main>' + footer() + stickyBar() + '</div>';
+    return '<div class="sf-site">' + header() + '<main class="sf-main">' + content + '</main>' + footer() + '</div>';
   }
 
   function privacyPage() {
-    return shell('<section class="sf-section sf-privacy-page"><div class="sf-section-head"><div><p class="sf-eyebrow">YOUR INFORMATION</p><h1>Privacy notice</h1></div><p>How ES Realty handles information submitted through this website.</p></div>' +
+    return shell('<section class="sf-section sf-privacy-page"><div class="sf-section-head"><div><p class="sf-eyebrow">YOUR INFORMATION</p><h1>Privacy notice</h1></div><p>How SEA ESTATES handles information submitted through this website.</p></div>' +
       '<div class="sf-privacy-content">' +
-      '<p><b>Who is responsible?</b> ES Realty operates this website and handles the inquiries submitted through it. For a privacy-related request, <a href="#/home?section=contact">contact our team</a> and write “Privacy request” in your message.</p>' +
+      '<p><b>Who is responsible?</b> SEA ESTATES operates this website and handles the inquiries submitted through it. For a privacy-related request, <a href="#/home?section=contact">contact our team</a> and write “Privacy request” in your message.</p>' +
       '<h2>Information used by the property guide</h2><p>The guide uses property details you enter, such as municipality, barangay, street, BIR classification, lot area, property type, and optional house, ownership, and selling details. The estimate is calculated in your browser. To look for available listing context, the selected municipality and property type may be queried through the Vercel-hosted market-search service; your name and contact details are not needed for that search.</p>' +
-      '<h2>When you send an inquiry or request a report</h2><p>We receive the contact details and message you submit, together with the property details and estimate snapshot needed to respond. Requests are recorded in ES Realty CRM and inquiry records hosted by Supabase. Where report delivery is configured, your report and email address are sent through Resend so the report can be delivered.</p>' +
+      '<h2>When you send an inquiry or request a report</h2><p>We receive the contact details and message you submit, together with the property details and estimate snapshot needed to respond. Requests are recorded in SEA ESTATES CRM and inquiry records hosted by Supabase. Where report delivery is configured, your report and email address are sent through Resend so the report can be delivered.</p>' +
       '<h2>How we use and share information</h2><p>We use submitted information to respond to your request, prepare or deliver a requested report, coordinate a property inquiry with the relevant broker or agent, maintain service records, and protect the service from abuse. Technical request information may also be processed to prevent abuse. We do not sell personal information; Supabase, Vercel, Resend, and any relevant listing agent may process information only to provide the requested service.</p>' +
       '<h2>Retention and your choices</h2><p>We keep inquiry and report records for as long as needed to respond, maintain business records, and meet applicable legal obligations. Under the Data Privacy Act, you may exercise applicable rights such as access, correction, objection, or deletion by contacting us through the form above. You may also raise a concern with the National Privacy Commission. Some records may need to be retained where the law requires it.</p>' +
       '<h2>Security and updates</h2><p>We use access controls and reasonable safeguards for the systems that receive inquiry information. This notice may be updated as the website or its service providers change; the date below identifies the latest revision.</p>' +
@@ -189,7 +187,7 @@
          "built" onto a line of its own. The line break is a layout decision, so
          it belongs in CSS, where the width already controls it. */
       '<h1>Something is being built in Batangas.</h1>' +
-      '<p class="sf-cs-lede">ES Realty is preparing a new mixed-use project. We are not sharing details before launch &mdash; but you can tell us you are interested and we will contact you first.</p>' +
+      '<p class="sf-cs-lede">SEA ESTATES is preparing a new mixed-use project. Details will be shared at launch. Leave your email if you would like to hear when Project B.T. opens.</p>' +
       '<div class="sf-cs-actions"><a class="sf-primary-btn" href="#/property-value">Get my property value</a>' +
       '<a class="sf-outline-btn" href="#/search">Browse properties</a></div>' +
       '</div>' +
@@ -244,7 +242,7 @@
 
       '<div class="sf-pv-steps"><h2 class="sf-pv-h2">What happens</h2><ol class="sf-pv-steps-list">' +
       '<li><span>01</span><div><b>Get your indicative value</b><p>The value guide takes about a minute. You get a BIR zonal reference and an indicative market range immediately.</p></div></li>' +
-      '<li><span>02</span><div><b>Have a short call with our team</b><p>A member of ES Realty reviews your guide with you and asks about your plans, timing and the property itself.</p></div></li>' +
+      '<li><span>02</span><div><b>Have a short call with our team</b><p>A member of SEA ESTATES reviews your guide with you and asks about your plans, timing and the property itself.</p></div></li>' +
        '<li><span>03</span><div><b>Discuss a professional valuation</b><p>If a formal valuation fits your needs, we can discuss the scope, documents, site review, and fee before you decide. There is no pressure to list.</p></div></li>' +
       '</ol></div>' +
 
@@ -257,7 +255,7 @@
       '<label>What are you planning?<select name="message"><option value="">Choose one</option>' +
       '<option>Just want to know my property value</option><option>I want to sell soon</option>' +
       '<option>I am preparing to sell in the future</option><option>I am looking to buy</option><option>Renting out my property</option></select></label>' +
-       '<label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about my property. Read our <a href="#/privacy">Privacy Notice</a>. I can opt out of follow-up at any time.</span></label>' +
+       '<label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to SEA ESTATES contacting me about my property. Read our <a href="#/privacy">Privacy Notice</a>. I can opt out of follow-up at any time.</span></label>' +
        '<button class="sf-primary-btn" type="submit">Request an appraisal consultation</button>' +
       '<p class="sf-pv-micro">Takes 30 seconds. No spam. No obligation.</p>' +
       '<p class="sf-form-status" aria-live="polite"></p></form></div></section>');
@@ -281,11 +279,6 @@
    * side effect of a fetch that may not succeed. */
   function applyContact() {
     try {
-      var call = document.querySelector("[data-sf-sticky-call]");
-      if (call && siteContact.phone) {
-        call.href = "tel:" + String(siteContact.phone).replace(/[^\d+]/g, "");
-        call.hidden = false;
-      }
       var details = document.querySelector("#sf-contact .sf-contact-details");
       if (details) details.innerHTML = contactDetails();
     } catch (e) { /* noop */ }
@@ -318,7 +311,7 @@
 
   function cardMedia(listing) {
     var images = cardImages(listing);
-    if (!images.length) return '<div class="sf-image-empty">ES</div>';
+    if (!images.length) return '<div class="sf-image-empty" aria-label="Property image not supplied">S.E</div>';
     if (images.length === 1) return '<img src="' + esc(images[0]) + '" alt="' + esc(listing.title) + '" loading="lazy">';
     var slides = images.map(function (image, i) {
       return '<div class="sf-slide" aria-hidden="' + (i ? "true" : "false") + '"><img src="' + esc(image) + '" alt="' + esc(listing.title) + ' photo ' + (i + 1) + '" loading="lazy"></div>';
@@ -352,7 +345,7 @@
   }
 
   function detailGallery(listing, images) {
-    if (!images.length) return '<div class="sf-gallery empty"><div>ES Realty</div></div>';
+    if (!images.length) return '<div class="sf-gallery empty"><div>SEA ESTATES</div></div>';
     var slides = images.map(function (image, i) {
       return '<div class="sf-slide" aria-hidden="' + (i ? "true" : "false") + '"><img src="' + esc(image) + '" alt="' + esc(listing.title) + ' photo ' + (i + 1) + '"></div>';
     }).join("");
@@ -389,7 +382,23 @@
     return viewState.mode === "list" && route().path === "search";
   }
 
+  // Zero/absent API defaults are not useful property facts. Do not invent
+  // bedrooms for studios or land; show only positive supplied measurements.
+  function propertyFacts(listing, detail) {
+    var fields = detail
+      ? [["bedrooms", "Bedrooms"], ["bathrooms", "Bathrooms"], ["floor_area_sqm", "Floor sqm"], ["lot_size_sqm", "Lot sqm"]]
+      : [["bedrooms", "beds"], ["bathrooms", "baths"], ["floor_area_sqm", "sqm"]];
+    var facts = fields.map(function (field) {
+      var raw = listing[field[0]];
+      if (!detail && field[0] === "floor_area_sqm" && !(Number(raw) > 0)) raw = listing.lot_size_sqm;
+      if (raw === null || raw === "" || raw === undefined || !Number.isFinite(Number(raw)) || Number(raw) <= 0) return "";
+      return '<span><b>' + esc(Number(raw)) + '</b> ' + esc(field[1]) + '</span>';
+    }).filter(Boolean);
+    return facts.length ? facts.join("") : '<span class="sf-facts-pending">Property details available on request</span>';
+  }
+
   function card(listing) {
+    compareRecords[String(listing.id)] = listing;
     var price = money(listing.display_price, listing.offer_type === "rent" ? "/mo" : "");
     return '<article class="sf-property-card sf-reveal sf-reveal-up ' + (isListView() ? "is-list" : "") + '">' +
       '<button class="sf-card-open" data-sf-listing="' + esc(listing.id) + '" aria-label="Open ' + esc(listing.title) + '"></button>' +
@@ -398,12 +407,63 @@
       '<button class="sf-save" data-sf-save="' + esc(listing.id) + '" aria-label="Sign in to save">♡</button></div>' +
       '<div class="sf-card-copy"><p class="sf-card-type">' + esc(typeLabel(listing.property_type)) + '</p><h3>' + esc(price) + '</h3>' +
       '<h4>' + esc(listing.title) + '</h4><p class="sf-card-location">' + esc(locationText(listing)) + '</p>' +
-      '<div class="sf-card-meta"><span><b>' + esc(listing.bedrooms || 0) + '</b> beds</span><span><b>' + esc(listing.bathrooms || 0) + '</b> baths</span>' +
-      '<span><b>' + esc(listing.floor_area_sqm || listing.lot_size_sqm || 0) + '</b> sqm</span></div></div></article>';
+      '<div class="sf-card-meta">' + propertyFacts(listing, false) + '</div>' + (route().path === "search" ? compareButton(listing) : "") + '</div></article>';
+  }
+
+  function compareButton(listing) {
+    compareRecords[String(listing.id)] = listing;
+    var selected = compareIds.indexOf(String(listing.id)) >= 0;
+    return '<button type="button" class="sf-compare-toggle" data-sf-compare="' + esc(listing.id) + '" aria-pressed="' + selected + '" aria-label="' + (selected ? 'Remove from comparison: ' : 'Compare: ') + esc(listing.title || "Property") + '">' + (selected ? "✓ Selected for comparison" : "+ Compare") + '</button>';
+  }
+
+  function compareTray() {
+    return '<div data-sf-compare-tray class="sf-compare-tray"><div><h2>Compare two properties</h2><p>' + compareIds.length + ' of 2 selected. Select Compare on a property to add it.</p></div><div class="sf-compare-selected">' + compareIds.map(function (id) {
+      return '<button type="button" data-sf-compare-remove="' + esc(id) + '" aria-label="Remove ' + esc((compareRecords[id] || {}).title || "property") + ' from comparison">' + esc((compareRecords[id] || {}).title || "Selected property") + ' ×</button>';
+    }).join("") + '</div><div class="sf-compare-actions"><button type="button" class="sf-primary-btn" data-sf-compare-open' + (compareIds.length === 2 ? "" : " disabled") + '>Compare properties</button>' + (compareIds.length ? '<button type="button" class="sf-outline-btn" data-sf-compare-clear>Clear selection</button>' : "") + '</div></div>';
+  }
+
+  function updateCompare(message) {
+    compareMessage = message || "";
+    try { sessionStorage.setItem("esrealty_compare_v1", JSON.stringify(compareIds)); } catch (e) {}
+    document.querySelectorAll("[data-sf-compare]").forEach(function (button) {
+      var selected = compareIds.indexOf(button.getAttribute("data-sf-compare")) >= 0;
+      button.setAttribute("aria-pressed", String(selected));
+      button.textContent = selected ? "✓ Selected for comparison" : "+ Compare";
+      var record = compareRecords[button.getAttribute("data-sf-compare")];
+      button.setAttribute("aria-label", (selected ? "Remove from comparison: " : "Compare: ") + ((record || {}).title || "Property"));
+    });
+    // Patch just comparison UI; keep search drafts, inquiry forms and maps intact.
+    var tray = document.querySelector("[data-sf-compare-tray]");
+    if (tray) tray.outerHTML = compareTray();
+    var live = document.querySelector("[data-sf-compare-status]");
+    if (live) live.textContent = compareMessage;
+  }
+
+  function comparisonPage() {
+    var content = '<section class="sf-compare-page"><a class="sf-back" href="' + esc(compareReturn) + '">← Back to properties</a><p class="sf-eyebrow">PROPERTY COMPARISON</p><h1 tabindex="-1" data-sf-compare-heading>Compare your two properties.</h1><p>Listing-supplied details side by side. Confirm prices and missing information with the listing agent.</p>' + compareTray() + '<p role="status" aria-live="polite" data-sf-compare-status>' + esc(compareMessage) + '</p>';
+    if (viewState.loading) return shell(content + '<p role="status">Refreshing selected properties…</p></section>');
+    if (compareIds.length !== 2) return shell(content + '<p>Select two properties to see their comparison.</p></section>');
+    var records = compareIds.map(function (id) { return compareErrors[id] ? null : compareRecords[id]; });
+    if (records.some(function (r) { return !r; })) return shell(content + '<p>One or more properties could not be loaded. ' + esc(compareIds.map(function (id) { return compareErrors[id] || ""; }).filter(Boolean).join(" ")) + '</p><button class="sf-outline-btn" data-sf-compare-retry>Retry loading</button></section>');
+    function supplied(value) { var n = Number(value); return isFinite(n) && n > 0 ? new Intl.NumberFormat("en-PH").format(n) : "Not supplied"; }
+    var rows = [
+      ["Listing type", function (r) { return r.offer_type === "rent" ? "For rent" : "For sale"; }],
+      ["Asking price / rent", function (r) { var n = Number(r.display_price || (r.offer_type === "rent" ? r.rent : r.price)); return n > 0 && isFinite(n) ? money(n, r.offer_type === "rent" ? " / month" : " sale price") : "Price on request"; }],
+      ["Location", function (r) { return [r.barangay, r.city, r.province].filter(Boolean).join(", ") || "Not supplied"; }],
+      ["Property type", function (r) { return r.property_type ? typeLabel(r.property_type) : "Not supplied"; }],
+      ["Bedrooms", function (r) { return supplied(r.bedrooms); }],
+      ["Bathrooms", function (r) { return supplied(r.bathrooms); }],
+      ["Floor area (sqm)", function (r) { return supplied(r.floor_area_sqm); }],
+      ["Lot area (sqm)", function (r) { return supplied(r.lot_area_sqm); }],
+      ["Year built", function (r) { return supplied(r.year_built); }]
+    ];
+    content += '<div class="sf-compare-properties">' + records.map(function (r, i) { var image = safeImage((r.images && r.images[0] && (r.images[0].url || r.images[0])) || ""); return '<article><span>Property ' + (i + 1) + '</span>' + (image ? '<img src="' + esc(image) + '" alt="" loading="lazy">' : '<p>Photo not supplied</p>') + '<h2>' + esc(r.title || "Property") + '</h2><a class="sf-outline-btn" href="#/listing/' + encodeURIComponent(r.id) + '">View property details</a></article>'; }).join("") + '</div>';
+    content += '<dl class="sf-compare-fields">' + rows.map(function (row) { return '<div><dt>' + esc(row[0]) + '</dt>' + records.map(function (r, i) { return '<dd><span class="sf-compare-mobile-label">Property ' + (i + 1) + ': </span>' + esc(row[1](r)) + '</dd>'; }).join("") + '</div>'; }).join("") + '</dl><p>Sale prices and monthly rent are different measures. Missing or zero-default fields do not establish that a property has no bedrooms, bathrooms or area.</p>';
+    return shell(content + '</section>');
   }
 
   function empty(message) {
-    return '<div class="sf-empty"><div>ES</div><h3>No properties found</h3><p>' + esc(message || "Try changing your filters.") + '</p></div>';
+    return '<div class="sf-empty"><div>S.E</div><h3>No properties found</h3><p>' + esc(message || "Try changing your filters.") + '</p></div>';
   }
 
   function skeletons(count) {
@@ -496,8 +556,38 @@
       }).join("");
       return '<label><span>' + esc(f.label) + '</span><select name="' + esc(f.name) + '">' + opts + '</select></label>';
     }).join("");
+    var advancedCount = ["state", "property_type", "offer_type"].filter(function (name) { return !!params.get(name); }).length;
     return '<form class="sf-search-form' + (compact ? " compact" : "") + '" data-sf-search>' + body +
-      '<button type="submit">Search properties</button></form>';
+      '<button type="submit">Search properties</button>' +
+      '<details class="sf-search-more" data-sf-more-filters hidden><summary>More filters' +
+      (advancedCount ? ' <span class="sf-search-more-count">(' + advancedCount + ' applied)</span>' : "") +
+      '</summary><div class="sf-search-more-fields"></div></details></form>';
+  }
+
+  // Move the existing labelled controls, rather than duplicating them or
+  // disabling closed fields. FormData therefore retains every filter even when
+  // the disclosure is closed. Desktop markup/order stays as before.
+  function syncSearchFilters() {
+    var narrow = !!(window.matchMedia && window.matchMedia("(max-width: 600px)").matches);
+    document.querySelectorAll("[data-sf-search]").forEach(function (form) {
+      var more = form.querySelector("[data-sf-more-filters]");
+      if (!more || form._sfFilterNarrow === narrow) return;
+      var focused = document.activeElement;
+      var advanced = ["state", "property_type", "offer_type"].map(function (name) { return form.querySelector('[name="' + name + '"]'); }).filter(Boolean);
+      if (narrow) {
+        var fields = more.querySelector(".sf-search-more-fields");
+        advanced.forEach(function (control) { fields.appendChild(control.closest("label")); });
+        more.hidden = false;
+        more.open = advanced.some(function (control) { return !!control.value || control === focused; });
+      } else {
+        var budget = form.querySelector('[name="max_price"]').closest("label");
+        advanced.forEach(function (control) { form.insertBefore(control.closest("label"), budget); });
+        more.hidden = true;
+        if (focused && more.contains(focused) && advanced.length) focused = advanced[0];
+      }
+      form._sfFilterNarrow = narrow;
+      if (focused && form.contains(focused) && focused !== document.activeElement && focused.getClientRects().length) focused.focus({ preventScroll: true });
+    });
   }
 
   /* Removable chips for whatever is currently narrowing the results. Rendered
@@ -535,8 +625,8 @@
    * never disagree about what services exist or where they lead. */
   function servicesSection() {
     return '<section class="sf-section sf-services" id="sf-services"><div class="sf-section-head sf-reveal"><div>' +
-      '<p class="sf-eyebrow">WHAT WE DO</p><h2>Full-service property help, from one team.</h2></div>' +
-      '<p>Buying, selling, renting and managing property in the Philippines. Start with the service you need &mdash; we will point you to the right next step.</p></div>' +
+      '<p class="sf-eyebrow">HOW WE CAN HELP</p><h2>Help with your next property move.</h2></div>' +
+      '<p>Buying, selling, renting or managing a property? Choose the support you need.</p></div>' +
       '<div class="sf-services-grid">' + SERVICES.map(function (item, i) {
         return '<a class="sf-service-card sf-reveal sf-reveal-up" href="' + esc(item.href) + '">' +
           '<span class="sf-service-num">' + (i < 9 ? "0" : "") + (i + 1) + '</span>' +
@@ -575,8 +665,8 @@
       : '<div class="sf-property-grid sf-featured-grid">' + live.slice(0, 6).map(card).join("") + '</div>';
 
     return '<section class="sf-section sf-featured" id="sf-featured"><div class="sf-section-head sf-reveal"><div>' +
-      '<p class="sf-eyebrow">CURRENT LISTINGS</p><h2>Properties on the market now.</h2></div>' +
-      '<p>Every listing is checked with the team before it appears here.</p></div>' + body +
+      '<p class="sf-eyebrow">PROPERTIES</p><h2>Explore available properties.</h2></div>' +
+      '<p>Compare locations and asking prices. Our team can confirm the details before you decide.</p></div>' + body +
       '<div class="sf-featured-more"><a class="sf-outline-btn" href="#/search">See all properties</a></div></section>';
   }
 
@@ -585,25 +675,26 @@
       '<section class="sf-est-hero" id="sf-intro">' +
       '<div class="sf-est-hero-copy sf-reveal">' +
       '<p class="sf-eyebrow">BATANGAS VALUE GUIDE</p>' +
-      '<h1>What is your <em>property worth?</em></h1>' +
-      '<p class="sf-est-hero-lede">An instant, free Batangas property value guide. See the selected BIR zonal reference separately from an ES Realty estimate calculated using disclosed location and property factors, with its range and source details.</p>' +
-      '<div class="sf-est-proof"><span><b>BIR Zonal</b> reference schedules</span><span><b>ES Realty</b> factor-based estimate</span><span><b>Free &amp; instant</b> guide</span></div>' +
-      '<p class="sf-est-hero-bir-note">ES Realty is independent of the BIR. BIR values are shown as tax-reference data.</p>' +
-      '<div class="sf-hero-actions sf-est-hero-actions"><a class="sf-hero-btn" href="#sf-estimator" data-est-services>Get My Free Estimate →</a><a class="sf-hero-link" href="#/search">Browse Properties</a></div>' +
+      '<h1>What could your <em>property be worth?</em></h1>' +
+      '<p class="sf-est-hero-lede">Explore available properties, or start the free guide for your Batangas property.</p>' +
+      '<div class="sf-hero-actions sf-est-hero-actions"><a class="sf-hero-btn" href="#sf-estimator" data-est-services>Start My Value Guide →</a><a class="sf-hero-link" href="#/search">Browse Properties →</a></div>' +
+      '<div class="sf-est-proof"><span><b>Free</b> planning guide</span><span><b>No account</b> to start</span><span><b>BIR reference</b> shown separately</span></div>' +
+      '<p class="sf-est-hero-bir-note">Current guide coverage: Batangas. SEA ESTATES is independent of the BIR.<span class="sf-home-disclaimer">A planning guide, not a certified appraisal.</span></p>' +
       '</div>' +
       (typeof window.ESREALTY_EST === "object" && window.ESREALTY_EST.cardSection ? window.ESREALTY_EST.cardSection() : '<section class="sf-section sf-est" id="sf-estimator" data-est-root><div class="sf-est-card" data-est-card><p class="sf-est-empty">Loading the value guide…</p></div></section>') +
       '</section>' +
 
-      '<section class="sf-section sf-guide-summary"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">WHAT YOU RECEIVE</p><h2>A clearer answer before your next property step.</h2></div><p>Start with the official reference, then review the factor-based estimate, asking-price guide, data match, and next professional step.</p></div>' +
-      '<div class="sf-guide-summary-grid"><article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>01</b><h3>Official BIR reference</h3><p>The published zonal rate for your selected Batangas location and classification.</p></article>' +
-      '<article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>02</b><h3>Asking-price guidance</h3><p>A factor-based starting point with its range and calculation details shown. Available asking listings provide context; their prices do not directly set the estimate.</p></article>' +
-      '<article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>03</b><h3>Professional next step</h3><p>Request ES Realty guidance or a licensed-appraiser consultation when you need a defensible opinion.</p></article></div></section>' +
-      servicesSection() +
+      '<section class="sf-section sf-guide-summary"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">YOUR VALUE GUIDE</p><h2>What your guide includes.</h2></div><p>Understand the reference, review the estimate, and decide what to check next.</p></div>' +
+      '<div class="sf-guide-summary-grid"><article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>01</b><h3>BIR tax reference</h3><p>The published zonal rate for your selected location and classification. Shown separately from the estimate.</p></article>' +
+      '<article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>02</b><h3>Planning estimate</h3><p>A factor-based estimate with its range and calculation details. Comparable asking prices are context, not calculation inputs.</p></article>' +
+      '<article class="sf-guide-summary-card sf-reveal sf-reveal-up"><b>03</b><h3>A practical next step</h3><p>Review the details, ask our team a question, or request a formal appraisal consultation.</p></article></div></section>' +
       featuredSection() +
-      '<section class="sf-process sf-process-compact" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">HOW IT WORKS</p><h2>Three simple steps to a <em>better decision.</em></h2></div><p>No account is needed to start the guide.</p></div><div class="sf-process-steps"><article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Choose the property</h3><p>Select the municipality, barangay, street, classification, and lot area.</p></article><article class="sf-process-step sf-reveal sf-reveal-up"><b>02</b><h3>Review the result</h3><p>See the BIR reference, factor-based estimate, recommended asking price, and data match.</p></article><article class="sf-process-step sf-reveal sf-reveal-up"><b>03</b><h3>Choose your next step</h3><p>Save the guide, browse properties, or request a professional valuation consultation.</p></article></div></section>' +
+      '<section class="sf-home-project sf-reveal" aria-labelledby="sf-home-project-title"><div><p class="sf-eyebrow">COMING NEXT</p><h2 id="sf-home-project-title">Project B.T. <span class="sf-home-project-status">Coming Soon</span></h2><p>Details will be shared at launch. Leave your email on the project page to hear when it opens.</p></div><a class="sf-outline-btn" href="#/project-bt">See Project B.T. →</a></section>' +
+      servicesSection() +
+      '<section class="sf-process sf-process-compact" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">HOW IT WORKS</p><h2>From property details to <em>your next step.</em></h2></div><p>Start with what you know. Review the guide before making a decision.</p></div><div class="sf-process-steps"><article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Enter the details</h3><p>Choose the location, classification and lot area. Add house details where needed.</p></article><article class="sf-process-step sf-reveal sf-reveal-up"><b>02</b><h3>Review your guide</h3><p>Check the BIR reference, planning estimate, source match and assumptions.</p></article><article class="sf-process-step sf-reveal sf-reveal-up"><b>03</b><h3>Decide what’s next</h3><p>Explore properties or ask our team about selling, buying or a formal valuation.</p></article></div></section>' +
 
-      '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div class="sf-reveal"><p class="sf-eyebrow">LOCAL BATANGAS GUIDANCE</p><h2>Ready for the <em>next check?</em></h2><p>Tell us whether you are buying, selling, valuing, or reviewing a property. We will help you identify the next practical step.</p><div class="sf-contact-details">' + contactDetails() + '</div></div>' +
-      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="Mobile number"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Tell us the property location and what you need..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about this request. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button type="submit">Talk to a specialist →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>'
+      '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div class="sf-reveal"><p class="sf-eyebrow">LET’S TALK</p><h2>What are you <em>planning next?</em></h2><p>Buying, selling, renting or reviewing a property? Share the location and your questions with our team.</p><div class="sf-contact-details">' + contactDetails() + '</div></div>' +
+      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" autocomplete="name" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" autocomplete="email" placeholder="you@email.com"></label><label>Phone<input name="phone" type="tel" required maxlength="50" autocomplete="tel" placeholder="Mobile number"></label><label>What would you like help with?<textarea name="message" rows="2" maxlength="2000" placeholder="Property location, your plans, and any questions..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to SEA ESTATES contacting me about this request. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button type="submit">Ask our team →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>'
     );
   }
 
@@ -747,7 +838,7 @@
     var cities = ["Batangas City", "Lipa", "Tanauan", "Santo Tomas", "Imus", "Bacoor", "Dasmariñas", "General Trias", "Santa Rosa", "Calamba", "Biñan", "Angeles", "San Fernando", "Antipolo", "Taytay", "Iloilo City", "Cebu City", "Lapu-Lapu", "Cagayan de Oro", "Davao City", "General Santos"];
     var chips = cities.map(function (city, i) { return '<a class="sf-reveal sf-reveal-zoom" style="--d:' + (Math.min(i, 11) * 0.05).toFixed(2) + 's" href="#/search?city=' + encodeURIComponent(city) + '">' + esc(city) + '</a>'; }).join("");
     return shell('<section class="sf-hero"><div class="sf-hero-copy"><p class="sf-eyebrow">PHILIPPINE SHOPHOUSE SPECIALISTS</p><h1>Shophouses that <em>work</em> harder.</h1>' +
-      '<p>Storefront below, living space above — one address for your business, family, and investment. ES Realty verifies live-work listings across the Philippines.</p>' +
+      '<p>Storefront below, living space above — one address for your business, family, and investment. SEA ESTATES verifies live-work listings across the Philippines.</p>' +
       '<div class="sf-hero-actions"><a class="sf-hero-btn" href="#/project-bt">Learn about Project B.T <span>→</span></a><button class="sf-hero-link" type="button" data-sf-scroll="#sf-contact">Talk to a Shophouse Specialist</button></div>' +
       '<div class="sf-proof"><span><b>Verified</b> live-work listings</span><span><b>Direct</b> developer access</span><span><b>Feasibility</b> guidance</span></div></div>' +
       '<div class="sf-hero-art"><div class="sf-hero-frame">' + (heroImage ? '<img src="' + esc(heroImage) + '" alt="Two-storey shophouse with retail below and living space above" fetchpriority="high" decoding="async">' : '') + '<span>Live-work, done right</span></div><div class="sf-floating-stat"><b>Business below.</b><span>Living above.</span></div></div><div class="sf-scroll-cue" aria-hidden="true"><i></i></div></section>' +
@@ -768,13 +859,13 @@
       '<div class="sf-featured-filter sf-reveal sf-reveal-zoom">' + searchFields(new URLSearchParams(), true) + '</div>' +
       '<div class="sf-property-grid">' + cards + '</div></section>' +
 
-      '<section class="sf-locations"><div class="sf-locations-wrap"><div class="sf-reveal"><p class="sf-eyebrow">LOCATIONS WE COVER</p><h2>Where shophouse demand is growing.</h2><p>From CALABARZON to Central Visayas, ES Realty tracks live-work listings in the provinces where daily commerce is on the rise. Tap a city to browse its current inventory.</p></div>' +
+      '<section class="sf-locations"><div class="sf-locations-wrap"><div class="sf-reveal"><p class="sf-eyebrow">LOCATIONS WE COVER</p><h2>Where shophouse demand is growing.</h2><p>From CALABARZON to Central Visayas, SEA ESTATES tracks live-work listings in the provinces where daily commerce is on the rise. Tap a city to browse its current inventory.</p></div>' +
       '<div class="sf-loc-chips">' + chips + '</div></div></section>' +
 
       '<section class="sf-roi"><div class="sf-reveal"><p class="sf-eyebrow">THE INVESTOR CASE</p><h2>A shophouse pays you <em>twice.</em></h2><p>Ground-floor trade covers operations while the residence above rents or appreciates. Most of our buyers target returns from both halves of the same building.</p>' +
       '<div class="sf-roi-stats"><div class="sf-roi-stat sf-reveal sf-reveal-up"><b>6–8%</b><span>Indicative gross rental yield on shophouse units</span></div><div class="sf-roi-stat sf-reveal sf-reveal-up"><b data-count="2">2</b><span>Income streams — retail ground floor and residence above</span></div><div class="sf-roi-stat sf-reveal sf-reveal-up"><b data-count="3" data-suffix="+">3+</b><span>Potential tenants a single unit can host over its life</span></div></div></div>' +
       '<div class="sf-guide sf-reveal sf-reveal-right"><h3>Download the Shophouse Investment Guide</h3><p>Financing paths, a location checklist, and unit economics — free for buyers who want the full picture before they view.</p>' +
-      '<form data-sf-guide><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me by email about the guide and relevant listings. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button type="submit">Send me the guide →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>' +
+      '<form data-sf-guide><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to SEA ESTATES contacting me by email about the guide and relevant listings. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button type="submit">Send me the guide →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>' +
 
       '<section class="sf-process" id="sf-process"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">REAL ESTATE SERVICES</p><h2>Local guidance for every <em>property decision.</em></h2></div><p>Practical real estate support for buyers, sellers, landlords, investors, and developers across the Philippines.</p></div><div class="sf-process-steps">' +
       '<article class="sf-process-step sf-reveal sf-reveal-up"><b>01</b><h3>Property Sales &amp; Acquisition</h3><p>Buy or sell residential, commercial, land, condominium, townhouse, and shophouse properties with transaction guidance.</p></article>' +
@@ -788,7 +879,7 @@
       '</div></section>' +
 
       '<section class="sf-cta" id="sf-contact"><div class="sf-cta-band"><div class="sf-reveal"><p class="sf-eyebrow">' + esc(siteContact.eyebrow) + '</p><h2>' + esc(siteContact.title) + '</h2><p>' + esc(siteContact.description) + '</p><div class="sf-contact-details">' + contactDetails() + '</div></div>' +
-      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="Mobile number"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Province, budget, and business idea..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about this request. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button type="submit">Request a call →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>');
+      '<form class="sf-cta-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Phone<input name="phone" required maxlength="50" placeholder="Mobile number"></label><label>Message<textarea name="message" rows="2" maxlength="2000" placeholder="Province, budget, and business idea..."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to SEA ESTATES contacting me about this request. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button type="submit">Request a call →</button><p class="sf-form-status" aria-live="polite"></p></form></div></section>');
   }
 
   function btStars(score) {
@@ -798,7 +889,7 @@
   function projectBtPage() {
     var heroImage = "assets/listings/bt1.jpg";
     var conceptImage = "assets/listings/bt2.jpg";
-    return shell('<section class="bt-hero"><div class="bt-hero-copy"><p class="bt-eyebrow">ES REALTY / DEVELOPMENT CONCEPT 01</p><h1>Project B.T <span>— Bahay Tindahan</span></h1>' +
+    return shell('<section class="bt-hero"><div class="bt-hero-copy"><p class="bt-eyebrow">SEA ESTATES / DEVELOPMENT CONCEPT 01</p><h1>Project B.T <span>— Bahay Tindahan</span></h1>' +
       '<p class="bt-hero-lede">A modern mixed-use real estate concept combining commercial and residential spaces in a single two-storey building.</p>' +
       '<div class="bt-actions"><button class="bt-button bt-button-dark" data-bt-inquire="Project B.T">Inquire About Project B.T <span>↗</span></button><a class="bt-link" href="#bt-concept" data-sf-scroll="#bt-concept">Explore the concept <span>↓</span></a></div>' +
       '<div class="bt-hero-proof"><span><b>01</b> Business below</span><span><b>02</b> Living above</span><span><b>∞</b> Value over time</span></div></div>' +
@@ -829,8 +920,8 @@
 
       '<section class="bt-highlights bt-section"><div><div class="bt-section-label">09 / INVESTMENT HIGHLIGHTS</div><h2>Not just a building.<br><em>A repeatable model.</em></h2></div><div class="bt-highlight-grid"><article><span>01</span><h3>Rental income</h3><p>Generate income from the upstairs residence, office, or rental unit while the ground floor serves business activity.</p></article><article><span>02</span><h3>Capital appreciation</h3><p>Own a visible, useful asset in a growing community with multiple potential future users.</p></article><article><span>03</span><h3>Scalable investment</h3><p>Start with one unit or a 3-sublot development and build a repeatable shophouse portfolio.</p></article></div></section>' +
 
-      '<section class="bt-contact" id="bt-inquiry"><div class="bt-contact-mark">BT</div><div class="bt-contact-copy"><div class="bt-section-label">10 / START A CONVERSATION</div><h2>Build the next<br><em>Bahay Tindahan.</em></h2><p>Tell us which product direction fits your site, business, or investment plan. ES REALTY will help you explore the right next step.</p></div><form class="bt-inquiry-form" data-bt-inquiry-form><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Interest<select name="interest"><option>Project B.T overview</option><option>Testarossa — Essential</option><option>Carrera — Signature</option><option>Ultima — Prestige</option><option>Site / development partnership</option></select></label><label>Message<textarea name="message" rows="3" maxlength="2000" placeholder="Tell us about your location, business, or investment goal."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty contacting me about Project B.T and related developments. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button class="bt-button bt-button-light" type="submit">Send inquiry <span>↗</span></button><p class="bt-form-status" aria-live="polite"></p></form></section>' +
-      '<section class="bt-thanks"><p>ES REALTY</p><h2>Thank you for imagining<br><em>what is possible.</em></h2><a href="#/home">Return to ES Realty <span>↗</span></a></section>');
+      '<section class="bt-contact" id="bt-inquiry"><div class="bt-contact-mark">BT</div><div class="bt-contact-copy"><div class="bt-section-label">10 / START A CONVERSATION</div><h2>Build the next<br><em>Bahay Tindahan.</em></h2><p>Tell us which product direction fits your site, business, or investment plan. SEA ESTATES will help you explore the right next step.</p></div><form class="bt-inquiry-form" data-bt-inquiry-form><label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label><label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label><label>Interest<select name="interest"><option>Project B.T overview</option><option>Testarossa — Essential</option><option>Carrera — Signature</option><option>Ultima — Prestige</option><option>Site / development partnership</option></select></label><label>Message<textarea name="message" rows="3" maxlength="2000" placeholder="Tell us about your location, business, or investment goal."></textarea></label><label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to SEA ESTATES contacting me about Project B.T and related developments. See our <a href="#/privacy">Privacy Notice</a>.</span></label><button class="bt-button bt-button-light" type="submit">Send inquiry <span>↗</span></button><p class="bt-form-status" aria-live="polite"></p></form></section>' +
+      '<section class="bt-thanks"><p>SEA ESTATES</p><h2>Thank you for imagining<br><em>what is possible.</em></h2><a href="#/home">Return to SEA ESTATES <span>↗</span></a></section>');
   }
 
   /* Distinguishes the two very different empty cases. Telling someone "no
@@ -840,11 +931,11 @@
     var active = activeFilters(params);
     if (active.length) {
       var chips = active.map(function (f) { return filterSummary(f); }).join(", ");
-      return '<div class="sf-empty"><div>ES</div><h3>No properties match these filters</h3>' +
+      return '<div class="sf-empty"><div>S.E</div><h3>No properties match these filters</h3>' +
         '<p>Nothing matches ' + esc(chips) + ' right now. Clear the filters to see everything we publish.</p>' +
         '<a class="sf-outline-btn" href="' + esc(clearLink(active.map(function (f) { return f.def.name; }))) + '">Clear all filters</a></div>';
     }
-    return '<div class="sf-empty"><div>ES</div><h3>No properties published yet</h3>' +
+    return '<div class="sf-empty"><div>S.E</div><h3>No properties published yet</h3>' +
       '<p>There are no live listings on the site at the moment. Get your property value in the meantime, or tell us what you are looking for and we will come back to you.</p>' +
       '<div class="sf-empty-actions"><a class="sf-primary-btn" href="#/property-value">Get my property value</a>' +
       '<a class="sf-outline-btn" href="#/search">Refresh</a></div></div>';
@@ -864,6 +955,7 @@
     var pager = pages > 1 ? '<div class="sf-pager"><button data-sf-page="' + (page - 1) + '"' + (page <= 1 ? " disabled" : "") + '>Previous</button><span>Page ' + page + ' of ' + pages + '</span><button data-sf-page="' + (page + 1) + '"' + (page >= pages ? " disabled" : "") + '>Next</button></div>' : "";
      return shell('<section class="sf-search-page"><div class="sf-search-intro"><p class="sf-eyebrow">PROPERTY SEARCH</p><h1>Find a property that fits.</h1><p>Browse current property inventory across the Philippines.</p></div>' +
       '<div class="sf-filter-stick">' + searchFields(params, true) + '</div>' + activeFilterChips(params) +
+      compareTray() + '<p class="sf-compare-status" role="status" aria-live="polite" data-sf-compare-status>' + esc(compareMessage) + '</p>' +
       '<div class="sf-results-bar"><p><b>' + esc(total) + '</b> ' + (Number(total) === 1 ? "property" : "properties") + '</p>' +
       '<div><label class="sf-visually-hidden" for="sf-sort">Sort properties</label><select id="sf-sort" data-sf-sort><option value="date_desc"' + (params.get("sort") === "date_desc" || !params.get("sort") ? " selected" : "") + '>Newest</option><option value="price_asc"' + (params.get("sort") === "price_asc" ? " selected" : "") + '>Price: Low to high</option><option value="price_desc"' + (params.get("sort") === "price_desc" ? " selected" : "") + '>Price: High to low</option></select>' +
       '<button data-sf-mode="grid" aria-pressed="' + (viewState.mode === "grid") + '" class="' + (viewState.mode === "grid" ? "active" : "") + '">Grid</button><button data-sf-mode="list" aria-pressed="' + (viewState.mode === "list") + '" class="' + (viewState.mode === "list" ? "active" : "") + '">List</button><button data-sf-mode="map" aria-pressed="' + (viewState.mode === "map") + '" class="' + (viewState.mode === "map" ? "active" : "") + '">Map</button></div></div>' +
@@ -881,18 +973,14 @@
     return "₱" + n;
   }
   function sfInitMap() {
-    window.__dbg = window.__dbg || {};
-    window.__dbg.entered = true;
     var n = 0;
     (function findEl() {
       var el = document.getElementById("sf-map");
-      if (!el) { if (++n > 50) { window.__dbg.elNever = true; return; } setTimeout(findEl, 100); return; }
-      window.__dbg.elFound = true;
+      if (!el) { if (++n > 50) return; setTimeout(findEl, 100); return; }
       window.ESREALTY_LEAFLET.ensure().then(function () {
         var m = 0;
         (function waitL() {
-          if (!window.L) { if (++m > 30) { window.__dbg.lNever = true; return; } setTimeout(waitL, 150); return; }
-          window.__dbg.built = true;
+          if (!window.L) { if (++m > 30) return; setTimeout(waitL, 150); return; }
           sfBuildMap();
         })();
       });
@@ -928,7 +1016,7 @@
     var price = sfPriceShort(l.offer_type === "rent" ? l.rent : l.price);
     return '<div style="min-width:180px"><b>' + esc(l.title || "Property") + '</b><br>' + esc(price)
       + (l.city ? ' · ' + esc(l.city) : '')
-      + '<br><a class="btn btn-primary btn-sm" style="margin-top:6px;display:inline-block" href="#/listing/' + encodeURIComponent(l.id) + '">View details</a></div>';
+       + '<br><a class="btn btn-primary btn-sm" style="margin-top:6px;display:inline-block" href="#/listing/' + encodeURIComponent(l.id) + '">View details</a>' + compareButton(l) + '</div>';
   }
   function detailPage(listing) {
     if (viewState.loading) return shell('<section class="sf-detail"><div class="sf-detail-loading">Loading property…</div></section>');
@@ -940,9 +1028,9 @@
       ld.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": "RealEstateListing", name: listing.title, description: (listing.description || "").slice(0, 300), image: images.filter(function (x) { return /^https:/.test(x); }).slice(0, 5), address: { "@type": "PostalAddress", addressLocality: listing.city, addressRegion: listing.province, addressCountry: "PH" }, offers: { "@type": "Offer", priceCurrency: "PHP", price: Number(listing.price || 0), availability: "https://schema.org/InStock" } });
       document.head.appendChild(ld);
     } catch (ldErr) {}
-    return shell('<section class="sf-detail"><button class="sf-back" data-sf-back>← Back to properties</button>' + gallery +
+    return shell('<section class="sf-detail"><button class="sf-back" data-sf-back>← Back to properties</button>' + compareTray() + '<p role="status" aria-live="polite" data-sf-compare-status></p>' + compareButton(listing) + gallery +
       '<div class="sf-detail-layout"><article class="sf-detail-copy"><p class="sf-eyebrow">' + esc(typeLabel(listing.property_type)) + ' · ' + esc(listing.offer_type === "rent" ? "FOR RENT" : "FOR SALE") + '</p>' +
-      '<h1>' + esc(listing.title) + '</h1><p class="sf-detail-location">' + esc(locationText(listing)) + '</p><div class="sf-key-stats"><span><b>' + esc(listing.bedrooms || 0) + '</b> Bedrooms</span><span><b>' + esc(listing.bathrooms || 0) + '</b> Bathrooms</span><span><b>' + esc(listing.floor_area_sqm || 0) + '</b> Floor sqm</span><span><b>' + esc(listing.lot_size_sqm || 0) + '</b> Lot sqm</span></div>' +
+      '<h1>' + esc(listing.title) + '</h1><p class="sf-detail-location">' + esc(locationText(listing)) + '</p><div class="sf-key-stats">' + propertyFacts(listing, true) + '</div>' +
       '<section><h2>About this property</h2><p class="sf-description">' + esc(listing.description || "Contact the listing agent for complete property information.") + '</p></section>' +
       (listing.details && listing.details.license_to_sell ? '<section class="sf-dhsud"><span class="sf-badge">' + esc(listing.details.license_to_sell) + '</span> DHSUD License to Sell number for this property.</section>' : '') +
       '<section><h2>Location</h2><div class="sf-detail-map" id="sf-detail-map"><span>' + esc(locationText(listing)) + '</span></div></section></article>' +
@@ -953,13 +1041,14 @@
   /* document.title was never set anywhere, so every route shipped the same
    * title and search engines could not tell the pages apart. */
   var PAGE_TITLES = {
-    "": "ES Realty | Free Batangas property value guide",
-    "home": "ES Realty | Free Batangas property value guide",
-    "search": "Properties for sale and rent in Batangas | ES Realty",
-    "property-value": "Get My Property Value | ES Realty",
-    "privacy": "Privacy Notice | ES Realty",
-    "project-bt": "Project B.T by ES Realty",
-    "listing": "Property details | ES Realty"
+    "": "SEA ESTATES | Properties & Batangas Value Guide",
+    "home": "SEA ESTATES | Properties & Batangas Value Guide",
+    "search": "Properties for sale and rent | SEA ESTATES",
+    "compare": "Compare two properties | SEA ESTATES",
+    "property-value": "Appraisal consultation | SEA ESTATES",
+    "privacy": "Privacy Notice | SEA ESTATES",
+    "project-bt": "Project B.T — Coming Soon | SEA ESTATES",
+    "listing": "Property details | SEA ESTATES"
   };
 
   /* Services have no pages of their own yet. They resolve to the homepage
@@ -1009,8 +1098,19 @@
     else if (current.path === "property-value") host.innerHTML = propertyValuePage(current.params);
     else if (current.path.indexOf("listing/") === 0) host.innerHTML = detailPage(viewState.result && viewState.result.data);
     else if (current.path === "search") host.innerHTML = searchPage(current.params);
+    else if (current.path === "compare") host.innerHTML = comparisonPage();
     else host.innerHTML = home();
     setTitle(current.path);
+    syncSearchFilters();
+    if (current.path === "search") {
+      compareReturn = location.hash;
+      try { sessionStorage.setItem("esrealty_compare_return_v1", compareReturn); } catch (e) {}
+    }
+    if (current.path === "compare" && !viewState.loading && !compareFocused) {
+      var comparisonHeading = host.querySelector("[data-sf-compare-heading]");
+      if (comparisonHeading) comparisonHeading.focus({ preventScroll: true });
+      compareFocused = true;
+    } else if (current.path !== "compare") compareFocused = false;
     /* Listing schema belongs to the detail page only. It used to be injected on
      * every detail view and only removed by the NEXT detail view, so leaving a
      * property page for home/search/shophouse left the previous listing's
@@ -1049,6 +1149,20 @@
     var key = current.path + "?" + current.params.toString();
     if (!force && key === cacheKey) { renderCurrent(); return; }
     cacheKey = key;
+    if (current.path === "compare") {
+      var comparisonRequest = ++requestId;
+      compareErrors = Object.create(null);
+      viewState.loading = compareIds.length === 2; renderCurrent();
+      if (!viewState.loading) return;
+      Promise.all(compareIds.map(function (selectedId) {
+        return API.get(selectedId).then(function (result) {
+          if (comparisonRequest !== requestId) return;
+          if (!result.data || isPlaceholderListing(result.data)) { delete compareRecords[selectedId]; compareErrors[selectedId] = "A selected listing is unavailable."; }
+          else compareRecords[selectedId] = result.data;
+        }).catch(function (error) { if (comparisonRequest === requestId) compareErrors[selectedId] = error.message || "Connection failed. Please retry."; });
+      })).then(function () { if (comparisonRequest === requestId) { viewState.loading = false; renderCurrent(); } });
+      return;
+    }
     /* Static marketing routes. They must not issue a listings request, or the
      * loading skeleton would flash on a page that has nothing to load. */
     if (current.path === "project-bt" || current.path === "property-value" || current.path === "privacy") {
@@ -1264,6 +1378,12 @@
   function bind() {
     if (document.documentElement.getAttribute("data-storefront-bound") === "true") return;
     document.documentElement.setAttribute("data-storefront-bound", "true");
+    if (window.matchMedia) {
+      var filterMedia = window.matchMedia("(max-width: 600px)");
+      var updateFilters = function () { if (active) syncSearchFilters(); };
+      if (filterMedia.addEventListener) filterMedia.addEventListener("change", updateFilters);
+      else if (filterMedia.addListener) filterMedia.addListener(updateFilters);
+    }
     window.addEventListener("hashchange", function () { if (active) { toggleMenu(false); closeDrops(null); loadCurrent(); } });
     /* Dropdown hygiene: only one panel open at a time, close on outside click,
      * and close on Escape. <details> gives us keyboard opening for free but no
@@ -1325,6 +1445,30 @@
       var thumb = event.target.closest("[data-sf-thumb]");
       if (thumb) { var thumbGallery = thumb.closest(".sf-gallery"); var thumbRoot = thumbGallery && thumbGallery.querySelector("[data-sf-carousel]"); if (thumbRoot) setCarousel(thumbRoot, Number(thumb.getAttribute("data-sf-thumb"))); return; }
       var listing = event.target.closest("[data-sf-listing]");
+      var comparison = event.target.closest("[data-sf-compare], [data-sf-compare-remove]");
+      if (comparison) {
+        event.preventDefault();
+        var selectedId = comparison.getAttribute("data-sf-compare") || comparison.getAttribute("data-sf-compare-remove");
+        var position = compareIds.indexOf(selectedId);
+        if (position >= 0) { compareIds.splice(position, 1); updateCompare("Property removed. " + compareIds.length + " of 2 selected."); }
+        else if (compareIds.length >= 2) updateCompare("You can compare 2 properties. Remove one before adding another.");
+        else { compareIds.push(selectedId); updateCompare("Property added. " + compareIds.length + " of 2 selected."); }
+        if (route().path === "compare") { ++requestId; viewState.loading = false; compareFocused = false; renderCurrent(); }
+        else if (comparison.hasAttribute("data-sf-compare-remove")) { var compareAction = document.querySelector("[data-sf-compare-open]"); if (compareAction && !compareAction.disabled) compareAction.focus(); else { var replacement = document.querySelector("[data-sf-compare]"); if (replacement) replacement.focus(); } }
+        return;
+      }
+      if (event.target.closest("[data-sf-compare-clear]")) {
+        compareIds = []; updateCompare("Comparison cleared.");
+        if (route().path === "compare") {
+          ++requestId; viewState.loading = false; compareFocused = false; renderCurrent();
+        } else {
+          var firstCompare = document.querySelector("[data-sf-compare]") || document.querySelector('[data-sf-search] button[type="submit"]');
+          if (firstCompare) firstCompare.focus({ preventScroll: true });
+        }
+        return;
+      }
+      if (event.target.closest("[data-sf-compare-open]") && compareIds.length === 2) { compareFocused = false; go("compare"); return; }
+      if (event.target.closest("[data-sf-compare-retry]")) { loadCurrent(true); return; }
       if (listing) { go("listing/" + encodeURIComponent(listing.getAttribute("data-sf-listing"))); return; }
       var save = event.target.closest("[data-sf-save]");
       if (save) { sessionStorage.setItem("esrealty_post_auth_favorite", save.getAttribute("data-sf-save")); openAuth("signin"); return; }
@@ -1392,7 +1536,7 @@
           consent: btData.get("consent") === "on"
         }).then(function () {
           btForm.reset();
-          if (btStatus) { btStatus.textContent = "Thanks — your Project B.T inquiry has been received. The ES REALTY team will follow up."; btStatus.className = "bt-form-status success"; }
+          if (btStatus) { btStatus.textContent = "Thanks — your Project B.T inquiry has been received. The SEA ESTATES team will follow up."; btStatus.className = "bt-form-status success"; }
         }).catch(function (error) {
           if (btStatus) { btStatus.textContent = error.message || "Could not send. Please try again."; btStatus.className = "bt-form-status error"; }
         }).finally(function () { btButton.disabled = false; });
@@ -1469,7 +1613,7 @@
           consent: consultData.get("consent") === "on"
         }).then(function () {
           consult.reset();
-          if (consultStatus) { consultStatus.textContent = "Thanks — a member of our team will reach out within one business day."; consultStatus.className = "sf-form-status success"; }
+          if (consultStatus) { consultStatus.textContent = "Your request has been received. The SEA ESTATES team will review your details and follow up using the contact information you provided."; consultStatus.className = "sf-form-status success"; }
         }).catch(function (error) {
           if (consultStatus) { consultStatus.textContent = error.message || "Could not send. Please try again."; consultStatus.className = "sf-form-status error"; }
         }).finally(function () { consultButton.disabled = false; });
@@ -1480,7 +1624,8 @@
   window.ESREALTY_STOREFRONT = {
     mount: function (options) {
       host = options.host; openAuth = options.openAuth || openAuth; active = true;
-      document.body.classList.add("storefront-active", "sf-has-sticky");
+      document.body.classList.remove("sf-has-sticky");
+      document.body.classList.add("storefront-active");
       bind(); loadSiteContact(); loadCurrent();
     },
     unmount: function () {

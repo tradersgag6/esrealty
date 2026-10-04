@@ -146,10 +146,10 @@ For a lead `l` with status `s`, `createdAt`, `updatedAt`, `nextFollowUp`,
 - `market-scan/vercel/api/agent-dispatch.js` (new)
 - `js/app.js` (agent engine + evidence + tabs + bindings; app.min.js rebuilt)
 - `tests/agent_crm_e2e.js` (new)
-- `AGENT_PROMPT.md` (this file)
+- `docs/specs/agent-autopilot.md` (this file)
 
 ### Adjacent feature masters (Phase 0/1, built and gated)
-- `PHASE_0_1_BUILD.md` — the build spec for compliance foundation + lead-gen
+- `docs/specs/phase-0-1-compliance-and-leadgen.md` — the build spec for compliance foundation + lead-gen
   automation whose acceptance is now green.
 - `supabase/ad_posts.sql` — shared Ads repository + RLS (deploy step #4 in
   `DEPLOY_GUIDE.md`).

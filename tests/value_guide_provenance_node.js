@@ -43,28 +43,28 @@ function textOf(bytes) {
 
 /* The sources render as a table, so one logical row is several text runs (the
      instrument label can wrap, and each column is its own run). Segment the
-     page by row boundary - a run that starts a new "APPLIES"/"also in force"
+     page by row boundary - a run that starts a new "APPLIES"/"other imported reference"
      row - rather than assuming one run per cell. */
 function sourceRows(runs) {
   const rows = [];
   let cur = null;
   for (const run of runs) {
-    const isStart = /^\s*(APPLIES|also in force)\b/.test(run);
+    const isStart = /^\s*(APPLIES|other imported reference)\b/.test(run);
     if (isStart) {
-      cur = { flag: /^\s*APPLIES/.test(run) ? "APPLIES" : "also in force", text: "" };
+      cur = { flag: /^\s*APPLIES/.test(run) ? "APPLIES" : "other imported reference", text: "", runs: [] };
       rows.push(cur);
     }
-    if (cur) cur.text += " " + run;
+    if (cur) { cur.text += " " + run; cur.runs.push(run); }
   }
 return rows.map(r => ({
     flag: r.flag,
     text: r.text.replace(/\s+/g, " "),
     instrument: (/Department Order (\d{3}-\d{4})/.exec(r.text) || [])[0] || "",
-    revision: (/\((\w+)\)/.exec(r.text) || [])[1] || "",
+    revision: (/Department Order \d{3}-\d{4}\s*\((\w+)\)/.exec(r.text) || [])[1] || "",
     rdo: (/(RDO \d+)/.exec(r.text) || [])[0] || "",
     /* The Effective column holds a bare date, so match the date itself rather
        than the word "effective" that the old label/value layout included. */
-    eff: (/(\d{4}-\d{2}-\d{2})/.exec(r.text) || [])[0] || ""
+    eff: r.runs.map(value => value.trim()).find(value => /^\d{4}-\d{2}-\d{2}$/.test(value)) || ""
   }));
 }
 
@@ -84,7 +84,7 @@ function chk(n, ok, d) { console.log("  [" + (ok ? "PASS" : "FAIL") + "] " + n +
     const r = await EST.estimate({
       purpose: "Selling", type: "house_lot", municipality: row.name, barangay: best.b,
       streetKey: best.st.streets[0].key, classification: A1.code, area: 300,
-      floorArea: 180, age: 10, floors: 2, corner: true
+      floorArea: 180, ageBand: "6-10", floors: "2", corner: true
     });
     const blob = await VG.toBlob(PDFLib, r, {
       preparedFor: "RDO " + r.rdo + " check", generatedOn: "2026-10-01",
@@ -110,7 +110,7 @@ function chk(n, ok, d) { console.log("  [" + (ok ? "PASS" : "FAIL") + "] " + n +
     chk(town + ": exactly one DO is flagged APPLIES", dos.filter(x => x.flag === "APPLIES").length === 1, "");
 
     const gov = dos.find(x => x.flag === "APPLIES");
-    const non = dos.find(x => x.flag === "also in force");
+    const non = dos.find(x => x.flag === "other imported reference");
     chk(town + " (RDO " + r.rdo + "): governing instrument is " + want, gov && gov.instrument === want, gov ? gov.instrument : "none");
     chk(town + ": governing record is for RDO 0" + r.rdo, gov && gov.rdo === "RDO 0" + r.rdo, gov ? gov.rdo : "none");
     chk(town + ": governing effective date is " + wantEff, gov && gov.eff === wantEff, "");

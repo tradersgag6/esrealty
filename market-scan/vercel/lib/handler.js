@@ -1,6 +1,6 @@
 "use strict";
 
-// Two-tier Market Scan handler (BACKEND_UX_FLOW_REPORT P1). Shared by the Vercel
+// Two-tier Market Scan handler (docs/audits/backend-ux-flow.md P1). Shared by the Vercel
 // function (api/market-scan.js) and the local dev server (server.js) so the
 // cache behavior is tested offline too.
 //

@@ -4,7 +4,7 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
   "use strict";
 
-  // Pure cash-ledger + Portfolio accounting rules for ES Realty.
+  // Pure cash-ledger + Portfolio accounting rules for SEA ESTATES.
   // Dependency-free and browser/Node compatible so backend rules, fixtures,
   // and the upcoming Portfolio UI share one source of truth.
 

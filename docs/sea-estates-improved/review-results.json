@@ -1,0 +1,227 @@
+{
+  "capturedAt": "2026-10-02T03:37:24.593Z",
+  "url": "http://127.0.0.1:8931/docs/sea-estates-improved/index.html#/home",
+  "checks": [
+    {
+      "name": "390: brand and two entry paths",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390: original sections retained",
+      "ok": true,
+      "detail": "[{\"selector\":\".sf-featured\",\"found\":true},{\"selector\":\".sf-guide-summary\",\"found\":true},{\"selector\":\".sf-services\",\"found\":true},{\"selector\":\".sf-process\",\"found\":true},{\"selector\":\".sea-bt-teaser\",\"found\":true},{\"selector\":\"#sf-contact\",\"found\":true},{\"selector\":\".sf-footer\",\"found\":true}]"
+    },
+    {
+      "name": "390: listing inventory present",
+      "ok": true,
+      "detail": "2 cards"
+    },
+    {
+      "name": "390: no page/element overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390: input readability",
+      "ok": true,
+      "detail": "small inputs=0"
+    },
+    {
+      "name": "mobile: both quick-entry paths visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390: calculator compact initially",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390: start opens original mounted calculator",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "768: brand and two entry paths",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "768: original sections retained",
+      "ok": true,
+      "detail": "[{\"selector\":\".sf-featured\",\"found\":true},{\"selector\":\".sf-guide-summary\",\"found\":true},{\"selector\":\".sf-services\",\"found\":true},{\"selector\":\".sf-process\",\"found\":true},{\"selector\":\".sea-bt-teaser\",\"found\":true},{\"selector\":\"#sf-contact\",\"found\":true},{\"selector\":\".sf-footer\",\"found\":true}]"
+    },
+    {
+      "name": "768: listing inventory present",
+      "ok": true,
+      "detail": "2 cards"
+    },
+    {
+      "name": "768: no page/element overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768: input readability",
+      "ok": true,
+      "detail": "small inputs=0"
+    },
+    {
+      "name": "768: calculator compact initially",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "768: start opens original mounted calculator",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1440: brand and two entry paths",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1440: original sections retained",
+      "ok": true,
+      "detail": "[{\"selector\":\".sf-featured\",\"found\":true},{\"selector\":\".sf-guide-summary\",\"found\":true},{\"selector\":\".sf-services\",\"found\":true},{\"selector\":\".sf-process\",\"found\":true},{\"selector\":\".sea-bt-teaser\",\"found\":true},{\"selector\":\"#sf-contact\",\"found\":true},{\"selector\":\".sf-footer\",\"found\":true}]"
+    },
+    {
+      "name": "1440: listing inventory present",
+      "ok": true,
+      "detail": "2 cards"
+    },
+    {
+      "name": "1440: no page/element overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440: input readability",
+      "ok": true,
+      "detail": "small inputs=0"
+    },
+    {
+      "name": "1440: calculator compact initially",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1440: start opens original mounted calculator",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guide: barangay never auto-selected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guide: actual property/ownership stage retained",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guide: original engine reaches real result",
+      "ok": true,
+      "detail": "{\"available\":true,\"integrity\":true,\"reference\":3500,\"total\":2975000,\"sections\":17}"
+    },
+    {
+      "name": "guide: full report sections retained",
+      "ok": true,
+      "detail": "17 sections"
+    },
+    {
+      "name": "guide: Back/render retains real inputs",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guard: write request blocked before network",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guard: in-page storage is isolated",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guard: contact form says nothing submitted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "search: original API route/filter used",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Project B.T.: original Coming Soon retained",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guard: no storage persisted into original",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "preview: zero uncaught JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "preview: zero mutation requests reached network",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "palette: main text contrast",
+      "ok": true,
+      "detail": "12.17:1"
+    },
+    {
+      "name": "palette: secondary text contrast",
+      "ok": true,
+      "detail": "5.48:1"
+    },
+    {
+      "name": "palette: CTA text contrast",
+      "ok": true,
+      "detail": "7.35:1"
+    },
+    {
+      "name": "palette: input border contrast",
+      "ok": true,
+      "detail": "3.73:1"
+    },
+    {
+      "name": "production hashes unchanged",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "captures": [
+    "original-home-390-viewport.png",
+    "original-home-390.png",
+    "improved-home-390-viewport.png",
+    "improved-home-390.png",
+    "improved-calculator-390.png",
+    "original-home-768-viewport.png",
+    "original-home-768.png",
+    "improved-home-768-viewport.png",
+    "improved-home-768.png",
+    "improved-calculator-768.png",
+    "original-home-1440-viewport.png",
+    "original-home-1440.png",
+    "improved-home-1440-viewport.png",
+    "improved-home-1440.png",
+    "improved-calculator-1440.png",
+    "improved-real-result-1440.png"
+  ],
+  "errors": [],
+  "mutations": [],
+  "ok": true
+}

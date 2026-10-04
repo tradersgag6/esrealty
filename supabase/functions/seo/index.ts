@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
     const out = `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
-<title>${esc(l.title)} — ES Realty</title>
+<title>${esc(l.title)} — SEA ESTATES</title>
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${esc(canonicalUrl)}">
 <meta property="og:type" content="website">

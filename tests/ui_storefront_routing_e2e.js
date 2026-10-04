@@ -43,7 +43,7 @@ function chk(n, ok, d) { window.__msChecks.push({ name: n, ok: !!ok, detail: d |
     chk("route-back-home-other-page-gone", !document.querySelector(".sf-cs") && !heroIsShophouse(), "stale page still mounted");
     chk("route-back-home-h1-is-value-guide", (() => {
       const h1 = document.querySelector(".sf-est-hero h1");
-      return !!h1 && h1.textContent.indexOf("property worth?") > 0;
+      return !!h1 && h1.textContent.indexOf("property be worth?") > 0;
     })(), "h1=" + ((document.querySelector(".sf-est-hero h1") || {}).textContent));
     chk("route-back-home-no-shophouse-marquee", !document.querySelector(".sf-marquee"), "marquee=" + !!document.querySelector(".sf-marquee"));
     chk("route-back-home-no-shophouse-why-grid", !document.querySelector(".sf-why-grid"), "whyGrid=" + !!document.querySelector(".sf-why-grid"));

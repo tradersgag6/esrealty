@@ -131,6 +131,27 @@ async function pickLocation() {
     chk("view-opens", q('[data-vg-next="2"]') !== null || /Value Guide/.test(q("#content").textContent),
       "wizard rendered");
 
+    /* ---------- 1b. the three technical decisions are collapsed ---------- */
+    /* They used to be three always-expanded groups (reference status, land
+       planning method, transaction scenario), so an operator read provenance and
+       optional cost fields before the location inputs. One collapsed disclosure
+       states them plainly and keeps every data-vg-set hook reachable. */
+    var vgAbout = q(".vg-about");
+    chk("about-panel-present", !!vgAbout, vgAbout ? "one disclosure" : "absent");
+    chk("about-panel-collapsed-by-default", !!(vgAbout && !vgAbout.open));
+    chk("about-panel-lists-three-facts",
+      !!(vgAbout && qa(".vg-about-facts li").length === 3 && vgAbout.querySelector(".vg-about-facts")),
+      qa(".vg-about-facts li").length + " facts");
+    chk("three-sections-nested-inside",
+      !!(vgAbout && qa(".vg-about > .vg-about-section").length === 3),
+      qa(".vg-about > .vg-about-section").length + " nested sections");
+    chk("reference-callout-preserved", !!q("[data-vg-reference-status]"));
+    chk("inputs-one-click-away",
+      !!(vgAbout && vgAbout.querySelector('[data-vg-set="landMethod"]') && vgAbout.querySelector('[data-vg-set="saleContext"]')));
+    chk("no-regrouped-sibling-land-method",
+      !/class="vg-group-title">Land planning method/.test(q("#content").innerHTML)
+      && !/class="vg-group-title">Transaction scenario/.test(q("#content").innerHTML));
+
     /* ---------- 2. stage 1 gating ---------- */
     EST = window.ESREALTY_EST;
     chk("estimator-available", !!EST, EST ? "ESREALTY_EST loaded" : "missing");
@@ -196,7 +217,7 @@ async function pickLocation() {
     q('[data-vg-next="2"]').click();
     await wait(500);
     chk("stage2-reached", q('[data-vg-next="3"]') !== null, "details screen");
-    chk("stage2-explains-ownership-impact", /25%/.test(q("#content").textContent),
+    chk("stage2-explains-evidence-led-ownership-policy", /No unsupported flat deductions/.test(q("#content").textContent),
       "occupancy impact disclosed");
 
     q('[data-vg-next="3"]').click();

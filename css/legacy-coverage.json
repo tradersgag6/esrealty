@@ -1,6 +1,6 @@
 {
- "capturedAt": "2026-09-27T10:19:16.860Z",
- "total": 677,
+ "capturedAt": "2026-10-02T01:07:53.830Z",
+ "total": 667,
  "live": [
   ".storefront-active",
   ".storefront-active .app-bg",
@@ -31,11 +31,6 @@
   ".sf-main",
   ".sf-eyebrow",
   ".sf-search-intro h1",
-  ".sf-search-form",
-  ".sf-search-form label",
-  ".sf-search-form label span",
-  ".sf-search-form input",
-  ".sf-search-form select",
   ".sf-section",
   ".sf-property-grid",
   ".sf-property-card",
@@ -54,7 +49,6 @@
   ".sf-card-location",
   ".sf-card-meta",
   ".sf-card-meta b",
-  ".sf-skeleton",
   ".sf-hero-actions",
   ".sf-hero-btn",
   ".sf-hero-link",
@@ -73,7 +67,9 @@
   ".sf-cta-band h2 em",
   ".sf-cta-band p",
   ".sf-contact-details",
+  ".sf-contact-details a",
   ".sf-contact-details span",
+  ".sf-contact-details a:hover",
   ".sf-cta-form",
   ".sf-cta-form label",
   ".sf-cta-form input",
@@ -143,11 +139,6 @@
   "[data-theme=\"light\"] .sf-cta-form label",
   "[data-theme=\"light\"] .sf-cta-form input",
   "[data-theme=\"light\"] .sf-cta-form textarea",
-  "[data-theme=\"light\"] .sf-search-form label span",
-  "[data-theme=\"light\"] .sf-search-form input",
-  "[data-theme=\"light\"] .sf-search-form select",
-  "[data-theme=\"light\"] .sf-search-form input:focus",
-  "[data-theme=\"light\"] .sf-search-form select:focus",
   "[data-theme=\"light\"] .sf-primary-btn",
   "[data-theme=\"light\"] .sf-hero-btn",
   "[data-theme=\"light\"] .sf-search-form button",
@@ -163,7 +154,9 @@
   "[data-theme=\"light\"] .sf-link-btn",
   "[data-theme=\"light\"] .sf-link-btn:hover",
   "[data-theme=\"light\"] .sf-brand small",
+  "[data-theme=\"light\"] .sf-contact-details a",
   "[data-theme=\"light\"] .sf-contact-details span",
+  "[data-theme=\"light\"] .sf-contact-details a:hover",
   "[data-theme=\"light\"] .sf-outline-btn",
   "[data-theme=\"light\"] .sf-consent input",
   ".sf-cta .sf-eyebrow",
@@ -179,8 +172,12 @@
   ".sf-search-intro p",
   "[data-theme=\"light\"] .sf-cta-band h2",
   "[data-theme=\"light\"] .sf-save",
+  ".sf-cta-band .sf-contact-details a",
   ".sf-cta-band .sf-contact-details span",
+  "[data-theme=\"light\"] .sf-cta-band .sf-contact-details a",
   "[data-theme=\"light\"] .sf-cta-band .sf-contact-details span",
+  ".sf-cta-band .sf-contact-details a:hover",
+  "[data-theme=\"light\"] .sf-cta-band .sf-contact-details a:hover",
   ".sf-cta-form .sf-consent",
   "[data-theme=\"light\"] .sf-cta-form .sf-consent",
   ".sf-visually-hidden",
@@ -229,12 +226,6 @@
   ".sf-loc-chips",
   ".sf-loc-chips a",
   ".sf-loc-chips a:hover",
-  ".sf-testimonials",
-  ".sf-quote-grid",
-  ".sf-quote",
-  ".sf-quote blockquote",
-  ".sf-quote figcaption b",
-  ".sf-quote figcaption span",
   ".sf-roi",
   ".sf-roi h2",
   ".sf-roi h2 em",
@@ -486,8 +477,6 @@
   ".sf-why-grid > .sf-reveal:nth-child(2)",
   ".sf-why-grid > .sf-reveal:nth-child(3)",
   ".sf-why-grid > .sf-reveal:nth-child(4)",
-  ".sf-quote-grid > .sf-reveal:nth-child(2)",
-  ".sf-quote-grid > .sf-reveal:nth-child(3)",
   ".sf-roi-stats > .sf-reveal:nth-child(2)",
   ".sf-roi-stats > .sf-reveal:nth-child(3)",
   ".sf-hero-copy > *",
@@ -504,7 +493,6 @@
   ".sf-guide button::after",
   ".sf-guide button:hover::after",
   ".sf-why-card:hover",
-  ".sf-quote:hover",
   ".sf-guide:hover",
   ".sf-why-card::before",
   ".sf-why-card:hover::before",
@@ -526,11 +514,9 @@
   "[data-theme=\"light\"] .sf-guide .sf-eyebrow",
   ".sf-hero .sf-eyebrow",
   ".sf-locations .sf-eyebrow",
-  ".sf-testimonials .sf-eyebrow",
   ".sf-detail .sf-eyebrow",
   "[data-theme=\"light\"] .sf-hero .sf-eyebrow",
   "[data-theme=\"light\"] .sf-locations .sf-eyebrow",
-  "[data-theme=\"light\"] .sf-testimonials .sf-eyebrow",
   "[data-theme=\"light\"] .sf-detail .sf-eyebrow",
   "[data-theme=\"light\"] .sf-floating-stat span",
   ".sf-why .sf-why-card h3",
@@ -565,11 +551,88 @@
   ".bt-inquiry-form .sf-consent input"
  ],
  "trulyDead": [
+  ".sf-testimonials",
+  ".sf-quote-grid",
+  ".sf-quote",
+  ".sf-quote blockquote",
+  ".sf-quote figcaption b",
+  ".sf-quote figcaption span",
+  ".sf-quote-grid > .sf-reveal:nth-child(2)",
+  ".sf-quote-grid > .sf-reveal:nth-child(3)",
+  ".sf-quote:hover",
+  ".sf-testimonials .sf-eyebrow",
+  "[data-theme=\"light\"] .sf-testimonials .sf-eyebrow",
   ".bt-cta-form .sf-consent input",
   ".sf-values",
   ".sf-values > div"
  ],
  "trulyDeadDetail": [
+  {
+   "sel": ".sf-testimonials",
+   "neverEmitted": [
+    "sf-testimonials"
+   ]
+  },
+  {
+   "sel": ".sf-quote-grid",
+   "neverEmitted": [
+    "sf-quote-grid"
+   ]
+  },
+  {
+   "sel": ".sf-quote",
+   "neverEmitted": [
+    "sf-quote"
+   ]
+  },
+  {
+   "sel": ".sf-quote blockquote",
+   "neverEmitted": [
+    "sf-quote"
+   ]
+  },
+  {
+   "sel": ".sf-quote figcaption b",
+   "neverEmitted": [
+    "sf-quote"
+   ]
+  },
+  {
+   "sel": ".sf-quote figcaption span",
+   "neverEmitted": [
+    "sf-quote"
+   ]
+  },
+  {
+   "sel": ".sf-quote-grid > .sf-reveal:nth-child(2)",
+   "neverEmitted": [
+    "sf-quote-grid"
+   ]
+  },
+  {
+   "sel": ".sf-quote-grid > .sf-reveal:nth-child(3)",
+   "neverEmitted": [
+    "sf-quote-grid"
+   ]
+  },
+  {
+   "sel": ".sf-quote:hover",
+   "neverEmitted": [
+    "sf-quote"
+   ]
+  },
+  {
+   "sel": ".sf-testimonials .sf-eyebrow",
+   "neverEmitted": [
+    "sf-testimonials"
+   ]
+  },
+  {
+   "sel": "[data-theme=\"light\"] .sf-testimonials .sf-eyebrow",
+   "neverEmitted": [
+    "sf-testimonials"
+   ]
+  },
   {
    "sel": ".bt-cta-form .sf-consent input",
    "neverEmitted": [
@@ -605,8 +668,7 @@
   ".sf-car-dots",
   ".sf-car-dots button",
   ".sf-car-count",
-  ".sf-contact-details a",
-  ".sf-contact-details a:hover",
+  ".sf-skeleton",
   ".sf-gallery",
   ".sf-gallery-stage",
   ".sf-gallery-stage .sf-slide img",
@@ -693,14 +755,8 @@
   ".sf-price-pin",
   ".sf-price-pin:hover",
   "body .sf-cta-form select",
-  "[data-theme=\"light\"] .sf-contact-details a",
-  "[data-theme=\"light\"] .sf-contact-details a:hover",
   "[data-theme=\"light\"] .sf-construction-heading .sf-eyebrow",
   "[data-theme=\"light\"] .sf-car-count",
-  ".sf-cta-band .sf-contact-details a",
-  "[data-theme=\"light\"] .sf-cta-band .sf-contact-details a",
-  ".sf-cta-band .sf-contact-details a:hover",
-  "[data-theme=\"light\"] .sf-cta-band .sf-contact-details a:hover",
   ".sf-construction-heading p",
   ".sf-why-shop .sf-construction-labels span",
   ".sf-why-equation > span",

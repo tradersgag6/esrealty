@@ -1,5 +1,5 @@
 /* ============================================================
-   ES Realty — Batangas Value Guide (v3)
+   SEA ESTATES — Batangas Value Guide (v3)
    Pure Node-testable math core over the official BIR import
    + 4-screen funnel UI (Phase 4).
 
@@ -15,6 +15,10 @@
   "use strict";
 
   var servicesBound = false;
+  var mountedHome = false, calculationRequest = 0;
+  var finance = typeof module === "object" && module.exports ? require("./value_guide_finance.js") : window.ESREALTY_FINANCE;
+  var evidence = typeof module === "object" && module.exports ? require("./value_guide_evidence.js") : window.ESREALTY_EVIDENCE;
+  var referenceTools = typeof module === "object" && module.exports ? require("./value_guide_reference.js") : window.ESREALTY_REFERENCE;
 
   /* ---------------------------------------------------------- */
   /*  normalization / classification mapping                     */
@@ -53,69 +57,18 @@
   }
 
   function normalizeComparable(raw, sourceType) {
-    raw = raw && typeof raw === "object" ? raw : {};
-    var price = Number(raw.price != null ? raw.price : (raw.display_price != null ? raw.display_price : raw.askingPrice));
-    var lotArea = Number(raw.lotArea != null ? raw.lotArea : (raw.lot_size_sqm != null ? raw.lot_size_sqm : raw.lot_size));
-    var floorArea = Number(raw.floorArea != null ? raw.floorArea : (raw.floor_area_sqm != null ? raw.floor_area_sqm : raw.floor_area));
-    if (!(price > 0) || !(lotArea > 0)) return null;
-    var source = sourceType || raw.sourceType || "unknown";
-    var type = normKey(raw.propertyType != null ? raw.propertyType : raw.property_type);
-    if (/HOUSE|HOME/.test(type)) type = "HOUSE_LOT";
-    else if (/LOT|LAND/.test(type)) type = "VACANT_LOT";
-    var offer = normKey(raw.offerType != null ? raw.offerType : raw.offer_type);
-    if (offer && offer !== "SALE" && offer !== "FOR SALE") return null;
-    return {
-      id: String(raw.id || raw.listingId || raw.url || "").slice(0, 160),
-      source: String(source).slice(0, 80),
-      sourceUrl: String(raw.sourceUrl || raw.source_url || raw.url || "").slice(0, 500),
-      retrievedAt: String(raw.retrievedAt || raw.retrieved_at || "").slice(0, 40),
-      municipality: normKey(raw.municipality || raw.city || raw.town),
-      barangay: normKey(raw.barangay),
-      propertyType: type,
-      price: Math.round(price),
-      lotArea: Math.round(lotArea * 100) / 100,
-      floorArea: floorArea > 0 ? Math.round(floorArea * 100) / 100 : 0,
-      pricePerSqm: Math.round(price / lotArea),
-      isAskingPrice: source !== "ES Realty transaction"
-    };
+    return evidence.normalize(raw, sourceType);
   }
 
   function comparableSummary(records, opts) {
-    opts = opts || {};
-    var normalized = (records || []).map(function (item) {
-      return item && item.pricePerSqm ? item : normalizeComparable(item, opts.sourceType);
-    }).filter(Boolean);
-    var wantedMunicipality = normKey(opts.municipality);
-    var wantedBarangay = normKey(opts.barangay);
-    var wantedType = normKey(opts.propertyType).replace(/-/g, "_");
-    normalized = normalized.filter(function (item) {
-      if (normKey(item.municipality) !== wantedMunicipality) return false;
-      if (wantedBarangay && item.barangay && normKey(item.barangay) !== wantedBarangay) return false;
-      if (wantedType && item.propertyType && item.propertyType !== wantedType) return false;
-      return true;
-    }).sort(function (a, b) {
-      var aLocal = normKey(a.barangay) === wantedBarangay ? 0 : 1;
-      var bLocal = normKey(b.barangay) === wantedBarangay ? 0 : 1;
-      return aLocal - bLocal;
-    }).slice(0, 8);
-    var values = normalized.map(function (item) { return item.pricePerSqm; }).sort(function (a, b) { return a - b; });
-    var median = values.length ? values[Math.floor((values.length - 1) / 2)] : 0;
-    var sources = [];
-    normalized.forEach(function (item) { if (sources.indexOf(item.source) === -1) sources.push(item.source); });
-    return {
-      count: normalized.length,
-      medianPricePerSqm: median,
-      sourceType: sources.join(", "),
-      records: normalized,
-      status: normalized.length ? "evidence-available" : "no-comparable-data"
-    };
+    return evidence.summary(records, opts);
   }
 
   var DEPTH_META = {
     1: { level: "street", pct: 0.95, rangePct: 0.05, label: "Exact BIR street value" },
     2: { level: "barangay-other", pct: 0.85, rangePct: 0.10, label: "Barangay all-other-streets value" },
-    3: { level: "municipality", pct: 0.70, rangePct: 0.20, label: "Municipality average" },
-    4: { level: "province", pct: 0.55, rangePct: 0.30, label: "Batangas province average" }
+    3: { level: "municipality", pct: 0.70, rangePct: 0.20, label: "Municipality median" },
+    4: { level: "province", pct: 0.55, rangePct: 0.30, label: "Batangas province median" }
   };
 
   function metaFor(depth) {
@@ -171,15 +124,26 @@
      a helper nested inside computeEstimate was unreachable from there. */
   function cfgVersion(c) { return (c && c.calculationVersion) || "unknown"; }
   function dataVersionOf(i) { return (i && i.dataVersion) || "unknown"; }
+  function unavailableResult(reason, config, index) {
+    return { available: false, reason: reason, calculationVersion: cfgVersion(config), dataVersion: dataVersionOf(index) };
+  }
 
   function computeEstimate(config, index, muniData, opts) {
     var unavailable = function (reason) {
-      return { available: false, reason: reason, calculationVersion: cfgVersion(config), dataVersion: dataVersionOf(index) };
+      return unavailableResult(reason, config, index);
     };
 
     var area = Number(opts && opts.area);
     if (!(area > 0)) return unavailable("no-area");
+    if (!isFinite(area) || area < 20 || area > 100000) return unavailable("invalid-area");
     if (!config || !index || !muniData || !muniData.barangays) return unavailable("data-integrity");
+    opts = opts || {};
+    if (opts.type && ["house_lot", "vacant_lot"].indexOf(opts.type) === -1) return unavailable("invalid-type");
+    if (opts.salePrice != null && (!isFinite(Number(opts.salePrice)) || Number(opts.salePrice) < 0 || Number(opts.salePrice) > 1000000000)) return unavailable("invalid-price");
+    if (opts.saleContext && ["private-resale", "developer", "unknown"].indexOf(opts.saleContext) === -1) return unavailable("invalid-sale-context");
+    if ((opts.developerFees != null && (!isFinite(Number(opts.developerFees)) || Number(opts.developerFees) < 0)) || (opts.brokerPct != null && (!isFinite(Number(opts.brokerPct)) || Number(opts.brokerPct) < 0 || Number(opts.brokerPct) > 1))) return unavailable("invalid-costs");
+    var ownershipOptions = { occupancy: ["empty", "caretaker", "tenants", "informal_settlers", "not_sure"], titleStatus: ["titled_self", "titled_previous", "tax_declaration", "not_sure"], inheritanceStatus: ["not_inherited", "settled", "pending", "not_sure"] };
+    if (Object.keys(ownershipOptions).some(function (key) { return opts[key] && ownershipOptions[key].indexOf(opts[key]) === -1; })) return unavailable("invalid-ownership");
 
     var muniRow = null;
     var wanted = normKey(opts.municipality);
@@ -188,6 +152,8 @@
       if (normKey(munis[i].name) === wanted) { muniRow = munis[i]; break; }
     }
     if (!muniRow) return unavailable("municipality-not-found");
+    var landMethod = opts.landMethod || "factor";
+    if (["factor", "time-indexed"].indexOf(landMethod) === -1 || (opts.timeSource && ["manual", "evidence"].indexOf(opts.timeSource) === -1)) return unavailable("invalid-land-method");
 
     var cls = normKey(opts.classification);
     var sel = { barangay: opts.barangay, streetKey: opts.streetKey, classification: cls };
@@ -205,6 +171,7 @@
     var band = bandMid(cfg, use);
     var adj = regionalAdj(cfg);
     var base = hit.value;
+    var referenceVerification = referenceTools.lookup(config.governmentReferenceRegister, muniRow.rdo, muniRow.name, opts.valuationDate || new Date().toISOString().slice(0, 10));
     var birZonalRatePerSqm = Math.round(base);
     var birZonalValue = Math.round(birZonalRatePerSqm * area);
     var typeKey = opts.type === "house_lot" ? "house_lot" : "vacant_lot";
@@ -212,7 +179,10 @@
       municipality: opts && opts.municipality,
       barangay: opts && opts.barangay,
       propertyType: typeKey,
-      sourceType: opts && opts.comparableSource
+      sourceType: opts && opts.comparableSource,
+      useGroup: useOfClassification(config, cls),
+      area: area, floorArea: Number(opts.floorArea) || 0, corner: !!opts.corner,
+      saleContext: opts.saleContext || "private-resale", condition: opts.condition || "unknown", valuationDate: opts.valuationDate
     });
     // Restore the original preview calculation. Comparable listings are
     // reported as supporting context, but are not direct inputs to this
@@ -221,21 +191,33 @@
     // silently capped to an arbitrary BIR multiple.
     var landPerSqm = Math.round(base * (1 + cornerPct) * proxy * band * adj);
     var landValue = Math.round(landPerSqm * area);
+    var factorLandValue = landValue;
+    var timeIndex = null;
+    if (landMethod === "time-indexed") {
+      timeIndex = referenceTools.timeScenario(base, area, { baseDate: opts.timeBaseDate || muniRow.effectivityDate, targetDate: opts.timeTargetDate, annualPct: opts.timeAnnualPct, source: opts.timeSource || "manual", evidenceId: opts.timeEvidenceId }, config.governmentReferenceRegister, { municipality: muniRow.name, useGroup: use });
+      if (!timeIndex.available) return unavailable(timeIndex.reason);
+      landPerSqm = timeIndex.rawRate; landValue = timeIndex.landAmount;
+    }
 
     var typeDef = (cfg.propertyTypes && cfg.propertyTypes[typeKey]) || { label: typeKey, kind: "land" };
     var kind = typeDef.kind === "built" ? "built" : "land";
 
     var floorArea = 0, floorsMult = 1, ageMid = 0, depPct = 0, buildCost = 0, improvement = 0, featuresTotal = 0, featuresUsed = [];
     if (kind === "built") {
+      if (!isFinite(Number(opts.floorArea || 0)) || Number(opts.floorArea) < 0 || Number(opts.floorArea) > 100000) return unavailable("invalid-floor-area");
+      if (opts.construction && !cfg.construction[opts.construction]) return unavailable("invalid-construction");
+      if (opts.floors != null && !(cfg.floors || []).some(function (f) { return f.key === String(opts.floors); })) return unavailable("invalid-storeys");
+      if (opts.ageBand && !(cfg.ageBands || []).some(function (b) { return b.key === opts.ageBand; })) return unavailable("invalid-age");
+      if (opts.features && (!Array.isArray(opts.features) || opts.features.some(function (key) { return !Object.prototype.hasOwnProperty.call(cfg.features || {}, key); }))) return unavailable("invalid-features");
       var fDef = Number(typeDef.floorDefaultRatio) > 0 ? typeDef.floorDefaultRatio : 0.6;
-      floorArea = Number(opts.floorArea) > 0 ? Math.round(Number(opts.floorArea)) : Math.round(area * fDef);
-      var floors = (cfg.floors || []).filter(function (f) { return f.key === (opts.floors || "1"); })[0];
+      floorArea = Math.round((Number(opts.floorArea) > 0 ? Number(opts.floorArea) : area * fDef) * 100) / 100;
+      var floors = (cfg.floors || []).filter(function (f) { return f.key === String(opts.floors || "1"); })[0];
       floorsMult = (floors && floors.multiplier) || 1;
       var ab = (cfg.ageBands || []).filter(function (b) { return b.key === (opts.ageBand || "0-5"); })[0];
       ageMid = (ab && ab.midpoint) || 2.5;
       var life = (cfg.depreciation && cfg.depreciation.lifeYears) || 40;
       var maxDep = (cfg.depreciation && cfg.depreciation.maxPct) || 0.95;
-      depPct = Math.round(Math.min(ageMid / life, maxDep) * 100) / 100;
+      depPct = Math.min(ageMid / life, maxDep);
       var cons = cfg.construction ? cfg.construction[(opts.construction || "mixed_chb")] : null;
       buildCost = (cons && cons.costPerSqm) || 25000;
       featuresTotal = 0;
@@ -243,17 +225,25 @@
       var feats = cfg.features || {};
       (opts.features || []).forEach(function (fk) {
         var fdef = feats[fk];
-        if (fdef && isFiniteNum(fdef.cost)) { featuresTotal += fdef.cost; featuresUsed.push(fk); }
+        if (fdef && isFiniteNum(fdef.cost) && featuresUsed.indexOf(fk) === -1) { featuresTotal += fdef.cost; featuresUsed.push(fk); }
       });
       improvement = Math.round(buildCost * floorArea * floorsMult * (1 - depPct)) + featuresTotal;
     }
 
-    var ownershipAdjustmentPct = ownershipRiskPct(opts);
+    var ownershipAdjustmentPct = 0;
+    var legacyOwnershipScenarioPct = ownershipRiskPct(opts);
+    var knownRisk = legacyOwnershipScenarioPct > 0 || opts.floodRisk === "High" || opts.roadAccess === "No direct road access";
+    if (knownRisk && comps.askingIndication) {
+      comps.askingIndication = null;
+      comps.status = "context-only-unmatched-property-risk";
+      comps.rejected.push({ id: "Subject property", reasons: ["Known possession/title/hazard/access differences require supported matching or professional review"] });
+    }
     var unadjustedTotal = landValue + improvement;
     var total = Math.round(unadjustedTotal * (1 - ownershipAdjustmentPct / 100));
-    var rangePct = meta.rangePct;
-    var low = Math.round(total * (1 - rangePct));
-    var high = Math.round(total * (1 + rangePct));
+    var rangeLowFactor = 0.85, rangeHighFactor = 1.30;
+    var rangePct = 0.30; // compatibility field; new range is asymmetric
+    var low = Math.round(total * rangeLowFactor);
+    var high = Math.round(total * rangeHighFactor);
     var perSqm = Math.round(total / area);
 
     if (!isFiniteNum(landValue) || !isFiniteNum(total) || !isFiniteNum(perSqm)) {
@@ -281,29 +271,49 @@
       classification: cls,
       classificationLabel: clsLabel,
       purpose: opts.purpose || "",
+      stage: opts.stage || "",
       type: typeKey,
       typeLabel: typeDef.label,
       kind: kind,
       use: use,
-      corner: { applied: !!opts.corner, pct: cornerPct },
+      corner: { applied: landMethod === "factor" && !!opts.corner, pct: landMethod === "factor" ? cornerPct : 0, recorded: !!opts.corner },
+      landMethod: landMethod,
+      planningMethodLabel: landMethod === "time-indexed" ? "Indexed-reference planning scenario" : "Factor-based planning estimate",
+      timeIndex: timeIndex,
+      factorBaseline: { landValue: factorLandValue, total: factorLandValue + improvement, selected: landMethod === "factor" },
+      referenceVerification: referenceVerification,
       source: { level: meta.level, depth: hit.depth, pct: meta.pct, label: meta.label, count: hit.count, referencable: hit.streetName || "" },
+      birReferenceConfirmed: hit.depth <= 2,
+      birReferenceLabel: hit.depth <= 2 ? "Official BIR zonal reference" : "Derived " + meta.level + " median reference (parcel rate unconfirmed)",
+      taxReferenceValue: hit.depth <= 2 ? birZonalValue : 0,
       reference: {
         value: base,
-        schedule: muniRow.departmentOrder + " (" + (muniRow.revision || "") + "), effective " + muniRow.effectivityDate,
+        verification: referenceVerification,
+        schedule: hit.depth === 4 ? "Derived province median across RDO 58 and 59; parcel schedule unconfirmed" : (hit.depth === 3 ? "Derived municipality median; underlying " : "") + muniRow.departmentOrder + " (" + (muniRow.revision || "") + "), effective " + muniRow.effectivityDate,
         rdo: muniRow.rdo
       },
       factors: { proxyFactor: proxy, bandMid: band, regionalAdj: adj },
+      factorSettingsVersion: cfg.factorSettingsVersion || cfg.calculationVersion,
       marketGuide: {
         value: total,
         landValue: landValue,
         ratePerSqm: landPerSqm,
-        sourceType: comps.count ? comps.sourceType : ((config.marketGuide && config.marketGuide.sourceType) || "ES Realty approved factors"),
+        sourceType: comps.count ? comps.sourceType : ((config.marketGuide && config.marketGuide.sourceType) || "SEA ESTATES approved factors"),
         comparableCount: comps.count,
         comparableMedianPricePerSqm: comps.medianPricePerSqm,
         status: comps.count ? "factor-based-with-listing-context" : "factor-based-no-comparable-data",
         comparablePricesUsed: false
       },
       ownershipAdjustmentPct: ownershipAdjustmentPct,
+      legacyOwnershipScenario: { pct: legacyOwnershipScenarioPct, value: Math.round(unadjustedTotal * (1 - legacyOwnershipScenarioPct / 100)), applied: false, basis: "Historical uncalibrated deduction; not applied to the neutral planning estimate" },
+      ownership: { occupancy: opts.occupancy || "not_sure", titleStatus: opts.titleStatus || "not_sure", inheritanceStatus: opts.inheritanceStatus || "not_sure" },
+      siteReview: { community: opts.community || "not stated", floodRisk: opts.floodRisk || "not stated", roadAccess: opts.roadAccess || "not stated", frontage: opts.frontage || "not stated" },
+      reviewFlags: [opts.occupancy || "not_sure", opts.titleStatus || "not_sure", opts.inheritanceStatus || "not_sure"].filter(function (v) { return ["empty", "titled_self", "not_inherited", "settled"].indexOf(v) === -1; }),
+      conditions: "Conditional planning figure; title, possession, condition and legal access remain unverified. No unsupported ownership discount applied.",
+      saleContext: opts.saleContext || "private-resale",
+      condition: opts.condition || "unknown",
+      costOptions: { saleContext: opts.saleContext || "private-resale", developerFees: opts.developerFees, brokerPct: opts.brokerPct, notarial: opts.notarial, fairMarketValue: opts.fairMarketValue, costAllocation: opts.costAllocation },
+      askingIndication: comps.askingIndication,
       unadjustedTotal: unadjustedTotal,
       birZonalRatePerSqm: birZonalRatePerSqm,
       birZonalValue: birZonalValue,
@@ -317,14 +327,19 @@
       floorArea: floorArea,
       floorsMultiplier: floorsMult,
       ageMidpoint: ageMid,
-      depreciatedPct: Math.round(depPct * 100),
+      depreciatedPct: Math.round(depPct * 10000) / 100,
       buildCostPerSqm: buildCost,
+      construction: opts.construction || "mixed_chb",
+      constructionLabel: labelFor(cfg, "construction", opts.construction || "mixed_chb"),
       improvement: improvement,
       featuresUsed: featuresUsed,
       featuresTotal: featuresTotal,
       total: total,
       perSqm: perSqm,
       rangePct: rangePct,
+      rangeLowFactor: rangeLowFactor,
+      rangeHighFactor: rangeHighFactor,
+      rangeMethod: "85%-130% planning scenarios; not a statistical confidence interval",
       low: low,
       high: high,
       salePrice: salePrice,
@@ -356,49 +371,13 @@
   }
 
   function taxMath(config, total, opts) {
-    var t = (config && config.tax) || {};
-    opts = opts || {};
-    var guide = Object.prototype.hasOwnProperty.call(opts, "marketGuideEstimate")
-      ? (Number(opts.marketGuideEstimate) > 0 ? Number(opts.marketGuideEstimate) : 0)
-      : (Number(total) || 0);
-    var zonal = Number(opts.birZonalValue) > 0 ? Number(opts.birZonalValue) : 0;
-    var fair = Number(opts.fairMarketValue) > 0 ? Number(opts.fairMarketValue) : 0;
-    var sale = Number(opts.salePrice) > 0 ? Number(opts.salePrice) : 0;
-    var candidates = [
-      { value: sale, basis: "Selling price" },
-      { value: fair, basis: "Fair market value" },
-      { value: zonal, basis: "BIR zonal value" },
-      { value: guide, basis: "ES Realty market guide estimate (illustrative)" }
-    ].filter(function (x) { return x.value > 0; });
-    if (!candidates.length) candidates.push({ value: 0, basis: "No tax base available" });
-    var selected = candidates.reduce(function (best, item) {
-      return item.value > best.value ? item : best;
-    });
-    var base = Math.round(selected.value);
-    var cgt = Math.round(base * (t.cgtPct || 0.06));
-    var dst = Math.round(base * (t.dstPct || 0.015));
-    var transfer = Math.round(base * (t.transferPct || 0.005));
-    var reg = Math.round(base * (t.registrationPct || 0.001));
-    var transactionPrice = sale > 0 ? sale : (Number(opts.transactionPrice) > 0 ? Number(opts.transactionPrice) : 0);
-    var broker = Math.round(transactionPrice * (t.brokerPct || 0.03));
-    var sellerCosts = cgt + broker;
-    var buyerCosts = dst + transfer + reg;
-    return {
-      base: base,
-      baseBasis: selected.basis,
-      cgt: cgt,
-      dst: dst,
-      transfer: transfer,
-      registration: reg,
-      broker: broker,
-      brokerPct: t.brokerPct || 0.03,
-      sellerCosts: sellerCosts,
-      buyerCosts: buyerCosts,
-      sellerNetProceeds: sale > 0 ? sale - sellerCosts : null,
-      projectedTransactionPrice: transactionPrice,
-      projectedNetProceeds: transactionPrice > 0 ? transactionPrice - sellerCosts : null,
-      total: cgt + dst + transfer + reg
-    };
+    return finance.transaction(config, total, opts);
+  }
+  function costsFor(result, config) {
+    return finance.transaction(config, result.total, Object.assign({}, result.costOptions || {}, {
+      salePrice: result.salePrice, transactionPrice: result.marketGuideEstimate, marketGuideEstimate: result.marketGuideEstimate,
+      birZonalValue: result.taxReferenceValue != null ? result.taxReferenceValue : result.birZonalValue
+    }));
   }
 
   function integrityCheck(result) {
@@ -406,14 +385,16 @@
     var adjustedBase = result.landValue + result.improvement;
     var expectedTotal = Math.round(adjustedBase * (1 - Number(result.ownershipAdjustmentPct || 0) / 100));
     var sums = expectedTotal === result.total;
-    var range = result.total * (1 - result.rangePct) === result.low &&
-        result.total * (1 + result.rangePct) === result.high;
+    var range = Math.round(result.total * (result.rangeLowFactor || .85)) === result.low &&
+        Math.round(result.total * (result.rangeHighFactor || 1.30)) === result.high;
+    var finite = isFiniteNum(result.total) && isFiniteNum(result.low) && isFiniteNum(result.high);
+    var perSqm = Math.round(result.total / result.area) === result.perSqm;
     return {
-      ok: sums,
+      ok: sums && range && finite && perSqm,
       sumsMatch: sums,
       rangeMatch: range,
-      finite: isFiniteNum(result.total) && isFiniteNum(result.low) && isFiniteNum(result.high),
-      perSqmMatches: Math.round(result.total / result.area) === result.perSqm
+      finite: finite,
+      perSqmMatches: perSqm
     };
   }
 
@@ -426,7 +407,10 @@
     metaFor: metaFor,
     resolveBase: resolveBase,
     computeEstimate: computeEstimate,
+    applyGuideSettings: applyGuideSettings,
     taxMath: taxMath,
+    costsFor: costsFor,
+    referenceTools: referenceTools,
     normalizeComparable: normalizeComparable,
     comparableSummary: comparableSummary,
     integrityCheck: integrityCheck
@@ -447,7 +431,7 @@
       };
 
   function fmt(n) {
-    return new Intl.NumberFormat("en-PH", { maximumFractionDigits: 0 }).format(Math.round(n || 0));
+    return new Intl.NumberFormat("en-PH", { maximumFractionDigits: 2 }).format(Number(n || 0));
   }
 
   function money(n) {
@@ -456,7 +440,7 @@
 
   function labelFor(config, kind, key) {
     var m = (config && config[kind]) || {};
-    var it = m[key];
+    var it = Array.isArray(m) ? m.filter(function (item) { return item.key === key; })[0] : m[key];
     return (it && it.label) ? it.label : String(key || "");
   }
 
@@ -491,7 +475,7 @@
   }
 
   function applyGuideSettings(config, payload) {
-    var guide = payload && payload.valueGuide;
+    var guide = payload && (payload.data || payload).valueGuide;
     if (!guide) return config;
     var out = JSON.parse(JSON.stringify(config));
     var proxy = guide.proxyFactors || {};
@@ -504,8 +488,14 @@
     Object.keys(construction).forEach(function (key) {
       if (out.construction && out.construction[key] && Number(construction[key]) > 0) out.construction[key].costPerSqm = Number(construction[key]);
     });
-    if (guide.version) out.calculationVersion = String(guide.version);
+    if (guide.version) out.factorSettingsVersion = String(guide.version);
     return out;
+  }
+
+  function updateGuideSettings(guide) {
+    if (!DATA || !guide || !guide.approvedBy || !guide.approvedAt) return;
+    DATA = { config: applyGuideSettings(DATA.config, { valueGuide: guide }), index: DATA.index, manifest: DATA.manifest, projectEvidence: DATA.projectEvidence };
+    dataPromise = Promise.resolve(DATA);
   }
 
   function loadData(force) {
@@ -514,9 +504,12 @@
       loadJSON("data/zonal-config.json"),
       loadJSON("data/batangas-zonal.json"),
       loadOptionalGuideSettings(),
-      loadJSON("data/data-manifest.json").catch(function () { return null; })
+      loadJSON("data/data-manifest.json").catch(function () { return null; }),
+      loadJSON("data/value-guide-project-evidence.json").catch(function () { return { records: [], unavailable: true }; }),
+      loadJSON("data/government-reference-register.json").catch(function () { return { records: [], unavailable: true }; })
     ]).then(function (parts) {
-      DATA = { config: applyGuideSettings(parts[0], parts[2]), index: parts[1], manifest: parts[3] };
+      DATA = { config: applyGuideSettings(parts[0], parts[2]), index: parts[1], manifest: parts[3], projectEvidence: parts[4] };
+      DATA.config.governmentReferenceRegister = parts[5];
       return DATA;
     });
     return dataPromise;
@@ -526,7 +519,7 @@
     slug = String(slug || "").toLowerCase();
     if (!slug) return Promise.reject(new Error("no municipality"));
     if (muniCache[slug]) return muniCache[slug];
-    muniCache[slug] = loadJSON("data/bir-batangas/municipalities/" + slug + ".json");
+    muniCache[slug] = loadJSON("data/bir-batangas/municipalities/" + slug + ".json").catch(function (error) { delete muniCache[slug]; throw error; });
     return muniCache[slug];
   }
 
@@ -542,9 +535,10 @@
       sort: "date_desc"
     };
     var request = window.ESREALTY_LISTINGS_API.list(filters).then(function (result) {
-      return result && Array.isArray(result.data) ? result.data : [];
-    }).catch(function () { return []; });
-    var timeout = new Promise(function (resolve) { setTimeout(function () { resolve([]); }, 900); });
+      var rows = result && Array.isArray(result.data) ? result.data.slice() : [];
+      rows.retrievalStatus = { source: "SEA ESTATES catalog", status: rows.length ? "returned" : "no-records" }; return rows;
+    }).catch(function () { var rows = []; rows.retrievalStatus = { source: "SEA ESTATES catalog", status: "unavailable" }; return rows; });
+    var timeout = new Promise(function (resolve) { setTimeout(function () { var rows = []; rows.retrievalStatus = { source: "SEA ESTATES catalog", status: "timeout" }; resolve(rows); }, 2500); });
     return Promise.race([request, timeout]);
   }
 
@@ -559,14 +553,14 @@
       live: "true"
     });
     var request = fetch(base + "/api/market-scan?" + query.toString(), { credentials: "omit" })
-      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (r) { if (!r.ok) throw new Error("Evidence source unavailable"); return r.json(); })
       .then(function (result) {
-        return result && Array.isArray(result.listings) ? result.listings.map(function (item) {
-          item.sourceType = "External web evidence · " + (item.sourceLabel || item.source || "market scan");
-          return item;
+        var rows = result && Array.isArray(result.listings) ? result.listings.map(function (item) {
+          return Object.assign({}, item, { sourceType: "External web evidence · " + (item.sourceLabel || item.source || "market scan") });
         }) : [];
-      }).catch(function () { return []; });
-    var timeout = new Promise(function (resolve) { setTimeout(function () { resolve([]); }, 1500); });
+        rows.retrievalStatus = { source: "External asking search", status: rows.length ? "returned" : "no-records" }; return rows;
+      }).catch(function () { var rows = []; rows.retrievalStatus = { source: "External asking search", status: "unavailable" }; return rows; });
+    var timeout = new Promise(function (resolve) { setTimeout(function () { var rows = []; rows.retrievalStatus = { source: "External asking search", status: "timeout" }; resolve(rows); }, 7500); });
     return Promise.race([request, timeout]);
   }
 
@@ -576,6 +570,7 @@
 
   var est = {
     screen: 1,
+    validationIssue: null,
     purpose: "Selling",
     stage: "",
     type: "vacant_lot",
@@ -592,6 +587,13 @@
     inheritanceStatus: "",
     area: null,
     salePrice: null,
+    landMethod: "factor", timeSource: "manual", timeAnnualPct: null, timeBaseDate: "", timeTargetDate: new Date().toISOString().slice(0, 10), timeEvidenceId: "",
+    saleContext: "private-resale",
+    developerFees: null,
+    brokerPct: .03,
+    notarial: null,
+    fairMarketValue: null,
+    condition: "unknown",
     corner: false,
     floorArea: "",
     construction: "mixed_chb",
@@ -607,7 +609,13 @@
     pricingUnlocked: false,
     leadSubmitted: false,
     muniData: null,
-    muniLoading: false
+    muniLoading: false,
+    /* Which "about this estimate" disclosures the reader opened. Screen 1 is
+       re-rendered on every purpose/type/municipality/street/classification
+       change, and a re-render rebuilds the markup from this map. Without it a
+       reader who opened the reference panel and then changed barangay lost the
+       panel mid-read and had to hunt for it again. */
+    openPanels: {}
   };
 
   /* ---------------------------------------------------------- */
@@ -730,10 +738,120 @@
     return '<div class="sf-est-locator"><span>' + bits.join(" · ") + "</span></div>";
   }
 
+/* Opening a disclosure that lives inside another closed <details> changes
+     nothing on screen: the element reports .open === true but stays hidden and
+     keeps a zero bounding box. Validation therefore walks the whole ancestor
+     chain, otherwise the field it just focused is invisible to the reader. */
+  function openDisclosureChain(el) {
+    for (var node = el; node; node = node.parentElement) {
+      if (String(node.tagName).toLowerCase() === "details") node.open = true;
+    }
+  }
+
+  /* Renders " open" when the reader asked for it, and when the current state
+     requires it to be visible (an invalid indexed scenario whose rate field is
+     inside the panel would otherwise be hidden behind a collapsed control). */
+  function panelOpenAttr(name, forceOpen) {
+    var open = forceOpen === true || est.openPanels[name] === true;
+    return " data-est-panel=\"" + esc(name) + "\"" + (open ? " open" : "");
+  }
+
+  function currentVerification(result) {
+    if (result && result.referenceVerification) return result.referenceVerification;
+    var row = est.muniRow;
+    if (!row) return null;
+    return referenceTools.lookup(DATA.config.governmentReferenceRegister, row.rdo, row.name, new Date().toISOString().slice(0, 10));
+  }
+
+  /* Reviewed land-price history is the only thing permitted to drive an
+     automatic index. It is empty today, so the control stays disabled and says
+     why instead of quietly inventing an annual rate. */
+  function reviewedTrend() {
+    var list = (DATA.config.governmentReferenceRegister || {}).landTimeEvidence || [];
+    if (!Array.isArray(list) || !list.length) return null;
+    var useGroup = useOfClassification(DATA.config, est.classification);
+    return list.filter(function (record) {
+      return record && record.status === "reviewed" && record.metric === "matched-vacant-land-asking-rate"
+        && String(record.municipality || "").toUpperCase() === String(est.municipality || "").toUpperCase()
+        && record.useGroup === useGroup;
+    })[0] || null;
+  }
+
+  function referencePlainFact() {
+    var verification = currentVerification();
+    if (!verification) return "Choose a municipality to match its BIR schedule.";
+    return verification.label + (verification.scheduleEffectiveDate ? " · schedule effective " + verification.scheduleEffectiveDate : "");
+  }
+
+  /* Lower-case variant for running prose. */
+  function referenceStatusShort() {
+    var verification = currentVerification();
+    if (!verification) return "no municipality selected";
+    return String(verification.label || "").charAt(0).toLowerCase() + String(verification.label || "").slice(1);
+  }
+
+  function methodPlainFact() {
+    if (est.landMethod !== "time-indexed") return "Factor-based guide · no annual change assumed";
+    var rateValue = est.timeAnnualPct == null || est.timeAnnualPct === "" ? null : Number(est.timeAnnualPct);
+    if (rateValue == null) return "Indexed land scenario · annual change not set yet";
+    var source = est.timeSource === "evidence" ? "reviewed local history" : "your own assumption";
+    return "Indexed land scenario · " + (rateValue > 0 ? "+" : "") + fmt(rateValue) + "% a year, " + source + " · separate from the factor guide";
+  }
+
+  function costPlainFact() {
+    if (est.saleContext === "developer") return "Developer purchase · uses your quoted charges, no blanket CGT";
+    if (est.saleContext === "unknown") return "Not determined · a written quotation is required";
+    return "Standard resale illustration · CGT, DST, transfer and registration";
+  }
+
+  function referenceStatusHtml(r) {
+    var verification = currentVerification(r);
+    if (!verification) return '<p class="sf-est-rdp">Select a municipality to see its imported schedule and verification status.</p>';
+    var fields = [["Published schedule effective date", verification.scheduleEffectiveDate || r && r.effectivityDate || "Not recorded"], ["Dataset generated", verification.datasetGeneratedAt || "Not recorded"], ["Import/download date", verification.importDate || "Not established separately"], ["Latest verification attempt", verification.lastAttemptedCheck || "Not recorded"], ["Successful applicability verification", verification.successfullyVerifiedOn || "Not verified"]];
+    return '<section class="sf-est-reference-status" data-est-reference-status><h5>Government reference status</h5><p><b>' + esc(verification.label) + '</b>. An imported match does not establish latest legal applicability.</p><dl>' + fields.map(function (field) { return '<div><dt>' + esc(field[0]) + '</dt><dd>' + esc(field[1]) + '</dd></div>'; }).join('') + '</dl><p>' + esc(verification.verificationNote) + '</p>' + (verification.relatedSchedules || []).map(function (schedule) { return '<p>' + esc(schedule.id + ': ' + schedule.label + (schedule.proposedPeriod ? ' (' + schedule.proposedPeriod + ')' : '')) + '. ' + esc(schedule.note || '') + (/^https:\/\//.test(schedule.sourceUrl || "") ? ' <a href="' + esc(schedule.sourceUrl) + '" target="_blank" rel="noopener noreferrer">Official source</a>' : '') + '</p>'; }).join('') + '</section>';
+  }
+  function timeInputsHtml() {
+    var histories = (DATA.config.governmentReferenceRegister || {}).landTimeEvidence || [];
+    var trend = reviewedTrend();
+    return '<details class="sf-est-time-inputs"' + panelOpenAttr("time", est.landMethod === "time-indexed") + '><summary>Land method and optional time scenario</summary><p>No annual growth is assumed. Indexed references are separate planning scenarios; existing market and corner factors are not stacked.</p><div class="sf-est-fields"><label class="sf-est-field sf-est-span2">Land method<select data-est-time="landMethod"><option value="factor"' + (est.landMethod === "factor" ? " selected" : "") + '>Existing factor-based guide</option><option value="time-indexed"' + (est.landMethod === "time-indexed" ? " selected" : "") + '>Indexed land-reference scenario</option></select></label><label class="sf-est-field">Adjustment source<select data-est-time="timeSource"><option value="manual"' + (est.timeSource === "manual" ? " selected" : "") + '>Manual assumption</option><option value="evidence"' + (est.timeSource === "evidence" ? " selected" : "") + '>Reviewed local land-price history</option></select></label><label class="sf-est-field">Assumed annual change (%)<span>Increase or decrease; greater than -100%, at most 100%</span><input type="number" min="-99.99" max="100" step="0.01" data-est-time="timeAnnualPct" value="' + esc(est.timeAnnualPct == null ? "" : est.timeAnnualPct) + '"></label><label class="sf-est-field">Reference/base date<input type="date" data-est-time="timeBaseDate" value="' + esc(est.timeBaseDate || est.muniRow && est.muniRow.effectivityDate || "") + '"></label><label class="sf-est-field">Target date<input type="date" data-est-time="timeTargetDate" value="' + esc(est.timeTargetDate) + '"></label><label class="sf-est-field sf-est-span2">Reviewed local history<select data-est-time="timeEvidenceId"><option value="">' + (histories.length ? 'Choose reviewed evidence' : 'No reviewed local land-price history available') + '</option>' + histories.map(function (record) { return '<option value="' + esc(record.id) + '"' + (est.timeEvidenceId === record.id ? " selected" : "") + '>' + esc(record.id + ' — ' + record.municipality) + '</option>'; }).join('') + '</select></label></div><p>No official BIR/SMV update or market appreciation is implied. Buildings are computed separately from their construction-cost assumptions.</p>'
+      + '<div class="sf-est-time-auto"><p>' + (trend
+        ? 'A reviewed local land-price history is registered for ' + esc(trend.municipality) + ' (' + esc(trend.id) + '). It can fill the annual change automatically.'
+        : 'Automatic annual change is unavailable. No reviewed local land-price history is registered for this property, so the calculator will not assume a growth rate for you.') + '</p>'
+      + '<button type="button" class="sf-est-time-apply" data-est-time-apply-evidence' + (trend ? "" : " disabled") + '>Use the reviewed local trend</button></div></details>';
+  }
+  /* The three technical panels used to sit at the top level of step 1, so a
+     first-time reader met government schedule provenance, an optional land index
+     and four cost inputs before anything about their property. They now sit
+     behind one "About this estimate" disclosure that states the three decisions
+     in plain language first; the full inputs stay one click away and every
+     data-est-* hook is unchanged, so validation, saving and PDF output are
+     unaffected. */
+  function aboutPanelHtml(costFields) {
+    return '<details class="sf-est-about"' + panelOpenAttr("about") + '>'
+      + '<summary><span class="sf-est-about-title">About this estimate</span>'
+      + '<span class="sf-est-about-sub">Reference status, land method and costs</span></summary>'
+      + '<ul class="sf-est-about-facts">'
+      + '<li><b>Government reference</b><span>' + esc(referencePlainFact()) + '</span></li>'
+      + '<li><b>Land method</b><span>' + esc(methodPlainFact()) + '</span></li>'
+      + '<li><b>Transaction costs</b><span>' + esc(costPlainFact()) + '</span></li>'
+      + '</ul>'
+      + '<p class="sf-est-about-note">These are planning inputs, not a certified appraisal. Opening a section below never changes an official government schedule.</p>'
+      + '<details class="sf-est-reference-disclosure"' + panelOpenAttr("reference") + '><summary>Government schedule and verification status</summary>' + referenceStatusHtml() + '</details>'
+      + timeInputsHtml()
+      + '<details class="sf-est-cost-inputs"' + panelOpenAttr("cost") + '><summary>Transaction type and optional costs</summary>' + costFields + '</details>'
+      + '</details>';
+  }
+
+  function timeResultHtml(r) {
+    if (!r.timeIndex) return '';
+    var t = r.timeIndex, fields = [["Original reference rate", money(t.originalRate) + '/sqm'], ["Indexed rate (display rounded)", money(t.rawRate) + '/sqm'], ["Elapsed period", fmt(t.elapsedYears) + ' years; ' + t.baseDate + ' to ' + t.targetDate], ["Annual change", fmt(t.annualPct) + '% — ' + t.source], ["Indexed land amount", money(t.landAmount)], ["Existing factor guide comparison", money(r.factorBaseline.total) + ' (not stacked or selected)']];
+    return '<section class="sf-est-time-result" data-est-time-result><h5>Indexed land-reference scenario</h5><dl>' + fields.map(function (field) { return '<div><dt>' + esc(field[0]) + '</dt><dd>' + esc(field[1]) + '</dd></div>'; }).join('') + '</dl><p>' + esc(t.formula) + '. Full precision is used before rounding the final land amount.</p><p>' + esc(t.note) + '</p></section>';
+  }
+
   function screen1Html() {
     var out = '<div class="sf-est-step" data-est-screen="1">';
     out += locSummary();
-    out += '<div class="sf-est-step-head"><span class="sf-est-step-no">01</span><div><p class="sf-est-step-eyebrow">START WITH THE DETAILS</p><h3>Tell us about the property</h3><p class="sf-est-step-subtitle">Your location and property details help us match the right BIR reference and prepare a guide tailored to your next move.</p></div></div>';
+    out += '<div class="sf-est-step-head"><span class="sf-est-step-no">01</span><div><p class="sf-est-step-eyebrow">START WITH THE DETAILS</p><h3>Tell us about your property</h3><p class="sf-est-step-subtitle">Your location and lot area help us match the right BIR reference. We’ll show the planning estimate separately, with the details behind it.</p></div></div>';
     out += '<div class="sf-est-fields">';
 
     out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">✦</i>Purpose</span><span>Why do you want to know the value?</span>' +
@@ -759,30 +877,47 @@
     out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌖</i>Municipality</span><span>Which municipality in Batangas?</span>' +
       '<select data-est-muni><option value="">— choose —</option>' + muniOptions() + "</select></label>";
 
-    out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌖</i>Barangay</span><span>Your barangay</span>' +
+    out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌖</i>Barangay</span><span>Choose after selecting the municipality</span>' +
       '<select data-est-barangay>' + barangayOptions() + "</select></label>";
 
-    out += '<div class="sf-est-field sf-est-span2 sf-est-street-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌕</i>Street</span><span>Search the BIR list, or choose the separate fallback below.</span>' +
+    out += '<div class="sf-est-field sf-est-span2 sf-est-street-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌕</i>Street</span><span>Search for your street, or choose “Street not listed” below.</span>' +
       '<div class="sf-est-street-input-wrap"><input data-est-street-q type="search" placeholder="' + (est.allOther ? "Street not listed — choose another street" : "Type to search streets…") + '" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="sf-est-street-options" aria-expanded="false" aria-label="Search the BIR street list" value="' + esc(est.allOther ? "" : est.streetLabel) + '">' +
       (est.allOther ? '<span class="sf-est-street-selected"><i aria-hidden="true">✓</i>Using all-other-streets rate</span>' : '') + '</div>' +
       '<div id="sf-est-street-options" class="sf-est-street-list" data-est-street-list role="listbox" aria-label="BIR streets"></div></div>';
+    out += '<button type="button" class="sf-est-street-fallback sf-est-span2" data-est-street-fallback' + (!est.barangay ? " disabled" : "") + '>My street is not listed — use the best available BIR reference</button>';
 
     out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">▣</i>BIR classification</span><span>Choose a land-use category, then the exact BIR code</span>' +
       '<select data-est-class-use aria-label="BIR classification category">' + classUseOptions() + "</select>" +
       '<select data-est-class aria-label="Exact BIR classification code">' + classOptions() + "</select></label>";
+    out += '<details class="sf-est-help sf-est-span2"><summary>What does BIR classification mean?</summary><p>The BIR schedule groups land by use, such as residential, commercial or agricultural. Choose the category and code that match the property. If you are unsure, confirm the classification with the relevant Revenue District Office before relying on the guide.</p></details>';
 
-    out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">▤</i>Lot area (sqm)</span><span>The total land area</span>' +
+    out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">▤</i>Lot area (sqm)</span><span>Total land area, in square metres</span>' +
       '<input data-est-area type="number" min="20" max="100000" step="1" inputmode="decimal" placeholder="e.g. 200" value="' + esc(est.area != null ? est.area : "") + '"></label>';
 
-    out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">₱</i>Expected selling price</span><span>Optional — improves tax-base and net-proceeds estimates</span>' +
+    out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">₱</i>' + (est.purpose === "Buying" ? "Asking price or your offer" : est.purpose === "I received an offer" ? "Offer received" : "Expected selling price") + '</span><span>Optional — changes costs and price comparison, not the property estimate</span>' +
       '<input data-est-sale-price type="number" min="0" max="1000000000" step="1000" inputmode="decimal" placeholder="e.g. 5000000" value="' + esc(est.salePrice != null ? est.salePrice : "") + '"></label>';
 
-    out += '</div>';
+out += "</div>";
+    /* Built after the main field grid closes so the technical panels never
+       interrupt the property questions above them. */
+    var costFields = "<div class=\"sf-est-fields\">" +
+      '<label class="sf-est-field sf-est-span2">Transaction type<select data-est-sale-context>' + [["private-resale", "Qualifying capital-asset resale (illustrative)"], ["developer", "Developer purchase / ordinary-asset sale"], ["unknown", "Not sure — quotation required"]].map(function (pair) { return '<option value="' + pair[0] + '"' + (est.saleContext === pair[0] ? " selected" : "") + '>' + esc(pair[1]) + '</option>'; }).join("") + '</select></label>' +
+      '<label class="sf-est-field">Quoted developer charges (PHP)<span>Optional total outside price; do not repeat taxes already included</span><input type="number" min="0" step="1" data-est-cost="developerFees" value="' + esc(est.developerFees == null ? "" : est.developerFees) + '"></label>' +
+      '<label class="sf-est-field">Broker commission (%)<span>Negotiable; resale scenario only</span><input type="number" min="0" max="100" step="0.1" data-est-cost="brokerPct" value="' + esc(est.brokerPct * 100) + '"></label>' +
+      '<label class="sf-est-field">Quoted notarial fee (PHP)<span>Optional, seller-paid in this illustration</span><input type="number" min="0" data-est-cost="notarial" value="' + esc(est.notarial == null ? "" : est.notarial) + '"></label>' +
+      '<label class="sf-est-field">Assessor schedule FMV (PHP)<span>Optional confirmed value; not assessed/taxable value</span><input type="number" min="0" data-est-cost="fairMarketValue" value="' + esc(est.fairMarketValue == null ? "" : est.fairMarketValue) + '"></label></div><p>Developer charges require a quote; no universal 6% CGT is applied to developer or unclassified transactions. Local transfer and registration rates remain illustrations.</p>';
+    out += aboutPanelHtml(costFields);
     out += '<label class="sf-est-field sf-est-corner"><input type="checkbox" data-est-corner' + (est.corner ? " checked" : "") + ">" +
       '<span><b>Corner lot</b> — frontage on more than one road <small>(+2.5% value)</small></span></label>';
 
     out += '<div class="sf-est-actions">' +
-      '<span class="sf-est-next-hint">We use the official BIR zonal schedule for ' + (est.municipality || "your municipality") + ".</span>" +
+      /* The reference status is deliberately repeated on the always-visible path.
+       "We use the official BIR zonal schedule" read as a claim of legal currency
+       the register does not support, and the honest version was hidden inside a
+       collapsed disclosure. */
+      '<span class="sf-est-next-hint">' + (est.municipality
+        ? "We match the BIR zonal schedule imported for " + esc(est.municipality) + " (" + esc(referenceStatusShort()) + ")."
+        : "Choose a municipality to match its BIR schedule.") + "</span>" +
       '<button type="button" class="sf-est-next" data-est-next>' + (est.type === "house_lot" ? "Continue to the house →" : "Continue to property details →") + "</button></div>";
     return out + "</div>";
   }
@@ -815,21 +950,21 @@
     return '<div class="sf-est-ownership-intro"><span class="sf-est-icon sf-est-icon-large" aria-hidden="true">▤</span><div><h4>Ownership &amp; title</h4><b>Important for a confident sale</b><p>Title status, occupancy, and inheritance can affect marketability and how quickly you can sell. Buyers will discover these during due diligence.</p></div></div>' +
       ownershipQuestion("occupancy", "Is anyone living on the property?", "This affects how quickly and easily you can sell.", [
         { value: "empty", label: "No, it's empty", note: "Ready for viewing", impact: "" },
-        { value: "caretaker", label: "A caretaker or family member", note: "There with permission", impact: "-5%" },
-        { value: "tenants", label: "Tenants paying rent", note: "With a lease or agreement", impact: "-10%" },
-        { value: "informal_settlers", label: "Informal settlers", note: "Occupying without permission", impact: "-25%" },
+        { value: "caretaker", label: "A caretaker or family member", note: "There with permission; confirm possession", impact: "" },
+        { value: "tenants", label: "Tenants paying rent", note: "Review lease and income; no automatic discount", impact: "" },
+        { value: "informal_settlers", label: "Informal settlers", note: "Possession unresolved; review needed", impact: "" },
         { value: "not_sure", label: "Not sure", note: "We'll skip this", impact: "" }
       ]) +
       ownershipQuestion("titleStatus", "Do you have a certificate of title?", "A Transfer Certificate of Title (TCT) or Condominium Certificate of Title (CCT).", [
         { value: "titled_self", label: "Yes, and it's in my name", note: "Title matches the owner", impact: "" },
-        { value: "titled_previous", label: "Yes, but still in the previous owner's name", note: "Not yet transferred", impact: "-8%" },
-        { value: "tax_declaration", label: "No, only a tax declaration", note: "No certificate of title yet", impact: "-15%" },
+        { value: "titled_previous", label: "Yes, but still in the previous owner's name", note: "Verify authority and transfer requirements", impact: "" },
+        { value: "tax_declaration", label: "No, only a tax declaration", note: "Registered ownership unconfirmed", impact: "" },
         { value: "not_sure", label: "Not sure", note: "We'll skip this", impact: "" }
       ]) +
       ownershipQuestion("inheritanceStatus", "Was this property inherited?", "Inherited properties need an Extrajudicial Settlement before they can be sold.", [
         { value: "not_inherited", label: "No, I bought it or it's always been mine", note: "No inheritance process", impact: "" },
         { value: "settled", label: "Yes, and the settlement is finished", note: "Annotated on the title", impact: "" },
-        { value: "pending", label: "Yes, but the settlement isn't done", note: "Extrajudicial Settlement still pending", impact: "-10%" },
+        { value: "pending", label: "Yes, but the settlement isn't done", note: "Settlement pending; no unsupported deduction", impact: "" },
         { value: "not_sure", label: "Not sure", note: "We'll skip this", impact: "" }
       ]);
   }
@@ -840,12 +975,13 @@
     out += '<div class="sf-est-step-head"><span class="sf-est-step-no">02</span><div><p class="sf-est-step-eyebrow">PROPERTY DETAILS</p><h3>Describe your property</h3><p class="sf-est-step-subtitle">A few details help us make the guide more useful and honest.</p></div></div>';
     if (est.type === "house_lot") {
       out += '<div class="sf-est-fields">' +
+        '<label class="sf-est-field sf-est-span2">Building condition<select data-est-condition>' + [["unknown", "Not inspected / unknown"], ["new", "New / completed finish"], ["good", "Good condition"], ["repair", "Repairs needed"]].map(function (pair) { return '<option value="' + pair[0] + '"' + (est.condition === pair[0] ? " selected" : "") + '>' + pair[1] + '</option>'; }).join("") + '</select><span>Used to screen asking comparisons, not an invented discount</span></label>' +
         '<label class="sf-est-field sf-est-span2">Construction style<span>Main build type</span>' + chipRow(
           ["wood_prefab", "mixed_chb", "rca_steel"].map(function (k) {
             return { label: labelFor(DATA.config, "construction", k), value: k, active: est.construction === k };
           }), "construction") + "</label>" +
-        '<label class="sf-est-field">Floor / built-up area (sqm)<span>Blank uses 60% of the lot as a guide</span>' +
-        '<input data-est-floor type="number" min="0" max="100000" step="1" inputmode="decimal" placeholder="auto — ' + fmt(Math.round((est.area || 0) * 0.6)) + ' sqm" value="' + esc(est.floorArea) + '"></label>' +
+        '<label class="sf-est-field">Total built-up area (sqm)<span>Across all storeys. Blank assumes 60% of lot area; storeys also apply a cost factor.</span>' +
+        '<input data-est-floor type="number" min="0" max="100000" step="0.01" inputmode="decimal" placeholder="auto — ' + fmt(Math.round((est.area || 0) * 0.6)) + ' sqm" value="' + esc(est.floorArea) + '"></label>' +
         '<label class="sf-est-field">Storeys<span>Multiplier on construction</span>' + chipRow(
           (DATA.config.floors || []).map(function (f) {
             return { label: f.label, value: f.key, active: est.floors === f.key };
@@ -866,10 +1002,9 @@
       out += '<p class="sf-est-hint">As a vacant lot there is no house to value — we only look at the land.</p>';
     }
     out += ownershipQuestions();
-    out += '<div class="sf-est-subhead">Site review factors</div>';
-    out += reviewFactorBlock();
+    out += '<details class="sf-est-site-review"><summary>Optional site review notes</summary>' + reviewFactorBlock() + '</details>';
     out += '<div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-prev>← Back to property details</button>' +
-      '<button type="button" class="sf-est-next" data-est-next>Calculate my estimate →</button></div>';
+      '<button type="button" class="sf-est-next" data-est-next>Review my inputs →</button></div>';
     return out + "</div>";
   }
 
@@ -998,39 +1133,72 @@
   }
 
   function askingPriceHtml(r) {
-    var label = "Recommended asking price";
+    var label = "Upper planning scenario (130%)";
     var note = r.marketGuideAvailable
       ? "A guide-based starting point. Comparable asking listings are context only and do not feed this calculation."
       : "A factor-based starting point. No comparable listings were available for this calculation.";
     return '<div class="sf-est-asking" data-est-asking-block><span>' + label + '</span><b>' + money(r.recommendedAskingPrice) + '</b><small>' + note + '</small></div>';
   }
 
+  function amountOrUnknown(value) { return value == null || !isFinite(Number(value)) ? "Not determined" : money(value); }
+  function transactionHtml(r, tax) {
+    if (tax.quotationRequired) return '<p class="sf-est-rdp"><b>Developer / unclassified transaction.</b> ' + esc(tax.note) + '</p><p class="sf-est-rdp">Quoted charges outside price: <b>' + amountOrUnknown(tax.quotedDeveloperFees) + '</b> · acquisition budget: <b>' + amountOrUnknown(tax.buyerTotal) + '</b>. Other unquoted costs and financing are not included.</p>';
+    return '<div class="sf-est-tax"><span>Illustrative tax base: <b>' + money(tax.base) + '</b> · ' + esc(tax.baseBasis) + '</span><b>CGT 6% ≈ ' + money(tax.cgt) + '</b><b>DST 1.5% ≈ ' + money(tax.dst) + '</b><b>Broker commission ' + fmt(tax.brokerPct * 100) + '% ≈ ' + money(tax.broker) + '</b><b>Transfer ~0.5% ≈ ' + money(tax.transfer) + '</b><b>Registration ~0.1% ≈ ' + money(tax.registration) + '</b></div><p class="sf-est-rdp"><b>Estimated seller costs:</b> ' + money(tax.sellerCosts) + ' · <b>estimated net proceeds:</b> ' + amountOrUnknown(tax.projectedNetProceeds) + ' · <b>Buyer acquisition budget:</b> ' + amountOrUnknown(tax.buyerTotal) + '</p><p class="sf-est-rdp">Qualifying capital-asset resale assumed. CGT, commission and quoted notary are seller-paid; DST, transfer and registration buyer-paid in this illustration. Costs and allocation are negotiable; local rates and exemptions require confirmation. Derived locality medians are not confirmed parcel tax-floor inputs.</p>';
+  }
+  function decisionHtml(r) {
+    var tax = costsFor(r, DATA.config), buying = r.purpose === "Buying", offered = r.salePrice > 0;
+    var comparison = offered && r.total > 0 ? '<p>' + (r.purpose === "I received an offer" ? "Offer received" : buying ? "Asking price / offer" : "Price scenario") + ': <b>' + money(r.salePrice) + '</b> · ' + fmt((r.salePrice / r.total - 1) * 100) + '% relative to the factor guide. This difference does not establish a fair transaction price.</p>' : '<p>No transaction price entered; costs use the central guide as an assumed price.</p>';
+    var title = buying ? "Your buying decision" : r.purpose === "I received an offer" ? "Review the offer" : r.purpose === "Selling" ? "Your selling decision" : "Planning for " + r.purpose;
+    if (r.askingIndication) comparison += '<p>Qualified asking median: <b>' + money(r.askingIndication.value) + '</b>' + (offered ? ' · price is ' + fmt((r.salePrice / r.askingIndication.value - 1) * 100) + '% relative to this asking indication.' : '.') + ' Advertised prices are not achieved sales.</p>';
+    var primaryLabel = buying ? "Total acquisition budget" : "Seller net proceeds", primaryAmount = buying ? tax.buyerTotal : tax.projectedNetProceeds;
+    var note = buying ? (tax.quotationRequired ? "Price plus quoted charges outside price; unquoted costs and financing excluded." : "Price plus assumed buyer-paid costs; financing excluded.") : "Price less assumed seller-paid costs; not a guaranteed sale outcome.";
+    if (r.purpose === "Estate") { primaryLabel = "Property-only estate tax scenario"; primaryAmount = finance.estate(r.total).tax; note = "Assumes this property were the entire citizen/resident estate. Actual tax requires all assets, death-date values and deductions; zero does not establish no filing duty."; }
+    if (r.purpose === "Loan") { primaryLabel = "Financing reference only"; primaryAmount = null; note = "Bank acceptance, loan-to-value, interest and approval are not determined by this guide."; }
+    return '<section class="sf-est-decision" data-est-decision><h4>' + esc(title) + '</h4>' + comparison + '<div class="sf-est-decision-grid"><div><span>' + primaryLabel + '</span><b>' + amountOrUnknown(primaryAmount) + '</b><small>' + note + '</small></div><div><span>Underlying property guide</span><b>' + money(r.total) + '</b><small>Same property facts give the same value for Buying and Selling.</small></div></div><p>' + esc(r.conditions) + '</p>' + (r.stage === "ready" ? '<p>Before listing: confirm current price, authority to sell and document readiness.</p>' : '') + '</section>';
+  }
+  function projectContextHtml(municipality) {
+    var registry = DATA && DATA.projectEvidence;
+    if (!registry || registry.unavailable) return '<p>Project-source register unavailable; no project prices used.</p>';
+    var records = (registry.records || []).filter(function (record) { return evidence.place(record.municipality) === evidence.place(municipality); });
+    if (!records.length) return '<p>No researched project records for this municipality. This does not mean the area has no properties for sale.</p>';
+    return '<p>Observed ' + esc(registry.observedOn) + '; price-effective dates unconfirmed. Specifications and broad ranges are context only, not numerical comparables.</p>' + records.map(function (record) {
+      var area = record.lotArea ? fmt(record.lotArea) + ' sqm lot' : record.lotAreaMinimum ? 'minimum ' + fmt(record.lotAreaMinimum) + ' sqm lot' : 'exact lot area unconfirmed';
+      var floor = record.floorArea ? ' · ' + fmt(record.floorArea) + ' sqm ' + (record.areaBasis === "gross-floor" ? 'gross floor' : 'floor; definition unconfirmed') : '';
+      var price = record.priceRange ? money(record.priceRange[0]) + ' – ' + money(record.priceRange[1]) + ' model range' : record.priceFrom ? 'from ' + money(record.priceFrom) : record.price ? money(record.price) + ' advertised' : 'price not published';
+      return '<article class="sf-est-project-record"><h5>' + esc(record.project + ' — ' + record.model) + '</h5><p>' + esc(area + floor) + '</p><p>' + esc(price) + ' · ' + esc(record.sourceTier) + '</p>' + (record.notes ? '<p>' + esc(record.notes) + '</p>' : '') + (/^https:\/\//.test(record.sourceUrl || "") ? '<a href="' + esc(record.sourceUrl) + '" target="_blank" rel="noopener noreferrer">View source</a>' : '') + '</article>';
+    }).join("");
+  }
+  function evidenceHtml(r) {
+    var c = r.comparableSummary || {}, indication = r.askingIndication;
+    var out = '<p class="sf-est-rdp">' + Number(c.count || 0) + ' context record(s); ' + Number(c.eligibleCount || 0) + ' passed the provisional asking screen. ' + esc(c.policy || "") + '</p>';
+    if (indication) out += '<div class="sf-est-asking-indication"><h5>Local asking-price indication</h5><b>' + money(indication.value) + '</b><p>Observed asking spread ' + money(indication.low) + ' – ' + money(indication.high) + '. ' + esc(indication.method) + '. ' + esc(indication.basis) + '.</p>' + (indication.spreadWarning ? '<p>Wide observed spread: review property differences before using this indication.</p>' : '') + '</div>';
+    else out += '<p class="sf-est-rdp">Insufficient qualified asking evidence for a numerical indication. The factor guide is not calibrated to achieved sales.</p>';
+    if (c.rejected && c.rejected.length) out += '<ul class="sf-est-rdl">' + c.rejected.slice(0, 8).map(function (row) { return '<li>' + esc((row.id || "Record") + ': ' + row.reasons.join('; ')) + '</li>'; }).join("") + '</ul>';
+    out += '<p class="sf-est-rdp">Search status: ' + esc((r.evidenceRetrieval || []).map(function (status) { return status.source + ': ' + status.status; }).join(' · ') || "No live asking search supplied") + '. Failed or limited searches do not establish market scarcity.</p>';
+    return out + '<details class="sf-est-project-context"><summary>Published project specifications and price context</summary>' + projectContextHtml(r.municipality) + '</details>';
+  }
+
+  function reviewHtml() {
+    var rows = [["Purpose", est.purpose], ["Property", est.type === "house_lot" ? "House & lot" : "Vacant lot"], ["Municipality", est.municipality], ["Barangay", est.barangay], ["Street", est.allOther ? "Street not listed; fallback reference will be shown" : est.streetLabel], ["BIR classification", est.classification], ["Lot area", fmt(est.area) + " sqm"], ["Corner lot", est.corner ? "Yes (+2.5%)" : "No"], ["Selling-price scenario", est.salePrice > 0 ? money(est.salePrice) : "Not supplied; costs will assume the central guide estimate"]];
+    if (est.type === "house_lot") rows = rows.concat([["Built-up area", fmt(Number(est.floorArea) > 0 ? est.floorArea : Math.round(est.area * .6)) + " sqm" + (!(Number(est.floorArea) > 0) ? " (assumed 60% of lot)" : "")], ["Construction", labelFor(DATA.config, "construction", est.construction)], ["Storeys", labelFor(DATA.config, "floors", est.floors)], ["Age", labelFor(DATA.config, "ageBands", est.ageBand)], ["Features", est.features.map(function (key) { return (DATA.config.features[key] || {}).label || key; }).join(", ") || "None selected"]]);
+    rows.push(["Selected land method", est.landMethod === "time-indexed" ? "Indexed reference; no stacked market/corner factors" : "Existing factor guide"]);
+    if (est.landMethod === "time-indexed") rows.push(["Time scenario", (est.timeBaseDate || est.muniRow.effectivityDate) + ' to ' + est.timeTargetDate + '; ' + est.timeSource + (est.timeSource === 'manual' ? '; ' + est.timeAnnualPct + '% annually' : '')]);
+    rows = rows.concat([["Government reference", referencePlainFact()], ["Occupancy", ownershipLabel("occupancy", est.occupancy)], ["Title", ownershipLabel("titleStatus", est.titleStatus)], ["Inheritance", ownershipLabel("inheritanceStatus", est.inheritanceStatus)], ["Risk treatment", "Review flags; no unsupported automatic deduction"], ["Transaction", est.saleContext], ["Cost basis", costPlainFact()], ["Range", "85%–130% of the planning estimate"]]);
+    return '<div class="sf-est-step" data-est-screen="5"><div class="sf-est-step-head"><span class="sf-est-step-no">03</span><div><h3>Check your inputs</h3><p>Review the property and assumptions before calculating.</p></div></div><dl class="sf-est-review">' + rows.map(function (row) { return '<div><dt>' + esc(row[0]) + '</dt><dd>' + esc(row[1]) + '</dd></div>'; }).join("") + '</dl><p class="sf-est-hint">“Not sure” remains unknown; it does not verify title or remove risk. Marketability deductions and construction allowances are model assumptions. This is a planning guide, not a certified appraisal.</p><div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-edit="1">Edit location</button><button type="button" class="sf-est-next sf-est-prev" data-est-edit="2">Edit property details</button><button type="button" class="sf-est-next" data-est-next>Calculate my estimate →</button></div></div>';
+  }
+
   function pricingStrategyHtml(r, suppliedTax) {
-    var tax = suppliedTax || taxMath(DATA.config, r.total, {
-      salePrice: r.salePrice,
-      birZonalValue: r.birZonalValue,
-      marketGuideEstimate: r.marketGuideAvailable ? r.marketGuideEstimate : 0,
-      transactionPrice: r.recommendedAskingPrice
-    });
+    var tax = suppliedTax || costsFor(r, DATA.config);
     var qualifier = '<p class="sf-est-rdp"><b>How to read these figures:</b> the lower end and midpoint are guide calculations, not guaranteed buyer offers. ' +
       (r.marketGuideAvailable ? "Comparable asking listings are shown as context; their prices are not direct calculation inputs." : "No comparable listings were available for this estimate; it uses the disclosed BIR-based factors.") + '</p>';
-if (est.pricingUnlocked) {
+    {
       return '<div class="sf-est-pricing-grid">' +
         '<div class="sf-est-price-card sf-est-price-floor"><span>Lower end of guide range</span><b>' + money(r.low) + '</b><small>A reference point for reviewing offers—not a guaranteed minimum.</small></div>' +
-        '<div class="sf-est-price-card sf-est-price-sweet"><span>Midpoint of guide range</span><b>' + money(Math.round((r.low + r.high) / 2)) + '</b><small>The arithmetic midpoint of this estimate range.</small></div>' +
-        '<div class="sf-est-price-card sf-est-price-tax"><span>Taxes &amp; fees</span><b>' + money(tax.sellerCosts) + '</b><small>CGT, DST, broker, and transfer assumptions.</small></div>' +
-        '<div class="sf-est-price-card sf-est-price-cash"><span>Cash you’ll receive</span><b>' + money(tax.projectedNetProceeds) + '</b><small>Estimated net proceeds after seller costs.</small></div>' +
+        '<div class="sf-est-price-card sf-est-price-sweet"><span>Central planning estimate</span><b>' + money(r.marketGuideEstimate) + '</b><small>The disclosed factor-based estimate (100%).</small></div>' +
+        '<div class="sf-est-price-card sf-est-price-tax"><span>Transaction taxes &amp; fees</span><b>' + (tax.total == null ? "Quotation required" : money(tax.total)) + '</b><small>' + (tax.quotationRequired ? "Quoted developer charges only; taxes not added twice." : "CGT, DST, transfer and estimated registration; broker/notary excluded.") + '</small></div>' +
+        '<div class="sf-est-price-card sf-est-price-cash"><span>After all transaction costs</span><b>' + (tax.netAfterAllTransactionCosts == null ? "Not determined" : money(tax.netAfterAllTransactionCosts)) + '</b><small>Private-resale illustration assumes all four costs are paid from price; before broker/notary.</small></div>' +
         '</div>' + qualifier;
     }
-    /* "Available after review" repeated four times read as four refusals rather
-     * than one locked feature. The cards now state what each number is FOR, and
-     * the lock is stated once, in the prompt below. */
-    return '<div class="sf-est-pricing-grid sf-est-pricing-preview">' +
-      '<div class="sf-est-price-card sf-est-price-floor"><span>Lower end of guide range</span><b class="sf-est-price-lock"><svg class="sf-est-lock-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="10.5" width="16" height="10.5" rx="2"></rect><path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5"></path></svg><span>Locked</span></b><small>A reference point for reviewing offers.</small></div>' +
-      '<div class="sf-est-price-card sf-est-price-sweet"><span>Midpoint of guide range</span><b class="sf-est-price-lock"><svg class="sf-est-lock-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="10.5" width="16" height="10.5" rx="2"></rect><path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5"></path></svg><span>Locked</span></b><small>The arithmetic midpoint of this estimate range.</small></div>' +
-      '<div class="sf-est-price-card sf-est-price-tax"><span>Taxes &amp; fees</span><b class="sf-est-price-lock"><svg class="sf-est-lock-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="10.5" width="16" height="10.5" rx="2"></rect><path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5"></path></svg><span>Locked</span></b><small>CGT, DST, broker, and transfer on your asking price.</small></div>' +
-      '<div class="sf-est-price-card sf-est-price-cash"><span>Cash you’ll receive</span><b class="sf-est-price-lock"><svg class="sf-est-lock-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="10.5" width="16" height="10.5" rx="2"></rect><path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5"></path></svg><span>Locked</span></b><small>Estimated net proceeds after those seller costs.</small></div>' +
-      '</div><div class="sf-est-pricing-prompt"><span class="sf-est-lock-icon"><svg class="sf-est-lock-glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="10.5" width="16" height="10.5" rx="2"></rect><path d="M7.5 10.5V7a4.5 4.5 0 0 1 9 0v3.5"></path></svg></span><div><b>Your pricing details are ready</b><p>The range, fee illustrations, and estimated net proceeds are calculated from this property guide and the assumptions shown. Request an appraiser consultation to review them.</p><button type="button" class="sf-est-inline-cta" data-est-lead-open>Request an appraisal consultation →</button></div></div>' + qualifier;
   }
 
   function unlockPricing() {
@@ -1061,31 +1229,26 @@ if (est.pricingUnlocked) {
       '<span class="sf-est-lead-done-icon" aria-hidden="true">✓</span>' +
       "<div><b>Request received &mdash; thank you.</b>" +
       "<p>" + esc(message || "A specialist will verify your inputs against the current BIR schedule and contact you within one business day.") + "</p>" +
-      "<p class=\"sf-est-lead-done-next\">Your pricing details above are now unlocked.</p>" +
+       "<p class=\"sf-est-lead-done-next\">Your guide remains available above. A request is not confirmation of a professional review.</p>" +
       "</div></div>";
   }
 
   function reportSections(r) {
-    var tax = taxMath(DATA.config, r.total, {
-      salePrice: r.salePrice,
-      birZonalValue: r.birZonalValue,
-      marketGuideEstimate: r.marketGuideAvailable ? r.marketGuideEstimate : 0,
-      transactionPrice: r.recommendedAskingPrice
-    });
+    var tax = costsFor(r, DATA.config);
     var comparableNote = r.marketGuide && r.marketGuide.comparableCount
       ? " " + r.marketGuide.comparableCount + " comparable asking listing(s) from " + r.marketGuide.sourceType + " were found for context. Their asking prices are not direct inputs to this factor-based calculation."
-      : " No comparable asking listings were available. This estimate uses the displayed BIR reference and ES Realty factors only.";
+      : " No comparable asking listings were available. This estimate uses the displayed BIR reference and SEA ESTATES factors only.";
     var s = [];
 
 var displayRange = '';
     var displayPerSqm = r.perSqm;
     var askingPriceBlock = askingPriceHtml(r);
     s.push({ t: "Estimate at a glance", h:
-      '<div class="sf-est-bir-primary"><span>Official BIR zonal reference</span><b>' + money(r.birZonalValue) + '</b><small>' + money(r.birZonalRatePerSqm) + '/sqm · tax floor, not a buyer price</small></div>' +
+      '<div class="sf-est-bir-primary"><span>' + esc(r.birReferenceLabel) + '</span><b>' + money(r.birZonalValue) + '</b><small>' + money(r.birZonalRatePerSqm) + '/sqm · ' + (r.birReferenceConfirmed ? "tax reference, not a buyer price" : "derived fallback; excluded from confirmed tax-floor inputs") + '</small></div>' +
       displayRange +
       '<p class="sf-est-per">≈ ' + money(displayPerSqm) + " /sqm of lot on " + fmt(r.area) + " sqm" + (r.kind && r.type === "house_lot" ? " · " + fmt(r.floorArea) + " sqm floor area" : "") + "</p>" +
        askingPriceBlock +
-       '<p class="sf-est-rdp">ES Realty is independent of the BIR. BIR schedule values are shown as a tax reference; the estimate is a guide-based starting point. A site and document review can refine it using the property condition and local market evidence.</p>' });
+       '<p class="sf-est-rdp">SEA ESTATES is independent of the BIR. BIR schedule values are shown as a tax reference; the estimate is a guide-based starting point. A site and document review can refine it using the property condition and local market evidence.</p>' });
 
     s.push({ t: "Pricing strategy", h: '<div data-est-pricing-body>' + pricingStrategyHtml(r, tax) + '</div>' });
 
@@ -1100,36 +1263,38 @@ var displayRange = '';
        "</ul>" });
 
     s.push({ t: "Ownership & title review", h:
-      '<ul class="sf-est-rdl"><li>Occupancy: <b>' + esc(ownershipLabel("occupancy", est.occupancy)) + '</b></li>' +
-      '<li>Title status: <b>' + esc(ownershipLabel("titleStatus", est.titleStatus)) + '</b></li>' +
-      '<li>Inheritance: <b>' + esc(ownershipLabel("inheritanceStatus", est.inheritanceStatus)) + '</b></li>' +
-      '<li>Indicative market adjustment: <b>' + (r.ownershipAdjustmentPct ? "-" + r.ownershipAdjustmentPct + "%" : "none recorded") + '</b></li></ul>' +
-      '<p class="sf-est-rdp">This is an indicative marketability adjustment, not a change to the official BIR zonal value. A broker, buyer, lawyer, and the Registry of Deeds should verify occupancy, title, and inheritance documents.</p>' });
+      '<ul class="sf-est-rdl"><li>Occupancy: <b>' + esc(ownershipLabel("occupancy", r.ownership.occupancy)) + '</b></li>' +
+      '<li>Title status: <b>' + esc(ownershipLabel("titleStatus", r.ownership.titleStatus)) + '</b></li>' +
+      '<li>Inheritance: <b>' + esc(ownershipLabel("inheritanceStatus", r.ownership.inheritanceStatus)) + '</b></li>' +
+      '<li>Automatic deduction: <b>none — evidence required</b></li></ul>' +
+      '<p class="sf-est-rdp">' + esc(r.conditions) + ' Historical flat title/occupancy discounts are not applied. Verify documents, possession and any actual remediation costs before using a transaction scenario.</p>' });
 
     s.push({ t: "How this number was built", h: provenanceHtml(r) });
+    if (r.timeIndex) s[s.length - 1].h = timeResultHtml(r) + '<p class="sf-est-rdp">Building allowances and depreciation remain separate.</p>';
 
     s.push({ t: "Source of land rates", h:
       "<p class=\"sf-est-rdp\">Official BIR zonal schedule <b>" + esc(r.reference.schedule) + "</b>, RDO " + esc(r.rdo) +
       " (DO " + esc(r.departmentOrder) + ", " + esc(r.revision) + "). Data version <b>" + esc(r.dataVersion) + "</b>, calculation " + esc(r.calculationVersion) + ".</p>" +
-      '<p class="sf-est-rdp">Schedule checked for supersession on <b>' + esc(currencyCheckedOn()) + "</b>; no newer instrument identified. This guide was generated on <b>" + esc(todayLabel()) + "</b>, which is the valuation date.</p>" });
+      referenceStatusHtml(r) + '<p class="sf-est-rdp">Guide generated on <b>' + esc(todayLabel()) + '</b>. Generation date is not successful applicability verification.</p>' });
 
     s.push({ t: "BIR classification used", h:
       "<p class=\"sf-est-rdp\"><b>" + esc(r.classification + (r.classificationLabel ? " — " + r.classificationLabel : "")) + "</b>. Use group: " + esc(r.use) + ". Coverage: " + esc(r.coverage) + ".</p>" });
 
     s.push({ t: "How precise is this match?", h:
-      "<ul class=\"sf-est-rdl\"><li>Data coverage: <b>" + Math.round(r.source.pct * 100) + "%</b> — " + esc(r.source.label) + "</li>" +
+      "<ul class=\"sf-est-rdl\"><li>Source match: <b>" + esc(r.source.label) + "</b>; match depth is not a valuation accuracy score.</li>" +
       (r.fallbackNote ? "<li>" + esc(r.fallbackNote) + "</li>" : "") + "</ul>" });
 
     s.push({ t: "Land value build-up", h:
       '<div class="sf-est-breakdown">' +
       "<span>" + money(r.reference.value) + "/sqm BIR base</span><i>×</i>" +
-      "<span>Corner " + (r.corner.applied ? "+" + Math.round(r.corner.pct * 100) + "%" : "no") + "</span><i>×</i>" +
+      "<span>Corner " + (r.corner.applied ? "+" + String(Math.round(r.corner.pct * 1000) / 10) + "%" : "no") + "</span><i>×</i>" +
       "<span>" + r.use + " " + r.factors.proxyFactor.toFixed(2) + "</span><i>×</i>" +
       "<span>Market band " + r.factors.bandMid.toFixed(2) + "</span><i>×</i>" +
       "<span>Region " + r.factors.regionalAdj.toFixed(2) + "</span>" +
       "</div>" +
       '<p class="sf-est-coverage">Effective land rate <b>' + money(r.landPerSqm) + " /sqm</b> × " + fmt(r.area) +
       " sqm = <b>" + money(r.landValue) + "</b> land value.</p>" });
+    if (r.timeIndex) s[s.length - 1].h = timeResultHtml(r);
 
     if (r.type === "house_lot") {
       s.push({ t: "House value (replacement cost approach)", h:
@@ -1145,24 +1310,19 @@ var displayRange = '';
 
     s.push({ t: "Total estimate and range", h:
       "<p class=\"sf-est-rdp\"><b>" + money(r.marketGuideEstimate) + "</b> · guide range <b>" + money(r.low) + " – " + money(r.high) +
-        "</b> (" + Math.round(r.rangePct * 100) + "% width selected by BIR match level; not a statistical accuracy score). ≈ <b>" + money(r.perSqm) + "</b>/sqm.</p>" });
+        "</b> (85%–130% planning scenarios, not a statistical confidence interval). ≈ <b>" + money(r.perSqm) + "</b>/sqm.</p>" });
 
     s.push({ t: "Coverage and limitations", h:
       "<p class=\"sf-est-rdp\">The BIR figure is matched street-by-street; where a street has no listed rate for a classification the engine falls back to the barangay all-other-streets rate, then municipality and province medians. The numerical estimate uses the BIR base, selected property-use and market-band factors, optional corner adjustment, and— for house-and-lot—replacement-cost and age-depreciation inputs. Comparable listing prices are shown as context and are not currently fed into the formula." + comparableNote + " Rows the BIR masked as “same as above” were resolved only when a municipality-wide rate existed — never guessed.</p>" });
 
-    s.push({ t: "Taxes, fees & commissions", h:
-      '<div class="sf-est-tax"><span>Illustrative tax base: <b>' + money(tax.base) + "</b> · " + esc(tax.baseBasis) + "</span>" +
-      "<b>CGT 6% ≈ " + money(tax.cgt) + "</b><b>DST 1.5% ≈ " + money(tax.dst) + "</b>" +
-      "<b>Broker commission 3% ≈ " + money(tax.broker) + "</b><b>Transfer ~0.5% ≈ " + money(tax.transfer) + "</b><b>Registration ~0.1% ≈ " + money(tax.registration) + "</b></div>" +
-      '<p class="sf-est-rdp"><b>Estimated seller costs:</b> ' + money(tax.sellerCosts) + ' · based on ' + money(tax.projectedTransactionPrice) + ' transaction price · <b>estimated net proceeds:</b> ' + money(tax.projectedNetProceeds) + '</p>' +
-      "<p class=\"sf-est-rdp\">DST, transfer and registration fees are commonly buyer-side costs but may be negotiated. Broker commission is an illustrative 3% assumption. Confirm current rates, tax base and cost allocation with the BIR, LGU, Registry of Deeds, broker and counsel.</p>" });
+    s.push({ t: "Taxes, fees & commissions", h: transactionHtml(r, tax) });
 
     s.push({ t: "Site review factors you recorded", h:
       "<ul class=\"sf-est-rdl\">" +
-      "<li>Community/setting: <b>" + esc(est.community || "not stated") + "</b></li>" +
-      "<li>Flood risk: <b>" + esc(est.floodRisk || "not stated") + "</b></li>" +
-      "<li>Road access: <b>" + esc(est.roadAccess || "not stated") + "</b></li>" +
-      "<li>Frontage: <b>" + esc(est.frontage || "not stated") + "</b></li>" +
+      "<li>Community/setting: <b>" + esc(r.siteReview.community) + "</b></li>" +
+      "<li>Flood risk: <b>" + esc(r.siteReview.floodRisk) + "</b></li>" +
+      "<li>Road access: <b>" + esc(r.siteReview.roadAccess) + "</b></li>" +
+      "<li>Frontage: <b>" + esc(r.siteReview.frontage) + "</b></li>" +
       "</ul>" +
       "<p class=\"sf-est-rdp\">These flags do not change the arithmetic — they are recorded so a specialist verifies them on site.</p>" });
 
@@ -1173,8 +1333,21 @@ var displayRange = '';
 
     s.push({ t: "Professional review", h:
       "<p class=\"sf-est-rdp\"><b>Request a site and document review.</b> A licensed real estate appraiser can review property condition, title, and current local evidence for a formal valuation assignment. The guide itself is a planning estimate.</p>" });
+    s.push({ t: "Asking evidence and project sources", h: evidenceHtml(r) });
 
-    return s;
+    var groups = [
+      { t: "Summary", titles: ["Estimate at a glance", "Pricing strategy", "The property"] },
+      { t: "Calculation", titles: ["How this number was built", "Land value build-up", "House value (replacement cost approach)", "House value", "Ownership & title review", "Total estimate and range"] },
+      { t: "Transaction costs", titles: ["Taxes, fees & commissions"] },
+      { t: "Market evidence", titles: ["Source of land rates", "BIR classification used", "How precise is this match?", "Site review factors you recorded", "Asking evidence and project sources"] },
+      { t: "Documents and next steps", titles: ["Professional review"] },
+      { t: "Methodology and limitations", titles: ["Methodology", "Coverage and limitations", "Legal"] }
+    ];
+    return groups.map(function (group) {
+      var html = s.filter(function (section) { return group.titles.indexOf(section.t) >= 0; }).map(function (section) { return '<section class="sf-est-report-group"><h5>' + esc(section.t) + '</h5>' + section.h + '</section>'; }).join("");
+      if (group.t === "Documents and next steps") html += '<p class="sf-est-rdp">Prepare the title (TCT/OCT), current tax declaration, real-property tax clearance, valid IDs and TIN. Confirm any authority to sell, spousal consent, inheritance settlement and financing documents that apply.</p><p class="sf-est-rdp">General sequence: execute the deed, settle applicable BIR taxes, obtain CAR, pay local transfer tax, register the title and update the tax declaration. CGT: generally 30 days from the transaction; DST: generally 10 days after the close of the document month; transfer: generally 60 days. Confirm the applicable rules with the receiving office.</p>';
+      return { t: group.t, h: html };
+    });
   }
 
   function resultSummaryHtml(r) {
@@ -1182,12 +1355,14 @@ var displayRange = '';
       ? (r.marketGuide.comparableCount || 0) + " comparable asking listing(s) found for context; listing prices are not direct inputs to this calculation."
       : "No comparable asking listings were available; this estimate uses the disclosed BIR-based factors.";
 return '<section class="sf-est-result-summary" aria-label="Estimated property value">' +
-      '<div class="sf-est-result-summary-head"><div><p class="sf-est-result-summary-label">ESTIMATED PROPERTY VALUE</p><h4>Recommended asking price</h4></div>' +
+      '<div class="sf-est-result-summary-head"><div><p class="sf-est-result-summary-label">ESTIMATED PROPERTY VALUE</p><h4>' + (r.landMethod === "time-indexed" ? 'Indexed-reference planning scenario' : 'Central planning estimate') + '</h4></div>' +
       '<span class="sf-est-result-evidence">' + (r.marketGuideAvailable ? "Local listing context found" : "Factor-based · no comparable listings") + '</span></div>' +
-      '<strong class="sf-est-result-value">' + money(r.recommendedAskingPrice) + '</strong>' +
-      '<div class="sf-est-result-bir"><span>Official BIR zonal reference</span><b>' + money(r.birZonalValue) + '</b><small>' + money(r.birZonalRatePerSqm) + '/sqm · tax-reference figure, separate from the estimate</small></div>' +
+      '<strong class="sf-est-result-value">' + money(r.marketGuideEstimate) + '</strong>' +
+      '<p class="sf-est-scenario-range">Planning range <b>' + money(r.low) + ' – ' + money(r.high) + '</b><span>85%–130% scenarios, not guaranteed offers or statistical confidence.</span></p>' +
+      '<div class="sf-est-result-bir"><span>' + esc(r.birReferenceLabel) + '</span><b>' + money(r.birZonalValue) + '</b><small>' + money(r.birZonalRatePerSqm) + '/sqm · ' + (r.birReferenceConfirmed ? "tax-reference figure, separate from the estimate" : "derived fallback, not confirmed parcel tax FMV") + '</small></div>' +
       '<p class="sf-est-result-context">' + context + '</p>' +
-      '<p class="sf-est-result-bir-note">ES Realty is independent of the BIR. Confirm the applicable schedule with the relevant Revenue District Office.</p>' +
+      '<p class="sf-est-result-reference-label"><b>' + esc(r.referenceVerification.label) + '</b> — published values unchanged; indexing is a separate scenario.</p>' +
+      '<p class="sf-est-result-bir-note">SEA ESTATES is independent of the BIR. Confirm the applicable schedule with the relevant Revenue District Office.</p>' +
       '</section>';
   }
 
@@ -1197,10 +1372,11 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     var selling = r.purpose === "Selling";
     var out = '<div class="sf-est-step sf-est-result-screen' + (selling ? " sf-est-selling-result" : "") + '" data-est-screen="4" data-est-purpose="' + esc(r.purpose || "") + '">';
     out += locSummary();
-    out += '<div class="sf-est-result-hero"><div class="sf-est-step-head sf-est-result-head"><span class="sf-est-step-no">04</span><div><p class="sf-est-result-eyebrow">YOUR PROPERTY VALUE GUIDE</p><h3 id="sf-est-result-heading" tabindex="-1">Your guide is ready.</h3><p class="sf-est-result-subtitle">' + (selling ? "Review the estimate, recommended asking price, and evidence details before deciding your next selling step." : "Review the estimate, recommended asking price, and source details behind your property guide.") + '</p></div></div><div class="sf-est-result-hero-foot"><span class="sf-est-ready"><i aria-hidden="true">✓</i> Property-specific guide prepared</span><button type="button" class="sf-est-scroll-cta" data-est-scroll-report>Explore calculation details <span aria-hidden="true">↓</span></button></div></div>';
-    out += '<div class="sf-est-result-data"><div><span class="sf-est-data-icon" aria-hidden="true">⌖</span><b>BIR street data</b><small>' + coverageTag(r.coverage) + ' · ' + esc(r.coverage === "good" ? "Street-level match" : "Best available match") + '</small></div><div><span class="sf-est-data-icon" aria-hidden="true">◷</span><b>Schedule effective</b><small>' + esc(r.effectivityDate) + '</small></div><div><span class="sf-est-data-icon" aria-hidden="true">▣</span><b>Data source</b><small>' + esc(r.dataVersion) + '</small></div></div>';
+    out += '<div class="sf-est-result-hero"><div class="sf-est-step-head sf-est-result-head"><span class="sf-est-step-no">04</span><div><p class="sf-est-result-eyebrow">YOUR PROPERTY VALUE GUIDE</p><h3 id="sf-est-result-heading" tabindex="-1">Your guide is ready.</h3><p class="sf-est-result-subtitle">Review the central estimate, planning scenarios and source evidence before deciding your next step.</p></div></div><div class="sf-est-result-hero-foot"><span class="sf-est-ready"><i aria-hidden="true">✓</i> Property-specific guide prepared</span><button type="button" class="sf-est-scroll-cta" data-est-scroll-report>Explore calculation details <span aria-hidden="true">↓</span></button></div></div>';
+    out += '<div class="sf-est-result-data"><div><span class="sf-est-data-icon" aria-hidden="true">⌖</span><b>BIR source match</b><small>' + esc(r.source.label) + '</small></div><div><span class="sf-est-data-icon" aria-hidden="true">◷</span><b>Schedule effective</b><small>' + esc(r.effectivityDate) + '</small></div><div><span class="sf-est-data-icon" aria-hidden="true">▣</span><b>Data source</b><small>' + esc(r.dataVersion) + '</small></div></div>';
     out += '<div class="sf-est-analysis-summary"><div class="sf-est-analysis-status"><span class="sf-est-analysis-check" aria-hidden="true">✓</span><div><b>Analysis complete</b><p>BIR reference matched with your property details.</p></div></div><div class="sf-est-property-chips"><span>' + esc(r.municipality) + ', ' + esc(r.barangay) + '</span><span>' + fmt(r.area) + ' sqm</span><span>' + esc(r.typeLabel) + '</span><span>' + esc(r.classification) + ' · ' + esc(r.use) + '</span></div></div>';
     out += resultSummaryHtml(r);
+    out += decisionHtml(r);
     /* Placed here, not at the foot of the page: the user has just seen their
      * number and the evidence behind it, which is when the next-step question
      * forms. The bottom CTA still exists for people who read to the end. */
@@ -1208,7 +1384,7 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     out += '<p class="sf-est-report-label">YOUR GUIDE, SECTION BY SECTION <span>Value, evidence, limitations, and next steps</span></p>';
     out += '<div class="sf-est-report">';
     reportSections(r).forEach(function (sec, i) {
-      out += '<details class="sf-est-rsec"' + (i < 3 ? " open" : "") + '>' +
+      out += '<details class="sf-est-rsec"' + (i === 0 ? " open" : "") + '>' +
         '<summary class="sf-est-rsec-head"><b>' + zeroPad(i + 1) + "</b><h4>" + esc(sec.t) + "</h4><span class=\"sf-est-rsec-toggle\" aria-hidden=\"true\"></span></summary>" +
         '<div class="sf-est-rsec-body">' + sec.h + "</div></details>";
     });
@@ -1224,7 +1400,7 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
       '<span class="sf-est-tag sf-est-tag-unavailable">Unavailable</span>' +
       "<h3>No estimate available yet" + (est.municipality ? " for " + esc(est.municipality) : "") + "</h3>" +
       "<p>" + esc(unavailableReason(r.reason)) + "</p>" +
-      '<div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-prev>← Back to property details</button></div>' +
+      '<div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-prev>← Back to property details</button>' + (r.reason === "connection" ? '<button type="button" class="sf-est-next" data-est-calc-retry>Retry calculation</button>' : "") + '</div>' +
       "</div>";
   }
 
@@ -1232,6 +1408,10 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     if (reason === "no-data") return "The official BIR schedule for this municipality does not publish a rate for the classification you chose, and no municipality or province median exists for it either. We don't guess — pick another classification, or ask us for an on-ground check.";
     if (reason === "municipality-not-found") return "That municipality is not in the imported BIR set.";
     if (reason === "integrity-fail") return "The calculation could not be reconciled and was stopped.";
+    if (reason === "connection") return "The reference data could not be loaded. Your inputs are retained; check your connection and retry.";
+    if (reason === "time-evidence-unavailable") return "No applicable reviewed local land-price history is available. Choose an explicit manual assumption or return to the factor guide.";
+    if (reason === "time-integrity-fail") return "The time scenario exceeded supported numeric precision and was stopped.";
+    if (/^invalid-/.test(reason || "")) return "One or more inputs are invalid or unsupported (" + reason + "). Review areas, categories, price and quoted costs before calculating.";
     return "Make sure you chose a municipality, barangay, classification and a lot area above.";
   }
 
@@ -1259,15 +1439,15 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     return '<div class="sf-est-nextstep">' +
       '<div class="sf-est-nextstep-head">' +
       '<span class="sf-est-nextstep-badge">No obligation to list</span>' +
-      "<h4>Get the numbers you can negotiate with</h4>" +
+      "<h4>Choose your next step</h4>" +
       "<p>Your indicative guide is ready. A professional review covers the three things an online tool cannot: your documents, the actual site, and what buyers are paying right now.</p>" +
       "</div>" +
       '<ul class="sf-est-nextstep-list">' +
-      "<li><b>Pricing details, unlocked</b><span>The guide range, its midpoint, and a guide-based recommended asking price.</span></li>" +
+      "<li><b>Your results are open</b><span>The central estimate, scenario range, BIR reference and cost assumptions are available above.</span></li>" +
       "<li><b>Document and site review</b><span>Title, occupancy, access, and condition checked against what you entered.</span></li>" +
       "<li><b>A specialist&rsquo;s next step</b><span>What to fix, what to hold, and what to ask for &mdash; before you list.</span></li>" +
       "</ul>" +
-      '<div class="sf-est-nextstep-act"><button type="button" class="sf-est-lead-cta alt" data-est-lead-open>Request an appraisal consultation →</button>' +
+      '<div class="sf-est-nextstep-act"><button type="button" class="sf-est-lead-cta" data-est-email-open>Email my guide →</button><button type="button" class="sf-est-lead-cta alt" data-est-lead-open>Request an appraisal consultation →</button>' +
       '<p class="sf-est-nextstep-reassure">A specialist replies within one business day. No obligation to list.</p></div>' +
       "</div>";
   }
@@ -1279,23 +1459,23 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
       return out + '<div class="sf-est-lead-done">' +
         '<span class="sf-est-lead-done-icon" aria-hidden="true">✓</span>' +
         "<div><b>Request received &mdash; thank you.</b>" +
-        "<p>A specialist will review the details you submitted and contact you within one business day. Your pricing details above are now unlocked.</p>" +
+        "<p>Your request has been received. Your guide remains available above.</p>" +
         "</div></div></div>";
     }
     out += '<div class="sf-est-lead-ctas"><button type="button" class="sf-est-lead-cta alt" data-est-lead-open><span class="sf-est-cta-icon" aria-hidden="true">✓</span>Request an appraisal consultation →</button></div>';
     if (est.leadOpen) {
       out += '<form class="sf-est-lead-form" data-est-lead-form>' +
-        "<h3>Request an appraisal consultation</h3>" +
+        "<h3>" + (est.appraisalRequested ? "Request an appraisal consultation" : "Email my guide") + "</h3>" +
         '<p class="sf-est-lead-ctx">For: <b>' + esc(est.municipality + " · " + est.barangay + (est.streetLabel && !est.allOther ? " · " + est.streetLabel : "")) + "</b> · " + leadValue + ".</p>" +
         '<p class="sf-est-lead-reassure">No obligation to list. A specialist replies within one business day.</p>' +
         '<div class="sf-est-lead-grid">' +
-        '<label>Full name<input name="name" required maxlength="160" placeholder="Your name"></label>' +
-        '<label>Email<input type="email" name="email" required maxlength="254" placeholder="you@email.com"></label>' +
-        '<label>Phone<input name="phone" required maxlength="50" placeholder="Mobile number"></label>' +
+        '<label>Full name<input name="name" autocomplete="name" required maxlength="160" placeholder="Your name"></label>' +
+        '<label>Email<input type="email" name="email" autocomplete="email" required maxlength="254" placeholder="you@email.com"></label>' +
+        '<label>Phone' + (est.appraisalRequested ? "" : " (optional)") + '<input name="phone" type="tel" autocomplete="tel"' + (est.appraisalRequested ? " required" : "") + ' maxlength="50" placeholder="Mobile number"></label>' +
         '<label>Message<textarea name="message" maxlength="600" rows="3">I’m interested in this Batangas property estimate.</textarea></label>' +
         "</div>" +
-        '<label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to ES Realty emailing this report to me and contacting me about this request. See our <a href="#/privacy">Privacy Notice</a>.</span></label>' +
-        '<button type="submit">Send my consultation request →</button>' +
+        '<label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to SEA ESTATES emailing this report to me and contacting me about this request. See our <a href="#/privacy">Privacy Notice</a>.</span></label>' +
+        '<button type="submit">' + (est.appraisalRequested ? "Send my consultation request →" : "Email my guide →") + '</button>' +
         '<p class="sf-form-status" data-est-lead-status aria-live="polite"></p></form>';
     }
     return out + "</div>";
@@ -1310,9 +1490,15 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     if (est.screen === 1) out = screen1Html();
     else if (est.screen === 2) out = screen2Html();
     else if (est.screen === 3) out = screen3Html();
+    else if (est.screen === 5) out = reviewHtml();
     else out = screen4Html();
     var card = getCard();
-    if (card) { card.innerHTML = out; bindCard(card); }
+    if (card) {
+      var stage = est.screen === 5 || est.screen === 3 ? 3 : est.screen;
+      var progress = '<ol class="sf-est-progress" aria-label="Value guide progress">' + ["Property & location", "Details", "Review", "Results"].map(function (label, i) { return '<li' + (stage === i + 1 ? ' aria-current="step"' : "") + '><b>' + (i + 1) + '</b><span>' + label + '</span></li>'; }).join("") + '</ol>';
+      card.innerHTML = progress + out; bindCard(card);
+      if (est.validationIssue && (est.screen === 1 || est.screen === 2)) showErr(card, est.validationIssue);
+    }
   }
 
   function revealEstimatorScreen() {
@@ -1322,7 +1508,7 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     // Align the step heading at the top of the viewport. Centering a long
     // details screen on mobile can leave the shorter calculating screen fully
     // above the viewport when renderLayout replaces the screen content.
-    screen.scrollIntoView({ behavior: "auto", block: "start" });
+    screen.scrollIntoView({ behavior: "instant", block: "start" });
     var bounds = screen.getBoundingClientRect();
     if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) {
       window.scrollTo(window.scrollX || 0, Math.max(0, window.scrollY + bounds.top - 16));
@@ -1369,8 +1555,49 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     return out;
   }
 
-  function bindCard(card) {
+function bindCard(card) {
     var self = this;
+    /* Remember which "about this estimate" sections the reader opened. The
+       toggle event does not fire for the `open` attribute present at parse
+       time, so this records reader intent only - a panel that renderLayout
+       force-opens (an invalid indexed scenario) is not silently pinned open. */
+    $qa(card, "[data-est-panel]").forEach(function (panel) {
+      panel.addEventListener("toggle", function () {
+        est.openPanels[panel.getAttribute("data-est-panel")] = panel.open;
+      });
+    });
+    $qa(card, "[data-est-time]").forEach(function (input) {
+      input.addEventListener(input.tagName === "SELECT" ? "change" : "input", function () {
+        var key = input.getAttribute("data-est-time"); est[key] = key === "timeAnnualPct" ? (input.value === "" ? null : Number(input.value)) : input.value; est.result = null;
+        if (input.tagName === "SELECT" && key !== "timeEvidenceId") { renderLayout(); var next = getCard().querySelector('[data-est-time="' + key + '"]'); if (next) next.focus({ preventScroll: true }); }
+      });
+    });
+var saleContext = $q(card, "[data-est-sale-context]");
+    if (saleContext) saleContext.addEventListener("change", function () { est.saleContext = saleContext.value; est.result = null; renderLayout(); });
+    var applyTrend = $q(card, "[data-est-time-apply-evidence]");
+    if (applyTrend) applyTrend.addEventListener("click", function () {
+      var trend = reviewedTrend();
+      if (!trend) return;
+      est.timeSource = "evidence";
+      est.timeEvidenceId = trend.id;
+      est.landMethod = "time-indexed";
+      est.result = null;
+      renderLayout();
+      var base = $q(getCard(), '[data-est-time="timeBaseDate"]');
+      if (base) base.focus({ preventScroll: true });
+    });
+    var condition = $q(card, "[data-est-condition]");
+    if (condition) condition.addEventListener("change", function () { est.condition = condition.value; });
+    $qa(card, "[data-est-cost]").forEach(function (input) { input.addEventListener("input", function () { var key = input.getAttribute("data-est-cost"), value = input.value === "" ? null : Number(input.value); est[key] = key === "brokerPct" ? (value == null ? .03 : value / 100) : value; est.result = null; }); });
+    $qa(card, "[data-est-edit]").forEach(function (button) { button.addEventListener("click", function () { est.screen = Number(button.getAttribute("data-est-edit")); renderLayout(); revealEstimatorScreen(); }); });
+    var fallback = $q(card, "[data-est-street-fallback]");
+    if (fallback) fallback.addEventListener("click", function () {
+      est.allOther = true; est.streetKey = ""; est.streetLabel = ""; est.classification = ""; est.classificationUse = "";
+      renderLayout(); var classification = getCard().querySelector("[data-est-class-use]"); if (classification) classification.focus();
+    });
+    var retryCalculation = $q(card, "[data-est-calc-retry]");
+    if (retryCalculation) retryCalculation.addEventListener("click", runEstimate);
+    $qa(card, "[data-est-email-open]").forEach(function (button) { button.addEventListener("click", function () { est.leadOpen = true; est.appraisalRequested = false; renderLayout(); revealLeadForm(); }); });
     $qa(card, "[data-chip-group]").forEach(function (group) {
       group.addEventListener("click", function (e) {
         var btn = e.target.closest("[data-val]");
@@ -1418,6 +1645,13 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
         if (est.municipalitySlug !== slug) return;
         est.muniData = null;
         renderLayout();
+        var currentCard = getCard();
+        if (currentCard) {
+          var problem = document.createElement("p"); problem.setAttribute("role", "alert"); problem.className = "sf-est-err"; problem.textContent = "Could not load municipality data. Your other inputs are retained.";
+          var retry = document.createElement("button"); retry.type = "button"; retry.className = "sf-est-next"; retry.textContent = "Retry municipality data";
+          retry.addEventListener("click", function () { var select = getCard().querySelector("[data-est-muni]"); if (select) select.dispatchEvent(new Event("change", { bubbles: true })); });
+          currentCard.prepend(problem, retry);
+        }
       });
     });
 
@@ -1437,6 +1671,10 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     if (sq) {
       var listEl = $q(card, "[data-est-street-list]");
       var refreshList = function () {
+        if ((est.streetKey && normKey(sq.value) !== normKey(est.streetLabel)) || (est.allOther && sq.value.trim())) {
+          est.streetKey = ""; est.streetLabel = ""; est.allOther = false; est.result = null;
+          var codes = $q(card, "[data-est-class]"); if (codes) codes.innerHTML = classOptions();
+        }
         if (listEl) {
           listEl.innerHTML = streetListHtml(sq.value);
           sq.setAttribute("aria-expanded", "true");
@@ -1532,6 +1770,7 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     if (!card.dataset.estInvalidBound) {
       card.dataset.estInvalidBound = "1";
       var clearInvalid = function () {
+        est.validationIssue = null;
         $qa(card, ".sf-est-invalid").forEach(function (el) { el.classList.remove("sf-est-invalid"); });
         $qa(card, "[aria-invalid]").forEach(function (el) { el.removeAttribute("aria-invalid"); });
       };
@@ -1562,7 +1801,7 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     });
     var salePriceIn = $q(card, "[data-est-sale-price]");
     if (salePriceIn) salePriceIn.addEventListener("input", function () {
-      est.salePrice = Number(salePriceIn.value) > 0 ? Number(salePriceIn.value) : null;
+      est.salePrice = salePriceIn.value === "" ? null : Number(salePriceIn.value);
       est.result = null;
     });
 
@@ -1626,7 +1865,8 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     if (next) {
       next.addEventListener("click", function () {
         if (est.screen === 1) {
-           if (validScreen1()) {
+            if (validScreen1()) {
+              est.validationIssue = null;
               est.screen = 2;
               renderLayout();
               revealEstimatorScreen();
@@ -1634,7 +1874,9 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
        } else if (est.screen === 2) {
           var missingOwnership = missingScreen2Field();
           if (missingOwnership) showErr(card, missingOwnership);
-          else runEstimate();
+           else { est.screen = 5; renderLayout(); revealEstimatorScreen(); }
+        } else if (est.screen === 5) {
+          runEstimate();
         }
       });
     }
@@ -1674,6 +1916,15 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     if (!est.streetKey && !est.allOther) return { field: "[data-est-street-q]", msg: "Pick a street from the list, or choose “Street not listed” to continue." };
     if (!est.classification) return { field: "[data-est-class]", msg: "Choose a BIR classification to continue." };
     if (!(est.area > 0)) return { field: "[data-est-area]", msg: "Enter the lot area in sqm to continue." };
+    if (!isFinite(Number(est.area)) || est.area < 20 || est.area > 100000) return { field: "[data-est-area]", msg: "Enter a lot area between 20 and 100,000 sqm." };
+    if (est.salePrice != null && (!isFinite(Number(est.salePrice)) || Number(est.salePrice) < 0 || Number(est.salePrice) > 1000000000)) return { field: "[data-est-sale-price]", msg: "Enter a non-negative selling price up to PHP 1 billion, or leave it blank." };
+    if (est.landMethod === "time-indexed") {
+      var indexCheck = referenceTools.timeScenario(1, 1, { baseDate: est.timeBaseDate || est.muniRow.effectivityDate, targetDate: est.timeTargetDate, annualPct: est.timeAnnualPct, source: est.timeSource, evidenceId: est.timeEvidenceId }, DATA.config.governmentReferenceRegister, { municipality: est.municipality, useGroup: useOfClassification(DATA.config, est.classification) });
+      if (!indexCheck.available) return { field: indexCheck.reason === "invalid-time-rate" ? '[data-est-time="timeAnnualPct"]' : indexCheck.reason === "time-evidence-unavailable" ? '[data-est-time="timeSource"]' : '[data-est-time="timeTargetDate"]', msg: indexCheck.reason === "time-evidence-unavailable" ? "No applicable reviewed land-price history. Choose manual assumption or the factor guide." : indexCheck.reason === "invalid-time-rate" ? "Enter an explicit annual change greater than -100% and at most 100%; no default rate is assumed." : "Choose valid base and target dates; target cannot precede base or be more than 100 years later." };
+    }
+    if (!isFinite(est.brokerPct) || est.brokerPct < 0 || est.brokerPct > 1) return { field: '[data-est-cost="brokerPct"]', msg: "Enter a commission from 0% to 100%." };
+    var invalidCost = ["developerFees", "notarial", "fairMarketValue"].filter(function (key) { return est[key] != null && (!isFinite(Number(est[key])) || Number(est[key]) < 0); })[0];
+    if (invalidCost) return { field: '[data-est-cost="' + invalidCost + '"]', msg: "Enter a non-negative quoted amount, or leave it blank." };
     return null;
   }
 
@@ -1681,6 +1932,7 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     if (!est.occupancy) return { field: '[data-est-ownership="occupancy"]', msg: "Choose the occupancy status to continue." };
     if (!est.titleStatus) return { field: '[data-est-ownership="titleStatus"]', msg: "Choose the title status to continue." };
     if (!est.inheritanceStatus) return { field: '[data-est-ownership="inheritanceStatus"]', msg: "Choose the inheritance status to continue." };
+    if (est.type === "house_lot" && (!isFinite(Number(est.floorArea || 0)) || Number(est.floorArea) < 0 || Number(est.floorArea) > 100000)) return { field: "[data-est-floor]", msg: "Enter a built-up area up to 100,000 sqm, or leave it blank for the stated assumption." };
     return null;
   }
 
@@ -1692,6 +1944,7 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     var btn = $q(card, "[data-est-next]");
     if (!btn) return;
     var missing = suppliedMissing || missingScreen1Field();
+    est.validationIssue = missing ? { field: missing.field, msg: missing.msg } : null;
     var msg = $q(card, "[data-est-next-hint]");
     if (!msg) {
       var p = document.createElement("p");
@@ -1710,7 +1963,12 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     $qa(card, "[aria-invalid]").forEach(function (el) { el.removeAttribute("aria-invalid"); });
     if (missing) {
       var field = $q(card, missing.field);
-      var wrap = field ? field.closest(".sf-est-field") : null;
+      /* The cost and time panels now live inside the collapsed "About this
+         estimate" disclosure, so opening only the nearest <details> left the
+         focused field inside a closed ancestor and therefore invisible. Walk
+         the whole chain. */
+      if (field) openDisclosureChain(field);
+      var wrap = field ? field.closest(".sf-est-field, fieldset") : null;
       if (wrap) {
         wrap.classList.add("sf-est-invalid");
         if (field) {
@@ -1730,8 +1988,9 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
 
   function runEstimate() {
     if (!validScreen1()) return;
+    var currentCalculation = ++calculationRequest;
     est.result = null;
-    est.pricingUnlocked = false;
+    est.pricingUnlocked = true;
     est.leadSubmitted = false;
     est.screen = 3;
     renderLayout();
@@ -1742,8 +2001,10 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
       municipality: est.municipality, barangay: est.barangay,
       streetKey: est.allOther ? "" : est.streetKey,
       classification: est.classification, area: est.area,
-      salePrice: est.salePrice,
-      corner: est.corner, purpose: est.purpose,
+      salePrice: est.salePrice, saleContext: est.saleContext, developerFees: est.developerFees, brokerPct: est.brokerPct,
+      landMethod: est.landMethod, timeSource: est.timeSource, timeAnnualPct: est.timeAnnualPct, timeBaseDate: est.timeBaseDate, timeTargetDate: est.timeTargetDate, timeEvidenceId: est.timeEvidenceId,
+      notarial: est.notarial, fairMarketValue: est.fairMarketValue, condition: est.condition,
+      corner: est.corner, purpose: est.purpose, stage: est.stage,
       type: est.type,
       floorArea: est.type === "house_lot" ? (Number(est.floorArea) > 0 ? Number(est.floorArea) : 0) : 0,
       floors: est.type === "house_lot" ? est.floors : "1",
@@ -1752,55 +2013,39 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
       features: est.type === "house_lot" ? est.features : [],
       occupancy: est.occupancy,
       titleStatus: est.titleStatus,
-      inheritanceStatus: est.inheritanceStatus
+      inheritanceStatus: est.inheritanceStatus,
+      community: est.community, floodRisk: est.floodRisk, roadAccess: est.roadAccess, frontage: est.frontage
     };
     Promise.all([loadMunicipality(est.municipalitySlug), loadComparableListings(opts)]).then(function (parts) {
+      if (currentCalculation !== calculationRequest || !getCard()) return;
       var md = parts[0];
       var internal = parts[1];
-      var evidence = internal.length ? Promise.resolve({ records: internal, source: "ES Realty listing" }) : loadExternalComparables(opts).then(function (external) {
-        return { records: external, source: external.length ? "External web evidence" : "" };
+      var usefulInternal = comparableSummary(internal, { municipality: opts.municipality, barangay: opts.barangay, propertyType: opts.type, area: opts.area, floorArea: opts.floorArea, corner: opts.corner, saleContext: opts.saleContext, condition: opts.condition }).eligibleCount >= 3;
+      var catalogRows = internal.map(function (row) { return Object.assign({}, row, { sourceType: "SEA ESTATES listing" }); });
+      var pendingEvidence = usefulInternal ? Promise.resolve({ records: catalogRows, source: "SEA ESTATES listing", externalStatus: { source: "External", status: "not-needed" } }) : loadExternalComparables(opts).then(function (external) {
+        return { records: catalogRows.concat(external), source: "Asking evidence", externalStatus: external.retrievalStatus || { source: "External", status: "not-configured" } };
       });
-      return evidence.then(function (evidenceSet) {
+      return pendingEvidence.then(function (evidenceSet) {
+        if (currentCalculation !== calculationRequest || !getCard()) return;
         opts.comparables = evidenceSet.records;
         opts.comparableSource = evidenceSet.source;
         var r = core.computeEstimate(config, index, md, opts);
+        if (r.available) { r.integrity = core.integrityCheck(r); if (!r.integrity.ok) r = unavailableResult("integrity-fail", config, index); }
+        r.evidenceRetrieval = [internal.retrievalStatus || { source: "Catalog", status: "not-configured" }, evidenceSet.externalStatus];
+        r.projectContext = ((DATA.projectEvidence || {}).records || []).filter(function (record) { return evidence.place(record.municipality) === evidence.place(opts.municipality); });
         est.result = r;
         animateThenReport();
       });
     }).catch(function () {
-      est.result = { available: false, reason: "no-data" };
+      if (currentCalculation !== calculationRequest || !getCard()) return;
+      est.result = { available: false, reason: "connection" };
       animateThenReport();
     });
   }
 
   function animateThenReport() {
-    var card = getCard();
-    var noteEl = card ? card.querySelector("[data-est-anim-note]") : null;
-    var stageEls = card ? $qa(card, "[data-est-stage]") : [];
-    if (!est.result || !est.result.available) {
-      setTimeout(function () { est.screen = 4; renderLayout(); }, 900);
-      return;
-    }
-    var t0 = performance ? performance.now() : Date.now();
-    var dur = 1500;
-    function frame(t) {
-      var p = Math.min(1, (t - t0) / dur);
-      if (noteEl && est.result) {
-        noteEl.textContent = p < 0.5 ? "Matching your barangay, street and BIR classification…" : "Reconciling the build-up and range…";
-      }
-      var stage = p < 0.35 ? 0 : p < 0.75 ? 1 : 2;
-      stageEls.forEach(function (el, index) { el.classList.toggle("active", index === stage); el.classList.toggle("complete", index < stage); });
-      if (p < 1) requestAnimationFrame(frame);
-      else {
-         setTimeout(function () {
-           est.screen = 4;
-           renderLayout();
-           var heading = getCard() && getCard().querySelector("#sf-est-result-heading");
-           if (heading && heading.focus) heading.focus();
-         }, 420);
-      }
-    }
-    requestAnimationFrame(frame);
+    // Progress reflects real data work; no artificial post-calculation delay.
+    est.screen = 4; renderLayout(); revealEstimatorScreen();
   }
 
   /* ---------------------------------------------------------- */
@@ -1813,8 +2058,12 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
       classification: r.classification, classificationLabel: r.classificationLabel,
       use: r.use, coverage: r.coverage, sourceLevel: r.source.level, dataCoveragePct: r.source.pct,
       total: r.total, marketGuideEstimate: r.marketGuideEstimate, marketGuideAvailable: r.marketGuideAvailable, recommendedAskingPrice: r.recommendedAskingPrice, low: r.low, high: r.high, perSqm: r.perSqm,
+      birReferenceConfirmed: r.birReferenceConfirmed, birReferenceLabel: r.birReferenceLabel, taxReferenceValue: r.taxReferenceValue,
+      saleContext: r.saleContext, costOptions: r.costOptions, conditions: r.conditions, factorSettingsVersion: r.factorSettingsVersion,
+      askingIndication: r.askingIndication,
+      landMethod: r.landMethod, planningMethodLabel: r.planningMethodLabel, timeIndex: r.timeIndex, factorBaseline: r.factorBaseline, referenceVerification: r.referenceVerification,
       birZonalRatePerSqm: r.birZonalRatePerSqm, birZonalValue: r.birZonalValue,
-      landValue: r.landValue, improvement: r.improvement, area: r.area, salePrice: r.salePrice,
+      landValue: r.landValue, improvement: r.improvement, area: r.area, floorArea: r.floorArea, salePrice: r.salePrice,
       ownershipAdjustmentPct: r.ownershipAdjustmentPct, occupancy: est.occupancy,
       titleStatus: est.titleStatus, inheritanceStatus: est.inheritanceStatus,
       marketGuide: r.marketGuide,
@@ -1828,20 +2077,20 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
       proxyFactor: r.factors.proxyFactor, bandMid: r.factors.bandMid, regionalAdj: r.factors.regionalAdj,
       buildCostPerSqm: r.buildCostPerSqm, floorsMultiplier: r.floorsMultiplier,
       ageMidpoint: r.ageMidpoint, depreciatedPct: r.depreciatedPct, featuresTotal: r.featuresTotal,
-      provenance: provenancePayload()
+      provenance: provenancePayload(r)
     } : null;
   }
 
   /* Compact provenance for the emailed/PDF report. Sends only the short
    * disclosure strings, not the whole manifest, so the report stays small and
    * the wording still comes from the single manifest the site reads. */
-  function provenancePayload() {
+  function provenancePayload(r) {
     var m = manifest();
     if (!m) return null;
     return {
-      basisOfValue: (m.valuation && m.valuation.basisOfValue) || "",
+      basisOfValue: r && r.timeIndex ? "Indexed-reference planning scenario" : (m.valuation && m.valuation.basisOfValue) || "",
       basisNote: (m.valuation && m.valuation.basisNote) || "",
-      order: (m.adjustmentFramework && m.adjustmentFramework.order) || [],
+      order: r && r.timeIndex ? ["Unchanged imported reference rate", "Explicit annual change over stated dates", "Lot area; full precision before final rounding", "Separate building/depreciation component"] : (m.adjustmentFramework && m.adjustmentFramework.order) || [],
       sources: (m.provenance && m.provenance.records || []).map(function (rec) {
 return {
             instrument: rec.instrument, authority: rec.authority, coverage: rec.coverage,
@@ -1854,6 +2103,7 @@ return {
           };
       }),
       currencyCheckedOn: (m.provenance && m.provenance.currencyCheckedOn) || "",
+      referenceStatus: "Latest applicability unverified unless the government register has successful verification and legal effectivity evidence",
       nextCurrencyReview: (m.provenance && m.provenance.nextCurrencyReview) || "",
       rangeMeaning: (m.range && m.range.meaning) || "",
       limitations: m.limitations || []
@@ -1892,7 +2142,8 @@ return {
           purpose: est.purpose, type: snap ? snap.type : est.type,
           typeLabel: snap ? snap.typeLabel : "", kind: est.type === "house_lot" ? "built" : "land",
           area: snap ? snap.area : (est.area || 0), corner: est.corner,
-          floorArea: est.type === "house_lot" ? (Number(est.floorArea) > 0 ? Number(est.floorArea) : 0) : 0
+          floorArea: snap ? snap.floorArea : 0,
+          floors: est.floors, ageBand: est.ageBand, construction: est.construction, features: est.features
         },
         location: {
           region: "Region IV-A (CALABARZON)", province: "Batangas",
@@ -1923,9 +2174,11 @@ return {
       ("loc-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10));
     form.dataset.estIdempotencyKey = key;
     var headers = { "Content-Type": "application/json", "Accept": "application/json", "Idempotency-Key": key };
+    var receivedHttp = false;
     var send = url
       ? window.fetch(url, { method: "POST", headers: headers, body: JSON.stringify(payload) })
         .then(function (res) {
+          receivedHttp = true;
           // Degraded fallback to listing-api ONLY on transport failure (this
           // endpoint never received/acknowledged the request, so no duplicate).
           // Any HTTP answer — including 500s — is surfaced to the user instead:
@@ -1936,7 +2189,7 @@ return {
           });
         })
         .catch(function (err) {
-          var isHttp = /^location-report /.test(err && err.message);
+          var isHttp = receivedHttp || /^location-report /.test(err && err.message);
           if (isHttp) throw err;
           return fallback();
         })
@@ -1944,10 +2197,12 @@ return {
     send.then(function (res) {
       form.reset();
       delete form.dataset.estIdempotencyKey;
-      var emailed = !!(res && (res.pdfSent || (!res.emailSkipped && res.id)));
+      // An inquiry ID confirms saving, not report delivery. The report endpoint
+      // explicitly returns pdfSent; the contact fallback may also return an ID.
+      var emailed = !!(res && res.pdfSent === true);
       var confirmMsg = emailed
-        ? "Thanks! Your report is on its way to your inbox. An ES Realty representative will verify your inputs and contact you within one business day."
-        : "Thanks — your report request is saved. An ES Realty representative will verify your inputs and contact you within one business day.";
+        ? "Your report has been sent. Check your inbox, including your spam folder. The SEA ESTATES team has also received your request."
+        : "Your report request has been saved. The SEA ESTATES team will review your details and follow up; no emailed delivery has been confirmed.";
       if (status) {
         status.textContent = confirmMsg;
         status.className = "sf-form-status success";
@@ -1980,7 +2235,7 @@ return {
   function markup() {
     return '<section class="sf-section sf-est" id="sf-estimator" data-est-root>' +
       '<div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">BATANGAS VALUE GUIDE</p><h2>What is your <em>property worth?</em></h2></div>' +
-      '<p>Official BIR zonal values for Batangas (RDO 58 &amp; 59), shown separately from an ES Realty market guide estimate.</p></div>' +
+      '<p>Official BIR zonal values for Batangas (RDO 58 &amp; 59), shown separately from a SEA ESTATES market guide estimate.</p></div>' +
       '<div class="sf-est-card" data-est-card></div></section>';
   }
 
@@ -1988,7 +2243,11 @@ return {
     if (typeof document === "undefined") return;
     if (!servicesBound) {
       servicesBound = true;
+      window.addEventListener("hashchange", function () {
+        if (!/^#\/?(home(?:\?|$)|$)/.test(location.hash)) { mountedHome = false; est.validationIssue = null; ++calculationRequest; }
+      });
       document.addEventListener("click", function (event) {
+        if (event.target.closest("[data-est-data-retry]")) { dataPromise = null; mount(); return; }
         var link = event.target.closest("[data-est-services]");
         if (!link) return;
         event.preventDefault();
@@ -1999,11 +2258,13 @@ return {
     }
     if (!document.querySelector("[data-est-root]")) return;
     loadData().then(function () {
-      est.screen = 1;
+      if (!getCard()) return;
+      if (!mountedHome) { est.screen = 1; mountedHome = true; }
       renderLayout();
     }).catch(function () {
       var card = getCard();
-      if (card) card.innerHTML = '<p class="sf-est-empty">Could not load reference data — refresh to try again.</p>';
+      dataPromise = null;
+      if (card) card.innerHTML = '<p class="sf-est-empty" role="alert">Could not load reference data. Check your connection and try again.</p><button class="sf-est-next" data-est-data-retry>Retry loading data</button>';
     });
   }
 
@@ -2116,6 +2377,7 @@ return {
       return loadMunicipality(row.slug).then(function (md) {
         var result = core.computeEstimate(d.config, d.index, md, opts);
         result.integrity = core.integrityCheck(result);
+        result.projectContext = ((d.projectEvidence || {}).records || []).filter(function (record) { return evidence.place(record.municipality) === evidence.place(opts.municipality); });
         return result;
       });
     });
@@ -2141,6 +2403,7 @@ return {
     mount: mount,
     core: core,
     loadData: loadData,
+    updateGuideSettings: updateGuideSettings,
     loadMunicipality: loadMunicipality,
     estimate: estimate,
     reference: reference,

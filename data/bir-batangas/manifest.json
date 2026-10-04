@@ -16,7 +16,7 @@
       "departmentOrder": "035-2022",
       "revision": "4th",
       "effectivityDate": "2022-07-23",
-      "effectiveTo": "Present",
+      "effectiveTo": "Latest applicability unverified",
       "sourceDatasetId": 915,
       "sourceTemplateId": 195,
       "sourceName": "RDO No. 58 - Batangas City, West Batangas.xlsx",
@@ -46,7 +46,7 @@
       "departmentOrder": "034-2022",
       "revision": "5th",
       "effectivityDate": "2022-07-10",
-      "effectiveTo": "Present",
+      "effectiveTo": "Latest applicability unverified",
       "sourceDatasetId": 914,
       "sourceTemplateId": 195,
       "sourceName": "RDO No. 59 - Lipa City, East Batangas.xls",
@@ -76,7 +76,7 @@
     "streetCount": 3710,
     "classificationCount": 38
   },
-  "note": "Official BIR zonal-value datasets for Batangas (RDO 58 West Batangas, DO 035-2022 / RDO 59 East Batangas, DO 034-2022). Imported from the official BIR sources listed below. Values are current until superseded by a newer Department Order.",
+  "note": "Officially sourced 2022 BIR datasets for RDO 58/59. Dataset-generation time is not a new schedule or confirmed import date. Latest applicability, supersession and effective SMV replacement are unverified; see government-reference-register.json. Numeric imported rates are unchanged.",
   "warnings": [
     "rdo58: 532 rows carried an unresolvable masked value and were excluded from lookup (172 resolved as 'same as above').",
     "rdo59: 353 rows carried an unresolvable masked value and were excluded from lookup (4 resolved as 'same as above')."

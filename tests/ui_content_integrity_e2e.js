@@ -112,6 +112,10 @@ function page_usableFields() {
     if (el.type === "hidden" || el.type === "checkbox" || el.type === "radio" || el.type === "submit" || el.type === "button") return;
     const cs = getComputedStyle(el);
     if (cs.display === "none" || cs.visibility === "hidden") return;
+    /* More Filters intentionally collapses its controls on small screens.
+       Applied filters auto-open the panel, and the dedicated filter suite
+       verifies all fields become usable after opening it. */
+    if (el.closest("details:not([open])") && !el.closest("summary")) return;
     /* an ancestor that clips to a 1px box hides the field too */
     let a = el.parentElement, clipped = false;
     while (a && a !== document.body) {
@@ -168,11 +172,19 @@ function page_buttonGeom() {
     });
 }
 
-function page_notifyForm() {
+async function page_notifyForm() {
   const input = document.querySelector("[data-sf-notify] input[type=email]");
   const submit = document.querySelector("[data-sf-notify] button[type=submit]");
+  // Desktop keeps the above-fold contract. A phone may legitimately need
+  // scrolling, so prove the button is visible and hit-testable after scrolling
+  // instead of treating all below-fold content as unreachable.
+  if (submit && matchMedia("(max-width: 600px)").matches) {
+    submit.scrollIntoView({ block: "center", behavior: "instant" });
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  }
   const r = input ? input.getBoundingClientRect() : { width: 0 };
-  const sr = submit ? submit.getBoundingClientRect() : { top: -1, bottom: -1 };
+  const sr = submit ? submit.getBoundingClientRect() : { top: -1, bottom: -1, width: 0, height: 0 };
+  const hit = submit ? document.elementFromPoint(sr.left + sr.width / 2, sr.top + sr.height / 2) : null;
   const label = input ? input.closest("label") : null;
   const labelText = label ? (label.querySelector("span") || {}).textContent || "" : "";
   let hidden = 0;
@@ -183,7 +195,7 @@ function page_notifyForm() {
   return {
     w: Math.round(r.width),
     visibleLabel: !!labelText && !label.classList.contains("sr-only"),
-    submitInView: sr.top < window.innerHeight,
+    submitInView: !!submit && sr.top >= 0 && sr.bottom <= window.innerHeight && sr.width >= 100 && sr.height >= 44 && !!hit && submit.contains(hit),
     submitY: Math.round(sr.top),
     vh: window.innerHeight,
     hiddenFields: hidden

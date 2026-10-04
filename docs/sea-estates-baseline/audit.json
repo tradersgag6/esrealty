@@ -1,0 +1,6959 @@
+{
+  "capturedAt": "2026-10-02T01:24:48.686Z",
+  "baseUrl": "http://127.0.0.1:8931/index.html",
+  "commit": "7d67c6541d84656d8775b6d8277bfb5149fd605d",
+  "captureStatus": "M css/legacy-coverage.json\n?? docs/sea-estates-baseline/\n?? docs/sea-estates-batch-0-tests.log\n?? tools/sea_estates_baseline.js",
+  "hashes": {
+    "index.html": "28c7267f3a4d6c5214590ab5638f3847382cde268ba7ac7fc576af1b9d34e8e3",
+    "js/app.js": "8a79aefe82329e9d0c0b78d53f787c3cbacf131a43299e7e54ba04573c997e04",
+    "js/app.min.js": "20f06eac4906294e9cc6ffea0b7c0915197e36081988d40f78310697c58e9345",
+    "js/storefront.js": "d248c4efc637588be64226822c4f00ccbad73f82cfd1a6ca11e16b2687a25064",
+    "js/estimator.js": "13001025917e2c258bee246c5e7d8d0a08e9a515a0cf75136b80c3e43f82e5c0",
+    "css/styles.css": "e49396b94a98260267b2cffc3f5e0a09e7bfba811a11e820df5c5189ce6ef200",
+    "css/storefront-legacy.css": "5ce8c78d93ddeb1e3280b9d6b9acead970936c442a50aa36ef2a9cb0926b2388",
+    "css/storefront.css": "bf5265357dbf450d6c3ed5938fc3e49ccfaa3d174e745b3773792b629562a492",
+    "css/estimator.css": "e008f62ca201d67ac22919f8ec0a95401dc5c6ebe36f11274e92409fda36524b"
+  },
+  "branding": [
+    {
+      "file": ".github/workflows/keepalive.yml",
+      "category": "source-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 19,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": ".github/workflows/market-index.yml",
+      "category": "source-review",
+      "count": 3,
+      "hits": [
+        {
+          "line": 23,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 28,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 29,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "404.html",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 6,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 18,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "AGENT_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 4,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 157,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 157,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "APPLE_DESIGN_ANALYSIS_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 3,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 11,
+          "spelling": "es realty"
+        }
+      ]
+    },
+    {
+      "file": "APPLE_DESIGN_FEASIBILITY_REPORT.md",
+      "category": "documentation-or-history-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "BACKEND_DESIGN_FIXTURE_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "BACKEND_UX_FLOW_REPORT.md",
+      "category": "documentation-or-history-review",
+      "count": 4,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 133,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 218,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 235,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "build_app.js",
+      "category": "source-review",
+      "count": 3,
+      "hits": [
+        {
+          "line": 10,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 26,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 27,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "css/bootstrap-fallback.css",
+      "category": "source-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "css/storefront.css",
+      "category": "source-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "css/styles.css",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 33,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "css/styles.reduced.css",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 34,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "data/batangas-projects.json",
+      "category": "provenance-or-data-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "data/data-manifest.json",
+      "category": "provenance-or-data-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 49,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 138,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "data/zonal-config.json",
+      "category": "provenance-or-data-review",
+      "count": 8,
+      "hits": [
+        {
+          "line": 31,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 37,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 43,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 173,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 174,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 175,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 187,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 187,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "DEPLOY_GUIDE.md",
+      "category": "documentation-or-history-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 109,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 133,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "docs/batangas-value-guide-sources.md",
+      "category": "documentation-or-history-review",
+      "count": 7,
+      "hits": [
+        {
+          "line": 33,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 44,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 54,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 101,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 105,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 111,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 122,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "FEASIBILITY_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 26,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 84,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "FRONTEND_UI_AUDIT_UPGRADE_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 6,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 11,
+          "spelling": "es realty"
+        },
+        {
+          "line": 12,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 104,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 289,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "HOSTING_MIGRATION_PLAN.md",
+      "category": "documentation-or-history-review",
+      "count": 12,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 32,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 51,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 67,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 67,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 69,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 70,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 70,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 70,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 71,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 80,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 84,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "index.html",
+      "category": "source-review",
+      "count": 15,
+      "hits": [
+        {
+          "line": 6,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 7,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 8,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 12,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 13,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 47,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 52,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 69,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 85,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 89,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 153,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 162,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 261,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 293,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 461,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "js/agent_next.js",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 6,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 10,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "js/app.js",
+      "category": "source-review",
+      "count": 134,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 8,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 9,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 12,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 15,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 18,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 21,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 26,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 27,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 48,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 56,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 56,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 57,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 258,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 259,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 290,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 290,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 500,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 502,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 676,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 951,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 1704,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 1761,
+          "spelling": "ESRealty"
+        },
+        {
+          "line": 1858,
+          "spelling": "ESRealty"
+        },
+        {
+          "line": 1864,
+          "spelling": "ESRealty"
+        },
+        {
+          "line": 1875,
+          "spelling": "ESRealty"
+        },
+        {
+          "line": 1883,
+          "spelling": "ESRealty"
+        },
+        {
+          "line": 1889,
+          "spelling": "ESRealty"
+        },
+        {
+          "line": 2341,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 2486,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 2487,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 2498,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 2498,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 2503,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 2743,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 2743,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 2760,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 2813,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 2877,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 2889,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 2949,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 2951,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 2952,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 4581,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 4665,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 4665,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 4897,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 6456,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 6695,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 6816,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 7706,
+          "spelling": "ES REALTY"
+        },
+        {
+          "line": 8987,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9244,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 9300,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 9599,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9601,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9725,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9734,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9745,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9754,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9873,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9875,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 10242,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 10244,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 10251,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 10357,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 10458,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 10615,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 10704,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 10709,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 10716,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 11219,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 11255,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 11255,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 11260,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 11263,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 11270,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 11862,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 12411,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 13737,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 13752,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 13768,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 13788,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 13797,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 13880,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 13985,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 13986,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 13987,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 14195,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 14451,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 14632,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 14644,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 14685,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 14907,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 14918,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 14918,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 14923,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 14935,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 14935,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15024,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15024,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 15025,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15026,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15027,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15028,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15029,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15098,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15131,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 15231,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 15282,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15347,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15350,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15362,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15363,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15364,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15365,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15366,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15367,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 16323,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 16324,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 16660,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 17085,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 17089,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 17132,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 17137,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 17157,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 17211,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 17216,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 17237,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 17280,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 17286,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 17349,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 17388,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 17431,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "js/attribution.js",
+      "category": "source-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "js/compliance_due.js",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 7,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "js/core.js",
+      "category": "source-review",
+      "count": 6,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 8,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 582,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 789,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 789,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 790,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "js/data.js",
+      "category": "source-review",
+      "count": 4,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 241,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 241,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 242,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "js/estimator.js",
+      "category": "source-review",
+      "count": 26,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 13,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 79,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 300,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 371,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 441,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 441,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 442,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 485,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 486,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 534,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 534,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 544,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 552,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 553,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 1077,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 1088,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 1190,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 1297,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 1760,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 1864,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 1865,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 1872,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 1949,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 1950,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 1983,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "js/listings-api.js",
+      "category": "source-review",
+      "count": 3,
+      "hits": [
+        {
+          "line": 5,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 18,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 43,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "js/playbook_seed.js",
+      "category": "source-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "js/portfolio_ledger.js",
+      "category": "source-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 7,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "js/storefront.js",
+      "category": "source-review",
+      "count": 48,
+      "hits": [
+        {
+          "line": 4,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 21,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 21,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 22,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 127,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 128,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 140,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 141,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 141,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 162,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 164,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 166,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 192,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 247,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 260,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 355,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 589,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 590,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 591,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 594,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 594,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 594,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 600,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 606,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 750,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 771,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 777,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 791,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 801,
+          "spelling": "ES REALTY"
+        },
+        {
+          "line": 832,
+          "spelling": "ES REALTY"
+        },
+        {
+          "line": 832,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 833,
+          "spelling": "ES REALTY"
+        },
+        {
+          "line": 833,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 891,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 956,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 957,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 958,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 959,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 960,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 961,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 962,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 1023,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 1023,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 1023,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 1090,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 1330,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 1395,
+          "spelling": "ES REALTY"
+        },
+        {
+          "line": 1480,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "js/supabase-config.js",
+      "category": "source-review",
+      "count": 4,
+      "hits": [
+        {
+          "line": 21,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 25,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 25,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 28,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "js/util.js",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 15,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 15,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "js/value_guide_pdf.js",
+      "category": "source-review",
+      "count": 6,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 44,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 172,
+          "spelling": "ES REALTY"
+        },
+        {
+          "line": 581,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 914,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 961,
+          "spelling": "ES-Realty"
+        }
+      ]
+    },
+    {
+      "file": "js/value_guide_tax.js",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 37,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "manifest.webmanifest",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/build-index.js",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 5,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 11,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/market_scan_server.ps1",
+      "category": "source-review",
+      "count": 3,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 28,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 597,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/README.md",
+      "category": "documentation-or-history-review",
+      "count": 3,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 10,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/start_market_scan.cmd",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 15,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/STORE_LOCATOR_AUDIT_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 8,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 20,
+          "spelling": "es realty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/STORE_LOCATOR_COVERAGE_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/STORE_LOCATOR_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 8,
+          "spelling": "es realty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/UPGRADE_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 8,
+          "spelling": "es realty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/vercel/lib/store_chains.js",
+      "category": "source-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 36,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/vercel/package.json",
+      "category": "source-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/worker/package-lock.json",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 8,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/worker/package.json",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 5,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "market-scan/worker/server.js",
+      "category": "source-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 4,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "PHASE_0_1_BUILD.md",
+      "category": "documentation-or-history-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "PORTFOLIO_CASHFLOW_FLOW_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 5,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 5,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 16,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 200,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 232,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "PORTFOLIO_FEATURE_UPGRADE_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 4,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 6,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 66,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 70,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "PORTFOLIO_UPGRADE_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 3,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 240,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 311,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "README.md",
+      "category": "documentation-or-history-review",
+      "count": 3,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 76,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 76,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "serve.js",
+      "category": "source-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 55,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "start_esrealty.cmd",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 4,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/check-backend.js",
+      "category": "backend-report-or-contract-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 148,
+          "spelling": "ESRealty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/cleanup_ai_test_data.sql",
+      "category": "backend-report-or-contract-review",
+      "count": 273,
+      "hits": [
+        {
+          "line": 14,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 14,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 21,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 21,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 21,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 22,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 22,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 30,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 30,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 30,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 35,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 40,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 40,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 40,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 41,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 41,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 41,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 41,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 42,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 42,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 42,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 42,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 43,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 43,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 43,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 44,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 44,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 45,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 45,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 52,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 52,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 52,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 53,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 53,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 53,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 53,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 54,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 54,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 54,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 54,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 55,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 55,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 55,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 56,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 56,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 57,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 57,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 65,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 65,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 65,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 65,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 66,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 66,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 66,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 66,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 67,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 67,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 67,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 68,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 68,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 69,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 69,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 86,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 86,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 86,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 86,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 87,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 87,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 87,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 87,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 88,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 88,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 88,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 89,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 89,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 90,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 90,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 100,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 100,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 100,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 100,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 101,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 101,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 101,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 101,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 102,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 102,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 102,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 103,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 103,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 104,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 104,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 110,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 110,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 110,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 110,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 111,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 111,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 111,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 111,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 112,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 112,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 112,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 113,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 113,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 114,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 114,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 125,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 125,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 125,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 130,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 135,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 135,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 135,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 136,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 136,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 136,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 136,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 137,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 137,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 137,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 137,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 138,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 138,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 138,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 139,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 139,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 140,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 140,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 147,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 147,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 147,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 148,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 148,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 148,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 148,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 149,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 149,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 149,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 149,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 150,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 150,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 150,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 151,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 151,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 152,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 152,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 171,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 171,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 171,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 171,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 172,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 172,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 172,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 172,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 173,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 173,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 173,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 174,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 174,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 175,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 175,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 222,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 222,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 222,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 222,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 223,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 223,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 223,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 223,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 224,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 224,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 224,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 225,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 225,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 226,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 226,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 232,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 232,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 232,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 232,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 233,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 233,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 233,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 233,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 234,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 234,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 234,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 235,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 235,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 236,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 236,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 246,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 246,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 246,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 246,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 247,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 247,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 247,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 247,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 248,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 248,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 248,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 249,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 249,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 250,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 250,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 259,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 259,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 259,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 259,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 260,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 260,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 260,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 260,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 261,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 261,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 261,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 262,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 262,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 263,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 263,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 272,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 272,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 272,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 276,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 281,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 281,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 286,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 286,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 286,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 286,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 287,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 287,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 287,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 287,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 288,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 288,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 288,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 289,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 289,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 290,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 290,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 307,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 307,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 307,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 307,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 308,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 308,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 308,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 308,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 309,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 309,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 309,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 310,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 310,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 311,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 311,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 317,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 317,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 317,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 317,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 318,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 318,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 318,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 318,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 319,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 319,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 319,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 320,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 320,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 321,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 321,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/diagnostic_schema.sql",
+      "category": "backend-report-or-contract-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/functions/admin-create-account/README.md",
+      "category": "backend-report-or-contract-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 23,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/functions/listing-api/index.ts",
+      "category": "backend-report-or-contract-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 30,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 32,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/functions/location-report/index.ts",
+      "category": "backend-report-or-contract-review",
+      "count": 10,
+      "hits": [
+        {
+          "line": 11,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 267,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 269,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 269,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 269,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 414,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 461,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 467,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 620,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 622,
+          "spelling": "ES-Realty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/functions/nearby-scan/index.ts",
+      "category": "backend-report-or-contract-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 60,
+          "spelling": "ESRealty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/functions/notify-dispatch/index.ts",
+      "category": "backend-report-or-contract-review",
+      "count": 6,
+      "hits": [
+        {
+          "line": 10,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 12,
+          "spelling": "ESRealty"
+        },
+        {
+          "line": 28,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 32,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 127,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 141,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/functions/seo/index.ts",
+      "category": "backend-report-or-contract-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 10,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 107,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/notifications.sql",
+      "category": "backend-report-or-contract-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 80,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/portfolio_a_investor.sql",
+      "category": "backend-report-or-contract-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/repair_schema.sql",
+      "category": "backend-report-or-contract-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "supabase/schema.sql",
+      "category": "backend-report-or-contract-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "sw.js",
+      "category": "source-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 24,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/ads_repo_e2e.js",
+      "category": "test-expectation",
+      "count": 4,
+      "hits": [
+        {
+          "line": 8,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 12,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 12,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 119,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/agent_crm_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 9,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/appraisal_analyze_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 43,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 43,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/appraisal_b1_e2e.js",
+      "category": "test-expectation",
+      "count": 3,
+      "hits": [
+        {
+          "line": 9,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 21,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 21,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/appraisal_b2_e2e.js",
+      "category": "test-expectation",
+      "count": 4,
+      "hits": [
+        {
+          "line": 8,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 8,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 18,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 18,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/appraisal_b3_e2e.js",
+      "category": "test-expectation",
+      "count": 3,
+      "hits": [
+        {
+          "line": 9,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 18,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 18,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/appraisal_b4_e2e.js",
+      "category": "test-expectation",
+      "count": 3,
+      "hits": [
+        {
+          "line": 9,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 18,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 18,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/appraisal_workflow_e2e.js",
+      "category": "test-expectation",
+      "count": 3,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 9,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/build_sync_node.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 22,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 23,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tests/cdp_driver_runner.js",
+      "category": "test-expectation",
+      "count": 4,
+      "hits": [
+        {
+          "line": 111,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 129,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 144,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 155,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tests/compliance_registry_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 9,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/crm_core_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 8,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 8,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/crm_mobile_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 7,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 7,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/crm_quickwins_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 8,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 8,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/database_backup_e2e.js",
+      "category": "test-expectation",
+      "count": 6,
+      "hits": [
+        {
+          "line": 21,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 22,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 57,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 58,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 59,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 71,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "tests/ds_summary_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 8,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 8,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/estimator_core_node.js",
+      "category": "test-expectation",
+      "count": 5,
+      "hits": [
+        {
+          "line": 54,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 58,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 62,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 69,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 162,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "tests/estimator_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 20,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 201,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tests/feasibility_e2e.js",
+      "category": "test-expectation",
+      "count": 4,
+      "hits": [
+        {
+          "line": 15,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 60,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 63,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/leads_pinmove_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 16,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 16,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/listings_stale_e2e.js",
+      "category": "test-expectation",
+      "count": 5,
+      "hits": [
+        {
+          "line": 9,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 19,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 22,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 23,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tests/listings_upgrade_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 13,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 13,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/market_filters_mobile_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 14,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 14,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/market_index_e2e.js",
+      "category": "test-expectation",
+      "count": 3,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 30,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 30,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/market_scan_e2e.js",
+      "category": "test-expectation",
+      "count": 3,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 8,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 8,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/market_scan_filters_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 15,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/playbook_e2e.js",
+      "category": "test-expectation",
+      "count": 3,
+      "hits": [
+        {
+          "line": 8,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 9,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 25,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "tests/playbook_seed_node.js",
+      "category": "test-expectation",
+      "count": 1,
+      "hits": [
+        {
+          "line": 20,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tests/pms_crud_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 19,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 19,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/pms_portal_mobile_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 7,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 7,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/portfolio_cloud_e2e.js",
+      "category": "test-expectation",
+      "count": 3,
+      "hits": [
+        {
+          "line": 14,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 15,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 65,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/portfolio_cloud_node.js",
+      "category": "test-expectation",
+      "count": 1,
+      "hits": [
+        {
+          "line": 118,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/portfolio_construction_e2e.js",
+      "category": "test-expectation",
+      "count": 4,
+      "hits": [
+        {
+          "line": 15,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 16,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 33,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 57,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "tests/portfolio_filters_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 44,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 45,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/portfolio_investor_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 6,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 6,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/portfolio_ledger_integrity_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 21,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 22,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/portfolio_ledger_ui_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 17,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 18,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/portfolio_migration_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 6,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 7,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/portfolio_overview_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 6,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 7,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/portfolio_permissions_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 13,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 14,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/portfolio_proofs_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 24,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 25,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/run_all.ps1",
+      "category": "test-expectation",
+      "count": 3,
+      "hits": [
+        {
+          "line": 9,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 10,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 32,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/stores_coverage_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 48,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 48,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/stores_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 35,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 35,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/stores_freshness_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 34,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 34,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/ui_plot_land_e2e.js",
+      "category": "test-expectation",
+      "count": 1,
+      "hits": [
+        {
+          "line": 5,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/ui_plot_wizard_e2e.js",
+      "category": "test-expectation",
+      "count": 1,
+      "hits": [
+        {
+          "line": 6,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/ui_preload_flash_e2e.js",
+      "category": "test-expectation",
+      "count": 3,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 13,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 13,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tests/ui_readability_mobile_e2e.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 177,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 201,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tests/value_guide_internal_e2e.js",
+      "category": "test-expectation",
+      "count": 8,
+      "hits": [
+        {
+          "line": 70,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 70,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 71,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 95,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 96,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 135,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 136,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 284,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/value_guide_internal_node.js",
+      "category": "test-expectation",
+      "count": 2,
+      "hits": [
+        {
+          "line": 84,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 157,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tests/value_guide_pdf_adversarial_node.js",
+      "category": "test-expectation",
+      "count": 1,
+      "hits": [
+        {
+          "line": 162,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "tests/value_guide_pdf_browser_e2e.js",
+      "category": "test-expectation",
+      "count": 9,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 107,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 107,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 108,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 108,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 113,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 114,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 185,
+          "spelling": "ES-Realty"
+        },
+        {
+          "line": 256,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tests/value_guide_pdf_node.js",
+      "category": "test-expectation",
+      "count": 5,
+      "hits": [
+        {
+          "line": 99,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 120,
+          "spelling": "ES REALTY"
+        },
+        {
+          "line": 125,
+          "spelling": "ES REALTY"
+        },
+        {
+          "line": 143,
+          "spelling": "ES REALTY"
+        },
+        {
+          "line": 146,
+          "spelling": "ES REALTY"
+        }
+      ]
+    },
+    {
+      "file": "tests/zz_screenshot_capture.js",
+      "category": "test-expectation",
+      "count": 1,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "tools/bir-import/download.js",
+      "category": "tooling-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 42,
+          "spelling": "ESRealty"
+        }
+      ]
+    },
+    {
+      "file": "tools/bir-import/import.js",
+      "category": "tooling-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "tools/bir-import/package-lock.json",
+      "category": "tooling-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "es-realty"
+        },
+        {
+          "line": 8,
+          "spelling": "es-realty"
+        }
+      ]
+    },
+    {
+      "file": "tools/bir-import/package.json",
+      "category": "tooling-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 2,
+          "spelling": "es-realty"
+        }
+      ]
+    },
+    {
+      "file": "tools/classify_styles.js",
+      "category": "tooling-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 423,
+          "spelling": "ES Realty"
+        }
+      ]
+    },
+    {
+      "file": "tools/legacy_css_coverage.js",
+      "category": "tooling-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 97,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tools/legacy_live_plan.js",
+      "category": "tooling-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 195,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tools/overflow_probe.js",
+      "category": "tooling-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 68,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tools/probe_properties.js",
+      "category": "tooling-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 16,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 51,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tools/sea_estates_baseline.js",
+      "category": "tooling-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 11,
+          "spelling": "ESREALTY"
+        },
+        {
+          "line": 11,
+          "spelling": "esrealty"
+        }
+      ]
+    },
+    {
+      "file": "tools/snapshot_public_styles.js",
+      "category": "tooling-review",
+      "count": 2,
+      "hits": [
+        {
+          "line": 381,
+          "spelling": "esrealty"
+        },
+        {
+          "line": 390,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "tools/which_rules_apply.js",
+      "category": "tooling-review",
+      "count": 1,
+      "hits": [
+        {
+          "line": 70,
+          "spelling": "ESREALTY"
+        }
+      ]
+    },
+    {
+      "file": "UI_READABILITY_MOBILE_FIX_PROMPT.md",
+      "category": "documentation-or-history-review",
+      "count": 3,
+      "hits": [
+        {
+          "line": 1,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 3,
+          "spelling": "ES Realty"
+        },
+        {
+          "line": 19,
+          "spelling": "ES Realty"
+        }
+      ]
+    }
+  ],
+  "css": [
+    {
+      "file": "css/storefront.css",
+      "hexOccurrences": 17,
+      "distinctHex": 17,
+      "tokenReferences": 221,
+      "sfTokenReferences": 221
+    },
+    {
+      "file": "css/storefront-legacy.css",
+      "hexOccurrences": 511,
+      "distinctHex": 164,
+      "tokenReferences": 8,
+      "sfTokenReferences": 0
+    },
+    {
+      "file": "css/estimator.css",
+      "hexOccurrences": 455,
+      "distinctHex": 131,
+      "tokenReferences": 1,
+      "sfTokenReferences": 1
+    },
+    {
+      "file": "css/styles.css",
+      "hexOccurrences": 258,
+      "distinctHex": 107,
+      "tokenReferences": 584,
+      "sfTokenReferences": 0
+    }
+  ],
+  "captures": [
+    {
+      "route": "#/home",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "home-desktop.png",
+      "viewportImage": "home-desktop-viewport.png",
+      "title": "ES Realty | Free Batangas property value guide",
+      "h1": [
+        "What is your property worth?"
+      ],
+      "headings": [
+        "A clearer answer before your next property step.",
+        "Full-service property help, from one team.",
+        "Properties on the market now.",
+        "Three simple steps to a better decision.",
+        "Ready for the next check?"
+      ],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Get My Free Estimate →",
+          "href": "#sf-estimator"
+        },
+        {
+          "text": "Browse Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "01Buying a propertyShortlists, viewings and offer support.→",
+          "href": "#/search"
+        },
+        {
+          "text": "02Selling a propertyFree value guide and a pricing review.→",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "03RentingTenant matching and lease support.→",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "04Pre-sellingPrepare, price and launch with confidence.→",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "05Property managementTurnover, collections and repairs handled.→",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "06Title and legalHandover checks and documentary help.→",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "07FinancingIntroduction to bank and developer options.→",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "See all properties",
+          "href": "#/search"
+        },
+        {
+          "text": "+63 900 000 0000",
+          "href": "tel:%2B639000000000"
+        },
+        {
+          "text": "hello@esrealty.ph",
+          "href": "mailto:hello%40esrealty.ph"
+        },
+        {
+          "text": "Privacy Notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:+639000000000"
+        }
+      ],
+      "listingIds": [
+        "lst-817f58bb-4946-4a9b-9488-a3ebf586b3da",
+        "lst-ec703e0a-6b9f-4f0b-baf6-3804972b11d7"
+      ],
+      "hasEstimator": true,
+      "hasBarangay": true,
+      "width": 1440,
+      "scrollWidth": 1440,
+      "errors": [],
+      "failedRequests": [
+        {
+          "url": "https://mrngaqtbaseewzcsogqi.supabase.co/functions/v1/listing-api/api/site-settings",
+          "error": "net::ERR_FAILED"
+        }
+      ]
+    },
+    {
+      "route": "#/search",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "properties-desktop.png",
+      "viewportImage": "properties-desktop-viewport.png",
+      "title": "Properties for sale and rent in Batangas | ES Realty",
+      "h1": [
+        "Find a property that fits."
+      ],
+      "headings": [],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:"
+        }
+      ],
+      "listingIds": [
+        "lst-817f58bb-4946-4a9b-9488-a3ebf586b3da",
+        "lst-ec703e0a-6b9f-4f0b-baf6-3804972b11d7"
+      ],
+      "hasEstimator": false,
+      "hasBarangay": false,
+      "width": 1440,
+      "scrollWidth": 1440,
+      "errors": [],
+      "failedRequests": []
+    },
+    {
+      "route": "#/property-value",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "property-value-desktop.png",
+      "viewportImage": "property-value-desktop-viewport.png",
+      "title": "Get My Property Value | ES Realty",
+      "h1": [
+        "Get my property value."
+      ],
+      "headings": [
+        "What happens",
+        "Talk to us about your property"
+      ],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Request an appraisal consultation",
+          "href": "#sf-pv-form"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Not ready yet? Start with the free value guide",
+          "href": "#/home"
+        },
+        {
+          "text": "Privacy Notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:"
+        }
+      ],
+      "listingIds": [],
+      "hasEstimator": false,
+      "hasBarangay": false,
+      "width": 1440,
+      "scrollWidth": 1440,
+      "errors": [],
+      "failedRequests": []
+    },
+    {
+      "route": "#/project-bt",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "project-bt-desktop.png",
+      "viewportImage": "project-bt-desktop-viewport.png",
+      "title": "Project B.T by ES Realty",
+      "h1": [
+        "Something is being built in Batangas."
+      ],
+      "headings": [
+        "Be the first to know"
+      ],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy Notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:"
+        }
+      ],
+      "listingIds": [],
+      "hasEstimator": false,
+      "hasBarangay": false,
+      "width": 1440,
+      "scrollWidth": 1440,
+      "errors": [],
+      "failedRequests": []
+    },
+    {
+      "route": "#/listing/lst-817f58bb-4946-4a9b-9488-a3ebf586b3da",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 1000
+      },
+      "image": "property-detail-desktop.png",
+      "viewportImage": "property-detail-desktop-viewport.png",
+      "title": "Property details | ES Realty",
+      "h1": [
+        "ULTIMA"
+      ],
+      "headings": [
+        "About this property",
+        "Location",
+        "₱12,000,000"
+      ],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "+",
+          "href": "#"
+        },
+        {
+          "text": "−",
+          "href": "#"
+        },
+        {
+          "text": "Leaflet",
+          "href": "https://leafletjs.com"
+        },
+        {
+          "text": "OpenStreetMap",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Privacy Notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:"
+        }
+      ],
+      "listingIds": [],
+      "hasEstimator": false,
+      "hasBarangay": false,
+      "width": 1440,
+      "scrollWidth": 1440,
+      "errors": [],
+      "failedRequests": []
+    },
+    {
+      "route": "#/home",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "image": "home-tablet.png",
+      "viewportImage": "home-tablet-viewport.png",
+      "title": "ES Realty | Free Batangas property value guide",
+      "h1": [
+        "What is your property worth?"
+      ],
+      "headings": [
+        "A clearer answer before your next property step.",
+        "Full-service property help, from one team.",
+        "Properties on the market now.",
+        "Three simple steps to a better decision.",
+        "Ready for the next check?"
+      ],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Get My Free Estimate →",
+          "href": "#sf-estimator"
+        },
+        {
+          "text": "Browse Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "01Buying a propertyShortlists, viewings and offer support.→",
+          "href": "#/search"
+        },
+        {
+          "text": "02Selling a propertyFree value guide and a pricing review.→",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "03RentingTenant matching and lease support.→",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "04Pre-sellingPrepare, price and launch with confidence.→",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "05Property managementTurnover, collections and repairs handled.→",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "06Title and legalHandover checks and documentary help.→",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "07FinancingIntroduction to bank and developer options.→",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "See all properties",
+          "href": "#/search"
+        },
+        {
+          "text": "+63 900 000 0000",
+          "href": "tel:%2B639000000000"
+        },
+        {
+          "text": "hello@esrealty.ph",
+          "href": "mailto:hello%40esrealty.ph"
+        },
+        {
+          "text": "Privacy Notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:+639000000000"
+        }
+      ],
+      "listingIds": [
+        "lst-817f58bb-4946-4a9b-9488-a3ebf586b3da",
+        "lst-ec703e0a-6b9f-4f0b-baf6-3804972b11d7"
+      ],
+      "hasEstimator": true,
+      "hasBarangay": true,
+      "width": 768,
+      "scrollWidth": 768,
+      "errors": [],
+      "failedRequests": [
+        {
+          "url": "https://mrngaqtbaseewzcsogqi.supabase.co/functions/v1/listing-api/api/site-settings",
+          "error": "net::ERR_FAILED"
+        }
+      ]
+    },
+    {
+      "route": "#/search",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "image": "properties-tablet.png",
+      "viewportImage": "properties-tablet-viewport.png",
+      "title": "Properties for sale and rent in Batangas | ES Realty",
+      "h1": [
+        "Find a property that fits."
+      ],
+      "headings": [],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:"
+        }
+      ],
+      "listingIds": [
+        "lst-817f58bb-4946-4a9b-9488-a3ebf586b3da",
+        "lst-ec703e0a-6b9f-4f0b-baf6-3804972b11d7"
+      ],
+      "hasEstimator": false,
+      "hasBarangay": false,
+      "width": 768,
+      "scrollWidth": 768,
+      "errors": [],
+      "failedRequests": []
+    },
+    {
+      "route": "#/property-value",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "image": "property-value-tablet.png",
+      "viewportImage": "property-value-tablet-viewport.png",
+      "title": "Get My Property Value | ES Realty",
+      "h1": [
+        "Get my property value."
+      ],
+      "headings": [
+        "What happens",
+        "Talk to us about your property"
+      ],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Request an appraisal consultation",
+          "href": "#sf-pv-form"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Not ready yet? Start with the free value guide",
+          "href": "#/home"
+        },
+        {
+          "text": "Privacy Notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:"
+        }
+      ],
+      "listingIds": [],
+      "hasEstimator": false,
+      "hasBarangay": false,
+      "width": 768,
+      "scrollWidth": 768,
+      "errors": [],
+      "failedRequests": []
+    },
+    {
+      "route": "#/project-bt",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "image": "project-bt-tablet.png",
+      "viewportImage": "project-bt-tablet-viewport.png",
+      "title": "Project B.T by ES Realty",
+      "h1": [
+        "Something is being built in Batangas."
+      ],
+      "headings": [
+        "Be the first to know"
+      ],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy Notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:"
+        }
+      ],
+      "listingIds": [],
+      "hasEstimator": false,
+      "hasBarangay": false,
+      "width": 768,
+      "scrollWidth": 768,
+      "errors": [],
+      "failedRequests": []
+    },
+    {
+      "route": "#/listing/lst-817f58bb-4946-4a9b-9488-a3ebf586b3da",
+      "viewport": {
+        "name": "tablet",
+        "width": 768,
+        "height": 1024
+      },
+      "image": "property-detail-tablet.png",
+      "viewportImage": "property-detail-tablet-viewport.png",
+      "title": "Property details | ES Realty",
+      "h1": [
+        "ULTIMA"
+      ],
+      "headings": [
+        "About this property",
+        "Location",
+        "₱12,000,000"
+      ],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "+",
+          "href": "#"
+        },
+        {
+          "text": "−",
+          "href": "#"
+        },
+        {
+          "text": "Leaflet",
+          "href": "https://leafletjs.com"
+        },
+        {
+          "text": "OpenStreetMap",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Privacy Notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:"
+        }
+      ],
+      "listingIds": [],
+      "hasEstimator": false,
+      "hasBarangay": false,
+      "width": 768,
+      "scrollWidth": 768,
+      "errors": [],
+      "failedRequests": []
+    },
+    {
+      "route": "#/home",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "image": "home-mobile.png",
+      "viewportImage": "home-mobile-viewport.png",
+      "title": "ES Realty | Free Batangas property value guide",
+      "h1": [
+        "What is your property worth?"
+      ],
+      "headings": [
+        "A clearer answer before your next property step.",
+        "Full-service property help, from one team.",
+        "Properties on the market now.",
+        "Three simple steps to a better decision.",
+        "Ready for the next check?"
+      ],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Get My Free Estimate →",
+          "href": "#sf-estimator"
+        },
+        {
+          "text": "Browse Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "01Buying a propertyShortlists, viewings and offer support.→",
+          "href": "#/search"
+        },
+        {
+          "text": "02Selling a propertyFree value guide and a pricing review.→",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "03RentingTenant matching and lease support.→",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "04Pre-sellingPrepare, price and launch with confidence.→",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "05Property managementTurnover, collections and repairs handled.→",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "06Title and legalHandover checks and documentary help.→",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "07FinancingIntroduction to bank and developer options.→",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "See all properties",
+          "href": "#/search"
+        },
+        {
+          "text": "+63 900 000 0000",
+          "href": "tel:%2B639000000000"
+        },
+        {
+          "text": "hello@esrealty.ph",
+          "href": "mailto:hello%40esrealty.ph"
+        },
+        {
+          "text": "Privacy Notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:+639000000000"
+        }
+      ],
+      "listingIds": [
+        "lst-817f58bb-4946-4a9b-9488-a3ebf586b3da",
+        "lst-ec703e0a-6b9f-4f0b-baf6-3804972b11d7"
+      ],
+      "hasEstimator": true,
+      "hasBarangay": true,
+      "width": 390,
+      "scrollWidth": 390,
+      "errors": [],
+      "failedRequests": [
+        {
+          "url": "https://mrngaqtbaseewzcsogqi.supabase.co/functions/v1/listing-api/api/site-settings",
+          "error": "net::ERR_FAILED"
+        }
+      ]
+    },
+    {
+      "route": "#/search",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "image": "properties-mobile.png",
+      "viewportImage": "properties-mobile-viewport.png",
+      "title": "Properties for sale and rent in Batangas | ES Realty",
+      "h1": [
+        "Find a property that fits."
+      ],
+      "headings": [],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:"
+        }
+      ],
+      "listingIds": [
+        "lst-817f58bb-4946-4a9b-9488-a3ebf586b3da",
+        "lst-ec703e0a-6b9f-4f0b-baf6-3804972b11d7"
+      ],
+      "hasEstimator": false,
+      "hasBarangay": false,
+      "width": 390,
+      "scrollWidth": 390,
+      "errors": [],
+      "failedRequests": []
+    },
+    {
+      "route": "#/property-value",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "image": "property-value-mobile.png",
+      "viewportImage": "property-value-mobile-viewport.png",
+      "title": "Get My Property Value | ES Realty",
+      "h1": [
+        "Get my property value."
+      ],
+      "headings": [
+        "What happens",
+        "Talk to us about your property"
+      ],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Request an appraisal consultation",
+          "href": "#sf-pv-form"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Not ready yet? Start with the free value guide",
+          "href": "#/home"
+        },
+        {
+          "text": "Privacy Notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:"
+        }
+      ],
+      "listingIds": [],
+      "hasEstimator": false,
+      "hasBarangay": false,
+      "width": 390,
+      "scrollWidth": 390,
+      "errors": [],
+      "failedRequests": []
+    },
+    {
+      "route": "#/project-bt",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "image": "project-bt-mobile.png",
+      "viewportImage": "project-bt-mobile-viewport.png",
+      "title": "Project B.T by ES Realty",
+      "h1": [
+        "Something is being built in Batangas."
+      ],
+      "headings": [
+        "Be the first to know"
+      ],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy Notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:"
+        }
+      ],
+      "listingIds": [],
+      "hasEstimator": false,
+      "hasBarangay": false,
+      "width": 390,
+      "scrollWidth": 390,
+      "errors": [],
+      "failedRequests": []
+    },
+    {
+      "route": "#/listing/lst-817f58bb-4946-4a9b-9488-a3ebf586b3da",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844
+      },
+      "image": "property-detail-mobile.png",
+      "viewportImage": "property-detail-mobile-viewport.png",
+      "title": "Property details | ES Realty",
+      "h1": [
+        "ULTIMA"
+      ],
+      "headings": [
+        "About this property",
+        "Location",
+        "₱12,000,000"
+      ],
+      "links": [
+        {
+          "text": "ESES RealtyBatangas property guidance.",
+          "href": "#/home"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a propertyShortlists, viewings and offer support.",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a propertyFree value guide and a pricing review.",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "RentingTenant matching and lease support.",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-sellingPrepare, price and launch with confidence.",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property managementTurnover, collections and repairs handled.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legalHandover checks and documentary help.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "FinancingIntroduction to bank and developer options.",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Home",
+          "href": "#/home"
+        },
+        {
+          "text": "Properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Get My Property Value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Buying a property",
+          "href": "#/search"
+        },
+        {
+          "text": "Selling a property",
+          "href": "#/property-value?service=sell"
+        },
+        {
+          "text": "Renting",
+          "href": "#/search?offer_type=rent"
+        },
+        {
+          "text": "Pre-selling",
+          "href": "#/property-value?service=pre-selling"
+        },
+        {
+          "text": "Property management",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Title and legal",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Financing",
+          "href": "#/home?section=services"
+        },
+        {
+          "text": "Project B.T",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "Shophouses",
+          "href": "#/project-bt"
+        },
+        {
+          "text": "+",
+          "href": "#"
+        },
+        {
+          "text": "−",
+          "href": "#"
+        },
+        {
+          "text": "Leaflet",
+          "href": "https://leafletjs.com"
+        },
+        {
+          "text": "OpenStreetMap",
+          "href": "https://www.openstreetmap.org/copyright"
+        },
+        {
+          "text": "Privacy Notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Browse properties",
+          "href": "#/search"
+        },
+        {
+          "text": "Privacy notice",
+          "href": "#/privacy"
+        },
+        {
+          "text": "Get my property value",
+          "href": "#/property-value"
+        },
+        {
+          "text": "Browse",
+          "href": "#/search"
+        },
+        {
+          "text": "Call us",
+          "href": "tel:"
+        }
+      ],
+      "listingIds": [],
+      "hasEstimator": false,
+      "hasBarangay": false,
+      "width": 390,
+      "scrollWidth": 390,
+      "errors": [],
+      "failedRequests": []
+    }
+  ],
+  "missing": [],
+  "screenshotsUseMocks": false,
+  "notes": [
+    "Brand matches are an inventory, not instructions for global replacement.",
+    "Unmatched legacy selectors are not proof of dead CSS; conditional states need separate review."
+  ]
+}

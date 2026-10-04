@@ -1,0 +1,156 @@
+{
+  "checkedAt": "2026-10-03T01:06:20.142Z",
+  "checks": [
+    {
+      "name": "Selling 320 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Seller proceeds 320",
+      "ok": true
+    },
+    {
+      "name": "Buying 320 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Buyer budget 320",
+      "ok": true
+    },
+    {
+      "name": "Developer 320 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Quote not double-charged 320",
+      "ok": true
+    },
+    {
+      "name": "Project-sources 320 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Specs not fabricated into priced units 320",
+      "ok": true
+    },
+    {
+      "name": "Selling 390 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Seller proceeds 390",
+      "ok": true
+    },
+    {
+      "name": "Buying 390 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Buyer budget 390",
+      "ok": true
+    },
+    {
+      "name": "Developer 390 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Quote not double-charged 390",
+      "ok": true
+    },
+    {
+      "name": "Project-sources 390 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Specs not fabricated into priced units 390",
+      "ok": true
+    },
+    {
+      "name": "Selling 768 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Seller proceeds 768",
+      "ok": true
+    },
+    {
+      "name": "Buying 768 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Buyer budget 768",
+      "ok": true
+    },
+    {
+      "name": "Developer 768 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Quote not double-charged 768",
+      "ok": true
+    },
+    {
+      "name": "Project-sources 768 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Specs not fabricated into priced units 768",
+      "ok": true
+    },
+    {
+      "name": "Selling 1440 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Seller proceeds 1440",
+      "ok": true
+    },
+    {
+      "name": "Buying 1440 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Buyer budget 1440",
+      "ok": true
+    },
+    {
+      "name": "Developer 1440 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Quote not double-charged 1440",
+      "ok": true
+    },
+    {
+      "name": "Project-sources 1440 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "Specs not fabricated into priced units 1440",
+      "ok": true
+    },
+    {
+      "name": "No uncaught browser exceptions",
+      "ok": true
+    }
+  ],
+  "captures": [
+    "selling-320.png",
+    "buying-320.png",
+    "developer-320.png",
+    "project-sources-320.png",
+    "selling-390.png",
+    "buying-390.png",
+    "developer-390.png",
+    "project-sources-390.png",
+    "selling-768.png",
+    "buying-768.png",
+    "developer-768.png",
+    "project-sources-768.png",
+    "selling-1440.png",
+    "buying-1440.png",
+    "developer-1440.png",
+    "project-sources-1440.png"
+  ],
+  "errors": []
+}

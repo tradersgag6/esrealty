@@ -1,5 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.8";
 import { PDFDocument, StandardFonts, rgb } from "npm:pdf-lib@1.17.1";
+import "../../../js/value_guide_finance.js";
+import TAX_REFERENCE from "../../../data/tax/ph-estate-tax-reference.json" with { type: "json" };
+const FINANCE = (globalThis as any).ESREALTY_FINANCE;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,7 +11,7 @@ const corsHeaders = {
 };
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
-const MAIL_FROM = Deno.env.get("MAIL_FROM") ?? "ES Realty <onboarding@resend.dev>";
+const MAIL_FROM = Deno.env.get("MAIL_FROM") ?? "SEA ESTATES <onboarding@resend.dev>";
 const MAX_BODY_BYTES = 200_000;
 const MAX_ESTIMATE_JSON_BYTES = 8_000;
 
@@ -33,7 +36,7 @@ function money(n: unknown) {
    and emit "PHP " instead — the email body (HTML/UTF-8) still uses ₱. */
 function moneyPdf(n: unknown) {
   const v = Math.round(Number(n || 0));
-  return "PHP " + Number.isFinite(v) ? new Intl.NumberFormat("en-PH", { maximumFractionDigits: 0 }).format(v) : "0";
+  return "PHP " + (Number.isFinite(v) ? new Intl.NumberFormat("en-PH", { maximumFractionDigits: 0 }).format(v) : "0");
 }
 
 function str(v: unknown, max: number) {
@@ -82,7 +85,11 @@ async function readJsonLimited(req: Request, maxBytes = MAX_BODY_BYTES) {
 }
 
 function wrap(font: any, text: string, maxWidth: number) {
-  const words = String(text).split(/\s+/).filter(Boolean);
+  const words = String(text).normalize("NFKD").replace(/[^\x20-\x7e\n]/g, "").split(/\s+/).filter(Boolean).flatMap(word => {
+    const chunks: string[] = []; let chunk = "";
+    for (const char of word) { if (chunk && font.widthOfTextAtSize(chunk + char, 9) > maxWidth) { chunks.push(chunk); chunk = ""; } chunk += char; }
+    if (chunk) chunks.push(chunk); return chunks;
+  });
   const lines: string[] = [];
   let line = "";
   for (const w of words) {
@@ -114,18 +121,38 @@ const SCORE_KEYS = [
 function sanitizeEstimate(raw: any): any {
   if (!raw || typeof raw !== "object") return null;
   const out: Record<string, unknown> = {};
-  const numberKeys = ["total", "marketGuideEstimate", "recommendedAskingPrice", "low", "high", "perSqm", "birZonalRatePerSqm", "birZonalValue", "landValue", "improvement", "area", "floorArea", "landPerSqm", "salePrice", "ownershipAdjustmentPct",
+  const numberKeys = ["taxReferenceValue", "total", "marketGuideEstimate", "recommendedAskingPrice", "low", "high", "perSqm", "birZonalRatePerSqm", "birZonalValue", "landValue", "improvement", "area", "floorArea", "landPerSqm", "salePrice", "ownershipAdjustmentPct",
     "cornerPct", "proxyFactor", "bandMid", "regionalAdj", "buildCostPerSqm", "floorsMultiplier", "ageMidpoint", "depreciatedPct", "featuresTotal"];
   for (const k of numberKeys) {
     if (k in raw) { const n = Number(raw[k]); if (isFinite(n)) out[k] = Math.round(n * 100) / 100; }
   }
   const stringKeys = ["municipality", "barangay", "street", "classification",
     "classificationLabel", "use", "coverage", "sourceLevel", "purpose", "type",
-    "typeLabel", "calculationVersion", "dataVersion", "asOf", "schedule", "occupancy", "titleStatus", "inheritanceStatus"];
+    "typeLabel", "calculationVersion", "dataVersion", "factorSettingsVersion", "conditions", "birReferenceLabel", "saleContext", "landMethod", "planningMethodLabel", "asOf", "schedule", "occupancy", "titleStatus", "inheritanceStatus"];
   for (const k of stringKeys) {
     if (raw[k] != null) out[k] = str(raw[k], 120);
   }
   if (raw.marketGuideAvailable != null) out.marketGuideAvailable = raw.marketGuideAvailable === true;
+  if (raw.birReferenceConfirmed != null) out.birReferenceConfirmed = raw.birReferenceConfirmed === true;
+  if (raw.referenceVerification && typeof raw.referenceVerification === "object") {
+    const v = raw.referenceVerification;
+    out.referenceVerification = { code: str(v.code, 50), label: str(v.label, 100), scheduleEffectiveDate: str(v.scheduleEffectiveDate, 20), datasetGeneratedAt: str(v.datasetGeneratedAt, 40), importDate: v.importDate == null ? null : str(v.importDate, 40), lastAttemptedCheck: str(v.lastAttemptedCheck, 20), successfullyVerifiedOn: v.successfullyVerifiedOn == null ? null : str(v.successfullyVerifiedOn, 20), verificationNote: str(v.verificationNote, 300) };
+  }
+  if (raw.timeIndex && typeof raw.timeIndex === "object") {
+    const t = raw.timeIndex;
+    const clean: any = { baseDate: str(t.baseDate, 20), targetDate: str(t.targetDate, 20), source: str(t.source, 100), evidenceId: str(t.evidenceId, 100), note: str(t.note, 350), formula: str(t.formula, 250) };
+    for (const key of ["annualPct", "elapsedYears", "factor", "originalRate", "rawRate", "landAmount"]) if (Number.isFinite(Number(t[key]))) clean[key] = Number(t[key]);
+    out.timeIndex = clean;
+  }
+  if (raw.costOptions && typeof raw.costOptions === "object") {
+    const c = raw.costOptions;
+    const clean: any = { saleContext: ["private-resale", "developer", "unknown"].includes(c.saleContext) ? c.saleContext : "unknown" };
+    for (const key of ["developerFees", "notarial", "fairMarketValue", "brokerPct"]) if (c[key] != null && Number.isFinite(Number(c[key])) && Number(c[key]) >= 0) clean[key] = key === "brokerPct" ? Math.min(1, Number(c[key])) : num(c[key]);
+    out.costOptions = clean;
+  }
+  if (raw.askingIndication && typeof raw.askingIndication === "object") {
+    out.askingIndication = { value: num(raw.askingIndication.value), low: num(raw.askingIndication.low), high: num(raw.askingIndication.high), count: num(raw.askingIndication.count), method: str(raw.askingIndication.method, 200), basis: "Client-supplied asking indication; not verified closing prices" };
+  }
   if (raw.cornerApplied != null) out.cornerApplied = raw.cornerApplied === true;
   /* Provenance is allowlisted here as well: the report must be able to state
    * where the figure came from, but only from fields we recognise. */
@@ -225,10 +252,14 @@ async function buildPdf(p: any) {
   const navy = rgb(0.12, 0.16, 0.23);
   const tan = rgb(0.49, 0.33, 0.11);
   const gray = rgb(0.36, 0.4, 0.44);
+  let currentPart = "";
 
   function newPage() {
     page = doc.addPage([595.28, 841.89]);
     y = page.getHeight() - 48;
+    page.drawText("SEA ESTATES", { x: 48, y, size: 11, font: bold, color: navy });
+    y -= 20;
+    if (currentPart) { page.drawText(currentPart + " - continued", { x: 48, y, size: 10, font: bold, color: tan }); y -= 24; }
   }
 
   function ensure(space: number) {
@@ -236,7 +267,9 @@ async function buildPdf(p: any) {
   }
 
   function heading(text: string, color = navy) {
+    if (/^0[1-6] /.test(text)) currentPart = "";
     ensure(28);
+    if (/^0[1-6] /.test(text)) currentPart = text;
     page.drawText(text, { x: 48, y, size: 13, font: bold, color });
     y -= 8;
     page.drawRectangle({ x: 48, y: y - 3, width: 90, height: 2, color: tan });
@@ -244,15 +277,15 @@ async function buildPdf(p: any) {
   }
 
   function line(label: string, value: string) {
-    ensure(30);
-    page.drawText(label, { x: 48, y, size: 9, font: bold, color: gray });
-    const lines = wrap(font, value, 420);
-    for (const l of lines) {
-      if (y < 70) newPage();
-      page.drawText(l, { x: 190, y, size: 9, font, color: navy });
+    const labels = wrap(bold, label, 130), lines = wrap(font, value, W - 238);
+    ensure(Math.min(Math.max(labels.length, lines.length, 1) * 13 + 4, 650));
+    for (let i = 0; i < Math.max(labels.length, lines.length, 1); i++) {
+      ensure(13);
+      if (labels[i]) page.drawText(labels[i], { x: 48, y, size: 9, font: bold, color: gray });
+      if (lines[i]) page.drawText(lines[i], { x: 190, y, size: 9, font, color: navy });
       y -= 13;
     }
-    if (lines.length === 0) y -= 13;
+    y -= 4;
   }
 
   function para(text: string, size = 9, color = gray) {
@@ -264,15 +297,30 @@ async function buildPdf(p: any) {
     }
   }
 
-  page.drawText("ES Realty", { x: 48, y, size: 18, font: bold, color: navy });
-  page.drawText("Location Analysis Full Report", { x: 48, y - 18, size: 11, font: bold, color: tan });
-  page.drawText("ES Realty · hello@esrealty.ph · esrealty.ph", { x: 420, y, size: 8, font, color: gray });
+  page.drawText("SEA ESTATES", { x: 48, y, size: 18, font: bold, color: navy });
+  page.drawText("Batangas Value Guide - Planning Report", { x: 48, y: y - 18, size: 11, font: bold, color: tan });
+  page.drawText("SEA ESTATES · hello@esrealty.ph · esrealty.ph", { x: 48, y: y - 32, size: 8, font, color: gray });
   y -= 46;
   const report = p.report || {};
   const property = report.property || {};
   const location = report.location || {};
   const analysis = report.analysis || {};
   const estimate = report.estimate || {};
+  heading("01 Valuation Summary");
+  if (Number(estimate.marketGuideEstimate) > 0) {
+    line("Central planning estimate", moneyPdf(estimate.marketGuideEstimate));
+    line("Planning scenario range", moneyPdf(estimate.low) + " - " + moneyPdf(estimate.high) + " (85%-130%; not statistical confidence)");
+    line(str(estimate.birReferenceLabel, 120) || "Separate BIR zonal reference", moneyPdf(estimate.birZonalValue));
+    line("Calculation / data version", str(estimate.calculationVersion, 50) + " / " + str(estimate.dataVersion, 60));
+    line("Selected planning method", str(estimate.planningMethodLabel, 120) || "Factor-based planning guide");
+    if (estimate.referenceVerification) {
+      line("Government applicability", estimate.referenceVerification.label + " (client-supplied status; not server verified)");
+      line("Schedule / dataset dates", estimate.referenceVerification.scheduleEffectiveDate + " / " + estimate.referenceVerification.datasetGeneratedAt);
+      line("Verification attempt / success", estimate.referenceVerification.lastAttemptedCheck + " / " + (estimate.referenceVerification.successfullyVerifiedOn || "Not verified"));
+      line("Import/download date", estimate.referenceVerification.importDate || "Not established separately");
+      para(estimate.referenceVerification.verificationNote);
+    }
+  }
 
   heading("Property");
   line("Type", property.typeLabel || str(property.type, 80) || "—");
@@ -280,7 +328,8 @@ async function buildPdf(p: any) {
   line("Lot / land area", num(property.area) > 0 ? num(property.area) + " sqm" : "—");
   if (property.kind === "built") {
     line("Floor / built-up area", num(property.floorArea) > 0 ? num(property.floorArea) + " sqm" : "auto");
-    line("Age", num(property.age) + " year(s)");
+    line("Age band", str(property.ageBand, 40) || "Not supplied");
+    line("Construction", str(property.construction, 40) || "Not supplied");
   }
 
   heading("Location");
@@ -291,6 +340,7 @@ async function buildPdf(p: any) {
   line("Province", location.province || "—");
   line("Region", location.region || "—");
 
+  if (analysis.present > 0) {
   heading("Nearby establishments (within 1 km — OpenStreetMap scan)");
   if (analysis.present > 0) {
     for (const [k, v] of Object.entries(analysis.nearbyCounts || {})) {
@@ -318,14 +368,18 @@ async function buildPdf(p: any) {
     ["Commercial growth", num(analysis.commercialGrowthScore)],
   ];
   for (const [k, v] of scoreRows) line(k, String(v));
+  } else {
+    para("Neighborhood and location scores were not assessed by this property guide.", 9, gray);
+  }
 
-  heading("Estimated value");
+  heading("02 Detailed Computation and Legal Basis");
   const hasEstimate = Number(estimate.marketGuideEstimate) > 0;
   const hasComparableContext = estimate.marketGuideAvailable === true;
   if (estimate && (estimate.birZonalValue || estimate.total)) {
-    line("Official BIR zonal value", moneyPdf(estimate.birZonalValue || estimate.total));
+    line(str(estimate.birReferenceLabel, 120) || "Official BIR zonal value", moneyPdf(estimate.birZonalValue || estimate.total));
     if (hasEstimate) {
-      line("Recommended asking price", moneyPdf(estimate.recommendedAskingPrice || estimate.high));
+      line("Central planning estimate", moneyPdf(estimate.marketGuideEstimate));
+      line("Upper planning scenario", moneyPdf(estimate.high));
       line("Comparable listing context", hasComparableContext ? "Available; asking prices are context only and are not direct calculation inputs." : "No comparable asking listings were available; the estimate uses the disclosed BIR-based factors.");
     } else {
       line("Recommended asking price", "Unavailable for this location and classification");
@@ -338,7 +392,15 @@ async function buildPdf(p: any) {
     line("Data coverage", str(estimate.coverage, 40) || "good");
     /* Audit trail: show the arithmetic so a reader can check it, not just the
      * answer. Factors are echoed from the sanitized clone, never recomputed. */
-    if (estimate.landPerSqm > 0 && estimate.proxyFactor > 0) {
+    if (estimate.timeIndex) {
+      const t = estimate.timeIndex;
+      line("Original reference rate", moneyPdf(t.originalRate) + "/sqm (unchanged)");
+      line("Indexed reference rate", String(Math.round(t.rawRate * 100) / 100) + " PHP/sqm (display rounded)");
+      line("Annual change / dates", t.annualPct + "% / " + t.baseDate + " to " + t.targetDate + " / " + t.source);
+      line("Indexed land amount", moneyPdf(t.landAmount));
+      para("No stacked market, region, corner or property-use multipliers are applied to this indexed scenario.");
+      para(t.formula + ". " + t.note + " Full precision used before final land rounding.");
+    } else if (estimate.landPerSqm > 0 && estimate.proxyFactor > 0) {
       line("Effective land rate build-up",
         moneyPdf(estimate.birZonalRatePerSqm) + "/sqm BIR base" +
         (estimate.cornerApplied ? " x (1+" + num(Math.round(Number(estimate.cornerPct || 0) * 1000) / 10) + "% corner)" : " (no corner adj.)") +
@@ -348,6 +410,7 @@ async function buildPdf(p: any) {
     if (estimate.buildCostPerSqm > 0) {
       line("Improvement build-up",
         moneyPdf(estimate.buildCostPerSqm) + "/sqm RCN" +
+        " x " + num(estimate.floorArea || property.floorArea) + " sqm built-up area" +
         " x storeys " + num(estimate.floorsMultiplier) +
         " less " + num(estimate.depreciatedPct) + "% depreciation (age midpoint " + num(estimate.ageMidpoint) + " yrs)" +
         (Number(estimate.featuresTotal) > 0 ? " + " + moneyPdf(Number(estimate.featuresTotal)) + " improvements" : ""));
@@ -391,19 +454,47 @@ async function buildPdf(p: any) {
 
   y -= 10;
   ensure(40);
-  page.drawText("Tax context on the available reference (guide only)", { x: 48, y, size: 10, font: bold, color: navy });
-  y -= 18;
-  const t = estimate && (hasComparableContext && hasEstimate ? estimate.marketGuideEstimate : estimate.birZonalValue);
-  if (t && t > 0) {
-    const cgt = Math.round(t * 0.06), dst = Math.round(t * 0.015), trans = Math.round(t * 0.005);
-    line("Capital gains tax 6%", moneyPdf(cgt));
-    line("Documentary stamp tax 1.5%", moneyPdf(dst));
-    line("Transfer fees ~0.5%", moneyPdf(trans));
+  heading("03 Transaction Costs and Inheritance");
+  const costs = FINANCE.transaction({}, estimate.marketGuideEstimate, { ...(estimate.costOptions || {}), salePrice: estimate.salePrice, birZonalValue: estimate.taxReferenceValue != null ? estimate.taxReferenceValue : estimate.birZonalValue, marketGuideEstimate: estimate.marketGuideEstimate, transactionPrice: estimate.marketGuideEstimate });
+  if (costs.available) {
+    line("Entered/assumed price", moneyPdf(costs.projectedTransactionPrice));
+    line("Illustrative tax base", moneyPdf(costs.base) + " / " + costs.baseBasis);
+    line("Capital gains tax 6%", moneyPdf(costs.cgt));
+    line("Documentary stamp tax ~1.5%", moneyPdf(costs.dst));
+    line("Transfer illustration ~0.5%", moneyPdf(costs.transfer));
+    line("Registration estimate ~0.1%", moneyPdf(costs.registration));
+    line("All transaction costs", moneyPdf(costs.total));
+    line("After all transaction costs", moneyPdf(costs.netAfterAllTransactionCosts) + " (before broker/notary; all four costs deducted)");
+    line("Seller commission scenario " + num(costs.brokerPct * 100) + "%", moneyPdf(costs.broker));
+    line("Seller-paid costs / proceeds", moneyPdf(costs.sellerCosts) + " / " + moneyPdf(costs.projectedNetProceeds) + " (CGT, commission and quoted notary seller-paid)");
+    line("Buyer acquisition budget", moneyPdf(costs.buyerTotal));
+    line("Decision purpose", str(estimate.purpose, 80) + " / same underlying guide, different party costs");
+    para("Qualifying capital-asset sale assumed. Assessor FMV, exemptions and notarial fees are not supplied. Transfer rate depends on the LGU; cities may use up to 0.75%. Confirm actual fees and payer allocation. " + TAX_REFERENCE.taxBaseNote);
+    const estate = FINANCE.estate(estimate.marketGuideEstimate);
+    line("Property-only estate scenario", moneyPdf(estate.gross) + " less citizen/resident standard deduction " + moneyPdf(estate.standardDeduction) + "; scenario tax " + moneyPdf(estate.tax));
+    para(TAX_REFERENCE.estate.note);
   } else {
-    line("Tax context", "n/a");
+    line("Tax context", "Quotation required; no universal capital-asset CGT applied");
+    if (costs.quotationRequired) { para(costs.note); line("Quoted developer charges", costs.quotedDeveloperFees == null ? "Not supplied" : moneyPdf(costs.quotedDeveloperFees)); line("Buyer acquisition budget", costs.buyerTotal == null ? "Not determined" : moneyPdf(costs.buyerTotal)); }
   }
 
-  heading("Notes & disclaimer");
+  heading("04 Market Evidence");
+  if (estimate.askingIndication) {
+    line("Asking-price indication", moneyPdf(estimate.askingIndication.value));
+    line("Observed asking spread", moneyPdf(estimate.askingIndication.low) + " - " + moneyPdf(estimate.askingIndication.high));
+    para(estimate.askingIndication.basis + ". " + estimate.askingIndication.method);
+  } else para("Insufficient qualified asking evidence for a numerical indication. The factor guide is not calibrated to completed sales.");
+  line("Source match", str(estimate.sourceLevel, 80) || "Not supplied");
+  line("Comparable evidence", hasComparableContext ? str(estimate.marketGuide?.comparableCount, 20) + " listing(s), context only; not calculation inputs" : "No comparable asking listings available. Disclosed factors were used.");
+  heading("05 Documents and Filing Guide");
+  for (const item of TAX_REFERENCE.sellerDocuments) para("Seller: " + item);
+  for (const item of TAX_REFERENCE.buyerDocuments) para("Buyer: " + item);
+  for (const step of TAX_REFERENCE.steps) para(step.n + ". " + step.label + " / " + step.where + " / " + step.deadline);
+  heading("06 Pricing Scenarios and Limitations");
+  line("Lower planning scenario (85%)", moneyPdf(estimate.low));
+  line("Central planning estimate", moneyPdf(estimate.marketGuideEstimate));
+  line("Upper planning scenario (130%)", moneyPdf(estimate.high));
+  para("Scenario endpoints are reference points, not mandatory walk-away or listing prices. No certified-appraisal or PVS-compliance claim is made. Valuation inputs are client-supplied and not verified by a site or document inspection.");
   const contact = report.contact || {};
   if (contact.purpose) line("Client purpose", str(contact.purpose, 80));
   if (contact.budget) line("Client budget", str(contact.budget, 80));
@@ -411,8 +502,10 @@ async function buildPdf(p: any) {
   if (contact.notes) line("Client notes", str(contact.notes, 240));
   y -= 6;
   para("Reference data as of " + str(report.asOf, 40) + ". " + str(report.disclaimer, 600), 8, gray);
-  para("Generated by ES Realty. Review the source schedule, match level, and stated calculation factors. Property condition, title, local evidence, and buyer demand can affect transaction value. For a formal valuation assignment, request a licensed real estate appraiser's site and document review.", 8, gray);
+  para("Generated by SEA ESTATES. Review the source schedule, match level, and stated calculation factors. Property condition, title, local evidence, and buyer demand can affect transaction value. For a formal valuation assignment, request a licensed real estate appraiser's site and document review.", 8, gray);
 
+  const pages = doc.getPages();
+  pages.forEach((sheet, i) => sheet.drawText("SEA ESTATES | Planning guide | Page " + (i + 1) + " of " + pages.length, { x: 48, y: 28, size: 8, font, color: gray }));
   const bytes = await doc.save();
   return bytes;
 }
@@ -428,7 +521,8 @@ function emailHtml(p: any) {
     ["Property type", esc(property.typeLabel || property.type || "—")],
     ["Area", esc((num(property.area) || "—") + " sqm") + (property.kind === "built" ? " · " + esc((num(property.floorArea) || "auto") + " sqm floor") : "")],
     ["Location", esc([location.town, location.barangay, location.address].filter(Boolean).join(" · ") || "Pinned location")],
-    ["BIR reference / recommended asking price", hasEstimate ? esc(money(estimate.birZonalValue || 0)) + " BIR reference · recommended asking " + esc(money(estimate.recommendedAskingPrice || estimate.high)) : (estimate.birZonalValue ? esc(money(estimate.birZonalValue)) + " BIR reference" : "Not estimated")],
+    ["BIR reference / central planning estimate", hasEstimate ? esc(money(estimate.birZonalValue || 0)) + " BIR reference · planning estimate " + esc(money(estimate.marketGuideEstimate)) : (estimate.birZonalValue ? esc(money(estimate.birZonalValue)) + " BIR reference" : "Not estimated")],
+    ["Planning range", hasEstimate ? esc(money(estimate.low)) + " - " + esc(money(estimate.high)) + " (85%-130% scenarios)" : "Not estimated"],
     ["Comparable listing context", hasComparableContext ? "Available; asking-listing prices are not direct calculation inputs." : "No comparable asking listings available; guide uses disclosed BIR-based factors."],
   ].map((r) => "<tr><td style='padding:6px 12px;font-size:13px;color:#5f6771'>" + r[0] + "</td><td style='padding:6px 12px;font-size:13px;font-weight:700;color:#1e2a3a'>" + r[1] + "</td></tr>").join("");
   /* Same provenance as the PDF, so the email alone still explains the figure. */
@@ -458,13 +552,13 @@ function emailHtml(p: any) {
     : "";
   return [
     '<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px">',
-    '<div style="font-weight:800;font-size:18px;color:#1e2a3a;margin-bottom:4px">ES Realty</div>',
+    '<div style="font-weight:800;font-size:18px;color:#1e2a3a;margin-bottom:4px">SEA ESTATES</div>',
     '<div style="font-size:15px;font-weight:700;color:#7d531d;margin-bottom:14px">Your full Location Analysis Report</div>',
     '<p style="font-size:14px;color:#374151;line-height:1.6">Hi ' + esc(p.full_name || "") + ',</p>',
     '<p style="font-size:14px;color:#374151;line-height:1.6">Thanks for your interest. Attached is the full location analysis for your property — nearby establishments, neighborhood scores, and the indicative estimate described below.</p>',
     '<table style="width:100%;border-collapse:collapse;margin:8px 0 16px">' + rows + "</table>",
     provHtml,
-    '<p style="font-size:12px;color:#6b7280;line-height:1.6">Your details have been sent to the ES Realty team. A specialist will reply within one business day — reply to this email anytime.</p>',
+    '<p style="font-size:12px;color:#6b7280;line-height:1.6">Your details have been sent to the SEA ESTATES team. Reply to this email if you have a question about your report.</p>',
     '<p style="font-size:12px;color:#6b7280;line-height:1.6">Your guide shows the reference and factors used. A site and document review can refine it for your property.</p>',
     "</div>",
   ].join("");
@@ -538,7 +632,7 @@ Deno.serve(async (req) => {
     inquiryType === "professional-appraisal-request" ? "Professional appraisal consultation request" : "Location analysis full report request",
     location.town ? "Town: " + location.town + (location.barangay ? " · " + location.barangay : "") : "",
     location.address ? "Address: " + location.address : "",
-    Number(estimate.recommendedAskingPrice) > 0 ? "Recommended asking price: " + money(estimate.recommendedAskingPrice) + " · " + (estimate.marketGuideAvailable === true ? "asking listings shown as context" : "no comparable asking listings available") : (estimate.birZonalValue ? "BIR zonal reference: " + money(estimate.birZonalValue) + " · no estimate available" : "Not estimated"),
+    Number(estimate.marketGuideEstimate) > 0 ? "Central planning estimate: " + money(estimate.marketGuideEstimate) + " · " + (estimate.marketGuideAvailable === true ? "asking listings shown as context" : "no comparable asking listings available") : (estimate.birZonalValue ? "BIR zonal reference: " + money(estimate.birZonalValue) + " · no estimate available" : "Not estimated"),
     estimate.birZonalValue ? "BIR zonal: " + money(estimate.birZonalValue) : "",
     body.purpose ? "Purpose: " + str(body.purpose, 80) : "",
     body.budget ? "Budget: " + str(body.budget, 80) : "",
@@ -617,9 +711,9 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           from: MAIL_FROM,
           to: [email],
-          subject: "Your ES Realty Location Analysis Report — " + (location.town || "pin"),
+          subject: "Your SEA ESTATES Location Analysis Report — " + (location.town || "pin"),
           html: emailHtml({ full_name: fullName, report }),
-          attachments: [{ filename: "ES-Realty-Location-Analysis.pdf", content: b64 }],
+          attachments: [{ filename: "SEA-ESTATES-Location-Analysis.pdf", content: b64 }],
         }),
       });
       pdfSent = resp.ok;

@@ -1,0 +1,168 @@
+{
+  "checkedAt": "2026-10-03T03:01:07.142Z",
+  "checks": [
+    {
+      "name": "factor 320 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "factor 320 verification clearly unconfirmed",
+      "ok": true
+    },
+    {
+      "name": "default factor baseline 320",
+      "ok": true
+    },
+    {
+      "name": "indexed 320 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "indexed 320 verification clearly unconfirmed",
+      "ok": true
+    },
+    {
+      "name": "index remains separate from unchanged tax reference 320",
+      "ok": true
+    },
+    {
+      "name": "lipa-status 320 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "lipa-status 320 verification clearly unconfirmed",
+      "ok": true
+    },
+    {
+      "name": "Lipa proposed future period 320",
+      "ok": true
+    },
+    {
+      "name": "factor 390 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "factor 390 verification clearly unconfirmed",
+      "ok": true
+    },
+    {
+      "name": "default factor baseline 390",
+      "ok": true
+    },
+    {
+      "name": "indexed 390 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "indexed 390 verification clearly unconfirmed",
+      "ok": true
+    },
+    {
+      "name": "index remains separate from unchanged tax reference 390",
+      "ok": true
+    },
+    {
+      "name": "lipa-status 390 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "lipa-status 390 verification clearly unconfirmed",
+      "ok": true
+    },
+    {
+      "name": "Lipa proposed future period 390",
+      "ok": true
+    },
+    {
+      "name": "factor 768 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "factor 768 verification clearly unconfirmed",
+      "ok": true
+    },
+    {
+      "name": "default factor baseline 768",
+      "ok": true
+    },
+    {
+      "name": "indexed 768 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "indexed 768 verification clearly unconfirmed",
+      "ok": true
+    },
+    {
+      "name": "index remains separate from unchanged tax reference 768",
+      "ok": true
+    },
+    {
+      "name": "lipa-status 768 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "lipa-status 768 verification clearly unconfirmed",
+      "ok": true
+    },
+    {
+      "name": "Lipa proposed future period 768",
+      "ok": true
+    },
+    {
+      "name": "factor 1440 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "factor 1440 verification clearly unconfirmed",
+      "ok": true
+    },
+    {
+      "name": "default factor baseline 1440",
+      "ok": true
+    },
+    {
+      "name": "indexed 1440 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "indexed 1440 verification clearly unconfirmed",
+      "ok": true
+    },
+    {
+      "name": "index remains separate from unchanged tax reference 1440",
+      "ok": true
+    },
+    {
+      "name": "lipa-status 1440 fits viewport",
+      "ok": true
+    },
+    {
+      "name": "lipa-status 1440 verification clearly unconfirmed",
+      "ok": true
+    },
+    {
+      "name": "Lipa proposed future period 1440",
+      "ok": true
+    },
+    {
+      "name": "No uncaught browser exceptions",
+      "ok": true
+    }
+  ],
+  "captures": [
+    "factor-320.png",
+    "indexed-320.png",
+    "lipa-status-320.png",
+    "factor-390.png",
+    "indexed-390.png",
+    "lipa-status-390.png",
+    "factor-768.png",
+    "indexed-768.png",
+    "lipa-status-768.png",
+    "factor-1440.png",
+    "indexed-1440.png",
+    "lipa-status-1440.png"
+  ],
+  "errors": []
+}

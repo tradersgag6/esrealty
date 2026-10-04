@@ -1,5 +1,13 @@
 # Batangas Value Guide Sources
 
+## Reference verification and indexing — 2026.10.3
+
+Read `docs/sea-reference-indexing/README.md` and `data/government-reference-register.json`. Published 2022 BIR values are unchanged; current legal applicability/latest revision remain unverified. Dataset generated 2026-09-22 is not a newly effective 2026 schedule or an established import date. Last verification attempt is 2026-10-03, not a successful check. Proposed SMVs, including Lipa 2028–2030, are not active replacements. Optional land-only indexing is a separately named scenario with explicit dates/rate, no automatic growth or stacked market/corner factors, and no official tax-reference substitution. Buildings remain separate.
+
+## Current implementation — 2026.10.2
+
+See `docs/sea-market-guide/README.md` and `data/value-guide-project-evidence.json`. The neutral factor-based planning figure has no unsupported flat ownership deductions; risk/site answers are recorded conditions. Fractional floor area and exact age/life depreciation are retained. A separately labelled asking indication requires qualified evidence; researched project specifications/ranges are context-only, not completed sales. The new asking screen is provisional, not a PVS-prescribed accuracy threshold. Derived municipality/province medians are not confirmed parcel tax-floor inputs. Buying and Selling share the same property figure but show different party costs; developer purchases require quotation-specific treatment. Final implementation regression: 97/97 suites passed.
+
 ## BIR land reference
 
 - Coverage: Batangas RDO 58 and RDO 59. The two RDOs are covered by **separate**
@@ -15,22 +23,22 @@
 - Per-RDO source files, URLs and row counts: `data/bir-batangas/manifest.json`
 - Governing orders: DO 60-2018 (3rd revision, 2018-12-21) as revised by DO 035-2022
   (RDO 58) and DO 034-2022 (RDO 59).
-- Currency check (2026-09-30): DO 035-2022 (eff. 2022-07-23) and DO 034-2022
-  (eff. 2022-07-10) remain the latest published schedules for RDO 58 and RDO 59.
-  Under RA 12001 (Real Property Valuation and Assessment Reform Act, Sec. 31) the
-  BIR zonal values stay in force until an LGU-approved Schedule of Market Values
-  replaces them, so the imported effectivity dates are not stale.
+- The previous 2026-09-30 “latest” assertion was not independently substantiated.
+   Read-only verification attempted 2026-10-03 encountered dynamic-page/API access
+   limitations; latest BIR revisions and effective SMV replacements remain unknown.
+   A 2022 date alone neither establishes expiry nor current applicability. Verify
+   locality-specific certification, publication/effectivity and transition treatment.
 - Review rule: verify that no newer Department Order supersedes the imported
   schedule before publishing a result. A published guide must cite the order for
   the RDO of the subject municipality, not a single blended citation.
 - Correcting an earlier error: this file previously attributed DO 035-2022 to both
   RDOs and cited RA 12000. The BIR importer manifest is the per-RDO source of
-  truth, and RA 12001 carries the short title "Real Property Valuation and
-  Assessment Reform Act".
+  truth, and RA 12001 carries the short title
+  "Real Property Valuation and Assessment Reform Act".
 
 ## Market guide factors
 
-The current guide uses ES Realty-approved factors. The BIR reference remains separately identified; the factor-based estimate is a planning guide with the assumptions shown in the result.
+The current guide uses SEA ESTATES-approved factors. The BIR reference remains separately identified; the factor-based estimate is a planning guide with the assumptions shown in the result.
 
 - Residential, commercial, agricultural, and industrial proxy factors are stored in `data/zonal-config.json`.
 - Market-band midpoints are stored in `data/zonal-config.json`.
@@ -41,7 +49,7 @@ The current guide uses ES Realty-approved factors. The BIR reference remains sep
 
 ## Validation status
 
-- Factor weights and market-band midpoints are ES Realty internal assumptions. They have not yet been
+- Factor weights and market-band midpoints are SEA ESTATES internal assumptions. They have not yet been
   reviewed by an independent qualified appraiser.
 - Because of that, public wording stays neutral: "factor-based guide", with the BIR reference shown
   separately and assumptions disclosed in the result.
@@ -68,47 +76,39 @@ BIR 11,500/sqm):
 
 Findings:
 
-- The result is a flat `BIR x 2.5` constant. The published "Market Adjustment" line is only the
-  arithmetic difference, and the "LVIS blend 70% / regional formula 30%" wording resolves to a
-  fixed 2.5 with no disclosed per-property inputs.
-- 2.5 is the ceiling of their own stated 1.5x-2.5x band, applied uniformly to every property. There is
-  no shape, corner, access, or title sensitivity in their output.
-- Their five cited comparables average 11,830/sqm (about 2% above the subject's own zonal value).
-  Applying that mean to the same lot gives 1,183,000, so their FMV is 2.43x their own comparable
-  average. The comparables are displayed as context and are not calculation inputs.
-- Their selling-cost table does not reconcile: the stated rates sum to 8.15% (234,312.50) but the
-  reported total is 8.1% (232,875).
+- This single example has an observed `BIR x 2.5` relationship. It does not establish a
+  universal competitor formula. The claimed 70% LVIS / 30% regional blend has undisclosed inputs.
+- The PDF says no comparable listings are available, but also displays nearby zonal-base
+  examples without record-level attribution. Those figures do not establish comparable sales.
+- The rates reconcile: `6% + 1.5% + 0.5% + 0.1% = 8.1%`; the four amounts total PHP 232,875.
+  PHP 2,642,125 subtracts all four transaction costs, excluding broker and notarial fees.
+  That is distinct from seller proceeds using buyer-paid DST/transfer/registration.
 
 Why we keep our own model:
 
-- Our residential band midpoint is already 2.5 with a 1.8-3.2 band, so plain residential lots already
-  land on the same midpoint inside a comparable range. The difference is structural, not numeric.
-- Ours is multiplicative and property-aware (`base x corner x proxy x band x regional`); a constant
-  would apply a top-of-band premium to landlocked, irregular, or flood-prone lots.
-- Matching the constant would import defects and would undercut the neutral, assumption-disclosing
-  wording above.
-
-Legal note: a multiplier and a method of computation are not copyrightable subject matter under
-IP Code Sec. 175 and *BJ Productions v. Vitarte* (G.R. 108946), which excludes "any idea, procedure,
-system, method or operation... or mere data as such." Replicating a constant was legally available;
-it was rejected on accuracy grounds. Their source code, curated dataset, report layout, and wording
-remain protected and are not copied here.
+- The disclosed residential factors already produce the same central example. Other use groups,
+  buildings, corner and ownership adjustments retain their own disclosed assumptions.
+- From calculation version **2026.10.1**, the owner-approved range is **85%-130% of the central
+  estimate**, explicitly a planning scenario envelope. Match quality is reported separately.
+- Access, flood and site notes remain non-monetary review flags; no site inspection is implied.
+- The PDF is an arithmetic/organization reference. Implementation and customer wording are
+  original; no undisclosed LVIS blend or licensed-appraisal/PVS-compliance claim is made.
 
 ## Comparable evidence
 
 Comparable priority is:
 
-1. ES Realty public Batangas listings with sale price and lot area.
+1. SEA ESTATES public Batangas listings with sale price and lot area.
 2. External market-scan listings when internal records are unavailable.
 3. No comparable evidence when neither source provides usable dimensions and price.
 
-The system stores source, URL, retrieval date, municipality, barangay, property type, asking price, lot area, and price per lot sqm. Public listings are asking-price context unless a record is explicitly marked as an ES Realty transaction; current estimator calculations do not use these prices as direct numeric inputs.
+The system stores source, URL, retrieval date, municipality, barangay, property type, asking price, lot area, and price per lot sqm. Public listings are asking-price context unless a record is explicitly marked as a SEA ESTATES transaction (or the compatible historical ES Realty transaction label); current estimator calculations do not use these prices as direct numeric inputs.
 
 The current `data/batangas-projects.json` file is not used as a comparable source because its project records do not consistently include lot area or floor area.
 
 ## Construction cost
 
-Current rates are provisional ES Realty assumptions:
+Current rates are provisional SEA ESTATES assumptions:
 
 - Wood / pre-fab: PHP 16,000/sqm
 - Mixed / CHB: PHP 25,000/sqm
@@ -119,7 +119,7 @@ The current internal appraisal RCN table labels these 2026 Philippine mid-range 
 Required evidence before changing the rates:
 
 - Current Batangas contractor quotations
-- ES Realty project cost records
+- SEA ESTATES project cost records
 - DPWH standard cost references
 - PSA construction-cost statistics
 - Quantity-surveyor or cost-engineer review

@@ -68,7 +68,7 @@
     var json = null, jsonErr = "";
     try { json = JSON.parse(await blobText(captured[0])); } catch (e) { jsonErr = String(e); }
     check("JSON backup parses", !!json && !jsonErr, jsonErr || "parsed");
-    check("JSON meta recorded", !!json && json.meta && json.meta.app === "ES Realty" && json.meta.role === "super-admin" && /T\d{2}:\d{2}/.test(json.meta.exportedAt || ""), json.meta ? json.meta.exportedAt : "none");
+    check("JSON meta recorded", !!json && json.meta && json.meta.app === "SEA ESTATES" && json.meta.role === "super-admin" && /T\d{2}:\d{2}/.test(json.meta.exportedAt || ""), json.meta ? json.meta.exportedAt : "none");
     check("JSON workspace exported", !!json && typeof json.workspace === "object" && json.workspace !== null, "type=" + (json ? typeof json.workspace : "null"));
     check("JSON workspace contains the seeded listing", !!json && /Backup Test Condo/.test(JSON.stringify(json.workspace)), "workspace listing");
     check("JSON local users exported as array", !!json && Array.isArray(json.localUsers), "array");

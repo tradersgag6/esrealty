@@ -188,5 +188,112 @@ ok(/Nothing is saved to the CRM and no email is sent/.test(vgBlock ? vgBlock[0] 
 ok(/integrity\.ok \? "" : " disabled"/.test(vgBlock ? vgBlock[0] : ""),
   "the PDF button is disabled when the integrity check fails");
 
+/* ---------- transaction fee parity ---------- */
+section("transaction fee parity");
+/* txCostEstimator drives the internal CRM transaction closing-cost figures and
+ * had no test at all, which is how its registration fee drifted to
+ * min(1%, 50k) + 2,000 - about 10x the project's own registrationPct on a
+ * typical base, and roughly PHP 47,000 of overstatement on a PHP 5,000,000
+ * transaction. Pin the rate to the single source of truth so it cannot drift
+ * again. js/value_guide_finance.js is the canonical owner; data/zonal-config.json
+ * carries the rate both the estimator and the PDF renderer read. */
+const ZONAL = JSON.parse(L("data/zonal-config.json"));
+const txCostSrc = /function txCostEstimator\(t\)\s*\{[\s\S]*?\n  \}/.exec(APP);
+ok(!!txCostSrc, "txCostEstimator is present in js/app.js");
+if (txCostSrc) {
+  const body = txCostSrc[0];
+  ok(!/Math\.min\(price \* 0\.01,\s*50000\)/.test(body) && !/\+\s*2000\s*;/.test(body),
+    "the ad-hoc registration cap and fixed fee are gone",
+    "was min(1%, 50000) + 2000");
+  ok(/C\.num\(t\.registrationPct,\s*0\.1\)/.test(body),
+    "registration defaults to the canonical 0.1% and is overridable per transaction");
+  // 0.1 percent expressed against the config's decimal rate.
+  ok(Math.abs(ZONAL.tax.registrationPct * 100 - 0.1) < 1e-9,
+    "the 0.1% default equals zonal-config registrationPct",
+    "config=" + (ZONAL.tax.registrationPct * 100) + "%");
+  // And it must equal what the shared owner computes for the same base.
+  const FIN = require("../js/value_guide_finance.js");
+  const base = 5000000;
+  const shared = FIN.transaction(ZONAL, base, { salePrice: base, brokerPct: 0 }).registration;
+  const local = base * (0.1 / 100);
+  ok(shared === local, "txCostEstimator now agrees with value_guide_finance",
+    "shared=" + shared + " local=" + local);
+}
+
+/* core.js reports CGT + DST + transfer and omits registration from both the
+ * item list and its total. That is consistent (6% + 1.5% + 0.5% = 8%), not a
+ * defect, but it must not drift into claiming 8% while also adding
+ * registration. */
+const coreTaxSrc = /zonalFMV:\s*zonalFMV[\s\S]{0,400}?total:\s*base != null \? base \* ([\d.]+) : null/.exec(L("js/core.js"));
+ok(!!coreTaxSrc, "the core tax summary total is still explicit");
+if (coreTaxSrc) {
+  const declared = Number(coreTaxSrc[1]);
+  const sum = ZONAL.tax.cgtPct + ZONAL.tax.dstPct + ZONAL.tax.transferPct;
+  ok(Math.abs(declared - sum) < 1e-9,
+    "the core tax total equals the sum of the components it reports",
+    "declared=" + declared + " sum=" + sum.toFixed(3));
+}
+
+/* ---------- geography parity ---------- */
+section("geography parity");
+/* Two tables describe the same 83 provinces: PH_GEO in js/app.js (the CI-gated
+ * source for tools/gen_ph_geo.js -> market-scan/vercel/lib/ph_geo.js) and
+ * PH_CITY_MAP in js/data.js (which backs D.citiesFor, i.e. every province
+ * dropdown in the CRM). PH_CITY_MAP was missing 163 municipalities that PH_GEO
+ * already had, including three Batangas cities this project sells in: Lobo,
+ * Mataasnakahoy and Taysan. Assert the wizard dropdowns can never fall behind
+ * PH_GEO again. Parse strictly inside each literal so neighbouring objects in
+ * the same file are not mistaken for geography. */
+function literalOf(src, name) {
+  const s = src.indexOf("const " + name);
+  let d = 0, started = false, end = -1;
+  for (let k = src.indexOf("{", s); k < src.length; k++) {
+    if (src[k] === "{") { d++; started = true; }
+    else if (src[k] === "}") { d--; if (started && d === 0) { end = k; break; } }
+  }
+  return { text: src.slice(s, end + 1), offset: s };
+}
+function bracketEnd(t, open) {
+  let d = 0;
+  for (let k = open; k < t.length; k++) {
+    if (t[k] === "[") d++;
+    else if (t[k] === "]") { d--; if (d === 0) return k; }
+  }
+  return -1;
+}
+function provincesIn(src, name) {
+  const { text } = literalOf(src, name);
+  const out = {};
+  const re = /"([^"]+)":\s*\[/g;
+  re.lastIndex = text.indexOf("{") + 1;
+  let m, guard = 0;
+  while ((m = re.exec(text)) && guard++ < 500) {
+    const open = m.index + m[0].length - 1;
+    const close = bracketEnd(text, open);
+    if (close < 0) continue;
+    out[m[1]] = (text.slice(open + 1, close).match(/"([^"]+)"/g) || []).map(x => x.slice(1, -1));
+    re.lastIndex = close + 1;
+  }
+  return out;
+}
+const GEO = provincesIn(APP, "PH_GEO");
+const CITYMAP = provincesIn(L("js/data.js"), "PH_CITY_MAP");
+const provNames = Object.keys(GEO);
+ok(provNames.length > 80, "PH_GEO still parses as a full province table", provNames.length + " provinces");
+ok(Object.keys(CITYMAP).length === provNames.length,
+  "PH_CITY_MAP and PH_GEO cover the same provinces",
+  "citymap=" + Object.keys(CITYMAP).length + " geo=" + provNames.length);
+const gaps = [];
+for (const p of provNames) {
+  const have = CITYMAP[p] || [];
+  for (const c of GEO[p]) if (!have.includes(c)) gaps.push(p + "/" + c);
+}
+ok(gaps.length === 0,
+  "every PH_GEO municipality is selectable in the CRM province dropdowns",
+  gaps.length ? gaps.slice(0, 6).join(", ") : "no gaps");
+for (const c of ["Lobo", "Mataasnakahoy", "Taysan"]) {
+  ok((CITYMAP["Batangas"] || []).includes(c), "Batangas dropdown includes " + c);
+}
+
 console.log(failures ? "\n" + failures + "/" + checked + " FAILED" : "\nALL GREEN (" + checked + " checks)");
 process.exit(failures ? 1 : 0);

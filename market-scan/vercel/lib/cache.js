@@ -1,6 +1,6 @@
 "use strict";
 
-// Scan-result cache for the Market Scan two-tier flow (BACKEND_UX_FLOW_REPORT P1).
+// Scan-result cache for the Market Scan two-tier flow (docs/audits/backend-ux-flow.md P1).
 //
 // Primary: Vercel KV (cross-instance, survives instance recycling).
 // Fallback: single-process in-memory Map (local dev / KV not provisioned).

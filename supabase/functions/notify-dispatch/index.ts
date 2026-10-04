@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
-const MAIL_FROM = Deno.env.get("MAIL_FROM") ?? "ES Realty <onboarding@resend.dev>";
+const MAIL_FROM = Deno.env.get("MAIL_FROM") ?? "SEA ESTATES <onboarding@resend.dev>";
 const SEMAPHORE_API_KEY = Deno.env.get("SEMAPHORE_API_KEY") ?? "";
 const SEMAPHORE_SENDER = Deno.env.get("SEMAPHORE_SENDER") ?? "ESRealty";
 const DISPATCH_SECRET = Deno.env.get("NOTIFY_DISPATCH_SECRET") ?? "";
@@ -25,11 +25,11 @@ function emailHtml(title: string, bodyText: string) {
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   return [
     '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;padding:24px;border:1px solid #e5e7eb;border-radius:12px">',
-    '<div style="font-weight:800;font-size:18px;color:#1e2a3a;margin-bottom:8px">ES Realty</div>',
+    '<div style="font-weight:800;font-size:18px;color:#1e2a3a;margin-bottom:8px">SEA ESTATES</div>',
     '<div style="font-size:16px;font-weight:700;margin-bottom:6px">' + esc(title) + "</div>",
     '<div style="font-size:14px;color:#374151;line-height:1.5">' + esc(bodyText) + "</div>",
     '<hr style="border:none;border-top:1px solid #e5e7eb;margin:18px 0">',
-    '<div style="font-size:12px;color:#6b7280">You are receiving this because you have an ES Realty account. Sign in to view details.</div>',
+    '<div style="font-size:12px;color:#6b7280">You are receiving this because you have a SEA ESTATES account. Sign in to view details.</div>',
     "</div>",
   ].join("");
 }
@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             from: MAIL_FROM,
             to: [email],
-            subject: "ES Realty — " + (n.title ?? "Notification"),
+            subject: "SEA ESTATES — " + (n.title ?? "Notification"),
             html: emailHtml(n.title ?? "", n.body ?? ""),
           }),
         });
@@ -138,7 +138,7 @@ Deno.serve(async (req) => {
     // ── SMS via Semaphore (PH) — only for urgent types ───────────────
     if (SEMAPHORE_API_KEY && phone && !(n as any).sms_sent_at && ["approval", "lead"].includes(n.type ?? "")) {
       try {
-        const msg = "ES Realty: " + (n.title ?? "") + (n.body ? ". " + n.body : "");
+        const msg = "SEA ESTATES: " + (n.title ?? "") + (n.body ? ". " + n.body : "");
         const r = await fetch("https://api.semaphore.co/api/v4/messages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -82,7 +82,7 @@ No new backend. No new dependencies.
 
 ## 6. Build prompt (copy-paste to the implementing agent)
 > In the ES Realty repo, implement the **Feasibility** tab per
-> FEASIBILITY_PROMPT.md §§2–4. Edits limited to: `TABS` + `renderDeal()` branch
+> `docs/specs/feasibility-tab.md` §§2–4. Edits limited to: `TABS` + `renderDeal()` branch
 > (`js/app.js:3872-3904`), new `dealFeasibility(m, raw)` renderer,
 > `freshDeal()` defaults (`app.js:1436-1437`), `applyDevelopmentPreset()`
 > Townhouse entry (`app.js:1501`), `data-fz-*` bindings beside the `data-dtab`

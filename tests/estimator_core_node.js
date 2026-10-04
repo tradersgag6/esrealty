@@ -36,8 +36,8 @@ eq(r.birZonalRatePerSqm, 3500, "cr BIR zonal rate remains official base");
 eq(r.birZonalValue, 700000, "cr BIR zonal value stays separate");
 eq(r.landPerSqm, 14875, "cr landPerSqm uses restored uncapped factor calculation");
 eq(r.landValue, 2975000, "cr landValue uses BIR × disclosed factors");
-eq(r.low, 2826250, "cr low ±5%");
-eq(r.high, 3123750, "cr high ±5%");
+eq(r.low, 2528750, "cr lower planning scenario 85%");
+eq(r.high, 3867500, "cr upper planning scenario 130%");
 eq(r.perSqm, 14875, "cr perSqm");
 eq(r.marketGuideEstimate, r.total, "factor-based estimate remains available without comparables");
 eq(r.marketGuideAvailable, false, "market guide availability requires comparables");
@@ -51,22 +51,24 @@ eq(r.dataVersion, index.dataVersion, "cr data version stamped");
 const comp = core.normalizeComparable({
   id: "internal-1", city: "Balayan", barangay: "BACLARAN", property_type: "House & Lot",
   offer_type: "sale", display_price: 4000000, lot_size_sqm: 200, source_url: "https://example.test/internal-1"
-}, "ES Realty listing");
+}, "SEA ESTATES listing");
 eq(comp.propertyType, "HOUSE_LOT", "comparable property type normalized");
 eq(comp.pricePerSqm, 20000, "comparable price per lot sqm");
 eq(comp.isAskingPrice, true, "listing comparable marked asking price");
-eq(core.normalizeComparable({ offer_type: "rent", display_price: 100000, lot_size_sqm: 100 }, "ES Realty listing"), null, "rental is not a sale comparable");
+eq(core.normalizeComparable({ offer_type: "sale", display_price: 4000000, lot_size_sqm: 200 }, "ES Realty transaction").isAskingPrice, true, "historic label does not verify actual sale");
+eq(core.normalizeComparable({ offer_type: "sale", display_price: 4000000, lot_size_sqm: 200, evidenceKind: "verified-sale", verified: true, saleDate: "2026-10-01", verificationReference: "fixture-document" }, "SEA ESTATES transaction").isAskingPrice, false, "explicit documented sale remains separate from asking data");
+eq(core.normalizeComparable({ offer_type: "rent", display_price: 100000, lot_size_sqm: 100 }, "SEA ESTATES listing"), null, "rental is not a sale comparable");
 const comps = core.comparableSummary([comp, {
   city: "Balayan", barangay: "BACLARAN", property_type: "House & Lot", offer_type: "sale",
   price: 6000000, lotArea: 200, sourceUrl: "https://example.test/internal-2"
-}], { municipality: "BALAYAN", barangay: "BACLARAN", propertyType: "house_lot", sourceType: "ES Realty listing" });
+}], { municipality: "BALAYAN", barangay: "BACLARAN", propertyType: "house_lot", sourceType: "SEA ESTATES listing" });
 eq(comps.count, 2, "comparable summary keeps matching internal records");
-eq(comps.medianPricePerSqm, 20000, "comparable summary median is deterministic");
-eq(comps.status, "evidence-available", "comparable summary status");
+eq(comps.medianPricePerSqm, 25000, "even median averages middle rates");
+eq(comps.status, "context-only-insufficient-evidence", "insufficient evidence not represented as qualified market indication");
 const compEstimate = core.computeEstimate(config, index, balayan, {
   municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "CR", area: 100,
   comparables: [{ city: "BALAYAN", barangay: "BACLARAN", property_type: "lot-only", offer_type: "sale", price: 1500000, lotArea: 100 }],
-  comparableSource: "ES Realty listing"
+  comparableSource: "SEA ESTATES listing"
 });
 eq(compEstimate.marketGuideAvailable, true, "market guide available with comparable evidence");
 eq(compEstimate.recommendedAskingPrice, compEstimate.high, "recommended asking price uses guide upper range");
@@ -137,10 +139,10 @@ eq(hl.type, "house_lot", "hl type");
 eq(hl.floorArea, 120, "hl floorArea");
 eq(hl.floorsMultiplier, 1.05, "hl floors 2 = 1.05");
 eq(hl.ageMidpoint, 15, "hl age midpoint 15");
-eq(hl.depreciatedPct, 38, "hl dep 15/40 = 38%");
+eq(hl.depreciatedPct, 37.5, "hl dep 15/40 = 37.5%");
 eq(hl.buildCostPerSqm, 32000, "hl RCA 32000");
 eq(hl.featuresTotal, 380000, "hl features 180000 + 200000");
-eq(hl.improvement, 2879840, "hl improvement exact");
+eq(hl.improvement, 2900000, "hl improvement exact without premature percentage rounding");
 eq(hl.total, hl.landValue + hl.improvement, "hl total = land + improvement");
 eq(core.integrityCheck(hl).ok, true, "hl reconciles");
 
@@ -159,7 +161,7 @@ eq(tax.transfer, 5000, "tax transfer");
 eq(tax.registration, 1000, "tax registration 0.1%");
 eq(tax.total, 81000, "tax total");
 eq(tax.base, 1000000, "tax fallback base uses guide total");
-eq(tax.baseBasis, "ES Realty market guide estimate (illustrative)", "tax fallback basis is disclosed");
+eq(tax.baseBasis, "SEA ESTATES market guide estimate (illustrative)", "tax fallback basis is disclosed");
 eq(tax.sellerCosts, 60000, "seller costs default to CGT");
 eq(tax.sellerNetProceeds, null, "seller net requires selling price");
 
@@ -184,8 +186,8 @@ let risk = core.computeEstimate(config, index, balayan, {
   municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "CR", area: 200,
   occupancy: "informal_settlers", titleStatus: "tax_declaration", inheritanceStatus: "pending"
 });
-eq(risk.ownershipAdjustmentPct, 50, "ownership/title risk adjustment totals 50%");
-eq(risk.total, Math.round((risk.landValue + risk.improvement) * 0.5), "ownership/title adjustment reconciles");
+eq(risk.ownershipAdjustmentPct, 0, "unsupported risk deduction not applied");
+eq(risk.total, risk.landValue + risk.improvement, "conditional neutral value reconciles");
 eq(core.integrityCheck(risk).ok, true, "risk-adjusted estimate reconciles");
 
 if (failures) { console.log(failures + " FAILURES"); process.exit(1); }

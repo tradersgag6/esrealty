@@ -16,7 +16,7 @@
     "barangays": 1085,
     "streets": 3710,
     "classifications": 38,
-    "calculationVersion": "2026.09.5",
+    "calculationVersion": "2026.10.3",
     "dataVersion": "bir-2022-rdo58-59"
   },
   "note": "BIR-backed Batangas dataset valid; deterministic and reconcilable.",
@@ -31,8 +31,8 @@
         "coverage": "RDO 058 (Batangas City, West Batangas)",
         "effectiveDate": "2022-07-23",
         "revision": "4th",
-        "status": "in-force",
-        "currencyNote": "No superseding Department Order identified as at the currency check below. Under RA 12001 (Real Property Valuation and Assessment Reform Act), BIR zonal values remain in force until replaced by an LGU-approved Schedule of Market Values."
+        "status": "applicability-unverified",
+        "currencyNote": "Imported 2022 schedule. Live metadata verification attempted 2026-10-03 was blocked; latest revision and certified/effective SMV replacement remain unconfirmed. RA 12001 transition requires locality-specific confirmation."
       },
       {
         "id": "bir-d034-2022",
@@ -41,12 +41,12 @@
         "coverage": "RDO 059 (Lipa City, East Batangas)",
         "effectiveDate": "2022-07-10",
         "revision": "5th",
-        "status": "in-force",
-        "currencyNote": "No superseding Department Order identified as at the currency check below. Under RA 12001 (Real Property Valuation and Assessment Reform Act), BIR zonal values remain in force until replaced by an LGU-approved Schedule of Market Values."
+        "status": "applicability-unverified",
+        "currencyNote": "Imported 2022 schedule. Live metadata verification attempted 2026-10-03 was blocked; latest revision and certified/effective SMV replacement remain unconfirmed. RA 12001 transition requires locality-specific confirmation."
       },
       {
         "id": "esrcn-2026",
-        "authority": "ES Realty",
+        "authority": "SEA ESTATES",
         "instrument": "Replacement Cost New (RCN) construction rate table",
         "coverage": "Batangas province, house-and-lot improvements only",
         "effectiveDate": "2026-01-01",
@@ -54,7 +54,10 @@
         "currencyNote": "Assumed new-build construction cost used for the cost approach. Depreciated by age band."
       }
     ],
-    "currencyCheckedOn": "2026-09-30",
+    "currencyCheckedOn": "",
+    "previousRecordedCheck": "2026-09-30 (not independently substantiated)",
+    "lastAttemptedCheck": "2026-10-03",
+    "successfullyVerifiedOn": null,
     "nextCurrencyReview": "2026-10-30"
   },
 
@@ -103,7 +106,7 @@
       { "key": "birRate", "label": "BIR zonal base rate", "kind": "source-of-record", "disclosure": "Per sqm, per street and classification" },
       { "key": "corner", "label": "Corner lot adjustment", "kind": "adjustment", "value": 0.025, "unit": "ratio", "disclosure": "Applied only when a corner influence is recorded" },
       { "key": "use", "label": "Property-use proxy", "kind": "adjustment", "value": { "residential": 1, "commercial": 1.7, "agricultural": 0.5, "industrial": 1.35 }, "disclosure": "Classification to use-group proxy" },
-      { "key": "band", "label": "Market band midpoint", "kind": "adjustment", "value": { "residential": 2.5, "commercial": 2.5, "agricultural": 1.5, "industrial": 2 }, "disclosure": "Midpoint of the disclosed band; band width sets the reported range" },
+      { "key": "band", "label": "Market band midpoint", "kind": "adjustment", "value": { "residential": 2.5, "commercial": 2.5, "agricultural": 1.5, "industrial": 2 }, "disclosure": "Multiplier for the central estimate; the separate scenario policy sets the displayed range" },
       { "key": "region", "label": "Regional adjustment", "kind": "adjustment", "value": 1, "disclosure": "Held at 1.00 for current Batangas coverage; reserved for future regional differentiation" },
       { "key": "area", "label": "Lot area", "kind": "quantity", "disclosure": "User-supplied; effective rate multiplied by area" }
     ],
@@ -117,30 +120,30 @@
   },
 
   "range": {
-    "method": "Band width applied to the calculated point estimate",
-    "meaning": "The range expresses sensitivity to the market-band assumption. Its width reflects the BIR data match level for the matched street, and is not a statistical confidence interval or an accuracy score.",
-    "guidance": "Treat the reported figure as the recommended asking price and the range as the negotiation envelope around it."
+    "method": "85% and 130% of the calculated central planning estimate",
+    "meaning": "The range is an asymmetric planning scenario envelope, not a statistical confidence interval or an accuracy score. Source match depth is reported separately and does not set its width.",
+    "guidance": "Use the central estimate and scenario endpoints as reference points, not guaranteed buyer offers or a prescribed walk-away price."
   },
 
   "assurance": [
     { "check": "Reconciliation", "statement": "Land value, improvement value and the stated total reconcile arithmetically on every run." },
-    { "check": "Determinism", "statement": "Identical inputs always produce an identical output; no random or time-dependent term enters the calculation." },
+    { "check": "Determinism", "statement": "Identical numeric inputs and explicit indexing dates reproduce the same arithmetic; current verification status is tracked separately." },
     { "check": "Source traceability", "statement": "Every reference rate resolves to a named BIR instrument, RDO, classification and effectivity date." },
     { "check": "Fallback disclosure", "statement": "Where a street has no listed rate for the classification, the fallback chain is used and disclosed in the result. Masked 'same as above' rows are resolved only where a municipality-wide rate exists; they are never guessed." },
     { "check": "Versioning", "statement": "Data version and calculation version are stamped on every output and advance on any change to the dataset or engine." },
-    { "check": "Review cadence", "statement": "The dataset is re-validated on a 30-day cycle and the reference schedule is re-checked for supersession on the same cycle." }
+    { "check": "Review cadence", "statement": "Scheduled review dates are reminders, not proof of successful applicability verification. Attempted and successful checks are recorded separately." }
   ],
 
   "limitations": [
     "No physical inspection of the property is performed or implied.",
     "Interior condition, structural defects and unpermitted additions are not observed; recorded condition inputs are unverified.",
     "Comparable listings are asking-price context, not verified transaction records.",
-    "The factor set is an ES Realty internal reference and has not been reviewed by an independent qualified appraiser.",
-    "Flood, title and legal status are recorded as client-supplied flags for on-site verification; they do not alter the arithmetic."
+    "The factor set is a SEA ESTATES internal reference and has not been reviewed by an independent qualified appraiser.",
+    "Occupancy, title, inheritance, flood and access are unverified review conditions. No unsupported flat risk deductions are applied to the neutral planning estimate."
   ],
 
   "taxContext": {
-    "note": "Illustrative tax figures use published statutory rates for orientation. The BIR tax base is the higher of selling price, zonal value, or assessed value, and is determined by the BIR, not by this guide.",
+    "note": "Tax illustrations use entered/assumed price and imported schedule values where matched. Latest applicability and statutory FMV require confirmation; assessed value is not full assessor-schedule FMV. Indexed scenarios never replace official tax references.",
     "cgtPct": 6,
     "dstPct": 1.5,
     "transferPct": 0.5,

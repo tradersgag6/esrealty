@@ -1,6 +1,6 @@
 "use strict";
 
-// Ad-performance sync seam for the CRM "Ad ROI" card (PHASE_0_1_BUILD.md 1.3).
+// Ad-performance sync seam for the CRM "Ad ROI" card (docs/specs/phase-0-1-compliance-and-leadgen.md 1.3).
 // Marketplace channels (Lamudi, Property24, Facebook, TikTok) only expose
 // view/inquiry counts behind partner credentials, so this endpoint is a no-op
 // until AD_PERF_SOURCE_URL is configured. When set it fetches the upstream feed

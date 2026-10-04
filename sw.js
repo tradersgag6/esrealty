@@ -1,4 +1,4 @@
-/* ES Realty service worker — offline-capable shell + asset caching.
+/* SEA ESTATES service worker — offline-capable shell + asset caching.
  *
  * Why this was rewritten
  * ----------------------
@@ -21,7 +21,7 @@
  * Deploy note: bump VERSION when you ship. The activate handler deletes every
  * cache not named here, so a bump evicts the previous generation.
  */
-const VERSION = "esrealty-pages-v6";
+const VERSION = "esrealty-pages-v10";
 const SHELL_CACHE = VERSION + "-shell";
 const ASSET_CACHE = VERSION + "-asset";
 const VENDOR_CACHE = VERSION + "-vendor";
@@ -40,6 +40,9 @@ const SHELL = [
   "./js/util.js",
   "./js/listings-api.js",
   "./js/storefront.js",
+  "./js/value_guide_finance.js",
+  "./js/value_guide_evidence.js",
+  "./js/value_guide_reference.js",
   "./js/data.js",
   "./js/playbook_seed.js",
   "./js/core.js",

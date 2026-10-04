@@ -1,6 +1,6 @@
 "use strict";
 /* ============================================================
-   ES Realty — Value Guide PDF renderer
+   SEA ESTATES — Value Guide PDF renderer
    ------------------------------------------------------------
    Builds the Batangas Value Guide as a downloadable PDF in the
    browser, using a vendored copy of pdf-lib (vendor/pdf-lib/).
@@ -44,6 +44,7 @@
   else root.ESREALTY_VG_PDF = factory();
 })(typeof self !== "undefined" ? self : this, function () {
   "use strict";
+  var finance = typeof module === "object" && module.exports ? require("./value_guide_finance.js") : globalThis.ESREALTY_FINANCE;
 
   /* The standard PDF fonts are WinAnsi-encoded and cannot represent U+20B1.
      Every peso figure is written as "PHP " for the same reason the emailed
@@ -169,7 +170,7 @@
       }
 
       function pageHeader(title) {
-        page.drawText("ES REALTY", { x: M, y: y, size: 8, font: bold, color: tan });
+        page.drawText("SEA ESTATES", { x: M, y: y, size: 8, font: bold, color: tan });
         var right = r.municipality + "  ·  RDO " + r.rdo;
         page.drawText(right, { x: W - M - font.widthOfTextAtSize(right, 7.6), y: y, size: 7.6, font: font, color: faint });
         y -= 7;
@@ -571,26 +572,23 @@
       y -= 92;
 
       tiles([
-        { label: "Market guide estimate", value: fmtMoney(r.marketGuideEstimate), sub: "Planning figure", accent: tan },
-        { label: "Guide range", value: fmtMoney(r.low) + " - " + fmtMoney(r.high), sub: Math.round(Number(r.rangePct || 0) * 100) + "% band width", accent: tan, small: true },
-        { label: "BIR zonal reference", value: fmtMoney(r.birZonalValue), sub: fmtMoney(r.birZonalRatePerSqm) + "/sqm, tax reference", accent: cool }
+        { label: r.landMethod === "time-indexed" ? "Indexed-reference scenario" : "Market guide estimate", value: fmtMoney(r.marketGuideEstimate), sub: "Planning figure", accent: tan },
+        { label: "Guide range", value: fmtMoney(r.low) + " - " + fmtMoney(r.high), sub: "85%-130% planning scenarios", accent: tan, small: true },
+        { label: r.birReferenceConfirmed === false ? "Derived locality reference" : "Official BIR zonal reference", value: fmtMoney(r.birZonalValue), sub: fmtMoney(r.birZonalRatePerSqm) + "/sqm, " + (r.birReferenceConfirmed === false ? "derived fallback" : "tax reference"), accent: cool }
       ]);
-
-      heading("Estimated value");
-      sideBySide(
-        { label: "Market guide estimate", value: fmtMoney(r.marketGuideEstimate), big: true, accent: tan, sub: "A planning figure built from the disclosed ES Realty factors." },
-        { label: "Official BIR zonal reference", value: fmtMoney(r.birZonalValue), accent: cool, sub: fmtMoney(r.birZonalRatePerSqm) + "/sqm - an official tax reference, not the estimate." }
-      );
 
       var cov = r.source || {};
       box([
-        "How much weight this figure carries: " + Math.round(Number(cov.pct || 0) * 100) + "% " + (cov.label || "") + ", matched from " + (cov.count || 0) + " reference value(s).",
-        r.fallbackNote ? "Note: " + r.fallbackNote : "Matched at " + (r.coverage === "good" ? "street level" : r.coverage === "limited" ? "municipality level, with limited street coverage" : "the best available level") + ".",
-        "This is a market-oriented planning guide, not a certified appraisal, statutory assessment, tax determination or lending valuation. The BIR zonal reference is an official tax reference and is not interchangeable with the estimate."
+        "Source match: " + (cov.label || "") + ", matched from " + (cov.count || 0) + " reference value(s). Match depth is not a statistical valuation accuracy score.",
+        r.fallbackNote ? "Note: " + r.fallbackNote : "Source match level: " + (cov.level || "not supplied") + ".",
+        "This is a planning guide, not a certified appraisal, tax determination or lending valuation. " + (r.birReferenceConfirmed === false ? "The locality median is derived, not a confirmed parcel tax floor; it is not interchangeable with the property estimate." : "The BIR reference is not interchangeable with the property estimate.")
       ], tan);
 
       heading("Valuation summary", { small: true });
+      var decisionCosts = finance.transaction({}, r.total, Object.assign({}, r.costOptions || {}, { salePrice: r.salePrice, transactionPrice: r.total, marketGuideEstimate: r.total, birZonalValue: r.taxReferenceValue != null ? r.taxReferenceValue : r.birZonalValue }));
       table(null, [
+        ["Purpose", r.purpose || "Not supplied"],
+        [r.purpose === "Buying" ? "Buyer acquisition budget" : "Seller net-proceeds illustration", (r.purpose === "Buying" ? decisionCosts.buyerTotal : decisionCosts.projectedNetProceeds) == null ? "Quotation required" : fmtMoney(r.purpose === "Buying" ? decisionCosts.buyerTotal : decisionCosts.projectedNetProceeds)],
         ["BIR zonal value per sqm", fmtMoney(r.birZonalRatePerSqm)],
         ["Lot area", fmtArea(r.area) + (r.corner && r.corner.applied ? "  (corner lot)" : "")],
         ["BIR zonal value", fmtMoney(r.birZonalValue)],
@@ -600,6 +598,12 @@
         ["Market guide rate per sqm", fmtMoney(r.marketGuideRatePerSqm)],
         ["Reference schedule", r.reference ? r.reference.schedule : "-"]
       ], [200, 300], { boldFirstCol: true, padY: 4, align: [null, "r"] });
+      if (r.referenceVerification) {
+        var verification = r.referenceVerification;
+        heading("Government reference verification", { small: true });
+        table(null, [["Status", verification.label], ["Published schedule effective", verification.scheduleEffectiveDate || r.effectivityDate], ["Dataset generated", verification.datasetGeneratedAt || "Not recorded"], ["Import/download date", verification.importDate || "Not established separately"], ["Attempt / successful check", (verification.lastAttemptedCheck || "Not recorded") + " / " + (verification.successfullyVerifiedOn || "Not verified")]], [200, 300], { padY: 4 });
+        para(verification.verificationNote || "Latest applicability unverified.", 8, gray);
+      }
 
       heading("What your report contains", { small: true });
       table(["Part", "Contents", "Page"],
@@ -607,7 +611,7 @@
           return [p.no + "  " + p.title, p.blurb, pageCount.starts[p.key] ? String(pageCount.starts[p.key]) : "-"];
         }), [150, 250, 34], { padY: 4, align: [null, null, "r"] });
 
-      para("The BIR zonal value is an official tax reference. The market guide estimate is a planning figure built from disclosed factors. They are not interchangeable, and comparable asking listings are context only - their prices are not calculation inputs.", 8, gray);
+      para("Comparable asking listings are context only, not calculation inputs.", 8, gray);
 
       /* ============================================================
          02  DETAILED COMPUTATION AND LEGAL BASIS
@@ -629,10 +633,15 @@
       ], [150, 350], { boldFirstCol: true, padY: 4 });
 
       heading("Step 2 - land value", { small: true });
+      if (r.timeIndex) {
+        var ti = r.timeIndex;
+        table(null, [["Original reference rate", fmtNum(ti.originalRate) + " PHP/sqm (unchanged)"], ["Selected scenario", "Indexed land reference; market/corner multipliers not stacked"], ["Annual change", fmtNum(ti.annualPct) + "% / " + ti.source], ["Base / target dates", ti.baseDate + " / " + ti.targetDate], ["Elapsed years", fmtNum(ti.elapsedYears, 6)], ["Indexed rate (display rounded)", fmtNum(ti.rawRate) + " PHP/sqm"], ["Indexed land amount", fmtMoney(ti.landAmount)], ["Factor guide comparison", fmtMoney(r.factorBaseline.total) + " (not selected)"]], [200, 300], { padY: 4 });
+        para(ti.formula + ". " + ti.note + " Full precision used before final rounding.", 8, gray);
+      } else {
       table(null, [
         ["BIR zonal base", fmtMoney(r.reference ? r.reference.value : r.birZonalRatePerSqm) + "/sqm"],
         ["Corner adjustment", r.corner && r.corner.applied
-          ? "x " + (1 + Number(r.corner.pct || 0)).toFixed(4) + "   (+" + Math.round(Number(r.corner.pct) * 100) + "%)"
+           ? "x " + (1 + Number(r.corner.pct || 0)).toFixed(4) + "   (+" + fmtNum(Number(r.corner.pct) * 100) + "%)"
           : "not applied"],
         ["Property-use factor", "x " + fmtNum(r.factors.proxyFactor) + "   (" + r.use + ")"],
         ["Market band midpoint", "x " + fmtNum(r.factors.bandMid)],
@@ -641,6 +650,7 @@
         ["Lot area", fmtArea(r.area)],
         ["Land value", fmtMoney(r.landValue)]
       ], [200, 300], { boldFirstCol: true, padY: 4 });
+      }
 
       if (r.type === "house_lot") {
         heading("Step 3 - house value (replacement cost)", { small: true });
@@ -662,7 +672,7 @@
       }
 
       var adj = Number(r.ownershipAdjustmentPct || 0);
-      heading("Step " + (r.type === "house_lot" ? "4" : "3") + " - ownership and title adjustment", { small: true });
+      heading("Step 4 - ownership and title adjustment", { small: true });
       if (adj > 0) {
         para("An indicative marketability adjustment, not a change to the official BIR zonal value. Verify occupancy, title and inheritance documents with the Registry of Deeds, a lawyer and the buyer.", 8, gray);
         table(null, [
@@ -679,11 +689,11 @@
       var basis = [
         ["Zonal values", "Department Order " + r.departmentOrder + " (" + r.revision + "), RDO " + r.rdo + ", effective " + r.effectivityDate],
         ["Authority of the BIR", "RA 12001, Real Property Valuation and Assessment Reform Act"],
-        ["Fair market value for tax", "Sec. 24(D), National Internal Revenue Code - may be taken as 50% of the zonal value"],
-        ["Capital gains tax", "Sec. 24(D), National Internal Revenue Code - 6% of the excess over fair market value"],
-        ["Documentary stamp tax", "Sec. 247, National Internal Revenue Code, as amended by RA 11315 - 1.5%"],
-        ["Local transfer tax", "Sec. 561, Local Government Code - up to 0.5% outside the National Capital Region"],
-        ["Estate tax", "Sec. 28(E), TRAIN Law (RA 10963) - 6% above PHP 10,000,000 of net estate"],
+        ["Fair market value for tax", "Sec. 6(E) NIRC: relevant BIR zonal and assessor schedule values; no half-zonal proxy"],
+        ["Capital gains tax", "Sec. 24(D) NIRC - 6% of higher gross selling price or statutory FMV for qualifying capital assets"],
+        ["Documentary stamp tax", "Sec. 196 NIRC; filing under Sec. 200(B), amended by RA 11976 Sec. 30"],
+        ["Local transfer tax", "Secs. 135 and 151 LGC - provincial/city rates depend on the LGU ordinance"],
+        ["Estate tax", "Secs. 84 and 86 NIRC, amended by RA 10963 Secs. 22-23 - 6% of net taxable estate"],
         ["Professional standard", "PVS 105 governs a LICENSED APPRAISAL. This report is not one and makes no claim of PVS 105 compliance."]
       ];
       table(["Reference", "Basis"], basis, [150, 350], { boldFirstCol: true, padY: 4 });
@@ -692,20 +702,24 @@
          03  TAX IMPLICATIONS
          ============================================================ */
       newSection("tax");
-      if (!tax || !tax.selling) {
+      if (tax && tax.selling && tax.selling.quotationRequired) {
+        box(["Developer / unclassified transaction. " + tax.selling.direction], tan);
+        line("Quoted charges outside price", tax.selling.quotedDeveloperFees == null ? "Not supplied" : fmtMoney(tax.selling.quotedDeveloperFees));
+        line("Buyer acquisition budget", tax.selling.buyerTotal == null ? "Not determined" : fmtMoney(tax.selling.buyerTotal));
+      } else if (!tax || !tax.selling) {
         box(["The tax reference data could not be loaded, so no tax figures are shown. This is deliberate: a figure computed from a missing statutory rate would be a guess."], rgb(0.72, 0.20, 0.22));
       } else {
         var s = tax.selling;
         box([
           "These are illustrative amounts for planning, not amounts payable. The BIR, the LGU and the Registry of Deeds each determine what is actually due.",
-          "The BIR tax base is the HIGHER of the selling price and the fair market value. This guide cannot know either with certainty, so it uses the higher of the guide estimate and 50% of the BIR zonal value: " + fmtMoney(s.taxBase) + ". " + s.taxBaseBasis,
+          "The tax base is the HIGHER applicable selling price or statutory fair market value: " + fmtMoney(s.taxBase) + ". " + s.taxBaseBasis,
           s.direction
         ], rgb(0.72, 0.45, 0.06));
 
-        heading("Estimated selling costs at the guide estimate", { small: true });
+        heading("Transaction-cost illustration", { small: true });
         table(["Fee or tax", "Rate", "What it is charged on", "Amount", "Paid to"],
           s.items.map(function (i) {
-            return [i.label, i.rateLabel, i.base + (i.baseAmount == null ? "" : " = " + fmtMoney(i.baseAmount)), fmtMoney(i.amount), i.billedBy || "-"];
+            return [i.label, i.rateLabel, i.base + (i.baseAmount == null ? "" : " = " + fmtMoney(i.baseAmount)), i.key === "notarial" && !i.amount ? "Not supplied" : fmtMoney(i.amount), i.billedBy || "-"];
           }), [118, 44, 152, 74, 84],
           { boldFirstCol: true, padY: 4, align: [null, null, null, "r", null] });
         para("Statutory bases: " + s.items.map(function (i) { return i.legalBasis; })
@@ -714,22 +728,23 @@
         heading("From asking price to cash in hand", { small: true });
         table(["Line", "Amount"],
           [
-            ["Guide estimate (assumed sale price)", fmtMoney(s.estimateValue)],
-            ["Less statutory costs (CGT, DST, transfer, registration, notarial)", "- " + fmtMoney(s.statutoryTotal)],
-            ["Estimated net proceeds before commission", fmtMoney(s.netProceeds.beforeCommission)],
+            ["Entered/assumed transaction price", fmtMoney(s.transactionPrice)],
+            ["All transaction costs (CGT, DST, transfer, registration)", "- " + fmtMoney(s.statutoryTotal)],
+            ["After all transaction costs, before broker/notary", fmtMoney(s.netProceeds.beforeCommission)],
+            ["Seller proceeds after CGT and quoted notary, before broker", fmtMoney(s.netProceeds.sellerBeforeCommission)],
             ["Less broker's commission (" + s.broker.rateLabel + ")", "- " + fmtMoney(s.broker.min) + "  to  - " + fmtMoney(s.broker.max)],
             ["Estimated cash received after seller costs", fmtMoney(s.netProceeds.atHighCommission) + "  to  " + fmtMoney(s.netProceeds.atLowCommission)]
           ], [290, 210], { boldFirstCol: true, padY: 4, align: [null, "r"] });
         para(s.broker.note, 7.6, faint);
 
-        heading("If the property is inherited", { small: true });
+        heading("Inheritance: property-only scenarios", { small: true });
         var ih = tax.inheritance;
         table(["Line", "On BIR zonal basis", "On market basis"],
           [
             ["Gross estate value", fmtMoney(ih.grossOnZonalBasis), fmtMoney(ih.grossOnMarketBasis)],
-            ["Less standard deduction (Art. 236 NIRC)", "- " + fmtMoney(ih.standardDeduction), "- " + fmtMoney(ih.standardDeduction)],
+            ["Standard deduction (Sec. 86(A)(1) NIRC)", "- " + fmtMoney(ih.standardDeduction), "- " + fmtMoney(ih.standardDeduction)],
             ["Net estate", fmtMoney(ih.onZonalBasis.afterDeduction), fmtMoney(ih.onMarketBasis.afterDeduction)],
-            ["Taxable portion above PHP " + String(fmtMoney(ih.taxThreshold)).replace("PHP ", ""), fmtMoney(ih.onZonalBasis.taxable), fmtMoney(ih.onMarketBasis.taxable)],
+            ["Net taxable estate in this scenario", fmtMoney(ih.onZonalBasis.taxable), fmtMoney(ih.onMarketBasis.taxable)],
             ["Estate tax at " + ih.taxPct + "%", fmtMoney(ih.onZonalBasis.tax), fmtMoney(ih.onMarketBasis.tax)]
           ], [200, 150, 150], { boldFirstCol: true, padY: 4, align: [null, "r", "r"] });
         para(ih.note, 8, gray);
@@ -740,6 +755,12 @@
          04  MARKET ANALYSIS AND COMPARABLES
          ============================================================ */
       newSection("market");
+      if (r.askingIndication) {
+        heading("Local asking-price indication", { small: true });
+        line("Median indication", fmtMoney(r.askingIndication.value));
+        line("Observed asking spread", fmtMoney(r.askingIndication.low) + " - " + fmtMoney(r.askingIndication.high));
+        para(r.askingIndication.method + ". " + r.askingIndication.basis + ".", 8, gray);
+      }
       para("How the estimate was reached from the available evidence, and how the property sits against other land in the same municipality.", 8.4, gray);
 
       var cs = r.comparableSummary || {};
@@ -748,9 +769,9 @@
 
       heading("Data coverage and match level", { small: true });
       table(null, [
-        ["Match level", r.coverage === "good" ? "Street-level match" : r.coverage === "limited" ? "Limited street coverage - municipality fallback" : "Best available match"],
+        ["Match level", cov.label || "Best available match"],
         ["Reference values used", (cov.count || 0) + " value(s) for this classification"],
-        ["Confidence", Math.round(Number(cov.pct || 0) * 100) + "% - " + (cov.label || "-")],
+        ["Source match", (cov.label || "-") + "; not statistical confidence"],
         ["Fallback applied", r.fallbackNote || "none"],
         ["Comparable asking listings", comps.length ? comps.length + " found" : "none available"],
         ["Municipality street rows", muniRow && muniRow.stats ? String(muniRow.stats.streetValueRows) : "-"]
@@ -780,7 +801,7 @@
             var area = Number(c.area || c.lotArea || 0);
             return [
               c.title || c.label || "-",
-              c.location || c.brangay || "-",
+              c.location || c.barangay || c.municipality || "-",
               price ? fmtMoney(price) : "-",
               area ? fmtArea(area) : "-",
               (price && area) ? fmtMoney(price / area) : "-"
@@ -815,7 +836,7 @@
       para("A starting checklist, not an exhaustive one. Requirements vary by the LGU, the Registry of Deeds and the transaction, and the Registry of Deeds will reject a transfer with a missing document regardless of what any checklist says.", 8.4, gray);
 
       heading("Filing deadlines and penalties", { small: true });
-      para("These run from a trigger, not a fixed date. The trigger is the date of notarisation for the transaction taxes and the date of death for the estate return, so no concrete date can be given until one of those is known.", 8, gray);
+       para("Each obligation has its own trigger: CGT generally runs from notarisation, DST from the close of the document month, transfer tax from the deed date, and the estate return from death (one calendar year). Confirm applicable rules before setting a filing date.", 8, gray);
       if (tax && tax.deadlines) {
         table(["Obligation", "Due within", "From", "Paid to", "If late"],
           tax.deadlines.map(function (d) {
@@ -851,47 +872,47 @@
 
       heading("Pricing strategy", { small: true });
       para("Reference points for a conversation, not a recommendation to price or accept at any of them. They are what the disclosed factors produce; they are not what a buyer will pay.", 8, gray);
-      var sellerCosts = tax && tax.selling ? tax.selling.statutoryTotal : 0;
-      var commLo = tax && tax.selling ? tax.selling.broker.min : 0;
-      var commHi = tax && tax.selling ? tax.selling.broker.max : 0;
-      var netLo = tax && tax.selling ? tax.selling.netProceeds.atLowCommission : 0;
-      var netHi = tax && tax.selling ? tax.selling.netProceeds.atHighCommission : 0;
+      var hasSellingCosts = !!(tax && tax.selling && !tax.selling.quotationRequired);
+      var sellerCosts = hasSellingCosts ? tax.selling.items[0].amount + (tax.selling.items[4] ? tax.selling.items[4].amount : 0) : 0;
+      var commLo = hasSellingCosts ? tax.selling.broker.min : 0;
+      var commHi = hasSellingCosts ? tax.selling.broker.max : 0;
+      var netLo = hasSellingCosts ? tax.selling.netProceeds.atLowCommission : 0;
+      var netHi = hasSellingCosts ? tax.selling.netProceeds.atHighCommission : 0;
       ladder([
         {
           label: "Lower end of guide range", value: fmtMoney(r.low), accent: cool,
           caption: "A reference point for reviewing offers."
         },
         {
-          label: "Midpoint of guide range", value: fmtMoney(midpoint), accent: tan, big: true,
-          caption: "The arithmetic midpoint of this estimate range."
+          label: "Central planning estimate", value: fmtMoney(r.marketGuideEstimate), accent: tan, big: true,
+          caption: "The disclosed factor-based estimate (100%)."
         },
         {
-          label: "Taxes and fees", value: "- " + fmtMoney(sellerCosts + commHi), accent: cool,
-          caption: "CGT, DST, broker and transfer at the guide estimate of " + fmtMoney(r.marketGuideEstimate)
-            + (tax && tax.selling ? ", plus registration and notarial fees." : ".") + " A higher selling price raises CGT and DST."
+          label: "Taxes and fees", value: hasSellingCosts ? "- " + fmtMoney(sellerCosts + commHi) : "Quotation required", accent: cool,
+          caption: "Seller-paid CGT, broker and quoted notarial costs. DST, transfer and registration assumed buyer-paid. A higher selling price can raise CGT and DST."
         },
         {
-          label: "Cash you would receive", value: netHi ? fmtMoney(netLo) + " - " + fmtMoney(netHi) : "-", accent: tan, big: true,
+          label: "Cash you would receive", value: hasSellingCosts ? fmtMoney(netHi) + " - " + fmtMoney(netLo) : "Not determined", accent: tan, big: true,
           caption: "Estimated net proceeds at the guide estimate after those seller costs, across the usual commission band."
         }
       ]);
       box([
         "The BIR zonal value is a tax floor in practice, not a negotiable one. It is what the BIR assesses against, so a price below it does not reduce the tax base for CGT or DST.",
-        "The guide range widens with how well the location matched. A wider range means a weaker match, not a more confident answer.",
-        "Nothing here accounts for condition, flood risk, access, title defects or buyer demand. A licensed appraiser inspecting the property may reach a different and better-supported figure."
+        "The 85%-130% guide range expresses planning scenarios, not statistical confidence. Source match quality is reported separately.",
+        "No site inspection or verified title assessment is performed. Unverified inputs apply model adjustments where stated; actual condition, access, flood risk and buyer demand require professional review."
       ], tan);
 
       heading("Source of record", { small: true });
       var p = meta && meta.provenance;
       if (p && p.sources && p.sources.length) {
-        para("All in-force instruments are listed. The one governing this property is marked APPLIES.", 8, gray);
+        para("Imported references are listed. APPLIES identifies the selected subject RDO, not proof of latest legal applicability; verification status is stated separately.", 8, gray);
         var seenNote = {};
         table(["Instrument", "Applies to", "Effective", "Status", "Authority"],
           p.sources.map(function (src) {
             var governs = new RegExp("RDO\\s*0?" + esc(String(r.rdo || "")).replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\b").test(src.coverage || "");
             var note = src.currencyNote && !seenNote[src.currencyNote] ? (seenNote[src.currencyNote] = true, "\n" + src.currencyNote) : "";
             return [
-              (governs ? "APPLIES  " : "also in force  ") + src.instrument + (src.revision ? " (" + src.revision + ")" : ""),
+              (governs ? "APPLIES (imported)  " : "other imported reference  ") + src.instrument + (src.revision ? " (" + src.revision + ")" : ""),
               (src.coverage || "") + note,
               src.effectiveDate || "-", src.status || "-", src.authority || "-"
             ];
@@ -904,14 +925,15 @@
         ["Tax reference version", tax && tax.reference ? tax.reference.version : "-"],
         ["Tax reference checked", tax && tax.reference ? tax.reference.checkedOn : "-"]
       ], [150, 350], { boldFirstCol: true, padY: 4 });
-      if (p && p.order && p.order.length) para("Order of adjustments: " + p.order.join(" > "), 7.6, faint);
+      if (r.timeIndex) para("Order: imported reference > explicit time factor > lot area > separately computed building component. No stacked market/corner multipliers.", 7.6, faint);
+      else if (p && p.order && p.order.length) para("Order of adjustments: " + p.order.join(" > "), 7.6, faint);
 
       heading("What this report does not cover", { small: true });
       var limits = (p && p.limitations) || [];
       if (!limits.length) {
         limits = [
           "No physical inspection of the property is performed or implied.",
-          "The factor set is an ES Realty internal reference and has not been reviewed by an independent qualified appraiser.",
+          "The factor set is a SEA ESTATES internal reference and has not been reviewed by an independent qualified appraiser.",
           "Tax figures are illustrative and use published statutory rates; the BIR and the LGU determine what is payable."
         ];
       }
@@ -958,7 +980,7 @@
   function fileName(r, meta) {
     var town = String(r.municipality || "property").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     var date = (meta && meta.generatedOn ? meta.generatedOn : "").replace(/[^0-9]/g, "");
-    return "ES-Realty-Value-Guide-" + (town || "property") + (date ? "-" + date : "") + ".pdf";
+    return "SEA-ESTATES-Value-Guide-" + (town || "property") + (date ? "-" + date : "") + ".pdf";
   }
 
   return { toBlob: toBlob, fileName: fileName, wrap: wrap, fmtMoney: fmtMoney, build: build, PARTS: PARTS };

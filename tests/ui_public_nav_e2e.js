@@ -67,13 +67,13 @@ function chk(n, ok, d) { window.__msChecks.push({ name: n, ok: !!ok, detail: d |
 
     /* ---- route titles ---- */
     await go("#/property-value", 1600);
-    chk("title-property-value", document.title.indexOf("Get My Property Value") === 0, "title=" + document.title);
+    chk("title-property-value", document.title === "Appraisal consultation | SEA ESTATES", "title=" + document.title);
     await go("#/project-bt", 1600);
     chk("title-project-bt", document.title.indexOf("Project B.T") === 0, "title=" + document.title);
     await go("#/search", 1800);
     chk("title-search", document.title.indexOf("Properties for sale and rent") === 0, "title=" + document.title);
     await go("#/home", 1600);
-    chk("title-home", document.title.indexOf("Free Batangas property value guide") > 0, "title=" + document.title);
+    chk("title-home", document.title === "SEA ESTATES | Properties & Batangas Value Guide", "title=" + document.title);
 
     /* ---- #/shophouse redirects to coming soon ---- */
     await go("#/shophouse", 1900);
@@ -154,10 +154,9 @@ function chk(n, ok, d) { window.__msChecks.push({ name: n, ok: !!ok, detail: d |
     await go("#/home", 1500);
 
     /* ---- sticky mobile CTA present ---- */
-    chk("sticky-bar-rendered", !!document.querySelector("[data-sf-sticky]"), "sticky=" + !!document.querySelector("[data-sf-sticky]"));
-    chk("sticky-primary-is-property-value", !!document.querySelector("[data-sf-sticky] a.sf-sticky-primary[href='#/property-value']"), "primary missing");
-    chk("sticky-call-hidden-until-known", document.querySelector("[data-sf-sticky-call]").hidden === true, "call link should stay hidden with no phone configured");
-    chk("sticky-body-class", document.body.classList.contains("sf-has-sticky"), "missing sf-has-sticky");
+    chk("bottom-action-bar-removed", !document.querySelector("[data-sf-sticky]"), "no fixed bottom actions");
+    chk("bottom-call-action-removed", !document.querySelector("[data-sf-sticky-call]"), "no fixed call action");
+    chk("no-sticky-space-reservation", !document.body.classList.contains("sf-has-sticky"), "no bottom-bar spacing class");
 
     /* ---- stylesheet actually loaded ---- */
     chk("storefront-css-loaded", Array.from(document.styleSheets).some(s => (s.href || "").indexOf("storefront.css") > -1), "storefront.css not in document");

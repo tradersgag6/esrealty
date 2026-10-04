@@ -1,5 +1,5 @@
 /* CRM Autopilot "What next" reasoning — node counterpart to the Agent tab box
- * (AGENT_PROMPT.md lines 103-106). Exercises the exact shipped module
+ * (docs/specs/agent-autopilot.md lines 103-106). Exercises the exact shipped module
  * js/agent_next.js that renders the box, so the due-reason / touch / playbook
  * draft contract cannot drift from what the rep sees. */
 const N = require("../js/agent_next.js");

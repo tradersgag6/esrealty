@@ -1,0 +1,794 @@
+{
+  "capturedAt": "2026-10-02T01:54:08.207Z",
+  "url": "http://127.0.0.1:8931/docs/sea-estates-design/index.html",
+  "checks": [
+    {
+      "name": "coastal: ink/paper contrast",
+      "ok": true,
+      "detail": "12.34:1 (minimum 4.5)"
+    },
+    {
+      "name": "coastal: muted/paper contrast",
+      "ok": true,
+      "detail": "5.80:1 (minimum 4.5)"
+    },
+    {
+      "name": "coastal: muted/surface contrast",
+      "ok": true,
+      "detail": "6.34:1 (minimum 4.5)"
+    },
+    {
+      "name": "coastal: muted/soft contrast",
+      "ok": true,
+      "detail": "5.30:1 (minimum 4.5)"
+    },
+    {
+      "name": "coastal: accent/paper contrast",
+      "ok": true,
+      "detail": "7.01:1 (minimum 4.5)"
+    },
+    {
+      "name": "coastal: surface/accent contrast",
+      "ok": true,
+      "detail": "7.66:1 (minimum 4.5)"
+    },
+    {
+      "name": "coastal: on-dark/dark contrast",
+      "ok": true,
+      "detail": "12.12:1 (minimum 4.5)"
+    },
+    {
+      "name": "coastal: on-dark-muted/dark contrast",
+      "ok": true,
+      "detail": "9.41:1 (minimum 4.5)"
+    },
+    {
+      "name": "coastal: badge-ink/badge contrast",
+      "ok": true,
+      "detail": "7.31:1 (minimum 4.5)"
+    },
+    {
+      "name": "coastal: control/surface contrast",
+      "ok": true,
+      "detail": "3.79:1 (minimum 3)"
+    },
+    {
+      "name": "coastal: control/paper contrast",
+      "ok": true,
+      "detail": "3.47:1 (minimum 3)"
+    },
+    {
+      "name": "warm: ink/paper contrast",
+      "ok": true,
+      "detail": "12.56:1 (minimum 4.5)"
+    },
+    {
+      "name": "warm: muted/paper contrast",
+      "ok": true,
+      "detail": "6.00:1 (minimum 4.5)"
+    },
+    {
+      "name": "warm: muted/surface contrast",
+      "ok": true,
+      "detail": "6.51:1 (minimum 4.5)"
+    },
+    {
+      "name": "warm: muted/soft contrast",
+      "ok": true,
+      "detail": "5.20:1 (minimum 4.5)"
+    },
+    {
+      "name": "warm: accent/paper contrast",
+      "ok": true,
+      "detail": "6.21:1 (minimum 4.5)"
+    },
+    {
+      "name": "warm: surface/accent contrast",
+      "ok": true,
+      "detail": "6.74:1 (minimum 4.5)"
+    },
+    {
+      "name": "warm: on-dark/dark contrast",
+      "ok": true,
+      "detail": "12.52:1 (minimum 4.5)"
+    },
+    {
+      "name": "warm: on-dark-muted/dark contrast",
+      "ok": true,
+      "detail": "9.70:1 (minimum 4.5)"
+    },
+    {
+      "name": "warm: badge-ink/badge contrast",
+      "ok": true,
+      "detail": "6.76:1 (minimum 4.5)"
+    },
+    {
+      "name": "warm: control/surface contrast",
+      "ok": true,
+      "detail": "4.35:1 (minimum 3)"
+    },
+    {
+      "name": "warm: control/paper contrast",
+      "ok": true,
+      "detail": "4.01:1 (minimum 3)"
+    },
+    {
+      "name": "clear: ink/paper contrast",
+      "ok": true,
+      "detail": "12.17:1 (minimum 4.5)"
+    },
+    {
+      "name": "clear: muted/paper contrast",
+      "ok": true,
+      "detail": "5.48:1 (minimum 4.5)"
+    },
+    {
+      "name": "clear: muted/surface contrast",
+      "ok": true,
+      "detail": "5.95:1 (minimum 4.5)"
+    },
+    {
+      "name": "clear: muted/soft contrast",
+      "ok": true,
+      "detail": "4.94:1 (minimum 4.5)"
+    },
+    {
+      "name": "clear: accent/paper contrast",
+      "ok": true,
+      "detail": "6.78:1 (minimum 4.5)"
+    },
+    {
+      "name": "clear: surface/accent contrast",
+      "ok": true,
+      "detail": "7.35:1 (minimum 4.5)"
+    },
+    {
+      "name": "clear: on-dark/dark contrast",
+      "ok": true,
+      "detail": "12.39:1 (minimum 4.5)"
+    },
+    {
+      "name": "clear: on-dark-muted/dark contrast",
+      "ok": true,
+      "detail": "9.75:1 (minimum 4.5)"
+    },
+    {
+      "name": "clear: badge-ink/badge contrast",
+      "ok": true,
+      "detail": "6.95:1 (minimum 4.5)"
+    },
+    {
+      "name": "clear: control/surface contrast",
+      "ok": true,
+      "detail": "3.75:1 (minimum 3)"
+    },
+    {
+      "name": "clear: control/paper contrast",
+      "ok": true,
+      "detail": "3.45:1 (minimum 3)"
+    },
+    {
+      "name": "home 320: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home 320: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "home 320: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "home 320: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "home 320: card image aspect ratio",
+      "ok": true,
+      "detail": "1.65, 1.65"
+    },
+    {
+      "name": "properties 320: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "properties 320: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "properties 320: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "properties 320: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "properties 320: card image aspect ratio",
+      "ok": true,
+      "detail": "1.65, 1.65"
+    },
+    {
+      "name": "value-guide 320: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "value-guide 320: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "value-guide 320: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "value-guide 320: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "project-bt 320: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "project-bt 320: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "project-bt 320: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "project-bt 320: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "property-ultima 320: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "property-ultima 320: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "property-ultima 320: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "property-ultima 320: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "contact 320: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "contact 320: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "contact 320: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "contact 320: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "home 390: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home 390: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "home 390: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "home 390: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "home 390: card image aspect ratio",
+      "ok": true,
+      "detail": "1.65, 1.65"
+    },
+    {
+      "name": "properties 390: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "properties 390: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "properties 390: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "properties 390: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "properties 390: card image aspect ratio",
+      "ok": true,
+      "detail": "1.65, 1.65"
+    },
+    {
+      "name": "value-guide 390: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "value-guide 390: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "value-guide 390: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "value-guide 390: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "project-bt 390: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "project-bt 390: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "project-bt 390: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "project-bt 390: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "property-ultima 390: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "property-ultima 390: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "property-ultima 390: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "property-ultima 390: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "contact 390: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "contact 390: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "contact 390: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "contact 390: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "home 768: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home 768: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "home 768: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "home 768: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "home 768: card image aspect ratio",
+      "ok": true,
+      "detail": "1.65, 1.65"
+    },
+    {
+      "name": "properties 768: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "properties 768: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "properties 768: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "properties 768: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "properties 768: card image aspect ratio",
+      "ok": true,
+      "detail": "1.65, 1.65"
+    },
+    {
+      "name": "value-guide 768: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "value-guide 768: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "value-guide 768: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "value-guide 768: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "project-bt 768: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "project-bt 768: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "project-bt 768: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "project-bt 768: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "property-ultima 768: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "property-ultima 768: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "property-ultima 768: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "property-ultima 768: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "contact 768: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "contact 768: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "contact 768: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "contact 768: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "home 1440: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home 1440: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "home 1440: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "home 1440: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "home 1440: card image aspect ratio",
+      "ok": true,
+      "detail": "1.65, 1.65"
+    },
+    {
+      "name": "properties 1440: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "properties 1440: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "properties 1440: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "properties 1440: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "properties 1440: card image aspect ratio",
+      "ok": true,
+      "detail": "1.65, 1.65"
+    },
+    {
+      "name": "value-guide 1440: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "value-guide 1440: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "value-guide 1440: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "value-guide 1440: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "project-bt 1440: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "project-bt 1440: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "project-bt 1440: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "project-bt 1440: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "property-ultima 1440: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "property-ultima 1440: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "property-ultima 1440: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "property-ultima 1440: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "contact 1440: screenshot theme identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "contact 1440: no horizontal overflow",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "contact 1440: control/text sizing",
+      "ok": true,
+      "detail": "{\"smallControls\":[],\"tinyText\":[]}"
+    },
+    {
+      "name": "contact 1440: images and heading",
+      "ok": true,
+      "detail": "{\"broken\":[],\"h1s\":1}"
+    },
+    {
+      "name": "keyboard: skip link first",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: required entries visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: Escape closes menu and returns focus",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "search: applied budget changes results",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "search: honest empty state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "search: clear restores both samples",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guide: no automatic barangay selection",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guide: error names and focuses barangay",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guide: parent change clears children",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "guide: valid form discloses prototype boundary",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "preview: no runtime errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "preview: local-only, GET-only resources",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "production: original application hashes unchanged",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "captures": [
+    "home-coastal-390.png",
+    "home-coastal-1440.png",
+    "home-warm-390.png",
+    "home-warm-1440.png",
+    "home-clear-390.png",
+    "home-clear-1440.png",
+    "home-coastal-390-viewport.png",
+    "properties-coastal-390-viewport.png",
+    "properties-coastal-390.png",
+    "value-guide-coastal-390-viewport.png",
+    "value-guide-coastal-390.png",
+    "project-bt-coastal-390-viewport.png",
+    "project-bt-coastal-390.png",
+    "property-ultima-coastal-390-viewport.png",
+    "property-ultima-coastal-390.png",
+    "home-coastal-768-viewport.png",
+    "properties-coastal-768-viewport.png",
+    "properties-coastal-768.png",
+    "value-guide-coastal-768-viewport.png",
+    "value-guide-coastal-768.png",
+    "project-bt-coastal-768-viewport.png",
+    "project-bt-coastal-768.png",
+    "property-ultima-coastal-768-viewport.png",
+    "property-ultima-coastal-768.png",
+    "home-coastal-1440-viewport.png",
+    "properties-coastal-1440-viewport.png",
+    "properties-coastal-1440.png",
+    "value-guide-coastal-1440-viewport.png",
+    "value-guide-coastal-1440.png",
+    "project-bt-coastal-1440-viewport.png",
+    "project-bt-coastal-1440.png",
+    "property-ultima-coastal-1440-viewport.png",
+    "property-ultima-coastal-1440.png"
+  ],
+  "errors": [],
+  "ok": true,
+  "scope": "Standalone proposal only; not a live-website accessibility certification or full regression run."
+}

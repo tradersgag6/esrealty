@@ -151,7 +151,7 @@ async function audit(label, r, meta) {
   const rBig = await EST.estimate({
     purpose: "Selling", type: "house_lot", municipality: worst.muni, barangay: worst.brgy,
     streetKey: worst.street, classification: c0,
-    area: 999999, floorArea: 99999, ageBand: "31plus", floors: "3plus", construction: "rca_steel"
+    area: 100000, floorArea: 99999, ageBand: "31plus", floors: "3plus", construction: "rca_steel"
   });
   chk("worst-case estimate produced", rBig.available === true, rBig.available ? "" : "reason " + rBig.reason);
   if (!rBig.available) process.exit(1);
@@ -159,7 +159,7 @@ async function audit(label, r, meta) {
   const taxBig = await TAX.full(rBig);
   const metaLong = {
     preparedFor: "Sagittarius Party Holdings Corporation and Spouses Dela Cruz",
-    preparedBy: "ES Realty Batangas Property Valuation Desk",
+    preparedBy: "SEA ESTATES Batangas Property Valuation Desk",
     generatedOn: "2026-10-01", reference: rBig.reference,
     provenance: EST.provenance(), tax: taxBig, muniRow: EST.municipalityRow(worst.muni)
   };

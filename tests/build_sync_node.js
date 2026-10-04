@@ -114,11 +114,16 @@ const FALLBACK_ALIASES = {
   "data-lead-q": "crm_core_e2e.js tries this then falls back to #lead-q",
   "data-pms-tab": "pms tests try this then fall back to button-text match; tabs are data-pmtab in app.js:8357"
 };
+// Explicitly removed features may still be queried by absence assertions or
+// optional compatibility checks. Require that these hooks stay absent instead
+// of treating their test references as instructions to restore deleted UI.
+const RETIRED_HOOKS = ["data-sf-sticky", "data-sf-sticky-call"];
 
 if (src !== null) {
   const shipped = ["index.html", "js/app.js", "js/storefront.js", "js/estimator.js", "js/agent_next.js",
     "js/portfolio_ledger.js", "js/portfolio_cloud.js", "js/compliance_due.js", "js/data.js", "js/core.js"]
     .map(f => readOr(path.join(ROOT, f))).filter(Boolean).join("\n");
+  check("removed bottom-bar hooks stay absent", RETIRED_HOOKS.every(h => !shipped.includes(h)), "explicit removal contract");
 
   const hooks = new Set();
   for (const f of fs.readdirSync(TESTS)) {
@@ -128,12 +133,14 @@ if (src !== null) {
     // (a) tokens asserted to be ABSENT: the whole selector of a negated query.
     //     Their absence is the passing condition, so they are not "must exist".
     const negative = new Set();
-    const negRe = /!\s*[\w.]*\(\s*'([^']*)'\s*\)/g;
+    // Each quote style may contain the other style in an attribute selector,
+    // e.g. !q('[data-est-screen="3"] [data-est-spin]').
+    const negRe = /!\s*[\w.]*\(\s*(?:"([^"]*)"|'([^']*)')\s*\)/g;
     let nm;
     while ((nm = negRe.exec(text))) {
       const tokRe = /\b(data-[a-z0-9]+(?:-[a-z0-9]+)*)\b/g;
       let t2;
-      while ((t2 = tokRe.exec(nm[1]))) negative.add(t2[1]);
+      while ((t2 = tokRe.exec(nm[1] === undefined ? nm[2] : nm[1]))) negative.add(t2[1]);
     }
 
     // (b) tokens positively driven: must appear as an attribute selector, i.e.
@@ -142,7 +149,7 @@ if (src !== null) {
     const posRe = /\[(data-[a-z0-9]+(?:-[a-z0-9]+)*)/g;
     let pm;
     while ((pm = posRe.exec(text))) {
-      if (!negative.has(pm[1])) hooks.add(pm[1]);
+      if (!negative.has(pm[1]) && !RETIRED_HOOKS.includes(pm[1])) hooks.add(pm[1]);
     }
   }
 

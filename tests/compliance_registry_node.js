@@ -1,5 +1,5 @@
 /* Compliance expiry-window math — the node counterpart to compliance_registry_e2e
- * (PHASE_0_1_BUILD.md line 74). Exercises the exact shipped module
+ * (docs/specs/phase-0-1-compliance-and-leadgen.md line 74). Exercises the exact shipped module
  * js/compliance_due.js that feeds complianceStatusOf in the app, so the
  * boundary contract below cannot drift from what the Compliance tab shows. */
 const D = require("../js/compliance_due.js");

@@ -1,5 +1,5 @@
 /* ============================================================
-   ES Realty — Financial Engine
+   SEA ESTATES — Financial Engine
    All calculations are deterministic client-side functions with
    documented formulas. AI never "computes" numbers in free text.
    ============================================================ */
@@ -579,7 +579,7 @@
     s["Conditions of Sale"] = { value: cond, basis: condBasis };
 
     const timeAdj = idxPct !== 0 ? _r1((months / 12) * idxPct * 100) : _r1((months / 12) * growth * 100);
-    s["Market Conditions (Time)"] = { value: timeAdj, basis: months + " months elapsed at " + (idxPct !== 0 ? pct(idxPct / 100) + "/mo from the ES Realty Market Price Index for " + (p.city || "the market") : pct(growth) + "/yr assumed appreciation in " + (p.city || "the market")) + "." };
+    s["Market Conditions (Time)"] = { value: timeAdj, basis: months + " months elapsed at " + (idxPct !== 0 ? pct(idxPct / 100) + "/mo from the SEA ESTATES Market Price Index for " + (p.city || "the market") : pct(growth) + "/yr assumed appreciation in " + (p.city || "the market")) + "." };
 
     if (cBench > 0 && sBench > 0) {
       const locAdj = _r1((sBench - cBench) / cBench * 100);

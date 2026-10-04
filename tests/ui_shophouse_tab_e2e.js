@@ -92,7 +92,7 @@ function chk(n, ok, d) { window.__msChecks.push({ name: n, ok: !!ok, detail: d |
 
     /* ---- home is unaffected by the closure ---- */
     await go("#/home", 1800);
-    chk("home-still-value-guide", (document.querySelector(".sf-est-hero h1") || {}).textContent.indexOf("property worth?") > 0, "h1=" + (document.querySelector(".sf-est-hero h1") || {}).textContent);
+    chk("home-still-value-guide", (document.querySelector(".sf-est-hero h1") || {}).textContent.indexOf("property be worth?") > 0, "h1=" + (document.querySelector(".sf-est-hero h1") || {}).textContent);
     checkNoLeak("home");
   } catch (e) {
     window.__msChecks.push({ name: "runner", ok: false, detail: (e && e.message || e) });

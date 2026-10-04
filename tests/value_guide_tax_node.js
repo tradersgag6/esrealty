@@ -26,8 +26,8 @@ function chk(n, ok, d) { console.log("  [" + (ok ? "PASS" : "FAIL") + "] " + n +
     ref.transaction.filter(t => t.ratePct != null).map(t => t.key).join(", "));
   chk("every item with a deadline states the trigger",
     ref.transaction.filter(t => t.deadlineDays != null).every(t => !!t.deadlineFrom), "");
-  chk("tax base note warns the BIR decides the base", /BIR determines fair market value/i.test(ref.taxBaseNote), "");
-  chk("tax base note says which is higher, selling price or FMV", /HIGHER of the selling price and the fair market value/i.test(ref.taxBaseNote), "");
+  chk("tax base note includes statutory BIR and assessor values", /BIR zonal reference/.test(ref.taxBaseNote) && /assessor schedule/.test(ref.taxBaseNote), "");
+  chk("tax base note uses higher price or statutory FMV", /higher of selling price and statutory fair market value/.test(ref.taxBaseNote), "");
   chk("authority note says the BIR and LGU decide the payable amount",
     /BIR and the LGU determine the actual amounts/i.test(ref.authorityNote), "");
 
@@ -51,24 +51,22 @@ function chk(n, ok, d) { console.log("  [" + (ok ? "PASS" : "FAIL") + "] " + n +
 
   const t = TAX.sellingCosts(r, ref);
   const V = r.marketGuideEstimate;
-  const fmv = r.birZonalValue * 0.5;
+  const fmv = r.taxReferenceValue != null ? r.taxReferenceValue : r.birZonalValue;
 
   // ---- the base, not the estimate
-  chk("tax base is the higher of estimate and FMV proxy",
+  chk("tax base is the higher assumed sale price or statutory reference",
     t.taxBase === Math.max(V, fmv), "base=" + t.taxBase + " est=" + Math.round(V) + " fmvProxy=" + Math.round(fmv));
-  chk("tax base basis is stated in words", /higher of/i.test(t.taxBaseBasis), "");
-  chk("FMV proxy is 50% of zonal, per Sec 24(D)",
-    t.fmvProxy === Math.round(r.birZonalValue * 0.5), "zonal=" + r.birZonalValue);
+  chk("tax base basis is stated in words", /Highest of/i.test(t.taxBaseBasis), "");
+  chk("no fabricated half-zonal proxy", !Object.hasOwn(t, "fmvProxy"), "zonal=" + r.birZonalValue);
 
   // ---- CGT is on the EXCESS only, never a flat percentage of the price
   const cgt = t.items.find(i => i.key === "capital_gains");
-  chk("CGT is computed on the excess over FMV, not the whole price",
-    cgt.amount === Math.round(Math.max(0, V - fmv) * 0.06),
-    "CGT=" + cgt.amount + " expected=" + Math.round(Math.max(0, V - fmv) * 0.06));
-  chk("CGT is far below a flat 6% of the price",
-    cgt.amount < V * 0.06, "flat 6% would be " + Math.round(V * 0.06));
+  chk("CGT is six percent of the full applicable base",
+    cgt.amount === Math.round(Math.max(V, fmv) * 0.06), "CGT=" + cgt.amount);
+  chk("below-zonal price does not erase CGT",
+    cgt.amount >= V * 0.06, "price=" + V);
   chk("CGT base is reported so the figure can be checked",
-    cgt.baseAmount === Math.round(Math.max(0, V - fmv)), "baseAmount=" + cgt.baseAmount);
+    cgt.baseAmount === Math.round(Math.max(V, fmv)), "baseAmount=" + cgt.baseAmount);
   chk("CGT base label names the statutory rule", /24\(D\)/.test(cgt.base), cgt.base);
 
   // ---- DST is on the full base
@@ -96,15 +94,15 @@ function chk(n, ok, d) { console.log("  [" + (ok ? "PASS" : "FAIL") + "] " + n +
     t.broker.min + "-" + t.broker.max);
 
   // ---- the direction-of-error warning is present and specific
-  chk("a floor-not-ceiling warning is carried", /floor/i.test(t.direction), "");
+  chk("asset classification and fee allocation disclosed", /capital-asset/.test(t.direction) && /seller-paid/.test(t.direction), "");
   chk("the warning says a higher price raises CGT and DST",
-    /HIGHER selling price raises capital gains tax and documentary stamp tax/i.test(t.direction), "");
+    /higher selling price can raise CGT and DST/i.test(t.direction), "");
 
   // ---- deadlines
   const dl = TAX.deadlines(ref);
   chk("deadlines are sorted most-urgent first",
     dl.every((d, i) => i === 0 || dl[i - 1].days <= d.days), dl.map(d => d.label + "(" + d.days + "d)").join(", "));
-  chk("DST deadline is 5 days", dl.some(d => /Documentary/.test(d.label) && d.days === 5), "");
+  chk("DST deadline is 10 days after close of document month", dl.some(d => /Documentary/.test(d.label) && d.days === 10 && /close of the month/.test(d.from)), "");
   chk("CGT deadline is 30 days", dl.some(d => /Capital gains/.test(d.label) && d.days === 30), "");
   chk("transfer deadline is 60 days", dl.some(d => /transfer/i.test(d.label) && d.days === 60), "");
   chk("every deadline names its trigger and penalty",
@@ -114,7 +112,7 @@ function chk(n, ok, d) { console.log("  [" + (ok ? "PASS" : "FAIL") + "] " + n +
 
   // ---- inheritance
   const inh = TAX.inheritance(r, ref);
-  chk("estate threshold is 10,000,000 (TRAIN, not 5M)", inh.taxThreshold === 10000000, "threshold=" + inh.taxThreshold);
+  chk("no universal extra estate threshold", inh.taxThreshold === 0 && inh.scenarioOnly, "threshold=" + inh.taxThreshold);
   chk("standard deduction is 5,000,000", inh.standardDeduction === 5000000, "");
   chk("estate tax rate is 6%", inh.taxPct === 6, "");
   chk("an ordinary Batangas property shows no estate tax",
@@ -128,8 +126,8 @@ function chk(n, ok, d) { console.log("  [" + (ok ? "PASS" : "FAIL") + "] " + n +
   const big = TAX.inheritance({ birZonalValue: 100000000, marketGuideEstimate: 90000000 }, ref);
   chk("a large estate DOES become taxable", big.onMarketBasis.tax > 0,
     "net=" + big.onMarketBasis.afterDeduction + " taxable=" + big.onMarketBasis.taxable + " tax=" + big.onMarketBasis.tax);
-  chk("a large estate tax = 6% of the excess above 10M",
-    big.onMarketBasis.tax === Math.round((90000000 - 5000000 - 10000000) * 0.06), "tax=" + big.onMarketBasis.tax);
+  chk("a large citizen/resident estate tax = 6% after standard deduction",
+    big.onMarketBasis.tax === 5100000, "tax=" + big.onMarketBasis.tax);
 
   /* Degenerate inputs must not put NaN or Infinity in the PDF. The notarial
      allowance is a flat peso amount, so even a zero-valued property shows it -
