@@ -2,7 +2,7 @@
 "use strict";
 
 // =====================================================================
-// ES Realty — Market Price Index builder
+// SEA ESTATES — Market Price Index builder
 // Pulls live scans from the Market Scan API, keeps only REAL portal
 // listings (DotProperty / MyProperty), computes the median ₱/sqm per
 // city for today, and merges it into data/market-index.json.

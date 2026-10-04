@@ -52,4 +52,4 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, "127.0.0.1", () => console.log("ES Realty running at http://localhost:" + PORT));
+server.listen(PORT, "127.0.0.1", () => console.log("SEA ESTATES running at http://localhost:" + PORT));

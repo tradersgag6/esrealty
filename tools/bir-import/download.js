@@ -1,6 +1,6 @@
 "use strict";
 /*
- * ES Realty — Official BIR Batangas zonal-value dataset downloader.
+ * SEA ESTATES — Official BIR Batangas zonal-value dataset downloader.
  *
  * Downloads the two current (2022) Department Order workbooks for Batangas
  * from the official BIR CDN and stores them under ./raw/ for the importer.

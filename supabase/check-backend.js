@@ -1,5 +1,5 @@
 "use strict";
-// Backend health checker for ES Realty.
+// Backend health checker for SEA ESTATES.
 //
 // Pings every Supabase edge function to confirm it is deployed, verifies that
 // protected routes enforce auth, and reads each function's source to report

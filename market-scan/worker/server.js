@@ -1,7 +1,7 @@
 "use strict";
 
 // =====================================================================
-//  Market Scan worker (ES Realty) — runs on http://localhost:8932.
+//  Market Scan worker (SEA ESTATES) — runs on http://localhost:8932.
 //  Zero required deps: plain Node http wrapper around the shared engine
 //  (../vercel/lib/_lib.js), plus:
 //    * listing history / price-drop tracking + live-median benchmarks (store.js)

@@ -2,7 +2,7 @@
   "name": "esrealty-market-scan-worker",
   "version": "1.0.0",
   "private": true,
-  "description": "Durable Market Scan worker for ES Realty: live scraping + Facebook Marketplace (Playwright) + listing history / median benchmarks.",
+  "description": "Durable Market Scan worker for SEA ESTATES: live scraping + Facebook Marketplace (Playwright) + listing history / median benchmarks.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

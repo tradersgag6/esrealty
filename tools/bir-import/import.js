@@ -1,6 +1,6 @@
 "use strict";
 /*
- * ES Realty — Official BIR Batangas zonal-value importer.
+ * SEA ESTATES — Official BIR Batangas zonal-value importer.
  *
  * Parses the current Department Order workbooks for RDO 58 (West Batangas,
  * DO 035-2022) and RDO 59 (East Batangas, DO 034-2022), normalizes them into

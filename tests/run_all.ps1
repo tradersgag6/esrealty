@@ -6,7 +6,7 @@ param(
     [switch]$Mobile              # shorthand for -WindowSize "390,844"
 )
 
-# ES Realty regression runner (Chrome DevTools Protocol, headless Chrome)
+# SEA ESTATES regression runner (Chrome DevTools Protocol, headless Chrome)
 # Requires: Chrome installed; local server running on :8931 (start_esrealty.cmd)
 # Usage:
 #   powershell -File tests\run_all.ps1              # run every *_e2e.js

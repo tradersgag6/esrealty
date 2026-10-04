@@ -1,5 +1,5 @@
 /* ============================================================
-   ES Realty — Static Data (Philippines)
+   SEA ESTATES — Static Data (Philippines)
    Regions → provinces → representative cities, market benchmarks,
    construction cost tables, and amenities.
    ============================================================ */

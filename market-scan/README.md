@@ -1,6 +1,6 @@
-# Market Scan (ES Realty)
+# Market Scan (SEA ESTATES)
 
-Live property intelligence for the ES Realty app — scans public listing sites
+Live property intelligence for the SEA ESTATES app — scans public listing sites
 for an area, matches rows to the user's property type / deal mode, keeps a
 per-listing price history, and builds live per-city price-per-sqm medians that
 feed the appraisal workflow.

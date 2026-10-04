@@ -1,5 +1,5 @@
 ﻿# =====================================================================
-#  Market Scan local scraper server (ES Realty)
+#  Market Scan local scraper server (SEA ESTATES)
 #  A lightweight PowerShell HttpListener that scrapes public property
 #  listing pages and serves normalized JSON to the Market Scan view.
 #
@@ -25,7 +25,7 @@
 #    dotproperty  : live scrape of dotproperty.com.ph listing pages
 #    lamudi       : attempt (frequently blocked -> status "blocked")
 #    zipmatch     : attempt (often unresolvable -> status "offline")
-#    localbenchmark: deterministic generator from ES Realty benchmark data
+#    localbenchmark: deterministic generator from SEA ESTATES benchmark data
 #
 #  Notes:
 #    * Binds to http://localhost:<port>/ so no admin/ACL needed.
@@ -594,7 +594,7 @@ function New-BenchmarkListing($City, $Bench, $Type, $Mode, $Seed) {
         pricePerSqm = if ($area -gt 0 -and $Mode -ne "rent") { [int64]($price / $area) } else { 0 }
         lotArea = $lot; floorArea = $floor; bedrooms = $beds; bathrooms = 0
         propertyType = $Type; verified = $false
-        description = "Generated from the ES Realty benchmark table for $City (indicative ₱$Bench/sqm) — reference data, not a live listing."
+        description = "Generated from the SEA ESTATES benchmark table for $City (indicative ₱$Bench/sqm) — reference data, not a live listing."
     }
 }
 

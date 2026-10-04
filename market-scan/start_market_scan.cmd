@@ -1,5 +1,5 @@
 @echo off
-rem Market Scan worker launcher (ES Realty)
+rem Market Scan worker launcher (SEA ESTATES)
 rem Starts the local Market Scan worker on http://localhost:8932
 rem   /api/market-scan        live scans (DotProperty, MyProperty, web, benchmarks, FB)
 rem   /api/market-scan/bench  live per-city price/sqm medians
@@ -12,5 +12,5 @@ if %errorlevel% neq 0 (
   pause
   exit /b 1
 )
-start "ES Realty Market Scan" /min node "%~dp0worker\server.js"
+start "SEA ESTATES Market Scan" /min node "%~dp0worker\server.js"
 echo Market Scan worker starting on http://localhost:8932 ...

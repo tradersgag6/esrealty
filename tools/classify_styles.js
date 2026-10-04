@@ -420,7 +420,7 @@ if (APPLY) {
   for (const rg of keepRanges) remaining += css.slice(rg.start, rg.end).replace(/\s+$/, "") + "\n";
 
   const stylesHeader = [
-    "/* ES Realty - application (admin) styles, plus the responsive override layer.",
+    "/* SEA ESTATES - application (admin) styles, plus the responsive override layer.",
     " *",
     " * SCOPE: the authenticated back-office, the shared primitives both surfaces",
     " * use, and the @media overrides that correct the storefront for smaller",
