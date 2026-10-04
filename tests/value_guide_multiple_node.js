@@ -9,14 +9,16 @@
  *
  * It then pins the disclosure itself: the builder in js/value_guide_reference.js
  * that owns the public copy, the multiple formatter, the guards that make it
- * refuse to speak at all when there is no usable multiple, and the
- * accuracy-language rule from docs/batangas-value-guide-sources.md:50-58.
+ * refuse to speak at all when there is no usable multiple, the
+ * accuracy-language rule from docs/batangas-value-guide-sources.md:50-58, and
+ * the HTML the result screen and the report build-up actually emit for it.
  *
  * Fixture: the Bauan Poblacion III street rate already asserted by
  * tests/value_guide_reference_node.js:22 (birZonalRatePerSqm === 11500).
  */
-const assert = require("assert"), fs = require("fs");
+const assert = require("assert"), fs = require("fs"), path = require("path"), vm = require("vm");
 const EST = require("../js/estimator.js"), REF = require("../js/value_guide_reference.js");
+const ROOT = path.join(__dirname, "..");
 const read = path => JSON.parse(fs.readFileSync(path, "utf8"));
 const config = read("data/zonal-config.json"), index = read("data/batangas-zonal.json"), md = read("data/bir-batangas/municipalities/bauan.json");
 let count = 0;
@@ -443,6 +445,353 @@ function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
        truncated. */
     assert.strictEqual(REF.formatMultiple(4.356249999999999), "4.35625");
     assert.strictEqual(REF.formatMultiple(0.7687499999999999), "0.76875");
+  });
+
+  /* ===================================================================
+     Task 3 - the HTML render.
+
+     The result screen and the report build-up are one string concatenation
+     each, inside functions that are not exported, so a source grep can only
+     ever say that some characters exist somewhere in the file. The checks
+     below drive the real renderer instead. js/estimator.js is loaded into a
+     vm context with a minimal document, the wizard state is set the way
+     runEstimate() sets it, and renderLayout() is asked for screen 4. What
+     comes back is the exact innerHTML the reader sees, with nothing inside
+     the renderer stubbed or re-implemented.
+
+     Only the disclosure builder is wrapped, in two ways: permanently, to
+     count calls per render, and temporarily, with a marked copy, to prove
+     the markup prints what the builder returned rather than a second copy
+     of the words.
+
+     This is what gives the accuracy guard above its teeth. Over the
+     published copy it never executes, because the verbatim assertions fire
+     first - see the note there. Over the RENDERED text it does run, and a
+     banned word planted in the renderer's own connective prose reaches it.
+     Mutation proof for that is recorded on the check itself. */
+
+  const card = { innerHTML: "", dataset: {}, querySelector: () => null, querySelectorAll: () => [], addEventListener: () => {} };
+  const sandbox = {
+    console: console, setTimeout: setTimeout, clearTimeout: clearTimeout,
+    location: { hash: "#/home" },
+    /* loadJSON() fetches repo-relative URLs, which Node's fetch rejects. The
+       same bytes are served from disk instead; no value is faked. */
+    fetch: url => {
+      const file = path.join(ROOT, String(url).replace(/^\//, ""));
+      return Promise.resolve({ ok: fs.existsSync(file), json: () => Promise.resolve(JSON.parse(fs.readFileSync(file, "utf8"))) });
+    }
+  };
+  sandbox.window = sandbox; sandbox.self = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext("globalThis.window = globalThis; globalThis.self = globalThis;", sandbox);
+  /* js/estimator.js mounts itself at load time whenever a document already
+     exists, so the document is injected AFTER the module has run and mount()
+     never fires. Every read of `document` inside the renderer happens at call
+     time, so renderLayout() still finds the card. util.js and the three
+     value-guide modules are the browser <script> tags from index.html, in
+     order, so referenceTools is the same object the page uses. */
+  ["js/util.js", "js/value_guide_finance.js", "js/value_guide_evidence.js", "js/value_guide_reference.js", "js/estimator.js"]
+    .forEach(file => vm.runInContext(fs.readFileSync(path.join(ROOT, file), "utf8"), sandbox, { filename: file }));
+  sandbox.document = {
+    querySelector: sel => (sel === "[data-est-card]" ? card : null),
+    querySelectorAll: () => [],
+    addEventListener: () => {},
+    createElement: () => ({ setAttribute() {}, addEventListener() {}, classList: { toggle() {} } }),
+    documentElement: { classList: { add() {}, remove() {} } },
+    body: { classList: { add() {}, remove() {} } },
+    getElementById: () => null
+  };
+  const browserEST = sandbox.ESREALTY_EST;
+  const disclosure = sandbox.ESREALTY_REFERENCE;
+
+  await browserEST.loadData();
+  const muniData = await browserEST.loadMunicipality("bauan");
+  const referenceTables = browserEST.reference();
+  const muniRow = browserEST.municipalityRow("BAUAN");
+
+  let disclosureCalls = 0;
+  const realDisclosure = disclosure.appliedMultipleDisclosure;
+  const countingDisclosure = function (result) { disclosureCalls += 1; return realDisclosure(result); };
+  disclosure.appliedMultipleDisclosure = countingDisclosure;
+
+  function renderScreen(opts) {
+    const state = browserEST._state();
+    const result = browserEST.core.computeEstimate(referenceTables.config, referenceTables.index, muniData, opts);
+    result.integrity = browserEST.core.integrityCheck(result);
+    Object.assign(state, {
+      municipality: "BAUAN", barangay: opts.barangay, streetLabel: "Binay St Ressurreccion St",
+      classification: opts.classification, area: opts.area, type: opts.type || "vacant_lot",
+      corner: !!opts.corner, landMethod: opts.landMethod || "factor",
+      timeSource: opts.timeSource, timeAnnualPct: opts.timeAnnualPct,
+      timeBaseDate: opts.timeBaseDate, timeTargetDate: opts.timeTargetDate,
+      leadOpen: false, leadSubmitted: false, pricingUnlocked: true,
+      muniRow: muniRow, muniData: muniData
+    });
+    state.result = result;
+    state.screen = 4;
+    card.innerHTML = "";
+    disclosureCalls = 0;
+    browserEST.debug.render(4);
+    return card.innerHTML;
+  }
+
+  /* The residential vector and the commercial corner vector. The second is not
+     decoration: 4.35625 is the vector that a 4-decimal formatter truncates, so
+     it is the one that proves the RENDERED number reconciles with the rendered
+     build-up rather than merely looking plausible. */
+  const factorHtml = renderScreen(options);
+  const cornerCommercialHtml = renderScreen({ ...options, classification: "CR", corner: true });
+  const indexedHtml = renderScreen(indexed);
+
+  const RESULT_BLOCK = /<div class="sf-est-result-multiple">[\s\S]*?<\/div>/;
+  const NOTE_BLOCK = /<p class="sf-est-multiple-note">[\s\S]*?<\/p>/;
+  const LIMIT_BLOCK = /<p class="sf-est-multiple-limit">[\s\S]*?<\/p>/;
+  const stripTags = html => html.replace(/<[^>]*>/g, "");
+  const peso = value => Number(String(value).replace(/[^\d.]/g, ""));
+  const DISCLOSURE_BLOCKS = [RESULT_BLOCK, NOTE_BLOCK, LIMIT_BLOCK];
+
+  /* ---- the accuracy rule, applied to what is actually rendered ----
+     FIRST, deliberately. Over the published copy the verbatim assertions
+     elsewhere in this file fire long before any regex, so the guard never
+     executes (see the mutation-12 note above). The connective prose around the
+     three blocks below is the RENDERER's, and this is the only check that reads
+     it, so this has to run before the verbatim pins or it can never be reached.
+
+     Mutation proof, run on 2026-10-04 against this file: inserting "accurate
+     to the printed build-up" into that connective prose in js/estimator.js
+     makes THIS check fail and nothing before it, with the offending sentence
+     in the assertion message. Inserting the same word anywhere the verbatim
+     pins already cover would be caught by those pins first, which is correct
+     but proves nothing about this guard - so the mutation had to land here. */
+
+  check("no rendered disclosure text claims accuracy", () => {
+    const words = [];
+    [factorHtml, cornerCommercialHtml].forEach(html => {
+      DISCLOSURE_BLOCKS.forEach(re => {
+        const found = re.exec(html);
+        assert.ok(found, "missing disclosure markup on the rendered screen: " + re.source);
+        words.push(stripTags(found[0]));
+      });
+    });
+    const blob = words.join(" ");
+    assert.strictEqual(BANNED.test(blob), false, "accuracy language rendered into: " + blob);
+  });
+
+  /* ---- the result screen ---- */
+
+  check("result screen renders the multiple inside the BIR block", () => {
+    assert.ok(/sf-est-result-bir/.test(factorHtml), "the BIR block is gone from the result screen");
+    /* A sibling of the BIR block, not a child: the disclosure qualifies the
+       BIR figure, so it must not be nested inside the BIR card. */
+    assert.ok(/<\/div><div class="sf-est-result-multiple">/.test(factorHtml),
+      "the disclosure is not emitted immediately after the BIR block");
+  });
+
+  check("result screen prints the label, the multiple and the assumption verbatim, in that order", () => {
+    const block = RESULT_BLOCK.exec(factorHtml);
+    assert.ok(block, "no .sf-est-result-multiple on the result screen");
+    /* Whole-element equality, not three substring tests: the element order is
+       part of the contract (label, then the number, then the qualifier) and a
+       substring test cannot see a reordering. */
+    assert.strictEqual(block[0],
+      '<div class="sf-est-result-multiple"><b>' + LABEL + '</b><span>2.5\u00d7 the BIR reference</span><small>' + ASSUMPTION + '</small></div>');
+  });
+
+  /* ---- the report land build-up ---- */
+
+  check("report land build-up renders the multiple, after the effective land rate row", () => {
+    assert.ok(/Land value build-up/.test(factorHtml), "the land build-up section is gone from the report");
+    const section = /Land value build-up[\s\S]*?<\/section>/.exec(factorHtml);
+    assert.ok(section, "the land build-up section did not render");
+    /* Positions, not "does this string appear somewhere". An earlier version
+       used loose [\s\S]*? chains, and a build-up that printed the note TWICE -
+       once above the breakdown and once below the rate - satisfied them. Each
+       needle is therefore required to appear exactly once, and in order: the
+       disclosure explains the product on the row above it. */
+    const at = function (needle, label) {
+      const first = section[0].indexOf(needle);
+      assert.ok(first > -1, label + " is missing from the land build-up section");
+      assert.strictEqual(section[0].split(needle).length - 1, 1, label + " appears more than once in the land build-up section");
+      return first;
+    };
+    const breakdown = at("sf-est-breakdown", "the factor breakdown");
+    const coverage = at("sf-est-coverage", "the effective land rate row");
+    const note = at("sf-est-multiple-note", "the multiple note");
+    const limit = at("sf-est-multiple-limit", "the multiple limitation");
+    assert.ok(coverage > breakdown, "the effective land rate row moved above the factor breakdown");
+    assert.ok(note > coverage, "the multiple note does not follow the effective land rate row");
+    assert.ok(limit > note, "the multiple limitation does not follow the multiple note");
+  });
+
+  check("report land build-up prints the note and the limitation verbatim", () => {
+    const note = NOTE_BLOCK.exec(factorHtml), limit = LIMIT_BLOCK.exec(factorHtml);
+    assert.ok(note, "no .sf-est-multiple-note in the report");
+    assert.ok(limit, "no .sf-est-multiple-limit in the report");
+    assert.strictEqual(stripTags(note[0]), LABEL + " \u2014 2.5\u00d7 the BIR reference. " + ASSUMPTION);
+    assert.strictEqual(stripTags(limit[0]), LIMITATION);
+  });
+
+  /* ---- the reconciliation, on the screen the reader sees ---- */
+
+  check("the rendered multiple reconciles with the rendered BIR base and land rate", () => {
+    /* The point of publishing the multiple: a reader multiplies it by the BIR
+       rate printed on the same screen and must land on the land rate printed on
+       that same screen. Checking the three numbers against each other is the
+       only assertion here that can see a screen whose figures no longer
+       multiply out.
+
+       Teeth: mutation 12 on 2026-10-04 scaled the printed BIR base by 1.5 in
+       js/estimator.js. Every verbatim pin, the sentinel count and the escaping
+       checks all stayed green - the words really are the builder's - and this
+       check went red on the arithmetic alone.
+
+       The 0.5 tolerance is money()'s own: it prints two decimals, so the
+       displayed rate is the product to within half a cent. For scale, the 4-
+       decimal truncation of the 5-decimal commercial corner vector moves the
+       product by 0.98 (4.3562 x 19,500 = 84,945.90 against a printed
+       84,946.88), so a formatter that lost that digit could not hide here
+       either - although in practice the verbatim pin above catches a formatter
+       change first. */
+    [["residential", factorHtml], ["commercial + corner", cornerCommercialHtml]].forEach(pair => {
+      const name = pair[0], html = pair[1];
+      const shown = /class="sf-est-result-multiple"><b>[^<]*<\/b><span>([\d.]+)\u00d7/.exec(html);
+      const base = /sf-est-breakdown"><span>\u20b1([\d,.]+)\/sqm BIR base/.exec(html);
+      const rate = /Effective land rate <b>\u20b1([\d,.]+) \/sqm/.exec(html);
+      assert.ok(shown && base && rate, name + ": could not read the multiple, the BIR base and the land rate off the rendered screen");
+      const multiple = Number(shown[1]), birRate = peso(base[1]), landRate = peso(rate[1]);
+      assert.ok(Math.abs(multiple * birRate - landRate) <= 0.5,
+        name + ": the screen shows " + multiple + " \u00d7 " + birRate + " = " + (multiple * birRate) + " but " + landRate + " /sqm on the same screen");
+    });
+  });
+
+  /* ---- Review Focus 3: a null disclosure renders NOTHING ---- */
+
+  check("a time-indexed result renders no disclosure element at all", () => {
+    /* Teeth: mutation 2 on 2026-10-04 replaced the null branch of the result
+       block with an empty <div class="sf-est-result-multiple"></div> - exactly
+       the Review Focus 3 defect, "no element at all" quietly becoming "an empty
+       element". This check went red on it and nothing before it. */
+    assert.ok(indexedHtml.length > 5000, "the indexed screen did not render at all (" + indexedHtml.length + " chars) - the check below would pass vacuously");
+    assert.ok(/Indexed-reference planning scenario/.test(indexedHtml), "the indexed screen did not render its own summary heading");
+    [RESULT_BLOCK, NOTE_BLOCK, LIMIT_BLOCK].forEach(re => {
+      assert.strictEqual(re.exec(indexedHtml), null, "the indexed screen still emits " + re.source);
+    });
+    assert.strictEqual(indexedHtml.indexOf("0\u00d7"), -1, "the indexed screen renders a 0x multiple");
+    assert.strictEqual(indexedHtml.indexOf("sf-est-result-multiple"), -1, "an empty disclosure element survived on the indexed screen");
+  });
+
+  /* ---- the markup prints the builder's words, not a second copy ---- */
+
+  check("the markup prints the builder's own strings", () => {
+    /* Every field the builder returns is marked. If the renderer carried its
+       own copy of the words - or recomputed the multiple - the marker would be
+       missing, and if it dropped or duplicated a field the count would be off.
+       This is the check that would catch Task 3 quietly forking the copy from
+       Task 2, and the verbatim pins above cannot see it: mutation 4 on
+       2026-10-04 replaced the label with a hardcoded literal that happened to
+       be byte-identical, so every verbatim check stayed green and this one went
+       red on 6 of 7. */
+    disclosure.appliedMultipleDisclosure = function (result) {
+      const d = realDisclosure(result);
+      if (!d) return null;
+      return {
+        multiple: d.multiple + " SENTINEL", multipleLabel: d.multipleLabel + " SENTINEL", text: d.text + " SENTINEL",
+        assumption: d.assumption + " SENTINEL", limitation: d.limitation + " SENTINEL", factors: d.factors
+      };
+    };
+    try {
+      const html = renderScreen(options);
+      const marked = (html.match(/SENTINEL/g) || []).length;
+      /* label + text in the result block, then assumption there: 3. The report
+         note repeats label + text + assumption and the limit adds limitation:
+         4. Seven in total. */
+      assert.strictEqual(marked, 7, "expected the builder's 7 interpolated fields to be marked, found " + marked);
+    } finally {
+      disclosure.appliedMultipleDisclosure = countingDisclosure;
+    }
+  });
+
+  check("every interpolated disclosure value is escaped", () => {
+    /* Teeth: mutation 5 on 2026-10-04 dropped the esc() on one field only -
+       multipleDisclosure.text - and this check went red on it. */
+    disclosure.appliedMultipleDisclosure = function (result) {
+      const d = realDisclosure(result);
+      if (!d) return null;
+      return {
+        multiple: d.multiple, multipleLabel: '<img src=x onerror="boom">',
+        text: "<script>boom</" + "script>", assumption: "a & b < c > d ' e",
+        limitation: "<b>limitation</b> & co", factors: d.factors
+      };
+    };
+    try {
+      const html = renderScreen(options);
+      assert.strictEqual(html.indexOf("<script>boom<"), -1, "the multiple text was interpolated without esc()");
+      assert.strictEqual(html.indexOf('<img src=x onerror="boom">'), -1, "the label was interpolated without esc()");
+      assert.ok(html.indexOf("&lt;script&gt;boom&lt;/script&gt;") !== -1, "the escaped multiple text is missing from the result screen");
+      assert.ok(html.indexOf("&lt;img src=x onerror=&quot;boom&quot;&gt;") !== -1, "the escaped label is missing from the result screen");
+      assert.ok(html.indexOf("a &amp; b &lt; c &gt; d &#39; e") !== -1, "the escaped assumption is missing");
+      assert.ok(html.indexOf("&lt;b&gt;limitation&lt;/b&gt; &amp; co") !== -1, "the escaped limitation is missing");
+    } finally {
+      disclosure.appliedMultipleDisclosure = countingDisclosure;
+    }
+  });
+
+  check("the disclosure is resolved once per render, not once per interpolated field", () => {
+    renderScreen(options);
+    /* Two render sites, two resolutions: the result summary and the report
+       build-up. A renderer that called the builder inside the concatenation
+       scores 5 here - once for the guard plus once per field - and the count
+       grows every time the markup gains an interpolation.
+
+       Teeth: mutation 3 on 2026-10-04 moved the call inside the concatenation
+       in js/estimator.js, exactly as described, and this check went red with
+       "resolved the disclosure 5 times". */
+    assert.strictEqual(disclosureCalls, 2,
+      "a full screen render resolved the disclosure " + disclosureCalls + " times; it must resolve once per render site");
+  });
+
+  /* ---- the brief's static source guards, kept alongside the real ones ---- */
+
+  /* These are shape checks, not behavioural coverage, and are labelled as
+     such. They earn their place for two things the rendered screen cannot see:
+     a disclosure resolved somewhere the screen never reaches, and the build-up
+     section losing its heading. Everything about WHAT is printed is pinned by
+     the assertions above.
+
+     Teeth: mutation 13 on 2026-10-04 rewrote the build-up emission as
+     `var multipleNoteHtml = (true ? multipleDisclosure : multipleDisclosure)`
+     - behaviourally identical, no longer matching the guarded shape - and the
+     guard assertion below turned red on it. The resolution-COUNT assertion is
+     redundant with the behavioural call-count check above, which catches a
+     third site first (mutation 14); it is kept because it names the number
+     rather than inferring it. */
+  const estSrc = fs.readFileSync(path.join(ROOT, "js/estimator.js"), "utf8");
+  check("source: both render sites resolve the disclosure and guard on it", () => {
+    const resolutions = estSrc.split("referenceTools.appliedMultipleDisclosure(").length - 1;
+    assert.strictEqual(resolutions, 2, "expected exactly 2 resolution sites in js/estimator.js, found " + resolutions);
+    assert.ok(/var multipleDisclosure = referenceTools\.appliedMultipleDisclosure\(/.test(estSrc), "the disclosure is not resolved into a named local");
+    assert.ok(/var multipleHtml = multipleDisclosure\s*\n?\s*\?/.test(estSrc), "the result-screen emission is not guarded on the disclosure being truthy");
+    assert.ok(/var multipleNoteHtml = multipleDisclosure\s*\n?\s*\?/.test(estSrc), "the build-up emission is not guarded on the disclosure being truthy");
+  });
+  check("source: the build-up still carries its heading and its effective land rate row", () => {
+    assert.ok(/Land value build-up/.test(estSrc), "js/estimator.js no longer names the land build-up section");
+    assert.ok(/sf-est-coverage/.test(estSrc), "the effective land rate row is gone");
+  });
+
+  /* ---- the stylesheet ---- */
+
+  check("the disclosure styles reuse the existing muted token and add none", () => {
+    const css = fs.readFileSync(path.join(ROOT, "css", "storefront.css"), "utf8");
+    const lines = css.split(/\r?\n/).filter(line => /sf-est-result-multiple|sf-est-multiple-note|sf-est-multiple-limit/.test(line));
+    assert.ok(lines.length >= 4, "expected the disclosure rules in css/storefront.css, found " + lines.length);
+    const coloured = lines.filter(line => /color\s*:/.test(line));
+    assert.ok(coloured.length >= 1, "no colour rule for the disclosure at all");
+    coloured.forEach(line => assert.ok(/var\(--sf-ink-mute/.test(line),
+      "not the project's existing muted token: " + line.trim()));
+    /* A second token would be a new --sf-* declaration on one of these lines. */
+    lines.forEach(line => assert.strictEqual(/--sf-[a-z-]+\s*:/.test(line), false,
+      "a second muted token was declared: " + line.trim()));
+    assert.ok(/--sf-ink-mute\s*:/.test(css), "the reused token does not exist in css/storefront.css");
   });
 
   console.log("ALL GREEN (" + count + " checks)");

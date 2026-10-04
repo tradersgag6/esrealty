@@ -1146,6 +1146,19 @@ body .sf-search-form button { min-height: 52px !important; height: 52px !importa
 .sf-est-report-group h5 { font-size: 18px; margin: 0 0 12px; }
 .sf-est-scenario-range { font-size: 16px; line-height: 1.6; margin: 16px 0; }
 .sf-est-scenario-range b, .sf-est-scenario-range span { display: block; }
+/* Applied market multiple: the one thing that links the BIR zonal reference to
+ * the market estimate. It is a planning assumption, so it is set in the muted
+ * token rather than given a panel of its own - it must not read as another
+ * headline figure. --sf-ink-mute is the existing muted token (5.7:1 on paper);
+ * no second token is introduced. */
+.sf-est-result-multiple { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+.sf-est-result-multiple b { font-size: 14px; }
+.sf-est-result-multiple small,
+.sf-est-multiple-note,
+.sf-est-multiple-limit { color: var(--sf-ink-mute, #6B605A); }
+.sf-est-result-multiple small { font-size: 12px; line-height: 1.5; }
+.sf-est-multiple-note { margin: 8px 0 0; font-size: 14px; line-height: 1.75; }
+.sf-est-multiple-limit { margin: 4px 0 0; font-size: 12px; line-height: 1.6; }
 .sf-site .sf-est-result-summary, .sf-site .sf-est-price-card, .sf-site .sf-est-nextstep { background: var(--sf-paper-warm); border-color: var(--sf-line); color: var(--sf-ink); }
 .sf-site .sf-est-icon, .sf-site .sf-est-data-icon { background: var(--sf-accent-soft); color: var(--sf-accent-hover); }
 .sf-site .sf-est-chip.active, .sf-site .sf-est-ownership-option.active { background: var(--sf-accent-soft); color: var(--sf-ink); border-color: var(--sf-accent); }

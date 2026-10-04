@@ -1256,6 +1256,16 @@ out += "</div>";
 
   function reportSections(r) {
     var tax = costsFor(r, DATA.config);
+    /* Resolved once per render for the same reason as the result summary: the
+     * build-up below is one concatenation, and the copy is owned by
+     * js/value_guide_reference.js so it cannot drift between surfaces. A null
+     * disclosure (time-indexed, or no usable multiple) emits no paragraphs at
+     * all - see the note on resultSummaryHtml. */
+    var multipleDisclosure = referenceTools.appliedMultipleDisclosure(r);
+    var multipleNoteHtml = multipleDisclosure
+      ? '<p class="sf-est-multiple-note">' + esc(multipleDisclosure.multipleLabel) + " — <b>" + esc(multipleDisclosure.text) + "</b>. " + esc(multipleDisclosure.assumption) + "</p>" +
+        '<p class="sf-est-multiple-limit">' + esc(multipleDisclosure.limitation) + "</p>"
+      : "";
     var comparableNote = r.marketGuide && r.marketGuide.comparableCount
       ? " " + r.marketGuide.comparableCount + " comparable asking listing(s) from " + r.marketGuide.sourceType + " were found for context. Their asking prices are not direct inputs to this factor-based calculation."
       : " No comparable asking listings were available. This estimate uses the displayed BIR reference and SEA ESTATES factors only.";
@@ -1314,7 +1324,8 @@ var displayRange = '';
       "<span>Region " + r.factors.regionalAdj.toFixed(2) + "</span>" +
       "</div>" +
       '<p class="sf-est-coverage">Effective land rate <b>' + money(r.landPerSqm) + " /sqm</b> × " + fmt(r.area) +
-      " sqm = <b>" + money(r.landValue) + "</b> land value.</p>" });
+      " sqm = <b>" + money(r.landValue) + "</b> land value.</p>" +
+      multipleNoteHtml });
     if (r.timeIndex) s[s.length - 1].h = timeResultHtml(r);
 
     if (r.type === "house_lot") {
@@ -1375,12 +1386,31 @@ var displayRange = '';
     var context = r.marketGuideAvailable
       ? (r.marketGuide.comparableCount || 0) + " comparable asking listing(s) found for context; listing prices are not direct inputs to this calculation."
       : "No comparable asking listings were available; this estimate uses the disclosed BIR-based factors.";
+    /* The BIR zonal reference and the market estimate are printed one after the
+     * other with nothing connecting them, so the factor that connects them is
+     * named here. Every word comes from referenceTools.appliedMultipleDisclosure;
+     * this module never restates the assumption or the limitation, so the HTML,
+     * the report and the PDF cannot word it three different ways.
+     *
+     * Resolved ONCE, above the concatenation. This screen is assembled by string
+     * concatenation, so calling the builder per interpolated field would rebuild
+     * the disclosure once per field.
+     *
+     * The guard is the honest part: appliedMultipleDisclosure returns null for
+     * the time-indexed land method (no factor stack was ever applied), and a null
+     * must leave nothing behind - not an empty element, not "0x the BIR
+     * reference". */
+    var multipleDisclosure = referenceTools.appliedMultipleDisclosure(r);
+    var multipleHtml = multipleDisclosure
+      ? '<div class="sf-est-result-multiple"><b>' + esc(multipleDisclosure.multipleLabel) + '</b><span>' + esc(multipleDisclosure.text) + '</span><small>' + esc(multipleDisclosure.assumption) + '</small></div>'
+      : "";
 return '<section class="sf-est-result-summary" aria-label="Estimated property value">' +
       '<div class="sf-est-result-summary-head"><div><p class="sf-est-result-summary-label">ESTIMATED PROPERTY VALUE</p><h4>' + (r.landMethod === "time-indexed" ? 'Indexed-reference planning scenario' : 'Central planning estimate') + '</h4></div>' +
       '<span class="sf-est-result-evidence">' + (r.marketGuideAvailable ? "Local listing context found" : "Factor-based · no comparable listings") + '</span></div>' +
       '<strong class="sf-est-result-value">' + money(r.marketGuideEstimate) + '</strong>' +
       '<p class="sf-est-scenario-range">Planning range <b>' + money(r.low) + ' – ' + money(r.high) + '</b><span>85%–130% scenarios, not guaranteed offers or statistical confidence.</span></p>' +
       '<div class="sf-est-result-bir"><span>' + esc(r.birReferenceLabel) + '</span><b>' + money(r.birZonalValue) + '</b><small>' + money(r.birZonalRatePerSqm) + '/sqm · ' + (r.birReferenceConfirmed ? "tax-reference figure, separate from the estimate" : "derived fallback, not confirmed parcel tax FMV") + '</small></div>' +
+      multipleHtml +
       '<p class="sf-est-result-context">' + context + '</p>' +
       '<p class="sf-est-result-reference-label"><b>' + esc(r.referenceVerification.label) + '</b> — published values unchanged; indexing is a separate scenario.</p>' +
       '<p class="sf-est-result-bir-note">SEA ESTATES is independent of the BIR. Confirm the applicable schedule with the relevant Revenue District Office.</p>' +
