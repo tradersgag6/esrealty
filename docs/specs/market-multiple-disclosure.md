@@ -12,7 +12,8 @@ landPerSqm = base x (1 + cornerPct) x proxy x band x regionalAdj
 ```
 
 With the shipped factors every residential input resolves to 1.0, so the band
-midpoint of `2.5` is the entire multiplier (`data/zonal-config.json:153`).
+midpoint of `2.5` is the entire multiplier (`data/zonal-config.json:155`; the
+`mid` keys sit at `:155`, `:160`, `:165`, `:170`).
 A reader sees a BIR reference and an estimate that is 150% higher, with no
 arithmetic connecting them and no statement of where 2.5 came from.
 
@@ -50,10 +51,16 @@ Compute the factor stack as a named value where the unrounded product already
 exists, so the disclosure cannot drift from the arithmetic:
 
 ```js
-// js/estimator.js:202  (behaviour-identical refactor)
+// js/estimator.js:202-203
 var factorStack = (1 + cornerPct) * proxy * band * adj;
 var landPerSqm = Math.round(base * factorStack);
 ```
+
+Grouping the product re-associates the floating-point multiply, so it is **not**
+behaviour-identical: across every rate in `data/bir-batangas` the whole-peso
+result is unchanged for non-corner parcels and moves by at most 1 peso on some
+corner lots (149,160 combinations). That drift is measured, not assumed, and is
+recorded where it happens at `js/estimator.js:197-200`.
 
 `factorStack` is the exact ratio. Dividing the rounded `landPerSqm` by the
 rounded `birZonalRatePerSqm` instead would introduce up to ~0.4% error at low
@@ -84,11 +91,14 @@ A hardcoded "2.5" would be wrong for three of these.
 
 ### 2. One source of truth for the copy
 
-HTML, report and PDF are separate renderers and their wording has already
-drifted elsewhere - the PDF land build-up used to omit the corner row the
-report build-up shows (`js/estimator.js:1321`). That past divergence is why the
-disclosure copy is owned in one place rather than written per surface. Add a
-single disclosure builder in `js/value_guide_reference.js`, the existing
+HTML, report and PDF are three separately-written renderers, so per-surface
+wording is possible by construction and every difference between them would be
+invisible without a comparison. There is already one deliberate asymmetry: the
+result screen prints the label, the multiple and the assumption, while the
+limitation appears only in the report build-up and the PDF. That is a choice,
+and it is only recognisable as a choice because the words come from one owner.
+So the disclosure copy is owned in one place rather than written per surface.
+Add a single disclosure builder in `js/value_guide_reference.js`, the existing
 provenance module, and have all three surfaces consume it:
 
 ```js
@@ -126,7 +136,20 @@ relationship is visible at the moment of reading — the disclosure element is
 interpolated immediately after it (`:1413`):
 
 > BIR zonal reference - P11,500/sqm · P1,150,000
-> **SEA ESTATES market band factor: 2.5× the BIR reference**
+> **SEA ESTATES market band factor: 2.5× the BIR reference for land**
+
+The sentence must name the land. The stack multiplies the lot area and the
+building component is computed separately, so for `house_lot` the unqualified
+"2.5× the BIR reference" reads as a multiple of the headline TOTAL printed
+directly above it - 2,875,000 against 6,655,000, so the printed product is
+131.5% short of the number printed above it while appearing to reconcile it.
+For `vacant_lot` the land is the whole property and the
+unqualified sentence happens to be true, which is what let the defect survive on
+a file whose only web fixture was a vacant lot.
+
+The qualifier belongs on `text`, not on `multipleLabel`: the report and PDF
+build-up rows print the label beside a `Land value` row that already scopes it,
+and qualifying it there would read worse.
 
 **Report - "Land value build-up"** (`js/estimator.js:1318-1328`), appended after
 the existing factor rows and the effective-land-rate line.
@@ -140,7 +163,7 @@ at `:596`). Public and internal PDFs share this renderer.
 ```
 multipleLabel SEA ESTATES market band factor
 multiple      2.5 (already formatted; the renderer must not re-round)
-text          2.5× the BIR reference
+text          2.5× the BIR reference for land
 assumption    A SEA ESTATES planning assumption. It is not derived from
               completed sales and has not been reviewed by an independent
               qualified appraiser.
@@ -157,21 +180,25 @@ out by a broker who knows the area.
 ### 5. Accuracy-language guard
 
 The disclosure must never claim accuracy. `tests/` gains a guard that fails if
-these appear in the disclosure strings (`tests/value_guide_multiple_node.js:401`):
+these appear in the disclosure strings (`tests/value_guide_multiple_node.js:408`):
 
 ```
-/\b(?:in)?accur\w*|\bguarantee|\u00b1|\bwithin \d+\s*(?:%|percent)|\berror margin|\bprecis\w*|\bclose to\b|\bexact match\b/i
+/\b(?:in)?accur\w*|\bguarantee|\u00b1|\bwithin \d+\s*(?:%|percent)|\berror margin|\bprecis\w*|\bclose to\b|\bexact match\b|\bPVS[\s-]?(?:complian\w*|conform\w*)\b|\bvalue[\s-]?loss\b|\bevaluation standards\b/i
 ```
 
-`docs/batangas-value-guide-sources.md:56-57` already forbids PVS-compliance,
-certified-accuracy and value-loss claims until an appraiser signs off. The guard
-turns most of that into a test rather than a convention, but not all of it: the
+`docs/batangas-value-guide-sources.md:56-57` forbids PVS-compliance,
+"evaluation standards", certified-accuracy and value-loss claims until a reviewer
+signs off. The guard turns all of that into a test rather than a convention: the
 regex fails on an `accur` stem — which is how `certified-accuracy` and
 `certified accuracy` are caught — plus `guarantee`, `±`, `within N %`/`percent`,
-`error margin`, a `precis` stem, `close to` and `exact match`. It does not match
-`PVS-compliant`, `PVS compliance`, `value-loss`/`value loss` or
-`evaluation standards`; those spellings are held by reviewer convention only.
-Closing that gap needs a change to the regex, which this task does not make.
+`error margin`, a `precis` stem, `close to`, `exact match`,
+`PVS-compliance`/`PVS compliance`/`PVS-compliant`, `value-loss`/`value loss` and
+`evaluation standards`.
+
+One asymmetry is accepted rather than solved: the regex cannot tell a claim from
+a denial, so a disclaimer such as `not PVS-compliant` also fails. That is the
+right side to err on for a rule that forbids the terminology in public copy
+outright, and it is documented here rather than worked around.
 
 ## Testing
 
@@ -187,6 +214,13 @@ New `tests/value_guide_multiple_node.js`:
    build-up, and the PDF build-up - static source assertions in the existing
    style of `value_guide_internal_node.js`.
 6. `null` disclosure renders nothing rather than an empty element.
+7. For a house and lot, `multiple x birZonalValue === landValue` and `!== total`,
+   and both the published string and the rendered result block end in
+   `for land`. The `house_lot` vector is not decoration: it is the only one
+   where the unqualified sentence is false, so an all-`vacant_lot` file cannot
+   see this defect at all.
+8. Every term §5 prohibits is asserted as a positive control, and the fixed
+   copy is asserted NOT to match the widened regex.
 
 Regression: the existing 100/100 suite must stay green, including
 `value_guide_pdf_browser_e2e` and the public/internal parity assertions.

@@ -58,25 +58,32 @@ The current guide uses SEA ESTATES-approved factors. The BIR reference remains s
 - Re-review the factors after any change to `data/zonal-config.json` market bands or proxies.
 - The calculator now publishes the applied multiple alongside the BIR reference, as a disclosed
   SEA ESTATES market band factor. It is derived from the factor stack the estimate already
-  applies — `(1 + cornerPct) x proxy x band x regionalAdj` — and not hardcoded, so it changes
-  with `data/zonal-config.json` and with the corner answer, and it is `null` (disclosed nothing)
-  in time-indexed mode because the factor stack is never *applied* there:
-  `js/estimator.js:202` computes it unconditionally, before the method branch, but the time
-  scenario replaces the rate at `js/estimator.js:210`, so the product is never applied and there
-  is nothing to disclose. Because the multiple is the same unreviewed planning assumption
-  described above, it is published as an assumption, not as a validated ratio. The strings are
-  not identical on every surface: the result screen renders `multipleLabel`, `text` and
-  `assumption` only (`js/estimator.js:1405`), while the limitation appears on the report
-  build-up (`js/estimator.js:1266-1267`) and in the PDF (`js/value_guide_pdf.js:686-687`). That
-  asymmetry is deliberate — the result-screen element is pinned to those three strings, with the
-  limitation excluded, by `tests/value_guide_multiple_node.js:610`.
-- The accuracy-language rule above is only partly machine-enforced. Its banned-term regex
-  (`tests/value_guide_multiple_node.js:401`) fails the suite on an `accur` stem — which is how
-  `certified-accuracy` and `certified accuracy` are caught — plus `guarantee`, `±`,
-  `within N %`/`percent`, `error margin`, a `precis` stem, `close to` and `exact match`. It does
-  not match `PVS-compliant`, `PVS compliance`, `value-loss`/`value loss` or
-  `evaluation standards`; those spellings are held by reviewer convention only. Closing that
-  gap needs a code change to the regex, which this documentation change does not make.
+applies — `(1 + cornerPct) x proxy x band x regionalAdj` — and not hardcoded, so it changes
+   with `data/zonal-config.json` and with the corner answer, and it is `null` (disclosed nothing)
+   in time-indexed mode because the factor stack is never *applied to the rate* there:
+   `js/estimator.js:202` computes it unconditionally, before the method branch, but the time
+   scenario replaces the rate at `js/estimator.js:210`. The product is computed but not applied —
+   `factorBaseline` (`js/estimator.js:294`) still carries the factor-method `landValue` and `total`,
+   and the web report (`js/estimator.js:868`) and the PDF print them as a not-selected comparison —
+   so there is no applied factor to disclose. Because the multiple is the same unreviewed
+   planning assumption described above, it is published as an assumption, not as a validated ratio.
+   The multiple is a **land** factor: it is applied to the lot area only, the building component
+   is computed separately, so the published sentence says "for land". On a house and lot the
+   unqualified sentence put a land product 131.5% short of the headline total printed directly
+   above it. The strings are
+not identical on every surface: the result screen renders `multipleLabel`, `text` and
+   `assumption` only (`js/estimator.js:1405`), while the limitation appears on the report
+   build-up (`js/estimator.js:1266-1267`) and in the PDF (`js/value_guide_pdf.js:686-687`). That
+   asymmetry is deliberate — the result-screen element is pinned to those three strings, with the
+   limitation excluded, by `tests/value_guide_multiple_node.js:683`.
+- The accuracy-language rule above is machine-enforced by the banned-term regex
+  (`tests/value_guide_multiple_node.js:408`), which fails the suite on an `accur` stem — which is
+  how `certified-accuracy` and `certified accuracy` are caught — plus `guarantee`, `±`,
+  `within N %`/`percent`, `error margin`, a `precis` stem, `close to`, `exact match`,
+  PVS-compliance / PVS compliance / PVS-compliant, value-loss / value loss, and
+  evaluation standards. All four terms the rule prohibits are covered by it; none is left to
+  reviewer convention. One asymmetry is accepted: the regex cannot tell a claim from a denial, so
+  a disclaimer such as "not PVS-compliant" also fails it.
 
 ## LandValuePH comparison (reviewed 2026-09-30)
 

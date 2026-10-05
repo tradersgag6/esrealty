@@ -308,10 +308,12 @@
          (1 + corner) x property-use proxy x market band x regional adjustment.
          Null under the indexed land method. factorStack is still computed above
          for that path - it is computed unconditionally, before the branch - but
-         the branch replaces the rate with the time scenario, so the factor
-         product is never applied to this result and there is nothing to
-         disclose. Disclosed as null rather than as a value the reader would
-         reasonably assume was applied. */
+         the branch replaces the rate with the time scenario, so the product is
+         never APPLIED to the rate: factorBaseline below still carries the
+         factor-method landValue and total, and the web report and the PDF both
+         print them as a not-selected comparison. There is therefore no applied
+         factor to disclose, and null is published rather than a value the
+         reader would reasonably assume was applied. */
       factorStack: landMethod === "factor" ? factorStack : null,
       appliedMultiple: landMethod === "factor" ? factorStack : null,
       factorSettingsVersion: cfg.factorSettingsVersion || cfg.calculationVersion,

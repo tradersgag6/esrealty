@@ -75,8 +75,8 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
      corner.pct is a FRACTION (0.025), not a percentage (2.5):
      data/zonal-config.json carries cornerLotPct: 0.025, js/estimator.js:169
      reads it straight into cornerPct, and :290 copies it into the result
-     unscaled. Renderers scale it themselves (js/estimator.js:1306 rounds
-     pct * 1000 / 10; js/value_guide_pdf.js:644 uses pct * 100). Dividing by 100
+     unscaled. Renderers scale it themselves (js/estimator.js:1321 rounds
+     pct * 1000 / 10; js/value_guide_pdf.js:674 uses pct * 100). Dividing by 100
      here would be wrong twice over and is pinned by the corner.pct assertion.
 
      Teeth checked by mutation on 2026-10-04 (each mutation run against this
@@ -138,7 +138,7 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
     const d = REF.appliedMultipleDisclosure(r);
     assert.strictEqual(d.multiple, "2.5");
     assert.strictEqual(d.multipleLabel, LABEL);
-    assert.strictEqual(d.text, "2.5\u00d7 the BIR reference");
+    assert.strictEqual(d.text, "2.5\u00d7 the BIR reference for land");
     assert.strictEqual(d.assumption, ASSUMPTION);
     assert.strictEqual(d.limitation, LIMITATION);
   });
@@ -169,7 +169,7 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
       const d = REF.appliedMultipleDisclosure(EST.core.computeEstimate(config, index, md, opts));
       assert.ok(d, "expected a disclosure");
       assert.strictEqual(d.multiple, expected);
-      assert.strictEqual(d.text, expected + "\u00d7 the BIR reference");
+      assert.strictEqual(d.text, expected + "\u00d7 the BIR reference for land");
     });
   });
 
@@ -398,13 +398,22 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
      until the day someone writes the phrase. Both are now asserted in the
      positive control below. Neither occurs in the fixed copy, so this cannot
      false-positive today. */
-  const BANNED = /\b(?:in)?accur\w*|\bguarantee|\u00b1|\bwithin \d+\s*(?:%|percent)|\berror margin|\bprecis\w*|\bclose to\b|\bexact match\b/i;
+  /* Every term docs/batangas-value-guide-sources.md:56-57 prohibits in public
+     copy, plus the accuracy stems that were already covered. The four the rule
+     names - PVS-compliance, "evaluation standards", certified-accuracy,
+     value-loss - are now all matched by the regex, not by reviewer
+     convention: a guard that cannot match looks identical to a clean copy.
+     Accepted asymmetry, unchanged: the regex cannot tell a claim from a denial,
+     so "not PVS-compliant" also fails. That is deliberate. */
+  const BANNED = /\b(?:in)?accur\w*|\bguarantee|\u00b1|\bwithin \d+\s*(?:%|percent)|\berror margin|\bprecis\w*|\bclose to\b|\bexact match\b|\bPVS[\s-]?(?:complian\w*|conform\w*)\b|\bvalue[\s-]?loss\b|\bevaluation standards\b/i;
 
   check("accuracy guard rejects every forbidden term (positive control)", () => {
     ["accurate", "accuracy", "accurately", "inaccurate", "inaccurately", "guarantee", "guaranteed",
      "\u00b1 5%", "within 5%", "within 10 %", "within 5 percent", "within 10 percent",
-     "error margin", "precision", "precise", "precisely",
-     "close to", "exact match"].forEach(phrase => {
+"error margin", "precision", "precise", "precisely",
+      "close to", "exact match",
+      "PVS-compliance", "PVS compliance", "PVS-compliant", "PVS conformant",
+      "value-loss", "value loss", "evaluation standards"].forEach(phrase => {
       assert.ok(BANNED.test(phrase), "guard failed to catch " + JSON.stringify(phrase));
     });
   });
@@ -429,6 +438,27 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
        or exactness without using a word on the earlier list. */
     assert.ok(BANNED.test("The estimate is close to the BIR reference"), "missed: close to");
     assert.ok(BANNED.test("an exact match"), "missed: exact match");
+    /* Never in the pattern at all until the final widening, so the four terms
+       docs/batangas-value-guide-sources.md:56-57 actually prohibits reached the
+       public copy unchecked. Each is a spelling of a prohibition the file
+       claims to enforce. */
+    assert.ok(BANNED.test("in PVS-compliance"), "missed: PVS-compliance");
+    assert.ok(BANNED.test("stated in PVS compliance"), "missed: PVS compliance");
+    assert.ok(BANNED.test("the guide is PVS-compliant"), "missed: PVS-compliant");
+    /* The hyphen and the space are the same word to this file's authors and both
+       occur in prose; the rule names the phrase with a hyphen. */
+    assert.ok(BANNED.test("a value-loss claim"), "missed: value-loss");
+    assert.ok(BANNED.test("a value loss claim"), "missed: value loss");
+    assert.ok(BANNED.test("meets evaluation standards"), "missed: evaluation standards");
+  });
+
+  /* The published copy must survive the widened guard. Without this the
+     widening above could be passing because it now matches something the
+     disclosure legitimately says, which is a different defect from missing a
+     banned term and would be just as invisible. */
+  check("the widened accuracy guard does not match the fixed copy", () => {
+    [LABEL, ASSUMPTION, LIMITATION, "2.5\u00d7 the BIR reference for land"].forEach(phrase =>
+      assert.strictEqual(BANNED.test(phrase), false, "the fixed copy now trips the guard: " + phrase));
   });
 
   check("no disclosure string claims accuracy", () => {
@@ -486,7 +516,44 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
      published copy it never executes, because the verbatim assertions fire
      first - see the note there. Over the RENDERED text it does run, and a
      banned word planted in the renderer's own connective prose reaches it.
-     Mutation proof for that is recorded on the check itself. */
+     Mutation proof for that is recorded on the check itself.
+
+     M-series, DEFINED HERE. The G-series above is the reference module's own
+     guards; this is the js/estimator.js renderer's ledger, and it is a
+     separate set - G12 and M12 are not the same kind of thing (see the G12
+     entry, which is a counter-example rather than mutation evidence). All
+     were applied to js/estimator.js on 2026-10-04 and reverted. The run
+     aborts at the first throw, so only the check named in each entry was
+     OBSERVED red:
+        M2.  replaced the null branch of the result block with an empty
+             `<div class="sf-est-result-multiple"></div>`
+             -> "a time-indexed result renders no disclosure element at all"
+                FAILS, on the empty-element assertion. Nothing before it.
+        M3.  moved the builder call inside the string concatenation
+             -> "the disclosure is resolved once per render, not once per
+                interpolated field" FAILS, "resolved the disclosure 5 times".
+        M4.  replaced the label with a hardcoded byte-identical literal
+             -> "the markup prints the builder's own strings" FAILS, 6 of 7
+                marks. Every verbatim check stayed green.
+        M5.  dropped esc() on multipleDisclosure.text alone
+             -> "every interpolated disclosure value is escaped" FAILS.
+        M12. scaled the printed BIR base by 1.5
+             -> "the rendered multiple reconciles with the rendered BIR base
+                and land rate" FAILS on the arithmetic alone.
+        M13. rewrote the build-up emission as
+             `var multipleNoteHtml = (true ? multipleDisclosure : ...)` -
+             behaviourally identical, no longer the guarded shape
+             -> "source: both render sites resolve the disclosure and guard on
+                it" FAILS.
+        M14. added a third, unreachable resolution site
+             -> "source: both render sites resolve the disclosure and guard on
+                it" FAILS on the site count (3). The behavioural count check
+                stayed green at 2, which is why the source check exists.
+
+     M1, M6-M11 were never assigned: the numbering came from a scratch review
+     ledger, not from a plan, so it has gaps. Nothing here depends on a label
+     being contiguous. M20-M29 (the PDF renderer) are defined in the Task 4
+     block below. */
 
   const card = { innerHTML: "", dataset: {}, querySelector: () => null, querySelectorAll: () => [], addEventListener: () => {} };
   const sandbox = {
@@ -560,6 +627,12 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
   const factorHtml = renderScreen(options);
   const cornerCommercialHtml = renderScreen({ ...options, classification: "CR", corner: true });
   const indexedHtml = renderScreen(indexed);
+  /* A house and lot, on the web as well as in the PDF. This is the vector that
+     made the unqualified sentence wrong, so every check below that reads it
+     needs a screen that actually renders it. 100 sqm lot, 180 sqm floor,
+     mixed CHB, 2 storeys, 6-10 yrs. */
+  const webHouseOptions = Object.assign({}, options, { type: "house_lot", floorArea: 180, ageBand: "6-10", floors: "2", construction: "mixed_chb" });
+  const houseHtml = renderScreen(webHouseOptions);
 
   const RESULT_BLOCK = /<div class="sf-est-result-multiple">[\s\S]*?<\/div>/;
   const NOTE_BLOCK = /<p class="sf-est-multiple-note">[\s\S]*?<\/p>/;
@@ -614,7 +687,7 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
        part of the contract (label, then the number, then the qualifier) and a
        substring test cannot see a reordering. */
     assert.strictEqual(block[0],
-      '<div class="sf-est-result-multiple"><b>' + LABEL + '</b><span>2.5\u00d7 the BIR reference</span><small>' + ASSUMPTION + '</small></div>');
+      '<div class="sf-est-result-multiple"><b>' + LABEL + '</b><span>2.5\u00d7 the BIR reference for land</span><small>' + ASSUMPTION + '</small></div>');
   });
 
   /* ---- the report land build-up ---- */
@@ -647,7 +720,7 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
     const note = NOTE_BLOCK.exec(factorHtml), limit = LIMIT_BLOCK.exec(factorHtml);
     assert.ok(note, "no .sf-est-multiple-note in the report");
     assert.ok(limit, "no .sf-est-multiple-limit in the report");
-    assert.strictEqual(stripTags(note[0]), LABEL + " \u2014 2.5\u00d7 the BIR reference. " + ASSUMPTION);
+    assert.strictEqual(stripTags(note[0]), LABEL + " \u2014 2.5\u00d7 the BIR reference for land. " + ASSUMPTION);
     assert.strictEqual(stripTags(limit[0]), LIMITATION);
   });
 
@@ -682,6 +755,72 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
       assert.ok(Math.abs(multiple * birRate - landRate) <= 0.5,
         name + ": the screen shows " + multiple + " \u00d7 " + birRate + " = " + (multiple * birRate) + " but " + landRate + " /sqm on the same screen");
     });
+  });
+
+  /* ---- the sentence has to say which part of the value it explains ----
+
+     Review finding, reproduced on the real engine before the fix: for
+     house_lot the result screen shows a headline TOTAL of 6,655,000 and, two
+     lines under the BIR figure, "SEA ESTATES market band factor: 2.5x the BIR
+     reference". A reader multiplying 2.5 x 1,150,000 gets 2,875,000 - a 131.5%
+     gap against the headline - and neither the label nor the sentence said
+     anything was missing from the product. The multiple IS a land factor: the
+     stack multiplies the lot area, and the building component is computed
+     separately in js/estimator.js. So the sentence must name the land.
+
+     Three assertions, and each can fail on its own:
+       - the arithmetic: multiple x birZonalValue === landValue. This is what
+         makes "for land" true rather than a hedge, and it is checked on the
+         result object, where the engine's own numbers are.
+       - the negative: that same product !== total. Without it the assertion
+         above also passes for a factor that happens to explain the whole
+         property, which is the reading the sentence has to exclude.
+       - the published string: d.text and the rendered block both end in
+         "for land", and the rendered block is checked on the house-and-lot
+         screen - the surface the defect was found on.
+
+     Teeth, verified by mutation on 2026-10-04: reverting `text` in
+     js/value_guide_reference.js to the unqualified sentence turns this RED on
+     the rendered-string assertion (and on the verbatim copy pin at line 141,
+     which is why the arithmetic assertions are here too - they are the ones
+     that survive a copy edit and keep meaning). Widening the multiple to the
+     total turns it RED on the negative assertion. Deleting the word "land"
+     from `multipleLabel` only would NOT turn it red, which is intended: the
+     label is deliberately unqualified. */
+  check("the disclosed multiple explains the land, not the total", () => {
+    const r = EST.core.computeEstimate(config, index, md, webHouseOptions);
+    const d = REF.appliedMultipleDisclosure(r);
+    assert.strictEqual(r.type, "house_lot", "the fixture stopped being a house and lot");
+    /* Pinned so the check cannot pass on a degenerate result where land and
+       total coincide (a zero improvement value). */
+    assert.ok(r.total > r.landValue, "the house fixture no longer has a building component, so land === total and this check proves nothing");
+    const product = Number(d.multiple) * r.birZonalValue;
+    assert.strictEqual(product, r.landValue,
+      "2.5 x " + r.birZonalValue + " = " + product + ", which is not the land value " + r.landValue);
+    assert.notStrictEqual(product, r.total,
+      "the multiple reproduces the total, so \"for land\" would be false: " + product + " === " + r.total);
+  });
+
+  check("the published sentence and the rendered result screen both say 'for land'", () => {
+    const d = REF.appliedMultipleDisclosure(EST.core.computeEstimate(config, index, md, webHouseOptions));
+    assert.ok(/\u00d7 the BIR reference for land$/.test(d.text), "the published sentence is " + JSON.stringify(d.text));
+    /* The label is asserted UNCHANGED and unqualified on purpose: the report
+       and PDF build-up print it beside a "Land value" row that already scopes
+       it, so qualifying the label would read worse there. */
+    assert.strictEqual(d.multipleLabel, LABEL, "multipleLabel must stay exactly " + JSON.stringify(LABEL));
+    const block = RESULT_BLOCK.exec(houseHtml);
+    assert.ok(block, "no .sf-est-result-multiple on the house and lot result screen");
+    assert.strictEqual(block[0],
+      '<div class="sf-est-result-multiple"><b>' + LABEL + '</b><span>2.5\u00d7 the BIR reference for land</span><small>' + ASSUMPTION + '</small></div>');
+    /* The screen the reader reconciles against: the printed total and the
+       printed multiple side by side, and the product is nowhere near it. This
+       is the 131.5% gap, read off the rendered HTML rather than the engine. */
+    const headline = /class="sf-est-result-value">(₱[\d,]+)</.exec(houseHtml);
+    assert.ok(headline, "could not read the headline total off the house and lot result screen");
+    assert.strictEqual(Number(peso(headline[1])), 6655000,
+      "the rendered headline is " + headline[1] + ", not the 6,655,000 the finding was reproduced on");
+    assert.notStrictEqual(Number(peso(headline[1])), 2875000,
+      "the rendered total equals the land product, so this screen is not the vector the finding was reproduced on");
   });
 
   /* The precondition the reconciliation above silently assumes.
@@ -796,7 +935,7 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
       "a full screen render resolved the disclosure " + disclosureCalls + " times; it must resolve once per render site");
   });
 
-  /* ---- the brief's static source guards, kept alongside the real ones ---- */
+  /* ---- the spec's static source guards, kept alongside the real ones ---- */
 
   /* A shape check, not behavioural coverage, and labelled as such. It earns
      its place for one thing the rendered screen cannot see: a disclosure
@@ -1203,13 +1342,13 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
     assert.ok(text.indexOf(d.text) > -1, "the browser-branch PDF drops the summary line");
   });
 
-  /* ---- the brief's static source guard, kept alongside the real ones ----
+  /* ---- the spec's static source guard, kept alongside the real ones ----
      A shape check, not behavioural coverage, and labelled as such: it can only
      see that the characters exist in the file. What is printed is pinned by the
      assertions above. It is here for the one defect text extraction is blind to,
      and blindness was measured rather than assumed.
 
-     Two mutations, both applied to js/value_guide_pdf.js on 2026-10-04:
+     Three mutations, all applied to js/value_guide_pdf.js on 2026-10-04:
        M26. drop `.filter(...)` and hand landRows to table() unfiltered
             -> the render THROWS: "TypeError: Cannot read properties of null
                (reading 'length')" at js/value_guide_pdf.js:347, on the first
@@ -1217,7 +1356,10 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
                filter is load-bearing and the silenced fixture above exercises
                it for real - the crash is the coverage.
        M27. keep the filter but make the falsy branch `[null]` instead of
-            `null` -> ALL GREEN (63 checks). table() accepts a one-element row,
+            `null` -> ALL GREEN. table() accepts a one-element row,
+             (that run printed ALL GREEN (63 checks); the file has since gained
+             checks - it printed 67 on 2026-10-05 - and none of them can see an
+             empty cell, which is the point)
             wrap() renders an empty cell as no ink at all, the row is at an even
             index so no shade band is drawn either, and the cost is 17.46pt of
             blank vertical space that no extracted text can show.

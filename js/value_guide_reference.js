@@ -65,14 +65,18 @@
      locations") is the reason this disclosure is worth publishing. No accuracy
      claim - no "accurate", "guaranteed", "\u00b1", "within N%", "error margin"
      or "precision" - may appear in anything returned from here. The rule in
-     docs/batangas-value-guide-sources.md:56-57 is only partly machine-enforced,
-     by the banned-term regex in tests/value_guide_multiple_node.js rather than
-     by rewriting the copy at runtime: silently editing published wording would
-     hide the defect instead of failing the build. The regex catches an `accur`
-     stem - which is how certified-accuracy is caught - plus `guarantee`,
-     "\u00b1", `within N %`/`percent`, `error margin`, a `precis` stem,
-     `close to` and `exact match`. PVS-compliance, value-loss and evaluation
-     standards are NOT matched by it; those terms rest on reviewer convention. */
+     docs/batangas-value-guide-sources.md:56-57 is machine-enforced, by the
+     banned-term regex in tests/value_guide_multiple_node.js rather than by
+     rewriting the copy at runtime: silently editing published wording would
+     hide the defect instead of failing the build. That regex now covers all
+     four terms the rule prohibits - it catches an `accur` stem (which is how
+     certified-accuracy is caught), `guarantee`, "\u00b1", `within N %`/`percent`,
+     `error margin`, a `precis` stem, `close to`, `exact match`, PVS-compliance
+     / PVS compliance / PVS-compliant, value-loss / value loss, and evaluation
+     standards. One accepted asymmetry: the regex cannot tell a claim from a
+     denial, so a disclaimer such as "not PVS-compliant" fails it too. That is
+     deliberate - the rule is about what the public copy is allowed to contain at
+     all until a reviewer signs off - and is recorded in the spec. */
   var MULTIPLE_LABEL = "SEA ESTATES market band factor";
   var MULTIPLE_ASSUMPTION = "A SEA ESTATES planning assumption. It is not derived from completed sales and has not been reviewed by an independent qualified appraiser.";
   var MULTIPLE_LIMITATION = "The same factor is applied across all Batangas municipalities. It is not adjusted for local demand and is likely too high for rural locations.";
@@ -84,12 +88,13 @@
      5 is what the SHIPPED factors require, not a general claim of
      losslessness. A corner lot multiplies by 1.025, and on the non-residential
      bands that lands on 4.35625 (commercial) and 0.76875 (agricultural) - five
-     decimals, not four. At 4 decimals this module published "4.3562x the BIR
-     reference" for a commercial corner lot while applying 4.35625, so a reader
-     who multiplied the disclosed multiple by the BIR rate did not get the
-     estimate back. Reconciling the disclosed number against the printed
-     build-up is the entire purpose of this disclosure, so the divisor covers
-     every use-group x corner combination the current factors can produce.
+     decimals, not four. At 4 decimals this module published a 4-decimal factor
+     beside the BIR figure for a commercial corner lot while applying 4.35625,
+     so a reader who multiplied the disclosed multiple by the BIR rate did not
+     get the land value back. Reconciling the disclosed number against the
+     printed build-up is the entire purpose of this disclosure, so the divisor
+     covers every use-group x corner combination the current factors can
+     produce.
 
      A different regionalAdj, or any future factor set carrying more decimals,
      can still exceed 5 - when it does, the corner x non-residential vectors in
@@ -120,7 +125,18 @@
     return {
       multiple: shown,
       multipleLabel: MULTIPLE_LABEL,
-      text: shown + "\u00d7 the BIR reference",
+      /* "for land" is not a hedge, it is the arithmetic. The factor stack is
+         applied to the lot area only; the building component is computed
+         separately in js/estimator.js. On a vacant lot the land IS the whole
+         property, so the sentence is true there too. Without it the number sits
+         beside the result screen's headline TOTAL (and the PDF summary's) and
+         reads as a multiple of it: for the house_lot fixture, 2.5 x 1,150,000 =
+         2,875,000 against a 6,655,000 headline, so the printed product is
+         131.5% short of the number printed above it while appearing to
+         reconcile it. The qualifier is on `text` only. multipleLabel stays
+         unqualified, because the report and PDF build-up rows print it beside a
+         "Land value" row that already scopes it. */
+      text: shown + "\u00d7 the BIR reference for land",
       assumption: MULTIPLE_ASSUMPTION,
       limitation: MULTIPLE_LIMITATION,
       factors: result.factors || {}
