@@ -141,8 +141,9 @@ interpolated immediately after it (`:1413`):
 The sentence must name the land. The stack multiplies the lot area and the
 building component is computed separately, so for `house_lot` the unqualified
 "2.5× the BIR reference" reads as a multiple of the headline TOTAL printed
-directly above it - 2,875,000 against 6,655,000, so the printed product is
-131.5% short of the number printed above it while appearing to reconcile it.
+directly above it - 2,875,000 against 6,655,000, so the printed product is 56.8%
+short of that total (equivalently, the total exceeds the product by 131.5%)
+while appearing to reconcile it.
 For `vacant_lot` the land is the whole property and the
 unqualified sentence happens to be true, which is what let the defect survive on
 a file whose only web fixture was a vacant lot.

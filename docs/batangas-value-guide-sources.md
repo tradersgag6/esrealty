@@ -58,9 +58,9 @@ The current guide uses SEA ESTATES-approved factors. The BIR reference remains s
 - Re-review the factors after any change to `data/zonal-config.json` market bands or proxies.
 - The calculator now publishes the applied multiple alongside the BIR reference, as a disclosed
   SEA ESTATES market band factor. It is derived from the factor stack the estimate already
-applies — `(1 + cornerPct) x proxy x band x regionalAdj` — and not hardcoded, so it changes
-   with `data/zonal-config.json` and with the corner answer, and it is `null` (disclosed nothing)
-   in time-indexed mode because the factor stack is never *applied to the rate* there:
+  applies — `(1 + cornerPct) x proxy x band x regionalAdj` — and not hardcoded, so it changes
+  with `data/zonal-config.json` and with the corner answer, and it is `null` (disclosed nothing)
+  in time-indexed mode because the factor stack is never *applied to the rate* there:
    `js/estimator.js:202` computes it unconditionally, before the method branch, but the time
    scenario replaces the rate at `js/estimator.js:210`. The product is computed but not applied —
    `factorBaseline` (`js/estimator.js:294`) still carries the factor-method `landValue` and `total`,
@@ -69,9 +69,9 @@ applies — `(1 + cornerPct) x proxy x band x regionalAdj` — and not hardcoded
    planning assumption described above, it is published as an assumption, not as a validated ratio.
    The multiple is a **land** factor: it is applied to the lot area only, the building component
    is computed separately, so the published sentence says "for land". On a house and lot the
-   unqualified sentence put a land product 131.5% short of the headline total printed directly
-   above it. The strings are
-not identical on every surface: the result screen renders `multipleLabel`, `text` and
+   unqualified sentence put a land product 56.8% short of the headline total printed directly
+   above it (equivalently, the total exceeds the product by 131.5%). The strings are
+   not identical on every surface: the result screen renders `multipleLabel`, `text` and
    `assumption` only (`js/estimator.js:1405`), while the limitation appears on the report
    build-up (`js/estimator.js:1266-1267`) and in the PDF (`js/value_guide_pdf.js:686-687`). That
    asymmetry is deliberate — the result-screen element is pinned to those three strings, with the

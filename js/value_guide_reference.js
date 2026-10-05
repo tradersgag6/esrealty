@@ -131,11 +131,11 @@
          property, so the sentence is true there too. Without it the number sits
          beside the result screen's headline TOTAL (and the PDF summary's) and
          reads as a multiple of it: for the house_lot fixture, 2.5 x 1,150,000 =
-         2,875,000 against a 6,655,000 headline, so the printed product is
-         131.5% short of the number printed above it while appearing to
-         reconcile it. The qualifier is on `text` only. multipleLabel stays
-         unqualified, because the report and PDF build-up rows print it beside a
-         "Land value" row that already scopes it. */
+         2,875,000 against a 6,655,000 headline, so the printed product is 56.8%
+         short of that total (equivalently, the total exceeds the product by
+         131.5%) while appearing to reconcile it. The qualifier is on `text`
+         only. multipleLabel stays unqualified, because the report and PDF
+         build-up rows print it beside a "Land value" row that already scopes it. */
       text: shown + "\u00d7 the BIR reference for land",
       assumption: MULTIPLE_ASSUMPTION,
       limitation: MULTIPLE_LIMITATION,

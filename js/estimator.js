@@ -306,14 +306,12 @@
       factors: { proxyFactor: proxy, bandMid: band, regionalAdj: adj },
       /* The one number linking the BIR zonal reference to the market estimate:
          (1 + corner) x property-use proxy x market band x regional adjustment.
-         Null under the indexed land method. factorStack is still computed above
-         for that path - it is computed unconditionally, before the branch - but
-         the branch replaces the rate with the time scenario, so the product is
-         never APPLIED to the rate: factorBaseline below still carries the
-         factor-method landValue and total, and the web report and the PDF both
-         print them as a not-selected comparison. There is therefore no applied
-         factor to disclose, and null is published rather than a value the
-         reader would reasonably assume was applied. */
+         Null under the indexed land method: factorStack is computed above
+         unconditionally, before the branch, which replaces the rate with the
+         time scenario, so the product is never APPLIED to it and null is
+         published rather than the product. factorBaseline above still carries
+         the factor-method landValue and total, which the web report and the PDF
+         print as a not-selected comparison. */
       factorStack: landMethod === "factor" ? factorStack : null,
       appliedMultiple: landMethod === "factor" ? factorStack : null,
       factorSettingsVersion: cfg.factorSettingsVersion || cfg.calculationVersion,
