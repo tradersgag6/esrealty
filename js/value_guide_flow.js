@@ -230,7 +230,130 @@
     });
   }
 
+  /* The model callout is fixed copy: it names our model, names the other one,
+     and states the measured divergence so the reader cannot mistake one figure
+     for the other. It is the first thing reportSections returns, so the report
+     cannot open without it. */
+  var MODEL_CALLOUT =
+    "Reference model: LandValuePH published methodology, market-indicator factor 1.174. "
+    + "The public site calculator uses a different model (SEA ESTATES factor stack) "
+    + "and returns a higher figure for the same property: 2.14x on a vacant lot in this fixture. "
+    + "Both are planning figures, not an appraisal.";
+
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  function peso(n) {
+    return "₱" + String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  function pct(n) { return ((Number(n) || 0) * 100).toFixed(2) + "%"; }
+
+  function summaryOpts(result) {
+    var r = result || {};
+    return { municipality: r.municipality, barangay: r.barangay, propertyType: r.type,
+      area: r.area, floorArea: r.floorArea, corner: !!r.cornerApplied,
+      saleContext: r.saleContext, useGroup: r.useGroup || r.classification };
+  }
+
+  function summarize(result, rows, est) {
+    if (!rows.length || !est || !est.core || typeof est.core.comparableSummary !== "function") return null;
+    return est.core.comparableSummary(rows, summaryOpts(result));
+  }
+
+  /* Our own catalog, filtered the way the storefront already filters it. The
+     estimator's own loader is private to that read-only file, so the filter set
+     is restated here; cost if the two drift is a listing that should have been
+     offered as context not being offered. */
+  function loadComparables(opts, est) {
+    var api = typeof window !== "undefined" && window.ESREALTY_LISTINGS_API;
+    if (!api || typeof api.list !== "function") return Promise.resolve([]);
+    opts = opts || {};
+    var filters = {
+      state: "Batangas",
+      city: opts.municipality,
+      offer_type: "sale",
+      status: "available",
+      property_type: opts.type === "house_lot" ? "house-and-lot" : "lot-only",
+      per_page: 50,
+      sort: "date_desc"
+    };
+    var request = api.list(filters).then(function (payload) {
+      var rows = payload && Array.isArray(payload.data) ? payload.data : [];
+      return rows.map(function (row) {
+        return est.core.normalizeComparable(row, "SEA ESTATES listing");
+      }).filter(Boolean);
+    }).catch(function () { return []; });
+    /* A hung request must not hold the report hostage. */
+    var timeout = new Promise(function (resolve) {
+      var timer = setTimeout(function () { resolve([]); }, 2500);
+      if (timer && timer.unref) timer.unref();
+    });
+    return Promise.race([request, timeout]);
+  }
+
+  /* Context only. Nothing in this function writes to a pricing field, and
+     tests/value_guide_flow_node.js freezes the golden totals across it. */
+  function applyComparables(result, list, est) {
+    if (!result) return result;
+    var rows = Array.isArray(list) ? list : [];
+    result.comparableListingCount = rows.length;
+    result.comparableSummary = rows.length ? summarize(result, rows, est) : null;
+    return result;
+  }
+
+  function comparablesSection(summary, rows) {
+    var head = '<div data-vg-comparables class="mt-16"><h3>Our own listings, for context</h3>'
+      + "<p>Asking advertisements from our own catalog, not completed sales. "
+      + "Shown for context only; no listing price enters the calculation above.</p>";
+    if (!rows.length) return head + "<p>No matching listings for this municipality.</p></div>";
+    var s = summary || {};
+    var items = (s.records || rows).slice(0, 8).map(function (rec) {
+      return "<li>" + esc(rec.title || rec.id || "Listing") + " · " + peso(rec.price) + "</li>";
+    }).join("");
+    return head + "<p>" + rows.length + " listing(s)"
+      + (s.medianPricePerSqm ? "; median " + peso(s.medianPricePerSqm) + "/sqm" : "")
+      + (s.askingIndication ? "; indication " + peso(s.askingIndication.value) : "") + ".</p>"
+      + (items ? "<ul>" + items + "</ul>" : "")
+      + '<p class="dim tiny">' + esc(s.policy || "") + "</p></div>";
+  }
+
+  function methodologySection(result) {
+    var model = (result && result.referenceModel) || {};
+    var applied = {};
+    (model.sections || []).forEach(function (s) { applied[s.id] = s; });
+    var rows = FACTORS.map(function (f) {
+      var hit = applied[f.id], bp = hit ? hit.bp : 0;
+      return '<tr data-vf="' + esc(f.id) + '"><th scope="row">' + esc(f.label) + "</th><td>"
+        + esc(f.section) + "</td><td>" + (bp > 0 ? "+" : "") + (bp / 100).toFixed(2) + "%</td></tr>";
+    }).join("");
+    return '<div data-vg-methodology class="mt-16"><h3>Methodology</h3>'
+      + "<p>BIR zonal base × market-indicator factor " + MODEL.MARKET_IND
+      + ", then one additive net of the twelve published answers below. Every answer is added once and "
+      + "the total is applied once; nothing is compounded.</p>"
+      + '<table><thead><tr><th>Question</th><th>Section</th><th>Applied</th></tr></thead><tbody>'
+      + rows + "</tbody></table>"
+      + '<p><b>Applied net:</b> ' + pct(model.net) + " on land, " + pct(model.buildingNet)
+      + " on the improvement.</p>"
+      + '<p class="dim small">Construction rates are flat and never escalated: '
+      + peso(model.rcnRate) + " per sqm for this build type, depreciated straight-line to a "
+      + MODEL.DEP_CAP * 100 + "% cap over " + (model.usefulLife || 40) + " years.</p></div>";
+  }
+
+  /* The report body after the figures: model callout first, then comparables,
+     then the methodology that produced the number. */
+  function reportSections(result, est, list) {
+    var rows = Array.isArray(list) ? list : [];
+    var summary = (result && result.comparableSummary) || summarize(result, rows, est);
+    return [MODEL_CALLOUT, comparablesSection(summary, rows), methodologySection(result)].join("\n");
+  }
+
   return { MODEL: MODEL, FACTORS: FACTORS, SEC_LAND_TERRAIN: SEC_LAND_TERRAIN,
            SEC_BUILDING: SEC_BUILDING, SEC_NEIGHBOURING: SEC_NEIGHBOURING, SEC_LEGAL: SEC_LEGAL,
-           netOf: netOf, sectionsOf: sectionsOf, compute: compute };
+           netOf: netOf, sectionsOf: sectionsOf, compute: compute,
+           MODEL_CALLOUT: MODEL_CALLOUT, loadComparables: loadComparables,
+           applyComparables: applyComparables, reportSections: reportSections };
 });

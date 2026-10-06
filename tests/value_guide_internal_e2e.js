@@ -231,7 +231,19 @@ async function pickLocation() {
     if (!hasResult) { finish(); return; }
 
     /* Reference status moved here from the deleted step-1 disclosure. */
-    chk("reference-callout-preserved", !!q("[data-vg-reference-status]"), "report carries it");
+    chk("reference-callout-preserved", !!q("[data-vg-reference-status]"), 
+    "report carries it");
+
+    /* The report body assembled by FLOW.reportSections must actually reach the
+       DOM: the fixed model callout, the context-only comparables block and the
+       twelve published factor rows. */
+    chk("model-callout-in-report",
+      document.body.textContent.indexOf("Reference model: LandValuePH published methodology") >= 0,
+      "callout rendered");
+    chk("comparables-block-in-report", !!q("[data-vg-comparables]"),
+      q("[data-vg-comparables]") ? "present" : "missing");
+    chk("methodology-twelve-factor-rows", qa("[data-vf]").length === 12,
+      qa("[data-vf]").length + " factor rows");
 
     /* The two figures must be visibly different kinds of number. */
     var figs = qa(".vg-figure");

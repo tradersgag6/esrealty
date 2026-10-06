@@ -195,5 +195,55 @@ const flow = () => require("../js/value_guide_flow.js");
     assert.ok(i > 0 && j > 0 && i < j, "script order: flow at " + i + ", bundle at " + j);
   });
 
+  /* ---- 9. report sections -------------------------------------------- */
+  await check("report names its model verbatim", async () => {
+    const F = flow();
+    const r = await F.compute(OPTS, EST);
+    const html = F.reportSections(r, EST, []);
+    assert.strictEqual(html.indexOf("Reference model: LandValuePH published methodology"), 0, "callout is first");
+    assert.ok(html.indexOf("SEA ESTATES factor stack") > 0, "names the other model");
+    assert.ok(html.indexOf("2.14x") > 0, "states the divergence");
+    assert.ok(html.indexOf("not an appraisal") > 0, "closes the caveat");
+  });
+
+  await check("comparables block renders even when empty", async () => {
+    const F = flow();
+    const r = await F.compute(OPTS, EST);
+    const html = F.reportSections(r, EST, []);
+    assert.ok(html.indexOf("data-vg-comparables") > 0, "block present");
+    assert.ok(html.indexOf("No matching listings for this municipality") > 0, "empty state stated");
+  });
+
+  await check("comparables never move the numbers", async () => {
+    const F = flow();
+    const a = await F.compute(OPTS, EST);
+    const b = Object.assign({}, a);
+    b.comparableSummary = { count: 5, medianPricePerSqm: 99999, askingIndication: { value: 1 } };
+    F.applyComparables(b, [{ price: 999999999 }], EST);
+    assert.strictEqual(b.total, a.total, "total frozen");
+    assert.strictEqual(b.low, a.low, "low frozen");
+    assert.strictEqual(b.high, a.high, "high frozen");
+    assert.strictEqual(b.perSqm, a.perSqm, "per-sqm frozen");
+    assert.strictEqual(b.landValue, a.landValue, "land frozen");
+    assert.strictEqual(b.improvement, a.improvement, "improvement frozen");
+    assert.ok(b.comparableSummary, "a summary is still attached");
+    assert.strictEqual(b.comparableListingCount, 1, "listing count recorded");
+  });
+
+  await check("methodology prints the twelve factors and the applied net", async () => {
+    const F = flow();
+    const r = await F.compute(OPTS, EST);
+    const html = F.reportSections(r, EST, []);
+    assert.strictEqual((html.match(/data-vf=/g) || []).length, 12, "twelve factor rows");
+    assert.ok(html.indexOf("-0.50") > 0 || html.indexOf("-0.5%") > 0, "applied net printed");
+    F.FACTORS.forEach(f => assert.ok(html.indexOf('data-vf="' + f.id + '"') > 0, f.id + " row"));
+  });
+
+  await check("loadComparables degrades to an empty list in Node", async () => {
+    const rows = await flow().loadComparables(OPTS, EST);
+    assert.ok(Array.isArray(rows), "always an array");
+    assert.strictEqual(rows.length, 0, "no listings API here");
+  });
+
   console.log("ALL GREEN (" + count + " checks)");
 })().catch(error => { console.error(error); process.exitCode = 1; });

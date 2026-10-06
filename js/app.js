@@ -10615,6 +10615,7 @@ premise: "Fee Simple / As Improved",
       + '<div class="mt-16 dim small">' + wrap + "</div>"
       + (integrity.ok ? '<div class="notice-banner mt-16">' + icon("check", 14) + " <span>Arithmetic reconciled: land + improvements, range and per-sqm all match.</span></div>"
         : '<div class="notice-banner mt-16" style="border-color:#E5484D">' + icon("alert", 14) + " <span><b>Integrity check failed.</b> The figures did not reconcile; do not issue this guide. Re-check the inputs.</span></div>")
+      + window.ESREALTY_VG_FLOW.reportSections(r, vgEst(), d.comparables || [])
       + '<div class="vg-actions">'
       + '<button class="btn btn-ghost" data-vg-next="2">← Back to details</button>'
       + '<button class="btn btn-ghost" data-vg-next="1">Edit inputs</button>'
@@ -10671,8 +10672,17 @@ premise: "Fee Simple / As Improved",
     try {
       /* One calculation, from one module. The storefront estimator still owns
          the BIR lookup, the coverage metadata and the ownership review; the
-         flow module owns the pricing on top of it. */
-      const r = await window.ESREALTY_VG_FLOW.compute(vgOpts(), vgEst());
+         flow module owns the pricing on top of it. Own-listing comparables are
+         fetched alongside and attached as context only - they are never a
+         calculation input, and the module's tests freeze the totals across
+         them. Loading them here rather than on stage entry means the report is
+         rendered exactly once, so a re-render cannot start a second request. */
+      const [r, comps] = await Promise.all([
+        window.ESREALTY_VG_FLOW.compute(vgOpts(), vgEst()),
+        window.ESREALTY_VG_FLOW.loadComparables(vgOpts(), vgEst())
+      ]);
+      d.comparables = comps;
+      if (r && r.available) window.ESREALTY_VG_FLOW.applyComparables(r, comps, vgEst());
       d.result = r;
       if (r && r.available) {
         d.error = "";
