@@ -131,12 +131,15 @@
     return bp / 10000;
   }
 
+  /* All twelve, answered or not. The report and the PDF both print the whole
+     published table, so an unanswered question has to be a printed 0% rather
+     than a missing row. */
   function sectionsOf(input) {
     var out = [];
     for (var i = 0; i < FACTORS.length; i++) {
-      var f = FACTORS[i], bp = factorBp(f, input);
-      if (bp === 0) continue;
-      out.push({ id: f.id, label: f.label, section: f.section, bp: bp, appliedTo: LAND_SECTIONS[f.section] ? "land" : "improvement" });
+      var f = FACTORS[i];
+      out.push({ id: f.id, label: f.label, section: f.section, min: f.min, max: f.max,
+        bp: factorBp(f, input), appliedTo: LAND_SECTIONS[f.section] ? "land" : "improvement" });
     }
     return out;
   }
@@ -213,6 +216,7 @@
       sections: sectionsOf(opts),
       rcnRate: rcn,
       usefulLife: life,
+      depCap: MODEL.DEP_CAP,
       depreciatedPct: r.depreciatedPct,
       flat: true
     };

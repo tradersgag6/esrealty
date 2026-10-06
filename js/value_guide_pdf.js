@@ -17,7 +17,7 @@
    the database.
 
    REPORT STRUCTURE
-   Six parts, and the cover states them so a reader knows what
+   Ten parts, and the cover states them so a reader knows what
    they are holding before they reach a number:
      1 Valuation Summary          the answer, the range, confidence
      2 Detailed Computation       every factor, plus the legal basis
@@ -25,6 +25,10 @@
      4 Market Analysis            match level, comparables, distribution
      5 Documents and Filing Guide checklists, deadlines, penalties
      6 Negotiation and Disclaimer pricing ladder, sources, limits
+     7 Model and Provenance       which model, and what it does not claim
+     8 Methodology                the twelve published factors, net included
+     9 Construction Basis         replacement cost and its provenance
+    10 Comparables, Context Only  our own listings, never an input
 
    THE FIGURES ARE LABELLED THE WAY THEY ARE
    Two numbers must never be conflated. The BIR zonal value is an
@@ -121,7 +125,7 @@
   }
 
   /* ============================================================
-     The six parts, and how each is described on the cover
+     The ten parts, and how each is described on the cover
      ============================================================ */
   var PARTS = [
     { key: "summary", no: "01", title: "Valuation Summary", blurb: "The estimate, the range, and how much weight it carries." },
@@ -129,7 +133,16 @@
     { key: "tax", no: "03", title: "Tax Implications", blurb: "Estimated selling costs, net proceeds, and the filing deadlines." },
     { key: "market", no: "04", title: "Market Analysis and Comparables", blurb: "Match level, comparable listings, and where this sits locally." },
     { key: "documents", no: "05", title: "Documents and Filing Guide", blurb: "What is needed, who to ask, and what late costs." },
-    { key: "negotiation", no: "06", title: "Negotiation Strategy and Disclaimer", blurb: "Pricing reference points, sources, limits, and disclaimers." }
+    { key: "negotiation", no: "06", title: "Negotiation Strategy and Disclaimer", blurb: "Pricing reference points, sources, limits, and disclaimers." },
+    /* Appended when the Value Guide moved to the three-step reference model.
+       The first six parts are the reference report's own structure and keep
+       their published numbers and order; these four carry what the new model
+       has to disclose. Titles avoid regex metacharacters because
+       tests/value_guide_pdf_node.js builds an unescaped selector from them. */
+    { key: "model", no: "07", title: "Model and Provenance", blurb: "Which model produced the figure, and what it does not claim." },
+    { key: "methodology", no: "08", title: "Methodology: Twelve Factors", blurb: "Each published question, its applied percentage, and the net." },
+    { key: "construction", no: "09", title: "Construction Basis", blurb: "Replacement cost, useful life, depreciation, provenance." },
+    { key: "comparables", no: "10", title: "Comparables, Context Only", blurb: "Our own listings, shown for context, never as an input." }
   ];
 
   function build(lib, doc, r, meta, pageCount) {
@@ -559,6 +572,10 @@
          called twice per PDF and the two calls must agree - which they do,
          because both take the same result object. */
       var multipleDisclosure = referenceTools.appliedMultipleDisclosure(r);
+      /* Present only on a result produced by the three-step reference model;
+         the public site calculator's result carries the factor stack instead
+         and every section below degrades rather than inventing one. */
+      var rm = r.referenceModel || null;
       var reportId = (meta && meta.generatedOn ? meta.generatedOn.replace(/-/g, "") : "") + "-" + esc(r.municipality || "").slice(0, 3).toUpperCase() + "-" + (r.rdo || "");
       var midpoint = (Number(r.low || 0) + Number(r.high || 0)) / 2;
 
@@ -675,14 +692,15 @@
           : "not applied"],
         /* The three SEA ESTATES factor rows only exist on a result that
            carried the factor stack. The Value Guide's reference-model result
-           nulls them by design (js/value_guide_flow.js), so a market-indicator
-           row stands in for them instead. The full reference-model land
-           build-up replaces this in Task 4. */
+           nulls them by design (js/value_guide_flow.js); in their place it
+           prints its own market indicator and the additive land net, which is
+           the whole of how that model turns a zonal base into a land value. */
         r.factors
           ? ["Property-use factor", "x " + fmtNum(r.factors.proxyFactor) + "   (" + r.use + ")"]
-          : ["Reference market indicator", "x " + fmtNum((r.referenceModel || {}).marketInd || 1)],
+          : ["Reference market indicator", "x " + fmtNum(rm ? rm.marketInd : 1)],
         r.factors ? ["Market band midpoint", "x " + fmtNum(r.factors.bandMid)] : null,
         r.factors ? ["Regional adjustment", "x " + fmtNum(r.factors.regionalAdj)] : null,
+        !r.factors && rm ? ["Applied land net", fmtNum(rm.net * 100, 2) + "%  (additive)"] : null,
         ["Effective land rate", fmtMoney(r.landPerSqm) + "/sqm"],
         ["Lot area", fmtArea(r.area)],
         ["Land value", fmtMoney(r.landValue)],
@@ -986,6 +1004,104 @@
       para(esc(r.disclaimer || ""), 8, gray);
       para("The tax figures in this report are illustrative estimates computed from published statutory rates for planning purposes. They are not a computation of tax payable. The BIR, the City or Municipal Treasurer and the Registry of Deeds determine the actual amounts, and the BIR tax base is the higher of the selling price and the fair market value as the BIR determines it. Consult a tax practitioner or lawyer before relying on any figure here.", 8, gray);
       para("This report is not a certified appraisal and does not claim compliance with PVS 105. For a formal valuation assignment, request a licensed real estate appraiser's site and document review.", 8, gray);
+
+      /* ============================================================
+         07  MODEL AND PROVENANCE
+         ============================================================ */
+      newSection("model");
+      heading("Which model produced this figure", { small: true });
+      if (rm) {
+        para("Reference model: " + rm.name + ". A BIR zonal base, a market-indicator factor of " + fmtNum(rm.marketInd, 3)
+          + ", then one additive net of the twelve published answers in the next part. Every answer is added once and the total is applied once; nothing is compounded.", 8, gray);
+        table(null, [
+          ["Reference model", rm.name],
+          ["Market indicator", "x " + fmtNum(rm.marketInd, 3)],
+          ["Land net (additive)", fmtNum(rm.net * 100, 2) + "%"],
+          ["Improvement net (additive)", fmtNum(rm.buildingNet * 100, 2) + "%"],
+          ["Escalation", "none - the replacement rate is flat"],
+          ["Zonal schedule effective", r.effectivityDate || "not recorded"],
+          ["Comparables", "context only, never an input"]
+        ], [200, 300], { boldFirstCol: true, padY: 4 });
+        box([
+          "The public site calculator uses a different model (SEA ESTATES factor stack) and returns a higher figure for the same property: 2.14x on a vacant lot in our fixture. Both are planning figures, not an appraisal.",
+          "Street rates in the zonal schedule for post-2022 subdivisions can sit far below what those homes transact for. The guide inherits that; the model name and the schedule date are disclosed here rather than a claimed accuracy."
+        ], tan);
+      } else {
+        para("Reference model: not recorded on this result. It came from the public site calculator's factor stack rather than the three-step reference model, so parts 08 and 09 do not describe it.", 8, gray);
+      }
+
+      /* ============================================================
+         08  METHODOLOGY: TWELVE FACTORS
+         ============================================================ */
+      newSection("methodology");
+      heading("The twelve published factors", { small: true });
+      if (rm) {
+        para("Each question maps to a published percentage. The answers are summed once into one net for the land and one for the improvement, and each net is applied once.", 8, gray);
+        table(["Question", "Section", "Published range", "Applied"],
+          rm.sections.map(function (s) {
+            return [s.label, s.section, fmtNum(s.min / 100, 2) + "% to " + fmtNum(s.max / 100, 2) + "%",
+              (s.bp > 0 ? "+" : "") + fmtNum(s.bp / 100, 2) + "%"];
+          }), [150, 130, 140, 70], { padY: 4, align: [null, null, null, "r"] });
+        box([
+          "Applied net: " + fmtNum(rm.net * 100, 2) + "% on land, " + fmtNum(rm.buildingNet * 100, 2) + "% on the improvement. Additive, not compounded.",
+          "An unanswered question is 0%. The published ranges are the ceilings, so no answer can move a component outside them."
+        ], tan);
+      } else {
+        para("Not applicable: this result was not produced by the twelve-factor reference model.", 8, gray);
+      }
+
+      /* ============================================================
+         09  CONSTRUCTION BASIS
+         ============================================================ */
+      newSection("construction");
+      heading("Construction basis", { small: true });
+      var rcn = rm ? rm.rcnRate : r.buildCostPerSqm;
+      var life = rm ? rm.usefulLife : 40;
+      var depCap = rm ? rm.depCap : 0.8;
+      table(null, [
+        ["Construction type", r.constructionLabel || r.construction || "-"],
+        ["Replacement cost", fmtMoney(rcn) + "/sqm"],
+        ["Floor area", r.type === "house_lot" ? fmtArea(r.floorArea) : "vacant land - no improvement"],
+        ["Useful life", life + " years"],
+        ["Age midpoint", fmtNum(r.ageMidpoint, 1) + " years"],
+        ["Depreciation applied", fmtNum(r.depreciatedPct, 2) + "%  (capped at " + fmtNum(depCap * 100, 0) + "%)"],
+        ["Escalation", "none - no valuation year, no annual uplift"]
+      ], [200, 300], { boldFirstCol: true, padY: 4 });
+      box([
+        fmtMoney(rcn) + "/sqm is a permit-declared figure: the Philippine Statistics Authority published a national residential average of PHP 14,429/sqm (Jan 2025) and PHP 14,081.64/sqm (May 2026), PSA Region IV-A was PHP 13,405/sqm (Jan 2025), and real Batangas turnkey quotations for an economic finish run PHP 23,100-31,185/sqm (Q1 2026). The rate sits above the permit-declared average and below every contractor quote.",
+        "It is neither a contractor's price nor a completed-sale cost, and it is never escalated: no published source supported the annual uplift that was tested against these figures."
+      ], tan);
+
+      /* ============================================================
+         10  COMPARABLES, CONTEXT ONLY
+         ============================================================ */
+      newSection("comparables");
+      heading("Own listings, for context", { small: true });
+      if (r.comparableListingCount) {
+        para(r.comparableListingCount + " listing(s) from our own catalog for the same municipality and property type. Asking advertisements, not completed sales.", 8, gray);
+        var cs = r.comparableSummary;
+        if (cs) {
+          table(null, [
+            ["Listings returned", String(r.comparableListingCount)],
+            ["Median price per sqm", cs.medianPricePerSqm ? fmtMoney(cs.medianPricePerSqm) + "/sqm" : "not established"],
+            ["Qualified indication", cs.askingIndication ? fmtMoney(cs.askingIndication.value) + " from " + cs.askingIndication.count + " eligible" : "insufficient evidence"],
+            ["Screening policy", cs.policy || "-"]
+          ], [200, 300], { boldFirstCol: true, padY: 4 });
+          var recs = (cs.records || []).slice(0, 8);
+          if (recs.length) {
+            table(["Listing", "Price", "Per sqm"], recs.map(function (rec) {
+              return [rec.title || rec.id || "Listing", fmtMoney(rec.price), fmtMoney(rec.pricePerSqm)];
+            }), [300, 100, 80], { padY: 4, align: [null, "r", "r"] });
+          }
+        }
+      } else {
+        para("No matching listings for this municipality.", 8, gray);
+      }
+      box([
+        "Comparables are context only. No listing price on this page enters the calculation that produced the estimate, the range or the per-sqm figure.",
+        "An asking price is what a seller wants, not what a buyer paid."
+      ], tan);
+
       return doc;
     });
   }

@@ -31,6 +31,22 @@ const VACANT = Object.assign({}, OPTS, { type: "vacant_lot", floorArea: 0 });
 
 const flow = () => require("../js/value_guide_flow.js");
 
+/* pdf-lib writes <hex> Tj; inflate first. Same shape as
+   tests/value_guide_reference_node.js:11-20. */
+function pdfText(bytes) {
+  const buffer = Buffer.from(bytes), text = [];
+  for (let at = 0; (at = buffer.indexOf("stream", at)) >= 0;) {
+    let start = at + 6; if (buffer[start] === 13) start++; if (buffer[start] === 10) start++;
+    const end = buffer.indexOf("endstream", start); if (end < 0) break;
+    try {
+      const ops = require("zlib").inflateSync(buffer.subarray(start, end)).toString("latin1");
+      for (const match of ops.matchAll(/<([0-9A-Fa-f]+)>\s*Tj/g)) text.push(Buffer.from(match[1], "hex").toString("latin1"));
+    } catch (_) {}
+    at = end + 9;
+  }
+  return text.join(" ");
+}
+
 (async () => {
   /* ---- 1. golden house-and-lot ---------------------------------------- */
   await check("golden house-and-lot fixture", async () => {
@@ -243,6 +259,30 @@ const flow = () => require("../js/value_guide_flow.js");
     const rows = await flow().loadComparables(OPTS, EST);
     assert.ok(Array.isArray(rows), "always an array");
     assert.strictEqual(rows.length, 0, "no listings API here");
+  });
+
+  /* ---- 10. PDF sections ------------------------------------------------ */
+  await check("PDF carries the model name and the construction disclosure", async () => {
+    const PDFLib = require(path.join(ROOT, "vendor/pdf-lib/pdf-lib.min.js"));
+    const PDF = require(path.join(ROOT, "js/value_guide_pdf.js"));
+    const r = await flow().compute(OPTS, EST);
+    const blob = await PDF.toBlob(PDFLib, r, { preparedFor: "3-step flow", preparedBy: "SEA ESTATES", generatedOn: "2026-10-06" });
+    const text = pdfText(await blob.arrayBuffer());
+    assert.ok(text.indexOf("LandValuePH reference model") >= 0, "model named");
+    assert.ok(text.indexOf("16,000") >= 0, "construction rate shown");
+    assert.ok(text.indexOf("permit-declared") >= 0, "rate disclosure");
+    assert.ok(text.indexOf("SEA ESTATES market band factor") < 0, "stale factor label gone");
+  });
+
+  await check("PDF gains model, methodology, construction and comparables parts", async () => {
+    const PDF = require(path.join(ROOT, "js/value_guide_pdf.js"));
+    const keys = PDF.PARTS.map(p => p.key);
+    ["model", "methodology", "construction", "comparables"].forEach(k =>
+      assert.ok(keys.indexOf(k) >= 0, "part " + k + " present"));
+    assert.strictEqual(keys.slice(0, 6).join(","),
+      "summary,computation,tax,market,documents,negotiation", "existing six untouched");
+    assert.strictEqual(keys.length, PDF.PARTS.length, "no duplicate keys");
+    PDF.PARTS.forEach((p, i) => assert.strictEqual(p.no, String(i + 1).padStart(2, "0"), p.key + " numbered in order"));
   });
 
   console.log("ALL GREEN (" + count + " checks)");
