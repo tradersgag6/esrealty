@@ -160,13 +160,18 @@ No fresh official verification, remote CI or hosted email delivery was performed
 Reproduce with local app/worker running:
 
 ```text
-node tests/value_guide_time_node.js
-powershell -NoProfile -ExecutionPolicy Bypass -File tests/run_all.ps1 -Test value_guide_time_e2e -Mobile
+node tests/value_guide_flow_node.js
+powershell -NoProfile -ExecutionPolicy Bypass -File tests/run_all.ps1 -Test value_guide_internal_e2e
 powershell -NoProfile -ExecutionPolicy Bypass -File tests/run_all.ps1 -Test value_guide_simplify_e2e
 node tools/review_about_panel.js
 node tools/review_sea_reference_indexing.js
 node tools/review_sea_reference_indexing.js --suite
 ```
+
+The time-indexed scenario suites (`value_guide_time_node.js`,
+`value_guide_time_e2e.js`) were removed with the three-step Value Guide, which
+no longer indexes anything. The storefront's indexed-scenario controls are still
+covered by `value_guide_simplify_e2e`.
 
 ## Handoff
 

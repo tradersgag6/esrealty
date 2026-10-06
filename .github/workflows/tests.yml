@@ -121,10 +121,6 @@ jobs:
         run: pwsh -NoProfile -File tests/run_all.ps1 -Test value_guide_purpose_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test value_guide_purpose_e2e
       - name: e2e value_guide_purpose_e2e (mobile)
         run: pwsh -NoProfile -File tests/run_all.ps1 -Test value_guide_purpose_e2e -Mobile || pwsh -NoProfile -File tests/run_all.ps1 -Test value_guide_purpose_e2e -Mobile
-      - name: e2e value_guide_time_e2e
-        run: pwsh -NoProfile -File tests/run_all.ps1 -Test value_guide_time_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test value_guide_time_e2e
-      - name: e2e value_guide_time_e2e (mobile)
-        run: pwsh -NoProfile -File tests/run_all.ps1 -Test value_guide_time_e2e -Mobile || pwsh -NoProfile -File tests/run_all.ps1 -Test value_guide_time_e2e -Mobile
       - name: e2e sea_brand_polish_e2e
         run: pwsh -NoProfile -File tests/run_all.ps1 -Test sea_brand_polish_e2e || pwsh -NoProfile -File tests/run_all.ps1 -Test sea_brand_polish_e2e
       - name: e2e portfolio_ledger_integrity_e2e
