@@ -673,9 +673,16 @@
         ["Corner adjustment", r.corner && r.corner.applied
            ? "x " + (1 + Number(r.corner.pct || 0)).toFixed(4) + "   (+" + fmtNum(Number(r.corner.pct) * 100) + "%)"
           : "not applied"],
-        ["Property-use factor", "x " + fmtNum(r.factors.proxyFactor) + "   (" + r.use + ")"],
-        ["Market band midpoint", "x " + fmtNum(r.factors.bandMid)],
-        ["Regional adjustment", "x " + fmtNum(r.factors.regionalAdj)],
+        /* The three SEA ESTATES factor rows only exist on a result that
+           carried the factor stack. The Value Guide's reference-model result
+           nulls them by design (js/value_guide_flow.js), so a market-indicator
+           row stands in for them instead. The full reference-model land
+           build-up replaces this in Task 4. */
+        r.factors
+          ? ["Property-use factor", "x " + fmtNum(r.factors.proxyFactor) + "   (" + r.use + ")"]
+          : ["Reference market indicator", "x " + fmtNum((r.referenceModel || {}).marketInd || 1)],
+        r.factors ? ["Market band midpoint", "x " + fmtNum(r.factors.bandMid)] : null,
+        r.factors ? ["Regional adjustment", "x " + fmtNum(r.factors.regionalAdj)] : null,
         ["Effective land rate", fmtMoney(r.landPerSqm) + "/sqm"],
         ["Lot area", fmtArea(r.area)],
         ["Land value", fmtMoney(r.landValue)],

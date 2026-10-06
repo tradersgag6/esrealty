@@ -150,8 +150,7 @@ async function pagesOf(bytes) {
     chk("stage 1 gates open", q('[data-vg-next="2"]') && !q('[data-vg-next="2"]').disabled, "");
 
     q('[data-vg-next="2"]').click();
-    await waitFor(function () { return q('[data-vg-next="3"]'); }, 40, 150);
-    q('[data-vg-next="3"]').click();
+    /* Three steps: step 2 (Details) carries the calculate button directly. */
     await waitFor(function () { return q("[data-vg-calc]"); }, 40, 150);
     q("[data-vg-calc]").click();
     await waitFor(function () { return q("[data-vg-pdf]") || /No estimate available/.test(q("#content").textContent); }, 120, 200);

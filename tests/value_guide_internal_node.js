@@ -98,8 +98,11 @@ ok(/core\.computeEstimate\(d\.config, d\.index, md, opts\)/.test(EST),
   "estimate() delegates to core.computeEstimate");
 ok(/result\.integrity = core\.integrityCheck\(result\)/.test(EST),
   "estimate() attaches the integrity verdict");
-ok(/vgEst\(\)\.estimate\(vgOpts\(\)\)/.test(APP), "the wizard calls estimate()");
-ok(!/function computeEstimate.*\n(?:.|\n)*?vgStage4/.test(vgBlock ? vgBlock[0] : ""),
+/* Task 2: the wizard no longer calls the estimator's estimate() itself - it
+ * hands the inputs to the reference-model module, which does. */
+ok(/ESREALTY_VG_FLOW\.compute\(vgOpts\(\), vgEst\(\)\)/.test(APP), "the wizard calls FLOW.compute()");
+ok(!/vgEst\(\)\.estimate\(vgOpts\(\)\)/.test(APP), "the wizard no longer calls estimate() directly");
+ok(!/function computeEstimate/.test(vgBlock ? vgBlock[0] : ""),
   "the wizard does not re-implement the formula");
 ok(/cfgVersion[\s\S]*?function dataVersionOf/.test(EST),
   "version helpers are at module scope");

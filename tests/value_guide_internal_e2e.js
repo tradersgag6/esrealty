@@ -1,8 +1,8 @@
 "use strict";
-/* Value Guide (internal) — four-stage flow, access, and the PDF download.
+/* Value Guide (internal) — three-step flow, access, and the PDF download.
  *
  *   1) the item exists in the Analysis dropdown and follows Appraisal's access
- *   2) stage 1 blocks progress until the BIR inputs are present
+ *   2) step 1 blocks progress until the BIR inputs are present
  *   3) a full vacant-lot run reaches a reconciled result
  *   4) the two figures are labelled as different kinds of number
  *   5) the PDF downloads a real PDF and NO lead/email side effect fires
@@ -131,23 +131,16 @@ async function pickLocation() {
     chk("view-opens", q('[data-vg-next="2"]') !== null || /Value Guide/.test(q("#content").textContent),
       "wizard rendered");
 
-    /* ---------- 1b. the three technical decisions are collapsed ---------- */
-    /* They used to be three always-expanded groups (reference status, land
-       planning method, transaction scenario), so an operator read provenance and
-       optional cost fields before the location inputs. One collapsed disclosure
-       states them plainly and keeps every data-vg-set hook reachable. */
-    var vgAbout = q(".vg-about");
-    chk("about-panel-present", !!vgAbout, vgAbout ? "one disclosure" : "absent");
-    chk("about-panel-collapsed-by-default", !!(vgAbout && !vgAbout.open));
-    chk("about-panel-lists-three-facts",
-      !!(vgAbout && qa(".vg-about-facts li").length === 3 && vgAbout.querySelector(".vg-about-facts")),
-      qa(".vg-about-facts li").length + " facts");
-    chk("three-sections-nested-inside",
-      !!(vgAbout && qa(".vg-about > .vg-about-section").length === 3),
-      qa(".vg-about > .vg-about-section").length + " nested sections");
-    chk("reference-callout-preserved", !!q("[data-vg-reference-status]"));
-    chk("inputs-one-click-away",
-      !!(vgAbout && vgAbout.querySelector('[data-vg-set="landMethod"]') && vgAbout.querySelector('[data-vg-set="saleContext"]')));
+    /* ---------- 1b. the collapsed "About this estimate" panel is gone ---------- */
+    /* It used to hold three disclosures on step 1 (reference status, land
+       method, transaction scenario). A three-step flow has no room for a
+       disclosure there: reference status moved to the report, the transaction
+       inputs became ordinary fields, and the land-method selector is deleted
+       along with the indexed scenario. */
+    chk("no-collapsed-about-panel", q(".vg-about") === null, ".vg-about removed");
+    chk("transaction-inputs-kept-as-ordinary-fields",
+      !!q('[data-vg-set="saleContext"]') && !!q('[data-vg-set="salePrice"]'), "saleContext + salePrice on step 1");
+    chk("land-method-selector-removed", !q('[data-vg-set="landMethod"]'), "no landMethod select");
     chk("no-regrouped-sibling-land-method",
       !/class="vg-group-title">Land planning method/.test(q("#content").innerHTML)
       && !/class="vg-group-title">Transaction scenario/.test(q("#content").innerHTML));
@@ -213,20 +206,18 @@ async function pickLocation() {
     var hint = (q("#content .dim.tiny") || {}).textContent || "";
     chk("next-enabled-when-complete", nextEnabled(), hint.slice(0, 120) || "gating says ready");
 
-    /* ---------- 3. stage 2 + 3 + 4 ---------- */
+    /* ---------- 3. stage 2 = details, stage 3 = report ---------- */
     q('[data-vg-next="2"]').click();
     await wait(500);
-    chk("stage2-reached", q('[data-vg-next="3"]') !== null, "details screen");
+    chk("stage2-reached", q("[data-vg-calc]") !== null, "details screen");
     chk("stage2-explains-evidence-led-ownership-policy", /No unsupported flat deductions/.test(q("#content").textContent),
       "occupancy impact disclosed");
 
-    q('[data-vg-next="3"]').click();
-    await wait(500);
-    chk("stage3-reached", q("[data-vg-calc]") !== null, "review screen");
-    /* The review is a label/value list, not a row of badges. Read the rows
-       structurally so the check describes what the user actually sees. */
+    /* The review list is folded into Details, so it is checked on this screen
+       rather than on a step of its own. Read the rows structurally so the
+       check describes what the user actually sees. */
     var rows = qa("#content .vg-summary-row");
-    var reviewText = qa("#content .vg-summary-row").map(function (r) {
+    var reviewText = rows.map(function (r) {
       var dt = r.querySelector("dt"), dd = r.querySelector("dd");
       return (dt ? dt.textContent.trim() : "") + ": " + (dd ? dd.textContent.trim() : "");
     }).join(" | ");
@@ -236,8 +227,11 @@ async function pickLocation() {
     q("[data-vg-calc]").click();
     await waitFor(function () { return q("[data-vg-pdf]") !== null || /No estimate available/.test(q("#content").textContent); }, 120, 200);
     var hasResult = q("[data-vg-pdf]") !== null;
-    chk("result-reached", hasResult, hasResult ? "stage 4" : q("#content").textContent.slice(0, 160));
+    chk("result-reached", hasResult, hasResult ? "stage 3" : q("#content").textContent.slice(0, 160));
     if (!hasResult) { finish(); return; }
+
+    /* Reference status moved here from the deleted step-1 disclosure. */
+    chk("reference-callout-preserved", !!q("[data-vg-reference-status]"), "report carries it");
 
     /* The two figures must be visibly different kinds of number. */
     var figs = qa(".vg-figure");

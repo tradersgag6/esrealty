@@ -10262,15 +10262,13 @@ premise: "Fee Simple / As Improved",
        2. Nothing is persisted. The result lives in state for the session
           and leaves as a downloaded PDF. That was an explicit decision.
 
-     Stage 1 property + location, stage 2 property details, stage 3
-     review and calculate, stage 4 the value summary and the PDF.
+     Stage 1 location, stage 2 details, stage 3 the report.
      ============================================================ */
 
   const VG_STAGES = [
-    { n: 1, label: "Property & location" },
-    { n: 2, label: "Property details" },
-    { n: 3, label: "Review & calculate" },
-    { n: 4, label: "Value summary" }
+    { n: 1, label: "Location" },
+    { n: 2, label: "Details" },
+    { n: 3, label: "Report" }
   ];
 
   /* Draft lives on state so it survives a re-render, but is deliberately NOT
@@ -10358,18 +10356,6 @@ premise: "Fee Simple / As Improved",
     if (!(Number(f.area) > 0)) missing.push("lot area");
     else f.area = Number(f.area);
     if (f.salePrice != null && f.salePrice !== "" && (!Number.isFinite(Number(f.salePrice)) || Number(f.salePrice) < 0)) missing.push("valid price scenario");
-    if (f.landMethod === "time-indexed") {
-      /* An indexed scenario is only meaningful with an explicit rate and a valid
-         date pair. There is deliberately no default rate: an invented growth
-         figure would be indistinguishable from a real one in the output, and the
-         government register cannot supply one. */
-      const row = vgEst().municipalityRow(f.municipality), cfg = vgEst().reference()?.config;
-      const check = vgEst().core.referenceTools.timeScenario(1, 1, {
-        baseDate: f.timeBaseDate || row?.effectivityDate, targetDate: f.timeTargetDate,
-        annualPct: f.timeAnnualPct, source: f.timeSource || "manual", evidenceId: f.timeEvidenceId
-      }, cfg?.governmentReferenceRegister, { municipality: f.municipality, useGroup: vgEst().core.useOfClassification(cfg, f.classification) });
-      if (!check.available) missing.push(check.reason === "time-evidence-unavailable" ? "reviewed local evidence or manual assumption" : "explicit valid annual rate and indexing dates");
-    }
     return missing;
   }
 
@@ -10413,24 +10399,6 @@ premise: "Fee Simple / As Improved",
       + '<div class="vg-form">' + body + "</div></div>";
   }
 
-  /* One collapsed "About this estimate" block for the three decisions that used
-     to be three always-expanded groups: government reference status, the land
-     planning method and the transaction scenario. The plain-language facts come
-     first so an operator can read the state of the estimate without expanding
-     anything; the full inputs stay one click away and keep every data-vg-set
-     hook, so saving, validation and PDF output are unchanged. */
-  function vgAboutGroup(facts, body) {
-    return '<details class="vg-about"><summary>About this estimate</summary>'
-      + '<ul class="vg-about-facts">' + facts.map(f =>
-        '<li><b>' + esc(f[0]) + "</b><span>" + esc(f[1]) + "</span></li>").join("") + "</ul>"
-      + '<p class="vg-group-note">Planning inputs, not a certified appraisal. Expanding a section below never changes an official government schedule.</p>'
-      + body + "</details>";
-  }
-
-  function vgDisclosure(title, body) {
-    return '<details class="vg-about-section"><summary>' + esc(title) + "</summary>" + body + "</details>";
-  }
-
   function renderValueGuide() {
     const d = vgDraft();
     const EST = vgEst();
@@ -10458,8 +10426,7 @@ premise: "Fee Simple / As Improved",
 
     if (d.stage === 1) body = vgStage1(d, ref);
     else if (d.stage === 2) body = vgStage2(d, config);
-    else if (d.stage === 3) body = vgStage3(d);
-    else body = vgStage4(d);
+    else body = vgStage3(d);
 
     return '<div class="hero"><div><h1>Value Guide</h1><p>Batangas planning estimate from the official BIR zonal reference and the disclosed SEA ESTATES factors</p></div>'
       + '<div class="actions"><button class="btn btn-ghost btn-sm" data-vg-reset>' + icon("edit", 14) + ' Start over</button></div></div>'
@@ -10510,41 +10477,12 @@ premise: "Fee Simple / As Improved",
     html += vgGroup("Guide details", "These appear on the PDF. Nothing here is sent anywhere.",
       vgField("Prepared for", "Optional. Printed on the PDF only; never transmitted.",
         '<input class="input" data-vg-set="preparedFor" value="' + esc(d.preparedFor) + '" placeholder="Client or property name">', 6)
-      + vgSelectField("Purpose", null, "data-vg-set=\"purpose\"", config.purposes || [], f.purpose, "— choose —", 6));
-
-    const sourceStatus = vgEst().core.referenceTools.lookup(config.governmentReferenceRegister, vgEst().municipalityRow(f.municipality)?.rdo, f.municipality, new Date().toISOString().slice(0, 10));
-    const landTimeEvidence = Array.isArray(config.governmentReferenceRegister?.landTimeEvidence) ? config.governmentReferenceRegister.landTimeEvidence : [];
-    html += vgAboutGroup([
-      ["Government reference", sourceStatus.label + (sourceStatus.scheduleEffectiveDate ? " · schedule effective " + sourceStatus.scheduleEffectiveDate : "")],
-      ["Land method", f.landMethod === "time-indexed"
-        ? "Indexed land scenario · " + (f.timeAnnualPct === "" || f.timeAnnualPct == null
-          ? "annual change not set yet"
-          : f.timeAnnualPct + "% a year, " + (f.timeSource === "evidence" ? "reviewed local history" : "manual assumption") + ", separate from the factor guide")
-        : "Factor-based guide · no annual change assumed"],
-      ["Transaction costs", f.saleContext === "developer"
-        ? "Developer purchase · uses quoted charges, no blanket CGT"
-        : f.saleContext === "unknown"
-          ? "Not determined · a written quotation is required"
-          : "Standard resale illustration · CGT, DST, transfer and registration"]
-    ],
-      vgDisclosure("Government schedule and verification status",
-        '<div class="vg-callout" data-vg-reference-status><b>Government reference: ' + esc(sourceStatus.label) + '</b><p>Schedule effectivity, dataset generation and legal applicability are separate. Last attempt: ' + esc(sourceStatus.lastAttemptedCheck || "not recorded") + '; successful verification: ' + esc(sourceStatus.successfullyVerifiedOn || "not verified") + '.</p></div>'
-        + (sourceStatus.relatedSchedules || []).map(s => '<p class="vg-group-note">' + esc(s.id + ": " + s.label + (s.proposedPeriod ? " (" + s.proposedPeriod + ")" : "")) + '. ' + esc(s.note || "") + "</p>").join(""))
-      + vgDisclosure("Land method and optional time scenario",
-        '<div class="vg-form">'
-        + vgSelectField("Land method", null, "data-vg-set=\"landMethod\"", [{ value: "factor", label: "Existing factor guide" }, { value: "time-indexed", label: "Indexed land-reference scenario" }], f.landMethod || "factor", "— choose —", 6)
-        + vgSelectField("Adjustment source", landTimeEvidence.length ? "A reviewed local trend can be applied automatically." : "Automatic annual change is unavailable. No reviewed local land-price history is registered for this property.", "data-vg-set=\"timeSource\"", [{ value: "manual", label: "Manual assumption" }, { value: "evidence", label: "Reviewed local history" }], f.timeSource || "manual", "— choose —", 6)
-        + vgSelectField("Reviewed history", null, "data-vg-set=\"timeEvidenceId\"", landTimeEvidence.map(record => ({ value: record.id, label: record.id + " — " + record.municipality })), f.timeEvidenceId || "", landTimeEvidence.length ? "No applicable reviewed record selected" : "No reviewed local land-price history available", 6)
-        + vgField("Annual change (%)", "No default; may increase or decrease.", '<input class="input" type="number" step="0.01" data-vg-set="timeAnnualPct" value="' + esc(f.timeAnnualPct == null ? "" : f.timeAnnualPct) + '">', 6)
-        + vgField("Reference/base date", "Blank uses imported schedule date.", '<input class="input" type="date" data-vg-set="timeBaseDate" value="' + esc(f.timeBaseDate || "") + '">', 6)
-        + vgField("Target date", "Required only for indexed scenario.", '<input class="input" type="date" data-vg-set="timeTargetDate" value="' + esc(f.timeTargetDate || "") + '">', 6)
-        + '</div><p class="vg-group-note">Indexed references are alternative scenarios, never stacked with market/corner multipliers or used as updated official rates. Buildings stay separate.</p>')
-      + vgDisclosure("Transaction type and optional costs",
-        '<div class="vg-form">'
-        + vgField("Asking / offer / selling price (PHP)", "Optional.", '<input class="input" data-vg-set="salePrice" inputmode="decimal" value="' + esc(f.salePrice || "") + '">', 6)
-        + vgSelectField("Transaction type", "No universal CGT assumed for developer purchases.", "data-vg-set=\"saleContext\"", [{ value: "private-resale", label: "Qualifying capital-asset resale" }, { value: "developer", label: "Developer / ordinary-asset purchase" }, { value: "unknown", label: "Unknown, quotation required" }], f.saleContext || "private-resale", "— choose —", 6)
-        + vgField("Quoted developer charges (PHP)", "Outside price only; no double-counting included taxes.", '<input class="input" data-vg-set="developerFees" inputmode="decimal" value="' + esc(f.developerFees || "") + '">', 6)
-        + '</div><p class="vg-group-note">Price changes party costs, not the underlying property guide.</p>'));
+      + vgSelectField("Purpose", null, "data-vg-set=\"purpose\"", config.purposes || [], f.purpose, "— choose —", 6)
+      + vgField("Asking / offer / selling price (PHP)", "Optional. Drives the tax illustration, never the property guide.",
+        '<input class="input" data-vg-set="salePrice" inputmode="decimal" value="' + esc(f.salePrice || "") + '">', 6)
+      + vgSelectField("Transaction type", "No universal CGT assumed for developer purchases.", "data-vg-set=\"saleContext\"", [{ value: "private-resale", label: "Qualifying capital-asset resale" }, { value: "developer", label: "Developer / ordinary-asset purchase" }, { value: "unknown", label: "Unknown, quotation required" }], f.saleContext || "private-resale", "— choose —", 6)
+      + vgField("Quoted developer charges (PHP)", "Outside price only; no double-counting included taxes.",
+        '<input class="input" data-vg-set="developerFees" inputmode="decimal" value="' + esc(f.developerFees || "") + '">', 6));
 
     html += "</div>";
 
@@ -10600,15 +10538,27 @@ premise: "Fee Simple / As Improved",
         { value: "not_inherited", label: "Not inherited" }, { value: "settled", label: "Inherited, settlement done" },
         { value: "pending", label: "Inherited, settlement pending" }, { value: "not_sure", label: "Not sure" }], f.inheritanceStatus, "— choose —", 6));
 
+    /* The review list used to be its own step. Folded into Details so the flow
+       is three steps: an operator checks the inputs in the same screen they
+       edit them on, then calculates. */
+    html += vgGroup("Check the inputs", "Confirm these before calculating. Anything still wrong can be changed above.",
+      '<dl class="vg-summary">' + vgReviewRows(d).map(r =>
+        '<div class="vg-summary-row"><dt>' + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd></div>").join("") + "</dl>");
+
     html += '<div class="vg-actions">'
       + '<button class="btn btn-ghost" data-vg-next="1">← Back</button>'
-      + '<button class="btn btn-primary" data-vg-next="3">Review &amp; calculate →</button></div>';
+      + (d.error ? '<div class="notice-banner mt-16" style="border-color:#E5484D">' + icon("alert", 14) + " " + esc(d.error) + "</div>" : "")
+      + '<button class="btn btn-primary" data-vg-calc' + (d.busy ? " disabled" : "") + ">" + icon("spark", 14) + " Calculate value</button></div>";
     return html + "</div>";
   }
 
-  function vgStage3(d) {
+  /* A label/value list, not a run of badges. As pills the label and value ran
+     together ("Lot area: 300 sqm" with no visual separation) and long values
+     wrapped under their own pill. */
+  function vgReviewRows(d) {
     const f = d.form;
     const row = vgEst().municipalityRow(f.municipality);
+    const config = (vgEst().reference() || {}).config || {};
     const rows = [
       ["Municipality", f.municipality + (row ? " (RDO " + row.rdo + ")" : "")],
       ["Barangay", f.barangay],
@@ -10619,48 +10569,42 @@ premise: "Fee Simple / As Improved",
       ["Corner lot", f.corner ? "Yes" : "No"]
     ];
     if (f.type === "house_lot") {
-      rows.push(["Construction", (vgEst().reference().config.construction || {})[f.construction] ? vgEst().reference().config.construction[f.construction].label : f.construction]);
-      rows.push(["Storeys", (vgEst().reference().config.floors || []).filter(x => x.key === f.floors).map(x => x.label)[0] || f.floors]);
-      rows.push(["Age band", (vgEst().reference().config.ageBands || []).filter(x => x.key === f.ageBand).map(x => x.label)[0] || f.ageBand]);
+      rows.push(["Construction", (config.construction || {})[f.construction] ? config.construction[f.construction].label : f.construction]);
+      rows.push(["Storeys", (config.floors || []).filter(x => x.key === f.floors).map(x => x.label)[0] || f.floors]);
+      rows.push(["Age band", (config.ageBands || []).filter(x => x.key === f.ageBand).map(x => x.label)[0] || f.ageBand]);
       if (f.features.length) rows.push(["Improvements", f.features.length + " selected"]);
       rows.push(["Built-up area", (f.floorArea ? f.floorArea : Math.round(Number(f.area) * 0.6) + " (assumed)") + " sqm"]);
     }
     rows.push(["Transaction", f.saleContext || "private-resale"]);
     rows.push(["Price scenario", f.salePrice || "Not supplied"]);
     rows.push(["Occupancy / title / inheritance", [f.occupancy || "unknown", f.titleStatus || "unknown", f.inheritanceStatus || "unknown"].join(" / ")]);
-    rows.push(["Land method", f.landMethod || "factor"]);
-    if (f.landMethod === "time-indexed") rows.push(["Time scenario", (f.timeBaseDate || row.effectivityDate) + " to " + f.timeTargetDate + "; " + (f.timeSource || "manual") + "; " + f.timeAnnualPct + "%"]);
-    /* A label/value list, not a run of badges. As pills the label and value ran
-       together ("Lot area: 300 sqm" with no visual separation) and long values
-       wrapped under their own pill. */
-    return '<div class="card card-pad"><h3 class="mb-16">Check the inputs</h3>'
-      + '<p class="dim small mb-16">Confirm these before calculating. Anything still wrong can be changed on the previous step.</p>'
-      + '<dl class="vg-summary">' + rows.map(r =>
-        '<div class="vg-summary-row"><dt>' + esc(r[0]) + "</dt><dd>" + esc(r[1]) + "</dd></div>").join("") + "</dl>"
-      + (d.busy ? '<p class="dim mt-16">Calculating…</p>' : "")
-      + (d.error ? '<div class="notice-banner mt-16" style="border-color:#E5484D">' + icon("alert", 14) + " " + esc(d.error) + "</div>" : "")
-      + '<div class="vg-actions">'
-      + '<button class="btn btn-ghost" data-vg-next="2">← Back</button>'
-      + '<button class="btn btn-primary" data-vg-calc' + (d.busy ? " disabled" : "") + ">" + icon("spark", 14) + " Calculate value</button></div></div>";
+    return rows;
   }
 
-  function vgStage4(d) {
+  function vgStage3(d) {
     const r = d.result;
     if (!r) return '<div class="card card-pad"><h3>No result yet</h3><p class="dim">Run the calculation first.</p></div>';
     if (!r.available) {
       return '<div class="card card-pad"><h3>No estimate available</h3>'
-        + '<p class="dim">' + esc(vgUnavailableReason(r.reason)) + "</p>"
-        + '<div class="row mt-16"><button class="btn btn-ghost" data-vg-next="1">← Back to inputs</button></div></div>';
+        + '<p class="dim">' + esc(d.error || "Check the location, classification and lot area.") + "</p>"
+        + '<div class="row mt-16"><button class="btn btn-ghost" data-vg-next="2">← Back to details</button></div></div>';
     }
     const integrity = r.integrity || {};
+    const config = (vgEst().reference() || {}).config || {};
+    const status = vgEst().core.referenceTools.lookup(config.governmentReferenceRegister,
+      vgEst().municipalityRow(d.form.municipality)?.rdo, d.form.municipality, new Date().toISOString().slice(0, 10));
     const wrap = "<p><b>How to read these figures:</b> the BIR zonal reference is an official tax reference. The market guide estimate is a planning figure built from disclosed factors. They are not interchangeable, and comparable asking listings are context only — their prices are not calculation inputs.</p>";
     let html = '<div class="card card-pad"><h3 class="mb-16">Estimated value</h3>'
       + '<div class="vg-figures">'
-      + '<div class="vg-figure vg-figure-primary"><span>' + (r.landMethod === "time-indexed" ? "Indexed-reference planning scenario" : "Market guide estimate") + "</span><b>" + C.money(r.marketGuideEstimate) + "</b>"
-      + "<small>Planning figure from the disclosed SEA ESTATES factors.</small></div>"
+      + '<div class="vg-figure vg-figure-primary"><span>Market guide estimate</span><b>' + C.money(r.marketGuideEstimate) + "</b>"
+      + "<small>Planning figure from the disclosed reference factors.</small></div>"
       + '<div class="vg-figure"><span>Official BIR zonal reference</span><b>' + C.money(r.birZonalValue) + "</b>"
       + "<small>" + C.money(r.birZonalRatePerSqm) + "/sqm · tax reference, separate from the estimate</small></div>"
       + "</div>"
+      + '<div class="vg-callout" data-vg-reference-status><b>Government reference: ' + esc(status.label) + "</b>"
+      + "<p>Schedule effectivity, dataset generation and legal applicability are separate. "
+      + "Schedule effective " + esc(status.scheduleEffectiveDate || "not recorded")
+      + "; last successful verification: " + esc(status.successfullyVerifiedOn || "not verified") + ".</p></div>"
       + '<dl class="vg-summary">'
       + '<div class="vg-summary-row"><dt>Guide range</dt><dd>' + C.money(r.low) + " – " + C.money(r.high) + '</dd></div>'
       + '<div class="vg-summary-row"><dt>Price per sqm</dt><dd>' + C.money(r.perSqm) + " /sqm</dd></div>"
@@ -10672,20 +10616,13 @@ premise: "Fee Simple / As Improved",
       + (integrity.ok ? '<div class="notice-banner mt-16">' + icon("check", 14) + " <span>Arithmetic reconciled: land + improvements, range and per-sqm all match.</span></div>"
         : '<div class="notice-banner mt-16" style="border-color:#E5484D">' + icon("alert", 14) + " <span><b>Integrity check failed.</b> The figures did not reconcile; do not issue this guide. Re-check the inputs.</span></div>")
       + '<div class="vg-actions">'
-      + '<button class="btn btn-ghost" data-vg-next="1">← Back to inputs</button>'
+      + '<button class="btn btn-ghost" data-vg-next="2">← Back to details</button>'
+      + '<button class="btn btn-ghost" data-vg-next="1">Edit inputs</button>'
       + '<button class="btn btn-primary" data-vg-pdf' + (integrity.ok ? "" : " disabled") + ">" + icon("print", 14) + " Download PDF</button>"
       + "</div>"
       + '<p class="dim tiny mt-8">Downloaded locally as a PDF. Nothing is saved to the CRM and no email is sent.</p>'
       + "</div>";
     return html;
-  }
-
-  function vgUnavailableReason(reason) {
-    if (reason === "municipality-not-found") return "That municipality is not in the imported BIR set.";
-    if (reason === "no-data") return "The BIR schedule does not publish a rate for this classification, and no municipality or province median exists for it. We do not guess — choose another classification or request an on-ground check.";
-    if (reason === "no-area") return "Enter a lot area above zero.";
-    if (reason === "integrity-fail") return "The calculation could not be reconciled and was stopped.";
-    return "Check the location, classification and lot area.";
   }
 
   /* Load barangay + street options for the chosen location. Cached on the draft
@@ -10732,10 +10669,22 @@ premise: "Fee Simple / As Improved",
     const d = vgDraft();
     d.busy = true; d.error = ""; save(); render();
     try {
-      const r = await vgEst().estimate(vgOpts());
+      /* One calculation, from one module. The storefront estimator still owns
+         the BIR lookup, the coverage metadata and the ownership review; the
+         flow module owns the pricing on top of it. */
+      const r = await window.ESREALTY_VG_FLOW.compute(vgOpts(), vgEst());
       d.result = r;
-      if (!r.available && r.reason) d.error = vgUnavailableReason(r.reason);
-      d.stage = r.available ? 4 : 3;
+      if (r && r.available) {
+        d.error = "";
+        d.stage = 3;
+      } else {
+        d.error = r && r.reason === "no-area"
+          ? "Enter a lot area above zero."
+          : r && r.reason === "no-data"
+            ? "The BIR schedule publishes no rate for that classification, and no median stands in for it. Choose another classification or request an on-ground check."
+            : "Could not produce an estimate (" + ((r && r.reason) || "unknown") + "). Check the location, classification and lot area.";
+        d.stage = 2;
+      }
     } catch (e) {
       d.error = (e && e.message) || "Could not run the calculation.";
     }

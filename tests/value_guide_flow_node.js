@@ -168,5 +168,32 @@ const flow = () => require("../js/value_guide_flow.js");
     assert.strictEqual(r.factorStack, null);
   });
 
+  /* ---- 8. the wizard shape ------------------------------------------- */
+  await check("wizard has exactly three stages", () => {
+    const APP = fs.readFileSync(path.join(ROOT, "js/app.js"), "utf8");
+    const m = APP.match(/const VG_STAGES = \[([\s\S]*?)\];/);
+    assert.ok(m, "VG_STAGES still present");
+    assert.strictEqual((m[1].match(/\{ n:/g) || []).length, 3);
+    assert.ok(/Location/.test(m[1]) && /Details/.test(m[1]) && /Report/.test(m[1]));
+  });
+
+  await check("calculate routes through the flow module", () => {
+    const APP = fs.readFileSync(path.join(ROOT, "js/app.js"), "utf8");
+    assert.ok(/ESREALTY_VG_FLOW/.test(APP), "flow module referenced");
+    assert.ok(!/vgEst\(\)\.estimate\(vgOpts\(\)\)/.test(APP), "raw estimate() call removed");
+  });
+
+  await check("old stage helpers are gone", () => {
+    const APP = fs.readFileSync(path.join(ROOT, "js/app.js"), "utf8");
+    ["function vgStage4", "vgUnavailableReason", "vgAboutGroup", "vgDisclosure"].forEach(n =>
+      assert.ok(APP.indexOf(n) < 0, n + " should be deleted"));
+  });
+
+  await check("index.html loads the flow module before the bundle", () => {
+    const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+    const i = html.indexOf("js/value_guide_flow.js"), j = html.indexOf("js/app.min.js");
+    assert.ok(i > 0 && j > 0 && i < j, "script order: flow at " + i + ", bundle at " + j);
+  });
+
   console.log("ALL GREEN (" + count + " checks)");
 })().catch(error => { console.error(error); process.exitCode = 1; });
