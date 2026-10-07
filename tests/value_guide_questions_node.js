@@ -77,5 +77,87 @@ check("every question key is renderable from the draft", () => {
   F.QUESTIONS.forEach(q => assert.ok(typeof q.input === "string" && q.input.length, q.id));
 });
 
+check("a skipped question is NaN, not zero", () => {
+  assert.ok(Number.isNaN(F.factorBp({ input: "terrain", options: [{ value: "0", bp: 0 }] }, {})));
+});
+
+check("an answered zero is a real zero, not NaN", () => {
+  assert.strictEqual(F.factorBp({ input: "terrain", options: [{ value: "0", bp: 0 }] }, { terrain: "0" }), 0);
+});
+
+check("an unmatched answer is unassessed, not a silent zero", () => {
+  assert.ok(Number.isNaN(F.factorBp({ input: "terrain", options: [{ value: "0", bp: 0 }] }, { terrain: "banana" })));
+});
+
+check("all nine skipped: net is zero, rows unassessed, nine assumptions", async () => {
+  const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST);
+  /* Twelve factors plus cornerExposure is 13 rows; OPTS sets corner false, so all
+     13 go unassessed. The nine are the ones the user can answer, and the test
+     pins that the four leftover factors are named too rather than hidden. */
+  assert.strictEqual(r.assumptions.length, F.FACTORS.length, "every unassessed factor is named");
+  const nineIds = ["lotShape", "terrain", "frontage", "roadAccess", "floodRisk",
+    "infrastructure", "titleDoc", "inheritance", "ownership"];
+  const named = r.assumptions.map(a => a.id);
+  nineIds.forEach(id => assert.ok(named.indexOf(id) >= 0, id + " reported as skipped"));
+  F.sectionsOf({}).forEach(row => assert.strictEqual(row.assessed, false, row.id + " unassessed"));
+  assert.ok(Number.isFinite(r.total) && r.total > 0, "a usable number is still produced");
+});
+
+check("a skipped question and a zero-bp answer read differently on the result", async () => {
+  /* The estimator needs its own location fields; pickInputs deliberately does not
+     carry them because it only forwards question answers. Pass the merged object,
+     which is how js/app.js builds the call. */
+  const base = { municipality: "BAUAN", barangay: "POBLACION III",
+    streetKey: "binay st ressurreccion st", classification: "RR",
+    type: "vacant_lot", area: 100, saleContext: "private-resale" };
+  const skipped = await F.compute(Object.assign({}, base, F.pickInputs(base)), EST);
+  const answered = await F.compute(Object.assign({}, base, F.pickInputs(Object.assign({}, base, { shape: "0" }))), EST);
+  const read = r => r.referenceModel.sections.filter(s => s.id === "lotShape")[0];
+  assert.strictEqual(read(skipped).assessed, false);
+  assert.strictEqual(read(skipped).bp, null);
+  assert.strictEqual(read(answered).assessed, true);
+  assert.strictEqual(read(answered).bp, 0, "an answered zero is scored zero, not skipped");
+  assert.strictEqual(skipped.total, answered.total, "but the number is the same");
+  assert.notStrictEqual(skipped.assumptions.length, answered.assumptions.length);
+});
+
+check("netOf treats a skipped factor as no contribution, never as NaN", () => {
+  assert.ok(Number.isFinite(F.netOf({}, true)));
+  assert.strictEqual(F.netOf({}, true), 0);
+});
+
+check("title, estate and occupancy are three separate factors", () => {
+  const byId = id => F.FACTORS.filter(f => f.id === id)[0];
+  assert.ok(byId("titleDoc"), "titleDoc");
+  assert.ok(byId("inheritance"), "inheritance");
+  assert.ok(byId("ownership"), "ownership");
+});
+
+check("title carries its own deductions, not the old conflated range", () => {
+  const t = F.FACTORS.filter(f => f.id === "titleDoc")[0];
+  assert.deepStrictEqual(t.options.map(o => o.bp), [0, -800, -1500]);
+  assert.strictEqual(t.min, -1500, "the declared range follows the options");
+});
+
+check("pending estate and occupancy carry the published deductions", () => {
+  const i = F.FACTORS.filter(f => f.id === "inheritance")[0];
+  const o = F.FACTORS.filter(f => f.id === "ownership")[0];
+  assert.deepStrictEqual(i.options.map(x => x.bp), [0, -1000]);
+  assert.deepStrictEqual(o.options.map(x => x.bp), [0, -500, -1000, -2500]);
+});
+
+check("no ownership deduction reaches ownershipAdjustmentPct", async () => {
+  const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({
+    occupancy: "informal_settlers", titled: "tax_declaration", estate_settled: "pending"
+  })), EST);
+  const read = s => r.referenceModel.sections.filter(x => x.id === s)[0];
+  assert.strictEqual(read("titleDoc").bp, -1500);
+  assert.strictEqual(read("inheritance").bp, -1000);
+  assert.strictEqual(read("ownership").bp, -2500);
+  assert.strictEqual(r.ownershipAdjustmentPct, 0, "that field stays neutral by design");
+  assert.ok(r.total < (await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST)).total,
+    "but the answers do move the number");
+});
+
 console.log("ALL GREEN (" + count + " checks)");
 })().catch(error => { console.error(error); process.exitCode = 1; });

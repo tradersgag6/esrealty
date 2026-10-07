@@ -74,18 +74,22 @@
       { value: "0", label: "Ordinary access", bp: 0 },
       { value: "50", label: "Paved barangay road", bp: 50 },
       { value: "200", label: "Paved, wide, direct to the highway", bp: 200 }] },
+    /* Title, estate and occupancy carry the reference's published deductions rather
+     than the old conflated range, and keep the value vocabulary the rest of the
+     app already uses (estimator.js records the same strings on result.ownership),
+     so a saved draft that recorded titled_previous still resolves. */
     { id: "titleDoc", input: "titleDoc", section: SEC_LEGAL, label: "Title", min: -1500, max: 0, options: [
-      { value: "0", label: "Clean title in the owner's name", bp: 0 },
-      { value: "-800", label: "Title still in a previous owner's name", bp: -800 },
-      { value: "-1500", label: "Tax declaration only", bp: -1500 }] },
+      { value: "titled_self", label: "Clean title in the owner's name", bp: 0 },
+      { value: "titled_previous", label: "Title still in a previous owner's name", bp: -800 },
+      { value: "tax_declaration", label: "Tax declaration only", bp: -1500 }] },
     { id: "inheritance", input: "inheritance", section: SEC_LEGAL, label: "Estate settled", min: -1000, max: 0, options: [
-      { value: "0", label: "Settled", bp: 0 },
-      { value: "-1000", label: "Inheritance pending", bp: -1000 }] },
+      { value: "settled", label: "Settled", bp: 0 },
+      { value: "pending", label: "Inheritance pending", bp: -1000 }] },
     { id: "ownership", input: "ownership", section: SEC_LEGAL, label: "Occupancy", min: -2500, max: 0, options: [
-      { value: "0", label: "Owner-occupied", bp: 0 },
-      { value: "-500", label: "Caretaker only", bp: -500 },
-      { value: "-1000", label: "Tenants", bp: -1000 },
-      { value: "-2500", label: "Informal settlers", bp: -2500 }] },
+      { value: "empty", label: "Owner-occupied", bp: 0 },
+      { value: "caretaker", label: "Caretaker only", bp: -500 },
+      { value: "tenants", label: "Tenants", bp: -1000 },
+      { value: "informal_settlers", label: "Informal settlers", bp: -2500 }] },
     { id: "floodRisk", input: "floodRisk", section: SEC_LEGAL, label: "Flood exposure", min: -500, max: 0, options: [
       { value: "0", label: "Not known to flood", bp: 0 },
       { value: "-150", label: "Floods in heavy rain", bp: -150 },
@@ -162,14 +166,19 @@
     return null;
   }
 
+  /* NaN, never 0, for a factor that was not answered. The old code returned 0,
+     which made "the user skipped this" indistinguishable from "the user picked
+     the option whose adjustment is zero" and let a row print 0.00% on the report
+     without saying anything was assessed at all. An unmatched answer is equally
+     unassessed: a stale value from an older form is not evidence. */
   function factorBp(f, input) {
     var raw = input ? input[f.input] : null;
-    if (f.type === "bool") return raw ? f.options[0].bp : 0;
-    if (raw == null || raw === "") return 0;
+    if (f.type === "bool") return raw ? f.options[0].bp : NaN;
+    if (raw == null || raw === "") return NaN;
     for (var i = 0; i < f.options.length; i++) {
       if (String(f.options[i].value) === String(raw)) return f.options[i].bp;
     }
-    return 0;
+    return NaN;
   }
 
   /* Additive: every bp is summed once and the total applied once. Compounding
@@ -180,20 +189,27 @@
     for (var i = 0; i < FACTORS.length; i++) {
       var f = FACTORS[i];
       if (landOnly && !LAND_SECTIONS[f.section]) continue;
-      bp += factorBp(f, input);
+      /* A skipped factor contributes nothing. It is not the same as a factor
+         scored zero, but it cannot move the number either way, so summing it as
+         0 is arithmetically right; the difference is recorded in assumptions[] so
+         the report can say which rows went unassessed. */
+      var b = factorBp(f, input);
+      if (b === b) bp += b;
     }
     return bp / 10000;
   }
 
-  /* All twelve, answered or not. The report and the PDF both print the whole
-     published table, so an unanswered question has to be a printed 0% rather
-     than a missing row. */
+  /* All of them, answered or not. The report and the PDF both print the whole
+     published table, so the row is never missing; `assessed` and a null bp carry
+     the distinction that the old unconditional 0% threw away. */
   function sectionsOf(input) {
     var out = [];
     for (var i = 0; i < FACTORS.length; i++) {
       var f = FACTORS[i];
+      var bp = factorBp(f, input), assessed = bp === bp;
       out.push({ id: f.id, label: f.label, section: f.section, min: f.min, max: f.max,
-        bp: factorBp(f, input), appliedTo: LAND_SECTIONS[f.section] ? "land" : "improvement" });
+        bp: assessed ? bp : null, assessed: assessed,
+        appliedTo: LAND_SECTIONS[f.section] ? "land" : "improvement" });
     }
     return out;
   }
@@ -262,12 +278,19 @@
       comparablePricesUsed: false,
       sourceType: "LandValuePH published reference model"
     });
+    var sections = sectionsOf(opts);
+    /* Every question the user skipped, named. A report that silently omitted them
+       would read as though the guide had checked and found nothing. */
+    r.assumptions = sections.filter(function (s) { return !s.assessed; })
+      .map(function (s) { return { id: s.id, label: s.label }; });
     r.referenceModel = {
       name: "LandValuePH reference model",
       marketInd: MODEL.MARKET_IND,
       net: landNet,
       buildingNet: bldgNet,
-      sections: sectionsOf(opts),
+      sections: sections,
+      questionCount: QUESTIONS.length,
+      skippedCount: r.assumptions.length,
       rcnRate: rcn,
       usefulLife: life,
       depCap: MODEL.DEP_CAP,
@@ -412,7 +435,7 @@
   return { MODEL: MODEL, FACTORS: FACTORS, QUESTIONS: QUESTIONS, pickInputs: pickInputs,
            SEC_LAND_TERRAIN: SEC_LAND_TERRAIN,
            SEC_BUILDING: SEC_BUILDING, SEC_NEIGHBOURING: SEC_NEIGHBOURING, SEC_LEGAL: SEC_LEGAL,
-           netOf: netOf, sectionsOf: sectionsOf, compute: compute,
+           netOf: netOf, sectionsOf: sectionsOf, factorBp: factorBp, compute: compute,
            MODEL_CALLOUT: MODEL_CALLOUT, loadComparables: loadComparables,
            applyComparables: applyComparables, reportSections: reportSections };
 });
