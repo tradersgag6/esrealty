@@ -65,16 +65,27 @@
       { value: "-800", label: "Steep / terraced", bp: -800 }] },
     { id: "cornerExposure", input: "corner", type: "bool", section: SEC_LAND_TERRAIN, label: "Corner exposure", min: 0, max: 500, options: [
       { value: "corner", label: "Frontage on two roads", bp: 250 }] },
+    { id: "frontage", input: "frontage", section: SEC_LAND_TERRAIN, label: "Frontage", min: -100, max: 150, options: [
+      { value: "-100", label: "Narrow, 6 m", bp: -100 },
+      { value: "0", label: "About average, 12 m", bp: 0 },
+      { value: "150", label: "Wide, 20 m", bp: 150 }] },
     { id: "roadAccess", input: "roadAccess", section: SEC_LAND_TERRAIN, label: "Road access", min: -200, max: 200, options: [
       { value: "-200", label: "Rough or unmade access", bp: -200 },
       { value: "0", label: "Ordinary access", bp: 0 },
       { value: "50", label: "Paved barangay road", bp: 50 },
       { value: "200", label: "Paved, wide, direct to the highway", bp: 200 }] },
-    { id: "titleDoc", input: "titleDoc", section: SEC_LEGAL, label: "Title and documentation", min: -500, max: 0, options: [
-      { value: "0", label: "Clean TCT in the seller's name", bp: 0 },
-      { value: "-200", label: "Tax declaration only", bp: -200 },
-      { value: "-350", label: "Inheritance not yet settled", bp: -350 },
-      { value: "-500", label: "Disputed or untraceable", bp: -500 }] },
+    { id: "titleDoc", input: "titleDoc", section: SEC_LEGAL, label: "Title", min: -1500, max: 0, options: [
+      { value: "0", label: "Clean title in the owner's name", bp: 0 },
+      { value: "-800", label: "Title still in a previous owner's name", bp: -800 },
+      { value: "-1500", label: "Tax declaration only", bp: -1500 }] },
+    { id: "inheritance", input: "inheritance", section: SEC_LEGAL, label: "Estate settled", min: -1000, max: 0, options: [
+      { value: "0", label: "Settled", bp: 0 },
+      { value: "-1000", label: "Inheritance pending", bp: -1000 }] },
+    { id: "ownership", input: "ownership", section: SEC_LEGAL, label: "Occupancy", min: -2500, max: 0, options: [
+      { value: "0", label: "Owner-occupied", bp: 0 },
+      { value: "-500", label: "Caretaker only", bp: -500 },
+      { value: "-1000", label: "Tenants", bp: -1000 },
+      { value: "-2500", label: "Informal settlers", bp: -2500 }] },
     { id: "floodRisk", input: "floodRisk", section: SEC_LEGAL, label: "Flood exposure", min: -500, max: 0, options: [
       { value: "0", label: "Not known to flood", bp: 0 },
       { value: "-150", label: "Floods in heavy rain", bp: -150 },
@@ -107,6 +118,49 @@
       { value: "-100", label: "Schedule a few years old", bp: -100 },
       { value: "-200", label: "Schedule is materially stale", bp: -200 }] }
   ];
+
+  /* The nine questions the reference asks, in its order, each bound to the
+     factor that consumes it. `pickInputs` is the only route from form state
+     into the model, so a question can never be collected without being
+     scored, and a factor can never lack a question. The keys below are the
+     draft field names the form writes, which is why they differ from the
+     factor ids: the pre-2026-10 form wrote lotShape/terrain/roadAccess while
+     the calculator read nothing that any control wrote, which is why every
+     methodology row printed 0.00%. */
+  var QUESTIONS = [
+    { id: "lotShape",   label: "Lot shape",        input: "shape",        factorId: "lotShape" },
+    { id: "terrain",    label: "Terrain and slope", input: "topography",  factorId: "terrain" },
+    { id: "frontage",   label: "Frontage",         input: "frontage",     factorId: "frontage" },
+    { id: "roadAccess", label: "Road access",      input: "access",       factorId: "roadAccess" },
+    { id: "floodRisk",  label: "Flood risk",       input: "flood",        factorId: "floodRisk" },
+    { id: "utilities",  label: "Utilities",        input: "utilities",    factorId: "infrastructure" },
+    { id: "titleDoc",   label: "Title",            input: "titled",       factorId: "titleDoc" },
+    { id: "inheritance", label: "Estate settled",  input: "estate_settled", factorId: "inheritance" },
+    { id: "ownership",  label: "Occupancy",        input: "occupancy",    factorId: "ownership" }
+  ];
+
+  /* Copies only answered questions onto the input object, keyed by the field the
+     matching factor reads. An unanswered key is omitted entirely rather than sent
+     as "", so the factor layer can tell "not answered" from an option whose
+     adjustment happens to be zero. */
+  function pickInputs(draft) {
+    var d = draft || {}, out = {};
+    for (var i = 0; i < QUESTIONS.length; i++) {
+      var q = QUESTIONS[i], v = d[q.input];
+      if (v === undefined || v === null || v === "") continue;
+      var f = factorById(q.factorId);
+      out[f ? f.input : q.input] = v;
+    }
+    /* Corner is asked in step 1 rather than Details, and is a boolean, so it
+       does not appear in QUESTIONS. */
+    if (d.corner) out.corner = true;
+    return out;
+  }
+
+  function factorById(id) {
+    for (var i = 0; i < FACTORS.length; i++) if (FACTORS[i].id === id) return FACTORS[i];
+    return null;
+  }
 
   function factorBp(f, input) {
     var raw = input ? input[f.input] : null;
@@ -355,7 +409,8 @@
     return [MODEL_CALLOUT, comparablesSection(summary, rows), methodologySection(result)].join("\n");
   }
 
-  return { MODEL: MODEL, FACTORS: FACTORS, SEC_LAND_TERRAIN: SEC_LAND_TERRAIN,
+  return { MODEL: MODEL, FACTORS: FACTORS, QUESTIONS: QUESTIONS, pickInputs: pickInputs,
+           SEC_LAND_TERRAIN: SEC_LAND_TERRAIN,
            SEC_BUILDING: SEC_BUILDING, SEC_NEIGHBOURING: SEC_NEIGHBOURING, SEC_LEGAL: SEC_LEGAL,
            netOf: netOf, sectionsOf: sectionsOf, compute: compute,
            MODEL_CALLOUT: MODEL_CALLOUT, loadComparables: loadComparables,
