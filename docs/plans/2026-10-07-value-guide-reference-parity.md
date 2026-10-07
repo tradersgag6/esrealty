@@ -19,7 +19,25 @@
 - `bp` is hundredths of a percent. 250 bp = 2.5%.
 - All copy is ours. The reference's flow, input set and interaction patterns are matched; its visual design, wording and assets are not (spec decision 1).
 - Node test command: `node tests/<name>.js`, expected pass output `ALL GREEN (n checks)`.
-- Full suite: `powershell -File tests/run_all.ps1 -Test value_guide`.
+- `tests/run_all.ps1` needs `-ExecutionPolicy Bypass` on this machine, and its `-Test`
+  parameter takes one suite at a time. There is no `value_guide` aggregate, so
+  "the value-guide suite" means running each node suite by name:
+
+```powershell
+$names = @('value_guide_questions_node','value_guide_flow_node','value_guide_inputs_node',
+  'value_guide_reference_node','value_guide_tax_node','value_guide_pdf_node',
+  'value_guide_internal_node','value_guide_multiple_node','value_guide_provenance_node',
+  'value_guide_pdf_adversarial_node','estimator_core_node','estimator_math_node','build_sync_node')
+$fail = 0
+foreach ($n in $names) { & node "tests\$n.js" | Out-Null; if ($LASTEXITCODE -ne 0) { $fail++ } }
+"FAILURES: $fail / $($names.Count)"
+```
+
+  Expected: `FAILURES: 0 / 13`.
+- **Run `node build_app.js` after every edit to `js/app.js`.** `build_sync_node.js`
+  compares the bundle's stamp against the source hash and fails with
+  "bundle matches source" when they diverge. Skipping it means the browser suite tests
+  stale code.
 
 ## Review Focus
 
