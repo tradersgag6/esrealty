@@ -10323,25 +10323,30 @@ premise: "Fee Simple / As Improved",
 
   function vgEst() { return window.ESREALTY_EST || null; }
 
-  function vgOpts() {
-    const f = vgDraft().form;
-    return {
-      purpose: f.purpose, type: f.type,
-      municipality: f.municipality, barangay: f.barangay,
-      streetKey: f.allOther ? "" : f.streetKey,
-      classification: f.classification, area: Number(f.area) || 0,
-      salePrice: f.salePrice === "" || f.salePrice == null ? null : Number(f.salePrice),
-      saleContext: f.saleContext || "private-resale",
-      developerFees: f.developerFees === "" || f.developerFees == null ? null : Number(f.developerFees),
-      landMethod: f.landMethod || "factor", timeSource: f.timeSource || "manual",
-      timeAnnualPct: f.timeAnnualPct === "" || f.timeAnnualPct == null ? null : Number(f.timeAnnualPct),
-      timeBaseDate: f.timeBaseDate, timeTargetDate: f.timeTargetDate, timeEvidenceId: f.timeEvidenceId,
-      corner: !!f.corner,
-      construction: f.construction, floorArea: Number(f.floorArea) || 0,
-      floors: f.floors, ageBand: f.ageBand, features: f.features,
-      occupancy: f.occupancy, titleStatus: f.titleStatus, inheritanceStatus: f.inheritanceStatus
-    };
-  }
+  /* Everything the model needs, in one object: the location and building inputs
+       the estimator reads, plus the nine question answers forwarded by
+       pickInputs(). The question names used to be occupancy/titleStatus/
+       inheritanceStatus here while FLOW.FACTORS read lotShape/terrain/
+       roadAccess, so nothing a user answered ever reached the model and every
+       methodology row printed 0.00%. Adding a question is now a change to
+       QUESTIONS alone, which pickInputs reads. */
+    function vgModelOpts() {
+      const f = vgDraft().form;
+      const questions = window.ESREALTY_VG_FLOW.pickInputs(f);
+      return Object.assign({}, questions, {
+        purpose: f.purpose, type: f.type,
+        municipality: f.municipality, barangay: f.barangay,
+        streetKey: f.allOther ? "" : f.streetKey,
+        allOther: !!f.allOther,
+        classification: f.classification, area: Number(f.area) || 0,
+        salePrice: f.salePrice === "" || f.salePrice == null ? null : Number(f.salePrice),
+        saleContext: f.saleContext || "private-resale",
+        developerFees: f.developerFees === "" || f.developerFees == null ? null : Number(f.developerFees),
+        landMethod: f.landMethod || "factor",
+        construction: f.construction, floorArea: Number(f.floorArea) || 0,
+        floors: f.floors, ageBand: f.ageBand, features: f.features
+      });
+    }
 
   function vgMissing() {
     const f = vgDraft().form;
@@ -10689,8 +10694,8 @@ function vgStage1(d, ref) {
          them. Loading them here rather than on stage entry means the report is
          rendered exactly once, so a re-render cannot start a second request. */
       const [r, comps] = await Promise.all([
-        window.ESREALTY_VG_FLOW.compute(vgOpts(), vgEst()),
-        window.ESREALTY_VG_FLOW.loadComparables(vgOpts(), vgEst())
+window.ESREALTY_VG_FLOW.compute(vgModelOpts(), vgEst()),
+      window.ESREALTY_VG_FLOW.loadComparables(vgModelOpts(), vgEst())
       ]);
       d.comparables = comps;
       if (r && r.available) window.ESREALTY_VG_FLOW.applyComparables(r, comps, vgEst());

@@ -19,6 +19,10 @@ const TAX = require(path.join(ROOT, "js/value_guide_tax.js"));
 const VG = require(path.join(ROOT, "js/value_guide_pdf.js"));
 
 let fails = 0;
+/* Build a RegExp from a literal string. Without this a part title containing a
+   metacharacter throws when the pattern is compiled. */
+function escapeRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
 function chk(n, ok, d) { console.log("  [" + (ok ? "PASS" : "FAIL") + "] " + n + (d ? " -- " + d : "")); if (!ok) fails++; }
 
 /* pdf-lib writes <hex> Tj; inflate first. Returns one entry per page, each an
@@ -113,11 +117,27 @@ const M = (n) => "PHP " + new Intl.NumberFormat("en-PH", { maximumFractionDigits
   const all = texts.join("\n").replace(/\s+/g, " ");
   console.log("  pages with text: " + pages.length + ", chars: " + all.length);
 
+  /* A title with an unbalanced bracket compiled raw throws at RegExp()
+   construction, so one careless title edit could take the whole PDF suite down
+   for a test-side reason rather than a document one. */
+chk("a part title containing regex metacharacters is matched literally", (() => {
+    const title = "Range (low) + 2.5x [draft";
+    let threwRaw = false;
+    try { new RegExp(title); } catch (e) { threwRaw = true; }
+    if (!threwRaw) return false;
+    const re = new RegExp("SEA ESTATES\\s+.{0,40}" + escapeRe(title).replace(/ /g, "\\s"));
+    return re.test("SEA ESTATES  Range (low) + 2.5x [draft  some body text");
+  })(), "the raw pattern throws and the escaped one matches its own title");
+
   /* Sections, not page numbers, are the contract: a section may legitimately
      run to a second sheet, so the flow is asserted by finding which page each
      section starts on rather than by index. */
   const SECTIONS = VG.PARTS.map(p => p.title);
-  const starts = SECTIONS.map(s => texts.findIndex(t => new RegExp("SEA ESTATES\\s+.{0,40}" + s.replace(/ /g, "\\s")).test(t.replace(/\s+/g, " "))));
+  /* A part title is text, not a pattern. Any title containing a metacharacter
+     (a period, a bracket, a plus) made the unescaped RegExp throw and the whole
+     PDF suite failed on a test-name detail rather than on the document. */
+  const starts = SECTIONS.map(s => texts.findIndex(t =>
+    new RegExp("SEA ESTATES\\s+.{0,40}" + escapeRe(s).replace(/ /g, "\\s")).test(t.replace(/\s+/g, " "))));
   chk("all six parts are present", starts.every(v => v >= 0), SECTIONS.map((s, i) => s + "@" + (starts[i] + 1)).join(", "));
   chk("the parts appear in the reference report's order",
     starts.every((v, i) => i === 0 || v > starts[i - 1]), starts.join(" < "));

@@ -98,10 +98,14 @@ ok(/core\.computeEstimate\(d\.config, d\.index, md, opts\)/.test(EST),
   "estimate() delegates to core.computeEstimate");
 ok(/result\.integrity = core\.integrityCheck\(result\)/.test(EST),
   "estimate() attaches the integrity verdict");
-/* Task 2: the wizard no longer calls the estimator's estimate() itself - it
- * hands the inputs to the reference-model module, which does. */
-ok(/ESREALTY_VG_FLOW\.compute\(vgOpts\(\), vgEst\(\)\)/.test(APP), "the wizard calls FLOW.compute()");
-ok(!/vgEst\(\)\.estimate\(vgOpts\(\)\)/.test(APP), "the wizard no longer calls estimate() directly");
+/* The wizard hands its inputs to the reference-model module, which calls
+ * estimate() itself. pickInputs is the only route: it used to be vgOpts(), which
+ * sent occupancy/titleStatus/inheritanceStatus while FLOW.FACTORS read
+ * lotShape/terrain/roadAccess, so nothing a user answered ever reached the model. */
+ok(/ESREALTY_VG_FLOW\.pickInputs\(/.test(APP), "the wizard routes its draft through pickInputs()");
+ok(!/\bvgOpts\s*\(/.test(APP), "the old vgOpts() translation is gone");
+ok(!/function pickInputs/.test(vgBlock ? vgBlock[0] : ""),
+  "pickInputs lives in the flow module, not re-implemented in the wizard");
 ok(!/function computeEstimate/.test(vgBlock ? vgBlock[0] : ""),
   "the wizard does not re-implement the formula");
 ok(/cfgVersion[\s\S]*?function dataVersionOf/.test(EST),
