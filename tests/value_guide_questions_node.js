@@ -186,6 +186,47 @@ check("every question's own option values resolve through its factor", () => {
   });
 });
 
+check("net cap and floor are symmetric", () => {
+  assert.strictEqual(F.MODEL.NET_FLOOR, -0.15);
+  assert.strictEqual(F.MODEL.NET_CAP, 0.15);
+});
+
+check("every answer at its worst clamps to the floor and stays positive", async () => {
+  const worst = await F.compute(Object.assign({}, OPTS, F.pickInputs({
+    shape: "-500", topography: "-800", frontage: "-100", access: "-200",
+    flood: "floods_routinely", utilities: "existing_services",
+    titled: "tax_declaration", estate_settled: "pending", occupancy: "informal_settlers",
+    zonalRecency: "-200", corner: true
+  })), EST);
+  assert.strictEqual(worst.referenceModel.net, F.MODEL.NET_FLOOR, "clamped, not merely negative");
+  assert.ok(worst.landValue > 0, "land value stays positive");
+  assert.ok(worst.total > 0, "total stays positive");
+});
+
+check("the best possible answers reach the cap without exceeding it", async () => {
+  const best = await F.compute(Object.assign({}, OPTS, F.pickInputs({
+    shape: "0", topography: "0", frontage: "150", access: "200",
+    flood: "0", utilities: "200", titled: "titled_self",
+    estate_settled: "settled", occupancy: "empty", zonalRecency: "0", corner: true
+  })), EST);
+  assert.ok(best.referenceModel.net <= F.MODEL.NET_CAP, "never above the cap");
+  assert.ok(best.referenceModel.net > 0, "the good answers do lift the value");
+});
+
+check("an option outside its declared range is clamped to it", () => {
+  /* Declared min/max were never enforced at runtime before, so a bad edit to the
+     table would silently exceed the published range. */
+  const f = { input: "x", min: -200, max: 200, options: [{ value: "a", bp: -9999 }] };
+  assert.strictEqual(F.clampBp(f, -9999), -200);
+  assert.strictEqual(F.clampBp(f, 9999), 200);
+  assert.strictEqual(F.clampBp(f, 50), 50);
+});
+
+check("net stays inside every factor's declared range", () => {
+  F.FACTORS.forEach(f => f.options.forEach(o =>
+    assert.ok(o.bp >= f.min && o.bp <= f.max, f.id + " option " + o.value + " outside its range")));
+});
+
 check("no ownership deduction reaches ownershipAdjustmentPct", async () => {
   const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({
     occupancy: "informal_settlers", titled: "tax_declaration", estate_settled: "pending"

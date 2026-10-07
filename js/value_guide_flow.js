@@ -32,6 +32,12 @@
     RANGE_LOW: 0.85,
     RANGE_HIGH: 1.30,
     DEP_CAP: 0.80,
+    /* Bound on the summed net. The published maxima across the land factors add
+       up to -24.5%, so without a floor a user who answers every question at its
+       worst would take a quarter off the BIR base and the report would have no
+       way to say the answer had stopped being credible. */
+    NET_FLOOR: -0.15,
+    NET_CAP: 0.15,
     /* Flat replacement-cost rates, keyed to the construction options that
        data/zonal-config.json already defines (that file is read-only). */
     RCN: { wood_prefab: 8000, mixed_chb: 16000, rca_steel: 18000 },
@@ -175,9 +181,19 @@
          0 is arithmetically right; the difference is recorded in assumptions[] so
          the report can say which rows went unassessed. */
       var b = factorBp(f, input);
-      if (b === b) bp += b;
+      if (b === b) bp += clampBp(f, b);
     }
-    return bp / 10000;
+    var net = bp / 10000;
+    return net < MODEL.NET_FLOOR ? MODEL.NET_FLOOR
+      : net > MODEL.NET_CAP ? MODEL.NET_CAP : net;
+  }
+
+  /* An option's bp never leaves the range its factor declares. The old code
+     declared min/max for documentation and never checked them. */
+  function clampBp(f, bp) {
+    if (typeof f.min === "number" && bp < f.min) return f.min;
+    if (typeof f.max === "number" && bp > f.max) return f.max;
+    return bp;
   }
 
   /* All of them, answered or not. The report and the PDF both print the whole
@@ -434,7 +450,8 @@
   return { MODEL: MODEL, FACTORS: FACTORS, QUESTIONS: QUESTIONS, pickInputs: pickInputs,
            SEC_LAND_TERRAIN: SEC_LAND_TERRAIN,
            SEC_NEIGHBOURING: SEC_NEIGHBOURING, SEC_LEGAL: SEC_LEGAL,
-           netOf: netOf, sectionsOf: sectionsOf, factorBp: factorBp, compute: compute,
+           netOf: netOf, sectionsOf: sectionsOf, factorBp: factorBp, clampBp: clampBp,
+           compute: compute,
            MODEL_CALLOUT: MODEL_CALLOUT, loadComparables: loadComparables,
            applyComparables: applyComparables, reportSections: reportSections };
 });
