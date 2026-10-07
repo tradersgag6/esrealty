@@ -98,17 +98,20 @@ check("an unmatched answer is unassessed, not a silent zero", () => {
   assert.ok(Number.isNaN(F.factorBp({ input: "terrain", options: [{ value: "0", bp: 0 }] }, { terrain: "banana" })));
 });
 
-check("all nine skipped: net is zero, rows unassessed, nine assumptions", async () => {
+check("all nine skipped: net is zero and every unanswered factor is named", async () => {
   const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST);
-  /* Twelve factors plus cornerExposure is 13 rows; OPTS sets corner false, so all
-     13 go unassessed. The nine are the ones the user can answer, and the test
-     pins that the four leftover factors are named too rather than hidden. */
-  assert.strictEqual(r.assumptions.length, F.FACTORS.length, "every unassessed factor is named");
-  const nineIds = ["lotShape", "terrain", "frontage", "roadAccess", "floodRisk",
-    "infrastructure", "titleDoc", "inheritance", "ownership"];
-  const named = r.assumptions.map(a => a.id);
-  nineIds.forEach(id => assert.ok(named.indexOf(id) >= 0, id + " reported as skipped"));
-  F.sectionsOf({}).forEach(row => assert.strictEqual(row.assessed, false, row.id + " unassessed"));
+  /* Spec Review Focus 1 wants the nine questions named. Two others can also be
+     unassessed: zonalRecency, when no schedule date is available, and nothing
+     else - cornerExposure is answered by an unticked box, so it never appears
+     here. The assertion is the list, not a count, so adding a legitimately
+     derived factor does not need this rewritten. */
+  const named = r.assumptions.map(a => a.id).sort();
+  ["lotShape", "terrain", "frontage", "roadAccess", "floodRisk", "infrastructure",
+    "titleDoc", "inheritance", "ownership"].forEach(id =>
+    assert.ok(named.indexOf(id) >= 0, id + " reported as skipped"));
+  assert.ok(named.indexOf("zonalRecency") >= 0, "the undated schedule is reported too");
+  assert.strictEqual(named.length, 10, "and nothing else: corner is an answer, not a skip");
+  assert.strictEqual(r.referenceModel.skippedCount, named.length);
   assert.ok(Number.isFinite(r.total) && r.total > 0, "a usable number is still produced");
 });
 
@@ -131,8 +134,11 @@ check("a skipped question and a zero-bp answer read differently on the result", 
 });
 
 check("netOf treats a skipped factor as no contribution, never as NaN", () => {
-  assert.ok(Number.isFinite(F.netOf({}, true)));
-  assert.strictEqual(F.netOf({}, true), 0);
+  /* Returns { net, clamped } so a caller printing the net can disclose the
+     limit rather than absorbing the difference silently. */
+  assert.ok(Number.isFinite(F.netOf({}, true).net));
+  assert.strictEqual(F.netOf({}, true).net, 0);
+  assert.strictEqual(F.netOf({}, true).clamped, false, "nothing to disclose at zero");
 });
 
 check("title, estate and occupancy are three separate factors", () => {
@@ -241,6 +247,31 @@ check("the classification picker reads the four, not all 35 codes", () => {
   assert.ok(helper.indexOf("ref.classifications") < 0, "it no longer walks every code");
 });
 
+check("a draft saved under the previous field names still resolves", () => {
+  /* The questions renamed titleStatus -> titled and inheritanceStatus ->
+     estate_settled. The option values never changed, so a saved answer is a
+     rename. js/app.js:vgMigrateLegacy does it; this pins the values still match
+     the factor table, which is what makes the rename safe. */
+  const legacy = { occupancy: "tenants", titleStatus: "tax_declaration", inheritanceStatus: "pending" };
+  const migrated = { occupancy: legacy.occupancy, titled: legacy.titleStatus, estate_settled: legacy.inheritanceStatus };
+  const out = F.pickInputs(migrated);
+  const bp = id => {
+    const f = F.FACTORS.filter(x => x.id === id)[0];
+    return F.factorBp(f, out);
+  };
+  assert.strictEqual(bp("ownership"), -1000, "occupancy still scores");
+  assert.strictEqual(bp("titleDoc"), -1500, "title still scores");
+  assert.strictEqual(bp("inheritance"), -1000, "estate still scores");
+  /* Every legacy value in the old draft shape must exist as an option value. */
+  const optionValues = id => F.FACTORS.filter(x => x.id === id)[0].options.map(o => o.value);
+  assert.ok(optionValues("titleDoc").indexOf("tax_declaration") >= 0);
+  assert.ok(optionValues("inheritance").indexOf("pending") >= 0);
+  assert.ok(optionValues("ownership").indexOf("tenants") >= 0);
+  /* The old field names must not be read as answers any more. */
+  const stale = F.pickInputs(legacy);
+  assert.ok(!("titleDoc" in stale), "an unmigrated draft does not silently score");
+});
+
 check("legacy and agricultural codes still resolve to a rate", async () => {
   /* X, GP, CL and the 29 agricultural sub-codes become unreachable from the form,
      but a saved draft may still carry one. It must price rather than fail. */
@@ -345,12 +376,87 @@ check("the nine questions are all reachable from a saved draft", () => {
   const out = F.pickInputs({ shape: "", titled: "", occupancy: "" });
   ["lotShape", "titleDoc", "ownership"].forEach(k =>
     assert.ok(!(k in out), k + " absent when the user skips"));
-  assert.ok(F.sectionsOf(out).every(s => s.assessed === false), "all read unassessed");
+  /* Only the answerable questions read unassessed. cornerExposure is answered by
+     an unticked box, so it scores zero; zonalRecency needs a schedule date. */
+  const rows = F.sectionsOf(out);
+  const unassessed = rows.filter(s => !s.assessed).map(s => s.id);
+  ["lotShape", "terrain", "frontage", "roadAccess", "floodRisk", "infrastructure",
+    "titleDoc", "inheritance", "ownership", "zonalRecency"].forEach(id =>
+    assert.ok(unassessed.indexOf(id) >= 0, id + " unassessed when skipped"));
+  assert.strictEqual(rows.filter(s => s.id === "cornerExposure")[0].assessed, true,
+    "corner is an answer, not a skip");
 });
 
 check("net cap and floor are symmetric", () => {
   assert.strictEqual(F.MODEL.NET_FLOOR, -0.15);
   assert.strictEqual(F.MODEL.NET_CAP, 0.15);
+});
+
+/* Every option value below is read out of the factor table rather than typed, so
+   this cannot silently stop exercising a factor. It previously used
+   flood: "floods_routinely" and utilities: "existing_services", neither of which
+   is an option value - both resolved to NaN and were skipped, so Review Focus 3
+   was covered by six of nine factors. */
+function worstCase(questionId) {
+  const f = F.FACTORS.filter(x => x.id === F.QUESTIONS.filter(q => q.id === questionId)[0].factorId)[0];
+  return f.options.reduce((a, b) => (b.bp < a.bp ? b : a));
+}
+check("every question can be answered at its worst", () => {
+  F.QUESTIONS.forEach(q => {
+    const f = F.FACTORS.filter(x => x.id === q.factorId)[0];
+    const out = F.pickInputs({ [q.input]: worstCase(q.id).value });
+    assert.ok(!Number.isNaN(F.factorBp(f, out)), q.id + " worst option resolves");
+  });
+});
+
+check("corner exposure is answered by leaving it unticked, not skipped", () => {
+  /* An unticked corner box is an answer: the property is not on a corner. */
+  const rows = F.sectionsOf({}).filter(s => s.id === "cornerExposure");
+  assert.strictEqual(rows.length, 1);
+  assert.strictEqual(rows[0].assessed, true, "corner is assessed either way");
+  assert.strictEqual(rows[0].bp, 0, "unticked scores its own zero");
+});
+
+check("zonalRecency is derived from the schedule date, not asked", async () => {
+  /* Spec decision 6: the BIR schedule date is a fact about the source, so it is
+     looked up. A current schedule scores 0, a stale one a deduction. */
+  const recent = await F.compute(Object.assign({}, OPTS, F.pickInputs({}), { effectivityDate: "2026-01-01" }), EST);
+  const stale = await F.compute(Object.assign({}, OPTS, F.pickInputs({}), { effectivityDate: "2020-01-01" }), EST);
+  const read = r => r.referenceModel.sections.filter(s => s.id === "zonalRecency")[0];
+  assert.strictEqual(read(recent).assessed, true, "a current schedule is assessed");
+  assert.strictEqual(read(recent).bp, 0);
+  assert.strictEqual(read(stale).assessed, true, "a stale schedule is assessed too");
+  assert.strictEqual(read(stale).bp, -200, "materially stale costs 200 bp");
+  assert.ok(stale.total < recent.total, "and it moves the figure");
+  const none = await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST);
+  assert.strictEqual(read(none).assessed, false, "no date means unassessed, not assumed current");
+});
+
+check("a report where nothing was skipped has an empty assumptions list", async () => {
+  /* With all nine answered and a schedule date present, nothing should be
+     reported unassessed. This is what a permanently-unassessed factor breaks. */
+  const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({
+    shape: "0", topography: "0", frontage: "0", access: "0", flood: "0",
+    utilities: "0", titled: "titled_self", estate_settled: "settled",
+    occupancy: "empty", corner: false
+  }), { effectivityDate: "2026-06-01" }), EST);
+  assert.deepStrictEqual(r.assumptions, [], "nothing reported unassessed");
+  assert.strictEqual(r.referenceModel.skippedCount, 0);
+});
+
+check("a clamped net says so rather than silently absorbing the difference", async () => {
+  /* Title "tax declaration only" alone is -15%, exactly the floor, so any second
+     adverse answer is dropped. The report has to disclose it or its own table
+     does not reconcile with its own total. */
+  const clamped = await F.compute(Object.assign({}, OPTS, F.pickInputs({
+    titled: "tax_declaration", occupancy: "informal_settlers"
+  })), EST);
+  assert.strictEqual(clamped.referenceModel.netClamped, true, "the clamp is reported");
+  assert.strictEqual(clamped.referenceModel.net, F.MODEL.NET_FLOOR);
+  const html = F.reportSections(clamped, EST, []);
+  assert.ok(/limit/i.test(html), "the rendered report mentions the limit");
+  const clean = await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST);
+  assert.strictEqual(clean.referenceModel.netClamped, false, "and stays silent when it does not bind");
 });
 
 check("every answer at its worst clamps to the floor and stays positive", async () => {

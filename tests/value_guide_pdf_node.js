@@ -17,6 +17,15 @@ const PDFLib = require(path.join(ROOT, "vendor/pdf-lib/pdf-lib.min.js"));
 const EST = require(path.join(ROOT, "js/estimator.js"));
 const TAX = require(path.join(ROOT, "js/value_guide_tax.js"));
 const VG = require(path.join(ROOT, "js/value_guide_pdf.js"));
+const F = require(path.join(ROOT, "js/value_guide_flow.js"));
+const OPTS = {
+  municipality: "BAUAN", barangay: "POBLACION III",
+  streetKey: "binay st ressurreccion st", classification: "RR",
+  type: "house_lot", area: 100, floorArea: 120, construction: "mixed_chb",
+  floors: "2", ageBand: "6-10", corner: false, features: [],
+  landMethod: "factor", saleContext: "private-resale",
+  effectivityDate: "2022-07-23"
+};
 
 let fails = 0;
 /* Build a RegExp from a literal string. Without this a part title containing a
@@ -138,7 +147,35 @@ chk("a part title containing regex metacharacters is matched literally", (() => 
      PDF suite failed on a test-name detail rather than on the document. */
   const starts = SECTIONS.map(s => texts.findIndex(t =>
     new RegExp("SEA ESTATES\\s+.{0,40}" + escapeRe(s).replace(/ /g, "\\s")).test(t.replace(/\s+/g, " "))));
-  chk("all six parts are present", starts.every(v => v >= 0), SECTIONS.map((s, i) => s + "@" + (starts[i] + 1)).join(", "));
+/* The methodology table is the one place the original 0.00% defect could still
+   reach a reader: bp is null for an unanswered factor and null/100 renders as
+   0.00%. Every other PDF assertion here runs against EST.estimate(), which never
+   populates referenceModel, so the reference-model branch was untested. This
+   builds a second PDF from the factor model with most questions skipped. */
+const partialResult = await F.compute(
+  Object.assign({}, OPTS, F.pickInputs({ titleDoc: "tax_declaration", ownership: "tenants" })), EST);
+chk("the fixture really did skip questions", partialResult.assumptions.length > 0,
+  partialResult.assumptions.length + " unassessed");
+const partialBlob = await VG.toBlob(PDFLib, partialResult, {
+  kind: "internal-value-guide", preparedFor: "partial", preparedBy: "SEA ESTATES",
+  generatedOn: "2026-10-01", reference: EST.reference(), provenance: EST.provenance(),
+  tax: EST.core.costsFor(partialResult, EST.reference().config), muniRow: EST.municipalityRow("BAUAN")
+});
+/* Same shape as the main render above: the shimmed Blob keeps its parts. */
+const partialText = pagesOf(new Uint8Array(partialBlob.parts[0])).map(p => p.runs.join(" ")).join("\n");
+chk("an unanswered factor reads Not assessed in the PDF, not 0.00%",
+  /Not assessed/.test(partialText), partialText.indexOf("Not assessed") > 0 ? "present" : "MISSING - the 0.00% defect is live");
+chk("the PDF lists what went unassessed", /Not assessed:/.test(partialText), "assumptions listed");
+chk("the PDF states the permitted claim", /Derived from published BIR zonal values/.test(partialText), "claim present");
+chk("the PDF disclaims RA 9646", /RA 9646/.test(partialText), "disclaimer present");
+chk("the PDF carries no reference branding", partialText.indexOf("LandValuePH") < 0, "LandValuePH absent");
+chk("the PDF has no stale factor count", !/twelve/i.test(partialText), "no 'twelve' anywhere");
+chk("the PDF has no deleted improvement net", partialText.indexOf("Improvement net") < 0, "improvement net removed");
+chk("a clamped net is disclosed in the PDF",
+  partialResult.referenceModel.netClamped ? /limit/i.test(partialText) : true,
+  partialResult.referenceModel.netClamped ? "clamp disclosed" : "not clamped, nothing to disclose");
+
+chk("all six parts are present", starts.every(v => v >= 0), SECTIONS.map((s, i) => s + "@" + (starts[i] + 1)).join(", "));
   chk("the parts appear in the reference report's order",
     starts.every((v, i) => i === 0 || v > starts[i - 1]), starts.join(" < "));
 

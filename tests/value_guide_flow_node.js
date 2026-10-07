@@ -24,8 +24,16 @@ const OPTS = {
   type: "house_lot", area: 100, floorArea: 120, construction: "mixed_chb",
   floors: "2", ageBand: "6-10", corner: false, features: [],
   landMethod: "factor", saleContext: "private-resale",
-  /* the three answers that produce the published net of -50 bp */
-  roadAccess: "50", community: "100", zonalRecency: "-200"
+  /* zonalRecency is derived from this rather than answered (spec decision 6),
+     so the fixture supplies the date the way js/app.js does. Bauan's schedule
+     reads 2022-07-23, which is past the three-year window, so it scores -200. */
+  effectivityDate: "2022-07-23",
+  /* The one answered question: a paved barangay road at +50 bp. */
+  roadAccess: "50",
+  /* The test suite's clock would make this date's bucket move as time passes, so
+     the recency expectation is asserted against the derivation rather than a
+     frozen number in the "derived recency follows the schedule date" check. */
+  _recencyNote: "2022-07-23 is over three years before 2026, so it scores -100 bp: stale, not materially stale."
 };
 const VACANT = Object.assign({}, OPTS, { type: "vacant_lot", floorArea: 0 });
 
@@ -53,22 +61,22 @@ function pdfText(bytes) {
     const r = await flow().compute(OPTS, EST);
     assert.strictEqual(r.birZonalRatePerSqm, 11500, "BIR rate unchanged");
     assert.strictEqual(r.birZonalValue, 1150000, "BIR value unchanged");
-    assert.strictEqual(r.landValue, 1329849);
+    assert.strictEqual(r.landValue, 1343350);
     assert.strictEqual(r.improvement, 1536000);
-    assert.strictEqual(r.total, 2865849);
-    assert.strictEqual(r.low, 2435972);
-    assert.strictEqual(r.high, 3725604);
-    assert.strictEqual(r.perSqm, 28658);
+    assert.strictEqual(r.total, 2879350);
+    assert.strictEqual(r.low, 2447448);
+    assert.strictEqual(r.high, 3743155);
+    assert.strictEqual(r.perSqm, 28794);
   });
 
   /* ---- 2. vacant-lot vector ------------------------------------------- */
   await check("vacant-lot vector carries no improvement", async () => {
     const r = await flow().compute(VACANT, EST);
     assert.strictEqual(r.improvement, 0);
-    assert.strictEqual(r.total, 1329849);
-    assert.strictEqual(r.low, 1130372);
-    assert.strictEqual(r.high, 1728804);
-    assert.strictEqual(r.perSqm, 13298);
+    assert.strictEqual(r.total, 1343350);
+    assert.strictEqual(r.low, 1141848);
+    assert.strictEqual(r.high, 1746355);
+    assert.strictEqual(r.perSqm, 13434);
   });
 
   /* ---- 3. the model constants ---------------------------------------- */
@@ -155,9 +163,12 @@ function pdfText(bytes) {
   /* ---- 6. additive net ------------------------------------------------ */
   await check("net is additive, not compounded", async () => {
     const F = flow();
-    const zero = await F.compute(Object.assign({}, VACANT, { roadAccess: "", infrastructure: "", zonalRecency: "" }), EST);
-    const one  = await F.compute(Object.assign({}, VACANT, { roadAccess: "50", infrastructure: "", zonalRecency: "" }), EST);
-    const two  = await F.compute(Object.assign({}, VACANT, { roadAccess: "50", infrastructure: "50", zonalRecency: "" }), EST);
+    /* A current schedule date each time, so the derived recency factor contributes
+       nothing and only the two answered questions are in play. */
+    const CUR = { effectivityDate: "2026-06-01" };
+    const zero = await F.compute(Object.assign({}, VACANT, CUR, { roadAccess: "", infrastructure: "" }), EST);
+    const one  = await F.compute(Object.assign({}, VACANT, CUR, { roadAccess: "50", infrastructure: "" }), EST);
+    const two  = await F.compute(Object.assign({}, VACANT, CUR, { roadAccess: "50", infrastructure: "50" }), EST);
     assert.strictEqual(zero.referenceModel.net, 0);
     assert.strictEqual(one.referenceModel.net, 0.005);
     assert.strictEqual(two.referenceModel.net, 0.01, "50bp + 50bp = 100bp, not 1.05 x 1.05");
@@ -165,15 +176,30 @@ function pdfText(bytes) {
     assert.notStrictEqual(1 + two.referenceModel.net, compounded);
   });
 
-  /* The golden fixture answers roadAccess +50 and zonalRecency -200. The old
-     fixture also carried community +100, which the retirement removed, so the
-     net moved from -50bp to -150bp. Both answered factors are land-bound, so the
-     building figure is unchanged. */
-  await check("the golden fixture lands on the published net of -150 bp", async () => {
+  /* The golden fixture answers roadAccess +50 and carries the 2022-07-23 schedule
+     date js/app.js passes, which derives zonalRecency -100 (between one and two
+     years old, not yet "materially stale"), for -50 bp overall. Both surviving
+     factors are land-bound, so the building figure is unchanged at 1536000 -
+     which is the proof the building was never in the net. */
+  await check("the golden fixture lands on the net of -50 bp", async () => {
     const r = await flow().compute(OPTS, EST);
-    assert.strictEqual(r.referenceModel.net, -0.015);
+    assert.strictEqual(r.referenceModel.net, -0.005);
+    assert.strictEqual(r.referenceModel.netClamped, false);
     const scored = r.referenceModel.sections.filter(s => s.assessed).map(s => s.id);
-    assert.deepStrictEqual(scored.sort(), ["roadAccess", "zonalRecency"]);
+    assert.deepStrictEqual(scored.sort(), ["cornerExposure", "roadAccess", "zonalRecency"],
+      "the answered question, the unticked corner box, and the derived schedule");
+  });
+
+  await check("the derived recency follows the schedule date, not the fixture", async () => {
+    const F = flow();
+    const fresh = await F.compute(Object.assign({}, OPTS, { effectivityDate: "2026-06-01" }), EST);
+    const stale = await F.compute(Object.assign({}, OPTS, { effectivityDate: "2019-01-01" }), EST);
+    const none = await F.compute(Object.assign({}, OPTS, { effectivityDate: null }), EST);
+    const read = r => r.referenceModel.sections.filter(s => s.id === "zonalRecency")[0];
+    assert.strictEqual(read(fresh).bp, 0, "a current schedule scores zero");
+    assert.strictEqual(read(stale).bp, -200, "a materially stale one scores -200");
+    assert.strictEqual(read(none).assessed, false, "an undated schedule is unassessed");
+    assert.strictEqual(read(none).bp, null, "and prints nothing rather than assuming zero");
   });
 
   await check("net stays inside every published factor range", async () => {
@@ -265,7 +291,9 @@ function pdfText(bytes) {
     const r = await F.compute(OPTS, EST);
     const html = F.reportSections(r, EST, []);
     assert.strictEqual((html.match(/data-vf=/g) || []).length, F.FACTORS.length, "one row per factor");
-    assert.ok(html.indexOf("-1.50") > 0 || html.indexOf("-1.5%") > 0, "applied net printed");
+    /* Read the net off the model rather than hard-coding a string: this fixture's
+       net depends on the derived recency factor, which moves as the clock does. */
+    assert.ok(html.indexOf((r.referenceModel.net * 100).toFixed(2) + "%") > 0, "applied net printed");
     F.FACTORS.forEach(f => assert.ok(html.indexOf('data-vf="' + f.id + '"') > 0, f.id + " row"));
   });
 
@@ -301,9 +329,14 @@ function pdfText(bytes) {
     const r = await flow().compute(OPTS, EST);
     const blob = await PDF.toBlob(PDFLib, r, { preparedFor: "3-step flow", preparedBy: "SEA ESTATES", generatedOn: "2026-10-06" });
     const text = pdfText(await blob.arrayBuffer());
-    assert.ok(text.indexOf("LandValuePH reference model") >= 0, "model named");
+    /* Spec decision 1 and the ledger ruling: a competitor is not named as the
+       source of the figure in a customer document. The permitted claim is. */
+    assert.ok(text.indexOf("Derived from published BIR zonal values") >= 0, "the permitted claim is stated");
+    assert.ok(text.indexOf("RA 9646") >= 0, "and it is not an appraisal under the Act");
+    assert.ok(text.indexOf("LandValuePH") < 0, "no reference branding in the PDF");
+    assert.ok(text.indexOf("twelve") < 0, "the stale factor count is gone: " + text.match(/\w+ published \w+/));
     assert.ok(text.indexOf("16,000") >= 0, "construction rate shown");
-    assert.ok(text.indexOf("permit-declared") >= 0, "rate disclosure");
+    assert.ok(text.indexOf("replacement-cost rate") >= 0, "rate named as a replacement cost, not a price");
     assert.ok(text.indexOf("SEA ESTATES market band factor") < 0, "stale factor label gone");
   });
 

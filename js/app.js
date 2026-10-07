@@ -10295,16 +10295,18 @@ premise: "Fee Simple / As Improved",
         stage: 1, result: null, busy: false, error: "",
         preparedFor: "", preparedBy: "",
         form: {
-          purpose: "Selling", type: "vacant_lot",
+          purpose: "Selling", type: "vacant_lot", saleStage: "",
           salePrice: "", saleContext: "private-resale", developerFees: "",
-          landMethod: "factor", timeSource: "manual", timeAnnualPct: "",
-          timeBaseDate: "", timeTargetDate: new Date().toISOString().slice(0, 10), timeEvidenceId: "",
+          landMethod: "factor",
           municipality: "", barangay: "", streetKey: "", allOther: false,
           classification: "", area: "", corner: false,
           construction: "mixed_chb", floorArea: "", floors: "1", ageBand: "0-5",
           features: [],
-          occupancy: "", titleStatus: "", inheritanceStatus: "",
-          community: "", floodRisk: "", roadAccess: "", frontage: ""
+          /* The nine question fields, named to match QUESTIONS. An old draft may
+             carry the previous occupancy/titleStatus/inheritanceStatus names;
+             vgModelOpts migrates them so a saved answer is not silently dropped. */
+          shape: "", topography: "", frontage: "", access: "", flood: "",
+          utilities: "", titled: "", estate_settled: "", occupancy: ""
         }
       };
     }
@@ -10330,14 +10332,33 @@ premise: "Fee Simple / As Improved",
        roadAccess, so nothing a user answered ever reached the model and every
        methodology row printed 0.00%. Adding a question is now a change to
        QUESTIONS alone, which pickInputs reads. */
+    /* A draft saved by the previous form recorded titleStatus and inheritanceStatus.
+       Their option values are unchanged - only the field names were renamed - so
+       migrating is a rename, not a reinterpretation. Without it a saved answer
+       would be dropped and the report would say the question went unanswered
+       while the review screen still displayed the old value. */
+const VG_LEGACY_KEYS = { titleStatus: "titled", inheritanceStatus: "estate_settled" };
+
+function vgMigrateLegacy(f) {
+      Object.keys(VG_LEGACY_KEYS).forEach(old => {
+        if (f[old] && !f[VG_LEGACY_KEYS[old]]) f[VG_LEGACY_KEYS[old]] = f[old];
+      });
+      return f;
+    }
+
     function vgModelOpts() {
-      const f = vgDraft().form;
+      const f = vgMigrateLegacy(vgDraft().form);
       const questions = window.ESREALTY_VG_FLOW.pickInputs(f);
       return Object.assign({}, questions, {
         purpose: f.purpose, type: f.type,
         municipality: f.municipality, barangay: f.barangay,
         streetKey: f.allOther ? "" : f.streetKey,
         allOther: !!f.allOther,
+        /* The schedule date of the rate that was matched. zonalRecency is derived
+           from this rather than asked, because it is a fact about the source we
+           hold, not something the reader knows. */
+        effectivityDate: vgEst() && vgEst().municipalityRow(f.municipality)
+          ? vgEst().municipalityRow(f.municipality).effectivityDate : null,
         classification: f.classification, area: Number(f.area) || 0,
         salePrice: f.salePrice === "" || f.salePrice == null ? null : Number(f.salePrice),
         saleContext: f.saleContext || "private-resale",
@@ -10631,7 +10652,21 @@ function vgQuestionGroups() {
     }
     rows.push(["Transaction", f.saleContext || "private-resale"]);
     rows.push(["Price scenario", f.salePrice || "Not supplied"]);
-    rows.push(["Occupancy / title / inheritance", [f.occupancy || "unknown", f.titleStatus || "unknown", f.inheritanceStatus || "unknown"].join(" / ")]);
+/* The questions now write titled / estate_settled / occupancy, so reading the old
+       titleStatus / inheritanceStatus names here showed "unknown" for answers the
+       user had just given. Read each question through QUESTIONS so the summary
+       cannot name a field the form does not write, and print "Not assessed" for a
+       skipped one rather than a fabricated answer. */
+    const FLOW = window.ESREALTY_VG_FLOW || {};
+    const factors = FLOW.FACTORS || [];
+    FLOW.QUESTIONS.forEach(q => {
+      const factor = factors.filter(x => x.id === q.factorId)[0];
+      if (!factor) return;
+      const val = f[q.input];
+      const opt = (factor.options || []).filter(o => o.value === val)[0];
+      rows.push([q.label, opt ? opt.label : "Not assessed"]);
+    });
+    if (f.corner) rows.push(["Corner lot", "Yes"]);
     return rows;
   }
 

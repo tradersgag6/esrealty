@@ -26,7 +26,7 @@
      5 Documents and Filing Guide checklists, deadlines, penalties
      6 Negotiation and Disclaimer pricing ladder, sources, limits
      7 Model and Provenance       which model, and what it does not claim
-     8 Methodology                the twelve published factors, net included
+     8 Methodology                the published factors, net included
      9 Construction Basis         replacement cost and its provenance
     10 Comparables, Context Only  our own listings, never an input
 
@@ -140,7 +140,7 @@
        has to disclose. Titles avoid regex metacharacters because
        tests/value_guide_pdf_node.js builds an unescaped selector from them. */
     { key: "model", no: "07", title: "Model and Provenance", blurb: "Which model produced the figure, and what it does not claim." },
-    { key: "methodology", no: "08", title: "Methodology: Twelve Factors", blurb: "Each published question, its applied percentage, and the net." },
+    { key: "methodology", no: "08", title: "Methodology: Published Factors", blurb: "Each published question, its applied percentage, and the net." },
     { key: "construction", no: "09", title: "Construction Basis", blurb: "Replacement cost, useful life, depreciation, provenance." },
     { key: "comparables", no: "10", title: "Comparables, Context Only", blurb: "Our own listings, shown for context, never as an input." }
   ];
@@ -1011,19 +1011,19 @@
       newSection("model");
       heading("Which model produced this figure", { small: true });
       if (rm) {
-        para("Reference model: " + rm.name + ". A BIR zonal base, a market-indicator factor of " + fmtNum(rm.marketInd, 3)
-          + ", then one additive net of the twelve published answers in the next part. Every answer is added once and the total is applied once; nothing is compounded.", 8, gray);
+        para("Derived from published BIR zonal values, adjusted for documented property factors. A BIR zonal base, a market-indicator factor of " + fmtNum(rm.marketInd, 3)
+          + ", then one additive net of the answers in the next part. Every answer is added once and the total is applied once; nothing is compounded. Not a real estate appraisal under RA 9646.", 8, gray);
         table(null, [
-          ["Reference model", rm.name],
+          ["Model", "value-guide factor model"],
           ["Market indicator", "x " + fmtNum(rm.marketInd, 3)],
           ["Land net (additive)", fmtNum(rm.net * 100, 2) + "%"],
-          ["Improvement net (additive)", fmtNum(rm.buildingNet * 100, 2) + "%"],
+          ["Net limit reached", rm.netClamped ? "yes - the sum of adverse answers was capped at " + fmtNum(rm.netLimit * 100, 2) + "%" : "no"],
           ["Escalation", "none - the replacement rate is flat"],
           ["Zonal schedule effective", r.effectivityDate || "not recorded"],
           ["Comparables", "context only, never an input"]
         ], [200, 300], { boldFirstCol: true, padY: 4 });
         box([
-          "The public site calculator uses a different model (SEA ESTATES factor stack) and returns a higher figure for the same property: 2.14x on a vacant lot in our fixture. Both are planning figures, not an appraisal.",
+          "The public site calculator uses a different model (SEA ESTATES factor stack) and returns roughly 2.1x the figure here for the same property. Both are planning figures, not an appraisal.",
           "Street rates in the zonal schedule for post-2022 subdivisions can sit far below what those homes transact for. The guide inherits that; the model name and the schedule date are disclosed here rather than a claimed accuracy."
         ], tan);
       } else {
@@ -1031,23 +1031,35 @@
       }
 
       /* ============================================================
-         08  METHODOLOGY: TWELVE FACTORS
+         08  METHODOLOGY: PUBLISHED FACTORS
          ============================================================ */
       newSection("methodology");
-      heading("The twelve published factors", { small: true });
+      heading("The published factors", { small: true });
       if (rm) {
-        para("Each question maps to a published percentage. The answers are summed once into one net for the land and one for the improvement, and each net is applied once.", 8, gray);
+        para("Each question maps to a published percentage. The answers are summed once into one net for the land, and that net is applied once.", 8, gray);
+        /* An unassessed factor carries bp null. Printing that as 0.00% would read
+           as "checked, nothing found", which is the opposite of what Not sure
+           means. The range column still shows what the factor could have done. */
         table(["Question", "Section", "Published range", "Applied"],
           rm.sections.map(function (s) {
-            return [s.label, s.section, fmtNum(s.min / 100, 2) + "% to " + fmtNum(s.max / 100, 2) + "%",
-              (s.bp > 0 ? "+" : "") + fmtNum(s.bp / 100, 2) + "%"];
+            var cell = s.assessed
+              ? (s.bp > 0 ? "+" : "") + fmtNum(s.bp / 100, 2) + "%"
+              : "Not assessed";
+            return [s.label, s.section, fmtNum(s.min / 100, 2) + "% to " + fmtNum(s.max / 100, 2) + "%", cell];
           }), [150, 130, 140, 70], { padY: 4, align: [null, null, null, "r"] });
+        var skipped = (r.assumptions || []).map(function (a) { return a.label; });
         box([
-          "Applied net: " + fmtNum(rm.net * 100, 2) + "% on land, " + fmtNum(rm.buildingNet * 100, 2) + "% on the improvement. Additive, not compounded.",
-          "An unanswered question is 0%. The published ranges are the ceilings, so no answer can move a component outside them."
+          "Applied net: " + fmtNum(rm.net * 100, 2) + "% on land. Additive, not compounded."
+            + (rm.netClamped
+              ? " The sum of adverse answers reached the " + fmtNum(rm.netLimit * 100, 2) + "% limit, so some stated conditions did not affect the figure."
+              : ""),
+          skipped.length
+            ? "Not assessed: " + skipped.join(", ") + ". These were left unassessed rather than guessed, and a question nobody answered cannot raise or lower the figure."
+            : "Every question was answered.",
+          "The published ranges are the ceilings, so no single answer can move a component outside them."
         ], tan);
       } else {
-        para("Not applicable: this result was not produced by the twelve-factor reference model.", 8, gray);
+        para("Not applicable: this result was not produced by the factor model.", 8, gray);
       }
 
       /* ============================================================
@@ -1067,8 +1079,15 @@
         ["Depreciation applied", fmtNum(r.depreciatedPct, 2) + "%  (capped at " + fmtNum(depCap * 100, 0) + "%)"],
         ["Escalation", "none - no valuation year, no annual uplift"]
       ], [200, 300], { boldFirstCol: true, padY: 4 });
+      /* The provenance sentence used to claim the rate "sits above the
+         permit-declared average" unconditionally. It does not hold for
+         wood_prefab (8,000 against a PSA national average of ~14,000), and
+         wood_prefab is one of the three options the form offers. State the
+         relationship rather than asserting it. */
+      var psaNational = 14082, psaRegion4a = 13405;
       box([
-        fmtMoney(rcn) + "/sqm is a permit-declared figure: the Philippine Statistics Authority published a national residential average of PHP 14,429/sqm (Jan 2025) and PHP 14,081.64/sqm (May 2026), PSA Region IV-A was PHP 13,405/sqm (Jan 2025), and real Batangas turnkey quotations for an economic finish run PHP 23,100-31,185/sqm (Q1 2026). The rate sits above the permit-declared average and below every contractor quote.",
+        fmtMoney(rcn) + "/sqm is a replacement-cost rate, not a market price. For comparison, the Philippine Statistics Authority published a national residential average of PHP " + fmtMoney(psaNational) + "/sqm (May 2026) and PSA Region IV-A was PHP " + fmtMoney(psaRegion4a) + "/sqm (Jan 2025); real Batangas turnkey quotations for an economic finish run PHP 23,100-31,185/sqm (Q1 2026). This figure is "
+          + (rcn > psaRegion4a ? "above" : rcn < psaRegion4a ? "below" : "at") + " the regional published average and below every contractor quote.",
         "It is neither a contractor's price nor a completed-sale cost, and it is never escalated: no published source supported the annual uplift that was tested against these figures."
       ], tan);
 

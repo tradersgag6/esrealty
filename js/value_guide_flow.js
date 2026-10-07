@@ -161,6 +161,24 @@
     { value: "A50", label: "Agricultural" }
   ];
 
+  /* The BIR schedule is reissued periodically. A rate drawn from a schedule more
+     than three years old is stale by the publisher's own cadence, and the
+     published recency factor tops out at -200 bp for a materially stale one.
+     effectivityDate comes from the matched rate, so this is a lookup rather than
+     a question. Returns NaN when no date is available, which keeps the old
+     "not assessed" behavior instead of assuming a current schedule. */
+  var RECENCY_YEARS = 3;
+  function zonalRecencyBp(input) {
+    var raw = input && (input.effectivityDate || input.zonalEffectivityDate);
+    if (!raw) return NaN;
+    var d = new Date(raw);
+    if (isNaN(d.getTime())) return NaN;
+    var years = (Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000);
+    if (years <= RECENCY_YEARS) return 0;
+    if (years < RECENCY_YEARS * 2) return -100;
+    return -200;
+  }
+
   function factorById(id) {
     for (var i = 0; i < FACTORS.length; i++) if (FACTORS[i].id === id) return FACTORS[i];
     return null;
@@ -173,7 +191,17 @@
      unassessed: a stale value from an older form is not evidence. */
   function factorBp(f, input) {
     var raw = input ? input[f.input] : null;
-    if (f.type === "bool") return raw ? f.options[0].bp : NaN;
+    /* A boolean factor is different from a choice. An unticked corner box is an
+       answer - the property is not on a corner - not a skipped question, so it
+       scores its own zero rather than NaN. Treating it as NaN put "Corner
+       exposure" in the report's list of things nobody checked, which is false:
+       the user was asked and answered. */
+    if (f.type === "bool") return raw ? f.options[0].bp : 0;
+    /* zonalRecency is derived from the matched rate's schedule date rather than
+       answered, so its input is the date and not a stored choice. Resolving it
+       here rather than in netOf keeps the printed table and the applied net
+       reading from the same value. */
+    if (f.id === "zonalRecency") return zonalRecencyBp(input);
     if (raw == null || raw === "") return NaN;
     for (var i = 0; i < f.options.length; i++) {
       if (String(f.options[i].value) === String(raw)) return f.options[i].bp;
@@ -184,6 +212,10 @@
   /* Additive: every bp is summed once and the total applied once. Compounding
      two +50 bp answers would give +100.25 bp, which is not what the published
      ranges describe. */
+  /* Returns the net and whether the limit bound. The clamp used to be silent, so
+     a property whose adverse answers summed past the floor reported a net the
+     reader could not reconcile with the table above it. Callers that print the
+     net must disclose the limit when netClamped is set. */
   function netOf(input, landOnly) {
     var bp = 0;
     for (var i = 0; i < FACTORS.length; i++) {
@@ -197,8 +229,14 @@
       if (b === b) bp += clampBp(f, b);
     }
     var net = bp / 10000;
-    return net < MODEL.NET_FLOOR ? MODEL.NET_FLOOR
-      : net > MODEL.NET_CAP ? MODEL.NET_CAP : net;
+    var clamped = net < MODEL.NET_FLOOR || net > MODEL.NET_CAP;
+    return {
+      net: clamped ? (net < MODEL.NET_FLOOR ? MODEL.NET_FLOOR : MODEL.NET_CAP) : net,
+      clamped: clamped,
+      /* The unclamped sum, so a report can show what the answers came to before
+         the limit bound. */
+      raw: net
+    };
   }
 
   /* An option's bp never leaves the range its factor declares. The old code
@@ -239,7 +277,14 @@
        questions describe the lot and the paperwork, and the building is priced by
        cost approach alone. This replaced a bldgNet that became permanently zero
        when its only factor (demand) was retired. */
-    var landNet = netOf(opts, true);
+    var net = netOf(opts, true);
+    var landNet = net.net;
+    /* zonalRecency is derived, not asked (spec decision 6): the BIR schedule date
+       for the matched rate is a fact about the source, so asking the user would be
+       asking them something we can look up. An old schedule is a real reason to
+       discount; leaving it permanently unassessed put a row in every report's
+       "what we didn't check" and made skippedCount always at least 1. */
+    var recency = zonalRecencyBp(opts);
 
     var landBase = Number(r.birZonalValue) || 0;
     r.landValue = Math.round(landBase * MODEL.MARKET_IND * (1 + landNet));
@@ -304,6 +349,9 @@
       name: "LandValuePH reference model",
       marketInd: MODEL.MARKET_IND,
       net: landNet,
+      netClamped: net.clamped,
+      netLimit: MODEL.NET_FLOOR,
+      netSumBeforeLimit: net.raw,
       buildingNet: null,
       sections: sections,
       questionCount: QUESTIONS.length,
@@ -446,6 +494,15 @@
     var skipList = skipped.length
       ? "<p><b>What we didn't check:</b> " + skipped.map(function (a) { return esc(a.label); }).join(", ") + ".</p>"
       : "<p>Every question was answered.</p>";
+    /* Without this the table and the total contradict each other: adverse
+       answers can sum past the limit, the excess is dropped, and the printed
+       "Applied net" would not reconcile with the printed rows. */
+    var clampLine = model.netClamped
+      ? "<p><b>Limit reached:</b> the adverse answers above sum to "
+        + pct(model.netSumBeforeLimit) + ", past the " + pct(model.netLimit)
+        + " limit this model applies to land. The figure above uses "
+        + pct(model.net) + ", so some of the stated conditions did not affect it.</p>"
+      : "";
     /* The count is read off the question list rather than typed. The reference
        prints its own count from a runtime table, so a hard-coded "nine" here
        would drift the moment the list changed. */
@@ -456,6 +513,7 @@
       + '<table><thead><tr><th>Question</th><th>Section</th><th>Applied</th></tr></thead><tbody>'
       + rows + "</tbody></table>"
       + '<p><b>Applied net:</b> ' + pct(model.net) + " on land.</p>"
+      + clampLine
       + skipList
       + '<p class="dim small">Construction rates are flat and never escalated: '
       + peso(model.rcnRate) + " per sqm for this build type, depreciated straight-line to a "
