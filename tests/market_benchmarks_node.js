@@ -86,45 +86,99 @@ check("no benchmark price ever reaches a formula", () => {
   });
 });
 
-check("the one land-only comparable implies a multiple inside the band", () => {
-  /* Laurel 310 sqm at 5270000 is the only record where the price is unambiguously
-     land. Against Laurel's residential BIR p50 this is ~6.8x, far above the
-     researched band. That is a real datapoint against the band being exact, and
-     the test asserts the model is NOT at that multiple - so the guide understates
-     this property rather than overstating it. Stating the direction is the point:
-     an estimate that errs low on a premium lot is safer than one that errs high. */
+/* Reads the RR rate BIR actually assigns to a named street. A municipal p50 is
+   not a valid denominator for an individual property: it blends subdivisions
+   priced far above it with subdivisions priced far below it. Correcting this is
+   what turned the two records below from apparent outliers into ordinary ones. */
+function streetRR(muniSlug, barangay, street) {
+  const d = require(path.join(ROOT, "data/bir-batangas/municipalities/" + muniSlug + ".json"));
+  const b = (d.barangays || {})[barangay];
+  assert.ok(b, muniSlug + " has barangay " + barangay);
+  const st = (b.streets || {})[street];
+  assert.ok(st, muniSlug + " has street " + street + " in " + barangay);
+  return st.classes.RR.value;
+}
+
+check("the premium land listing lands at or near the band, so it is not an outlier", () => {
+  /* 310 sqm at 5270000 is the only record where the price is unambiguously land.
+     The previous version of this test compared it against Laurel's residential
+     p50 of 2500/sqm and concluded 6.8x - far above the band. That denominator was
+     wrong: it is not the rate this street carries, and no individual property can
+     be judged against a town-wide median.
+
+     Against the rates BIR actually assigns to Splendido Taal, the same listing is
+     1.26x (Dayap Itaas / Niyugan, 13500) to 2.43x (Paliparan, 7000) - i.e. it sits
+     inside the researched band, not 2.7x above it. The record no longer supports
+     treating the band as an over-estimate. */
   const r = BM.records.filter(x => x.id === "laurel-splendido-310")[0];
-  const muni = zonal.municipalities.filter(m => m.name === "LAUREL")[0];
-  const implied = r.askingPrice / (muni.byClass.RR.p50 * r.lotArea);
-  assert.ok(implied > 3.0,
-    "the premium-lot comparable is above the band (" + implied.toFixed(2) + "x), so it is an outlier, not the band");
-  /* Our band ceiling must not chase it. */
-  const b = bandOf("residential");
-  assert.ok(b.max < implied, "the disclosed ceiling stays below the premium outlier");
+  const perSqm = r.askingPrice / r.lotArea;
+  const dayap = streetRR("laurel", "DAYAP ITAAS", "splendido taal jaka");
+  const paliparan = streetRR("laurel", "PALIPARAN", "splendido taal");
+  const low = perSqm / Math.max(dayap, paliparan);
+  const high = perSqm / Math.min(dayap, paliparan);
+  assert.ok(low >= 1.2 && low <= 1.4, "against the 13500 street rate it is ~1.26x, got " + low.toFixed(2));
+  assert.ok(high >= 2.3 && high <= 2.5, "against the 7000 street rate it is ~2.43x, got " + high.toFixed(2));
+  assert.ok(high <= BM._bandResearch.bandHigh,
+    "even the more favourable denominator stays inside the researched ceiling");
+  assert.ok(low >= 1.2, "and it is not so far below the floor that it would drag the band down either");
 });
 
-check("the subdivision rate sits BELOW the BIR median, which is the reason for the clamp", () => {
-  /* Gavina Ville Subdivision Phase 3 publishes 3200-3400/sqm. San Pascual's
-     residential distribution runs p25 2500, p50 4000, p75 6500, so the asking
-     rate is 1.28x-1.36x its p25 and 0.80x-0.85x its p50.
+check("the subdivision record sits BELOW its own street's BIR rate, which is why the band is clamped", () => {
+  /* Gavina Ville Phase 3 shows 3200-3400/sqm. BIR 035-2022 assigns 6000/sqm to the
+     Palsahingin leg and 5000/sqm to the Sambat leg, so the asking rate is
+     0.53x-0.68x the rate for the very street it is on.
 
-     This is the single most important record in the file, and it contradicts the
-     premise of a pure "market = BIR x N" model: an established subdivision is
-     priced BELOW the BIR zonal median for the same town. The BIR zonal value is
-     a tax base, not a floor on market, so no multiplier can be right everywhere.
+     This is the record that disproves BIR-as-floor, and it survives the corrected
+     denominator: an established subdivision can trade below its BIR zonal rate.
+     The BIR value is a tax base, not a market floor, so no single multiplier is
+     right everywhere - the band is clamped rather than widened to chase outliers.
 
-     The test asserts the band stays above this record. Over-pricing the province
-     to compensate for one premium subdivision listing would be the worse error. */
+     Reliability is low: the figure sits in a historical price-trends block on an
+     undated page, not a live quoted price. It is a direction, not a calibration. */
   const r = BM.records.filter(x => x.id === "gavina-ville-ph3")[0];
-  const muni = zonal.municipalities.filter(m => m.name === "SAN PASCUAL")[0];
-  const vsP25 = r.askingPricePerSqmMin / muni.byClass.RR.p25;
-  const vsP50 = r.askingPricePerSqmMax / muni.byClass.RR.p50;
-  assert.ok(vsP25 < BM._bandResearch.bandLow,
-    "the subdivision rate is below the researched floor against p25 (" + vsP25.toFixed(2) + "x) - this is the record that disproves BIR-as-floor");
-  assert.ok(vsP50 < 1,
-    "and below the BIR median itself (" + vsP50.toFixed(2) + "x), so the band must not be treated as a lower bound");
+  const palsa = streetRR("san-pascual", "PALSAHINGIN", "gavina ville");
+  const sambat = streetRR("san-pascual", "SAMBAT", "gavina ville");
+  const vsPalsa = r.askingPricePerSqmMin / palsa;
+  const vsSambat = r.askingPricePerSqmMax / sambat;
+  assert.ok(vsPalsa < 1 && vsSambat < 1,
+    "below the BIR rate for its own street (" + vsPalsa.toFixed(2) + "x / " + vsSambat.toFixed(2) + "x)");
+  assert.ok(vsPalsa > 0.5 && vsPalsa < 0.6, "about 0.53x against the 6000 rate, got " + vsPalsa.toFixed(2));
+  assert.strictEqual(r.priceReliability && r.priceReliability.indexOf("historical") >= 0, true,
+    "and it is recorded as a historical trend, not a live quote");
   assert.ok(cfg.marketBand.bands.residential.min > BM._bandResearch.bandLow,
-    "the disclosed band floor stays above both, so this record is never priced below its own asking rate");
+    "the disclosed band floor stays above this record, so it is never priced below its own asking rate");
+});
+
+check("the LandValuePH reference report reconciles and is not treated as market evidence", () => {
+  /* The purchased reference report is the closest thing to an external check on
+     the internal 1.174 model. Its arithmetic does reconcile - which is why the
+     internal model reproduces it - but its own text contradicts its own numbers,
+     so it validates the arithmetic and nothing else. */
+  const rb = BM._referenceBenchmark;
+  assert.ok(rb, "the reference report is recorded");
+  const v = rb.reported;
+  assert.strictEqual(v.birZonalRatePerSqm, 11500);
+  assert.strictEqual(v.birBase, v.birZonalRatePerSqm * 100, "BIR base is rate x lot area");
+  assert.strictEqual(v.rcn, v.rcnPerSqm * v.floorArea);
+  assert.strictEqual(v.depreciationAmount, v.rcn * v.accumulatedDepreciationPct / 100);
+  assert.strictEqual(v.buildingValue, v.rcn - v.depreciationAmount);
+  assert.strictEqual(v.total, v.landValue + v.buildingValue, "land + building = the reported total");
+  assert.strictEqual(v.rangeLow, Math.round(v.total * 0.85), "the range is the total x 85%");
+  assert.strictEqual(v.rangeHigh, Math.round(v.total * 1.30), "and x 130%");
+  /* The multiplier the internal model uses must equal the one this report implies,
+     or the "parity" is a coincidence rather than a reference. */
+  assert.strictEqual(rb.arithmeticVerified.landMultiplierRounded, 1.174);
+  assert.ok(Math.abs(rb.arithmeticVerified.landMultiplierImplied - v.landValue / v.birBase) < 1e-6);
+  /* And the report's own inconsistencies stay recorded, so nobody later cites it
+     as proof that a +2.0% net adjustment or a 23000/sqm market rate is real. */
+  assert.ok(rb.internalInconsistencies.length >= 4, "its internal contradictions are kept on file");
+  assert.strictEqual(rb.notMarketEvidence, true, "it must never be promoted to market evidence");
+  assert.strictEqual(rb.numericalAllowed, false);
+  /* The "no benchmark reaches a formula" rule has to cover this key too. */
+  ["js/estimator.js", "js/value_guide_flow.js", "js/core.js", "js/storefront.js"].forEach(f => {
+    const src = fs.readFileSync(path.join(ROOT, f), "utf8");
+    assert.ok(src.indexOf("_referenceBenchmark") < 0, f + " must not read the reference report");
+  });
 });
 
 check("the calculator still produces a figure for every classification", () => {

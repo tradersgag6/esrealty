@@ -4,8 +4,9 @@
   "_observedOn": "2026-10-07",
   "_bandResearch": {
     "statement": "Published Batangas research puts ordinary market at 1.5x to 3.0x the BIR zonal value.",
-    "scope": "RESIDENTIAL LAND, in desirable locations. Not a province-wide law. Two records below fall outside it - one at 0.85x and one at 6.8x - so the band is a calibration target for the middle of the residential market, not a bound the calculator may never cross. The band is clamped to this range rather than widened to absorb the outliers, because over-pricing an entire province to compensate for one premium listing is the worse error.",
-    "contradictedBy": ["gavina-ville-ph3", "laurel-splendido-310"],
+    "scope": "RESIDENTIAL LAND, in desirable locations. Not a province-wide law. Measured against the matched STREET rate rather than a municipal median, the land-only records below land at 1.26x-2.43x (Splendido Taal) and 0.53x-0.68x (Gavina Ville). The band is a calibration target for the middle of the residential market, not a bound the calculator may never cross. It is clamped to this range rather than widened to absorb the outliers, because over-pricing an entire province to compensate for one premium listing is the worse error.",
+    "measuredAgainst": "matched street BIR RR rate, not a municipal p50 - a municipal median mixes subdivisions priced far above it with subdivisions priced far below it, so it is not a denominator any individual property can be judged by",
+    "contradictedBy": ["gavina-ville-ph3"],
     "sources": [
       "https://ren.ph/tools/zonal-value/batangas/batangas-city - 'Market value is not a simple multiplier of the BIR zonal value'",
       "https://richestph.com/batangas-city-real-estate-2024-expert-predictions-and-market-insights/ - 'Actual market transactions in desirable areas often command prices 1.5 to 3 times higher'; residential BIR 500-15000 -> estimated market 750-45000",
@@ -13,6 +14,42 @@
     ],
     "bandLow": 1.5,
     "bandHigh": 3.0
+  },
+  "_referenceBenchmark": {
+    "id": "lvph-d-9531904c",
+    "source": "LandValuePH detailed report LVPH-D-9531904C, dated October 5, 2026 - BINAY ST (RESSURRECCION ST), Poblacion III, Bauan",
+    "inputs": "RR 11500/sqm, 100 sqm lot, 120 sqm floor, 2 storeys, mixed CHB, age 6-10, non-corner, TCT",
+    "reported": {
+      "birZonalRatePerSqm": 11500,
+      "birSchedule": "BIR RR 8-2018, as cited by the report",
+      "lotArea": 100,
+      "floorArea": 120,
+      "birBase": 1150000,
+      "landValue": 1350000,
+      "rcnPerSqm": 16000,
+      "rcn": 1920000,
+      "accumulatedDepreciationPct": 20,
+      "depreciationAmount": 384000,
+      "buildingValue": 1536000,
+      "total": 2886000,
+      "rangeLow": 2453100,
+      "rangeHigh": 3751800
+    },
+    "arithmeticVerified": {
+      "landMultiplierImplied": 1.173913,
+      "landMultiplierRounded": 1.174,
+      "rangeIsTotalTimes085And130": true,
+      "sumReconciles": true
+    },
+    "internalInconsistencies": [
+      "Claimed net factor adjustment is +2.0%, but the four category rows printed in the report sum to +0.5% (land and terrain +0.5, everything else 0.0).",
+      "The +2.0% is never applied to the arithmetic: 1150000 x 1.02 = 1173000, not the reported 1350000.",
+      "The report's own tax-visibility page states a market rate of 23000/sqm (2.0x BIR), which is inconsistent with the 13500/sqm it actually valued the land at.",
+      "Depreciation is labelled '20.0%/year' but 20% is the accumulated figure over a 40-year life, not an annual rate. The remaining-useful-life line states 85% / 34 years, which implies 15% accumulated, not 20%.",
+      "The report states active market listing data for Bauan is still being compiled, and shows no comparables. It is a BIR-referenced AVM, not a market-derived appraisal."
+    ],
+    "notMarketEvidence": true,
+    "numericalAllowed": false
   },
   "records": [
     {
@@ -27,7 +64,9 @@
       "priceBasis": "exact-unit, developer-published model price",
       "sourceTier": "developer-price-list",
       "sourceUrl": "https://www.cbdi.com.ph/eco-township-comes-to-lipa-batangas/",
+      "sourceUrlStatus": "dead - returns 404 as of 2026-10-07",
       "corroboratingUrl": "https://www.businesses10.com/PH/Lipa-City/619675627894215/Paseo-De-Lipa-by-CBDI",
+      "corroboratingUrlStatus": "live as of 2026-10-07",
       "observedOn": "2026-10-07",
       "priceAsOf": "2026-03",
       "numericalAllowed": false,
@@ -46,6 +85,7 @@
       "priceBasis": "range across models, no lot area published",
       "sourceTier": "developer-price-list",
       "sourceUrl": "https://www.cbdi.com.ph/eco-township-comes-to-lipa-batangas/",
+      "sourceUrlStatus": "dead - returns 404 as of 2026-10-07",
       "observedOn": "2026-10-07",
       "priceAsOf": "2026-01",
       "numericalAllowed": false,
@@ -61,13 +101,22 @@
       "lotAreaMax": 234,
       "askingPricePerSqmMin": 3200,
       "askingPricePerSqmMax": 3400,
-      "priceBasis": "publisher states the per-sqm rate directly",
+      "priceBasis": "publisher shows a per-sqm figure, inside a historical price-trends block",
       "sourceTier": "published-subdivision-rate",
       "sourceUrl": "https://irealtee.com/properties/gavina-ville-subd-phase-3-san-pascual-batangas",
       "observedOn": "2026-10-07",
-      "priceAsOf": "2026-10",
+      "priceAsOf": "historical-trend-unchanged",
+      "priceReliability": "low - the publisher shows these rates in a historical price-trends block, not as a current quoted price, and the page does not date them",
       "numericalAllowed": false,
-      "notes": "The single most important record in this file, and it contradicts the model's own premise. San Pascual residential runs p25 2500, p50 4000, p75 6500, so 3200-3400/sqm is 1.28x-1.36x its p25 and 0.80x-0.85x its p50. An established subdivision is priced BELOW the BIR zonal median for the same town. The BIR zonal value is a tax base, not a floor on market, so no single multiplier can be right everywhere and the band must be clamped rather than widened to chase outliers."
+      "birStreetCheck": {
+        "note": "measured against the street this project is actually listed on, not the municipal median",
+        "streetRates": {
+          "Palsahingin / GAVINA VILLE": 6000,
+          "Sambat / GAVINA VILLE": 5000
+        },
+        "impliedMultipleRange": "0.53x - 0.68x"
+      },
+      "notes": "The single most important record in this file, and it contradicts the model's own premise. Measured against the two BIR street rates that actually cover this subdivision (6000 and 5000/sqm, BIR 035-2022), a 3200-3400/sqm asking rate is 0.53x-0.68x. An established subdivision is priced well BELOW the BIR zonal rate for the same street. The BIR zonal value is a tax base, not a floor on market, so no single multiplier can be right everywhere and the band must be clamped rather than widened to chase outliers. Low reliability because the figure is a historical trend line, not a live quote."
     },
     {
       "id": "batangas-city-betzaida-200",
@@ -118,7 +167,16 @@
       "observedOn": "2026-10-07",
       "priceAsOf": "2026-02",
       "numericalAllowed": false,
-      "notes": "The only land-only comparable found. 17000/sqm against a Laurel residential BIR p50 of 2500/sqm implies 6.8x, well above the researched band. Gated estate frontage at the Taal recreation belt; treated as the upper outlier, not the band."
+      "birStreetCheck": {
+        "note": "Splendido Taal carries different BIR rates per barangay; all three are listed rather than picking the flattering one",
+        "streetRates": {
+          "Dayap Itaas / SPLENDIDO TAAL (JAKA)": 13500,
+          "Niyugan / SPLENDIDO TAAL": 13500,
+          "Paliparan / SPLENDIDO TAAL": 7000
+        },
+        "impliedMultipleRange": "1.26x - 2.43x"
+      },
+      "notes": "The only land-only comparable found, and it lands INSIDE the researched band once measured properly. 5270000/310 = 17000/sqm. Against the Dayap Itaas and Niyugan rates of 13500 that is 1.26x; against the Paliparan rate of 7000 it is 2.43x. The earlier reading of 6.8x came from comparing against a Laurel municipal p50 of 2500, which is not the rate this street carries. Gated estate frontage at the Taal recreation belt, so the higher of those two ratios is the relevant end. This record therefore no longer justifies treating the band as an over-estimate."
     },
     {
       "id": "batangas-city-brgy17-166",
