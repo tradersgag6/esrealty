@@ -47,12 +47,21 @@ check("exactly nine questions, each mapped to a live factor", () => {
    derivation and are retired by Task 4, so until then they are the only factors
    allowed to be unreachable - and this assertion fails the moment one of them is
    neither retired nor given a question. */
-check("every factor is reachable, a step-1 boolean, or a named pending retirement", () => {
-  const PENDING_RETIREMENT = ["faultProximity", "amenities", "community", "demand"];
+/* faultProximity, amenities, community and demand have neither a question nor a
+   derivation, and Task 4 retires them. Naming them here keeps that list honest:
+   when the four are gone this becomes a plain reachability assertion. */
+const PENDING_RETIREMENT = ["faultProximity", "amenities", "community", "demand"];
+
+check("every factor is reachable, a step-1 boolean, or named for retirement", () => {
   const fed = F.QUESTIONS.map(q => q.factorId).concat(["cornerExposure", "zonalRecency"]);
   F.FACTORS.forEach(f => {
     assert.ok(fed.indexOf(f.id) >= 0 || PENDING_RETIREMENT.indexOf(f.id) >= 0, f.id + " unreachable");
   });
+});
+
+check("the four answerable factors are retired", () => {
+  PENDING_RETIREMENT.forEach(id =>
+    assert.strictEqual(F.FACTORS.filter(f => f.id === id).length, 0, id + " retired"));
 });
 
 check("pickInputs omits unanswered keys rather than zeroing them", () => {
@@ -144,6 +153,37 @@ check("pending estate and occupancy carry the published deductions", () => {
   const o = F.FACTORS.filter(f => f.id === "ownership")[0];
   assert.deepStrictEqual(i.options.map(x => x.bp), [0, -1000]);
   assert.deepStrictEqual(o.options.map(x => x.bp), [0, -500, -1000, -2500]);
+});
+
+check("the building section is gone and no building net is published", async () => {
+  assert.strictEqual(F.SEC_BUILDING, undefined, "the section constant is gone");
+  const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST);
+  assert.strictEqual(r.referenceModel.buildingNet, null, "explicitly null, not a silent zero");
+});
+
+check("the nine questions never move the improvement", async () => {
+  const clean = await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST);
+  const worst = await F.compute(Object.assign({}, OPTS, F.pickInputs({
+    shape: "-500", topography: "-800", frontage: "-100", access: "-200",
+    flood: "floods_routinely", utilities: "existing_services",
+    titled: "tax_declaration", estate_settled: "pending", occupancy: "informal_settlers"
+  })), EST);
+  assert.strictEqual(clean.improvement, worst.improvement, "the building is untouched");
+  assert.ok(worst.landValue < clean.landValue, "the land moved down");
+});
+
+check("every question's own option values resolve through its factor", () => {
+  /* The join that broke silently before: a question whose option values the
+     factor table does not carry scores NaN and the report prints nothing. */
+  F.QUESTIONS.forEach(q => {
+    const f = F.FACTORS.filter(x => x.id === q.factorId)[0];
+    assert.ok(f, q.id + " has a factor");
+    f.options.forEach(opt => {
+      const picked = F.pickInputs({ [q.input]: opt.value });
+      assert.ok(!Number.isNaN(F.factorBp(f, picked)),
+        q.id + ' option "' + opt.value + '" is unresolvable');
+    });
+  });
 });
 
 check("no ownership deduction reaches ownershipAdjustmentPct", async () => {

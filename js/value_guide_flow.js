@@ -39,7 +39,6 @@
   };
 
   var SEC_LAND_TERRAIN = "Land & Terrain";
-  var SEC_BUILDING = "Building & Features";
   var SEC_NEIGHBOURING = "Neighbouring";
   var SEC_LEGAL = "Legal & Environment";
   /* Everything outside SEC_LAND sections is applied to the improvement, which
@@ -95,28 +94,10 @@
       { value: "-150", label: "Floods in heavy rain", bp: -150 },
       { value: "-300", label: "Floods seasonally", bp: -300 },
       { value: "-500", label: "Floods routinely", bp: -500 }] },
-    { id: "faultProximity", input: "faultProximity", section: SEC_LEGAL, label: "Fault proximity", min: -300, max: 0, options: [
-      { value: "0", label: "More than 5 km from a mapped fault", bp: 0 },
-      { value: "-100", label: "Within 5 km", bp: -100 },
-      { value: "-300", label: "Within 1 km", bp: -300 }] },
-    { id: "amenities", input: "amenities", section: SEC_NEIGHBOURING, label: "Amenities", min: 0, max: 300, options: [
-      { value: "0", label: "None within reach", bp: 0 },
-      { value: "100", label: "Playground or court nearby", bp: 100 },
-      { value: "200", label: "Clubhouse and pool", bp: 200 },
-      { value: "300", label: "Full subdivision amenities", bp: 300 }] },
-    { id: "community", input: "community", section: SEC_NEIGHBOURING, label: "Community quality", min: 0, max: 300, options: [
-      { value: "0", label: "Ordinary neighbourhood", bp: 0 },
-      { value: "100", label: "Gated subdivision", bp: 100 },
-      { value: "200", label: "Well-kept, managed community", bp: 200 },
-      { value: "300", label: "Prime, high-demand enclave", bp: 300 }] },
-    { id: "infrastructure", input: "infrastructure", section: SEC_NEIGHBOURING, label: "Infrastructure", min: 0, max: 200, options: [
+    { id: "infrastructure", input: "infrastructure", section: SEC_NEIGHBOURING, label: "Utilities", min: 0, max: 200, options: [
       { value: "0", label: "Existing services only", bp: 0 },
       { value: "50", label: "Paved approach and drainage", bp: 50 },
       { value: "200", label: "New road, utility or transit project", bp: 200 }] },
-    { id: "demand", input: "demand", section: SEC_BUILDING, label: "Demand (LVIS)", min: -300, max: 300, options: [
-      { value: "-300", label: "Weak demand", bp: -300 },
-      { value: "0", label: "Normal demand", bp: 0 },
-      { value: "300", label: "Strong demand", bp: 300 }] },
     { id: "zonalRecency", input: "zonalRecency", section: SEC_LEGAL, label: "Zonal schedule recency", min: -200, max: 0, options: [
       { value: "0", label: "Schedule current", bp: 0 },
       { value: "-100", label: "Schedule a few years old", bp: -100 },
@@ -224,10 +205,12 @@
     for (var k in base) if (Object.prototype.hasOwnProperty.call(base, k)) r[k] = base[k];
     opts = opts || {};
 
+    /* Every surviving factor is a land or ownership characteristic, so there is one
+       net and it applies to the land. There is no building-section net: the nine
+       questions describe the lot and the paperwork, and the building is priced by
+       cost approach alone. This replaced a bldgNet that became permanently zero
+       when its only factor (demand) was retired. */
     var landNet = netOf(opts, true);
-    /* netOf(opts, false) totals every section, so subtracting the land share
-       leaves the Building & Features answers alone. */
-    var bldgNet = netOf(opts, false) - landNet;
 
     var landBase = Number(r.birZonalValue) || 0;
     r.landValue = Math.round(landBase * MODEL.MARKET_IND * (1 + landNet));
@@ -242,7 +225,7 @@
       r.improvement = 0;
     } else {
       var floor = Number(r.floorArea) || 0;
-      r.improvement = Math.round(floor * rcn * (1 - dep) * (1 + bldgNet)) + (Number(r.featuresTotal) || 0);
+      r.improvement = Math.round(floor * rcn * (1 - dep)) + (Number(r.featuresTotal) || 0);
     }
 
     r.total = r.landValue + r.improvement;
@@ -287,7 +270,7 @@
       name: "LandValuePH reference model",
       marketInd: MODEL.MARKET_IND,
       net: landNet,
-      buildingNet: bldgNet,
+      buildingNet: null,
       sections: sections,
       questionCount: QUESTIONS.length,
       skippedCount: r.assumptions.length,
@@ -406,19 +389,35 @@
     var model = (result && result.referenceModel) || {};
     var applied = {};
     (model.sections || []).forEach(function (s) { applied[s.id] = s; });
+    /* Every row prints, answered or not, so the table always shows the full
+       model. A row that was never answered reads "Not assessed" rather than
+       0.00%: the old rendering could not tell those apart, so a skipped question
+       looked like a checked one that found nothing. */
     var rows = FACTORS.map(function (f) {
-      var hit = applied[f.id], bp = hit ? hit.bp : 0;
-      return '<tr data-vf="' + esc(f.id) + '"><th scope="row">' + esc(f.label) + "</th><td>"
-        + esc(f.section) + "</td><td>" + (bp > 0 ? "+" : "") + (bp / 100).toFixed(2) + "%</td></tr>";
+      var hit = applied[f.id];
+      var assessed = !!(hit && hit.assessed);
+      var cell = assessed
+        ? (hit.bp > 0 ? "+" : "") + (hit.bp / 100).toFixed(2) + "%"
+        : "Not assessed";
+      return '<tr data-vf="' + esc(f.id) + '"' + (assessed ? "" : ' data-vf-unassessed')
+        + '><th scope="row">' + esc(f.label) + "</th><td>" + esc(f.section)
+        + "</td><td>" + cell + "</td></tr>";
     }).join("");
+    var skipped = Array.isArray(result && result.assumptions) ? result.assumptions : [];
+    var skipList = skipped.length
+      ? "<p><b>What we didn't check:</b> " + skipped.map(function (a) { return esc(a.label); }).join(", ") + ".</p>"
+      : "<p>Every question was answered.</p>";
+    /* The count is read off the question list rather than typed. The reference
+       prints its own count from a runtime table, so a hard-coded "nine" here
+       would drift the moment the list changed. */
     return '<div data-vg-methodology class="mt-16"><h3>Methodology</h3>'
       + "<p>BIR zonal base × market-indicator factor " + MODEL.MARKET_IND
-      + ", then one additive net of the twelve published answers below. Every answer is added once and "
+      + ", then one additive net of the " + QUESTIONS.length + " published answers below. Every answer is added once and "
       + "the total is applied once; nothing is compounded.</p>"
       + '<table><thead><tr><th>Question</th><th>Section</th><th>Applied</th></tr></thead><tbody>'
       + rows + "</tbody></table>"
-      + '<p><b>Applied net:</b> ' + pct(model.net) + " on land, " + pct(model.buildingNet)
-      + " on the improvement.</p>"
+      + '<p><b>Applied net:</b> ' + pct(model.net) + " on land.</p>"
+      + skipList
       + '<p class="dim small">Construction rates are flat and never escalated: '
       + peso(model.rcnRate) + " per sqm for this build type, depreciated straight-line to a "
       + MODEL.DEP_CAP * 100 + "% cap over " + (model.usefulLife || 40) + " years.</p></div>";
@@ -434,7 +433,7 @@
 
   return { MODEL: MODEL, FACTORS: FACTORS, QUESTIONS: QUESTIONS, pickInputs: pickInputs,
            SEC_LAND_TERRAIN: SEC_LAND_TERRAIN,
-           SEC_BUILDING: SEC_BUILDING, SEC_NEIGHBOURING: SEC_NEIGHBOURING, SEC_LEGAL: SEC_LEGAL,
+           SEC_NEIGHBOURING: SEC_NEIGHBOURING, SEC_LEGAL: SEC_LEGAL,
            netOf: netOf, sectionsOf: sectionsOf, factorBp: factorBp, compute: compute,
            MODEL_CALLOUT: MODEL_CALLOUT, loadComparables: loadComparables,
            applyComparables: applyComparables, reportSections: reportSections };

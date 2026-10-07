@@ -53,22 +53,22 @@ function pdfText(bytes) {
     const r = await flow().compute(OPTS, EST);
     assert.strictEqual(r.birZonalRatePerSqm, 11500, "BIR rate unchanged");
     assert.strictEqual(r.birZonalValue, 1150000, "BIR value unchanged");
-    assert.strictEqual(r.landValue, 1343350);
+    assert.strictEqual(r.landValue, 1329849);
     assert.strictEqual(r.improvement, 1536000);
-    assert.strictEqual(r.total, 2879350);
-    assert.strictEqual(r.low, 2447448);
-    assert.strictEqual(r.high, 3743155);
-    assert.strictEqual(r.perSqm, 28794);
+    assert.strictEqual(r.total, 2865849);
+    assert.strictEqual(r.low, 2435972);
+    assert.strictEqual(r.high, 3725604);
+    assert.strictEqual(r.perSqm, 28658);
   });
 
   /* ---- 2. vacant-lot vector ------------------------------------------- */
   await check("vacant-lot vector carries no improvement", async () => {
     const r = await flow().compute(VACANT, EST);
     assert.strictEqual(r.improvement, 0);
-    assert.strictEqual(r.total, 1343350);
-    assert.strictEqual(r.low, 1141848);
-    assert.strictEqual(r.high, 1746355);
-    assert.strictEqual(r.perSqm, 13434);
+    assert.strictEqual(r.total, 1329849);
+    assert.strictEqual(r.low, 1130372);
+    assert.strictEqual(r.high, 1728804);
+    assert.strictEqual(r.perSqm, 13298);
   });
 
   /* ---- 3. the model constants ---------------------------------------- */
@@ -90,9 +90,11 @@ function pdfText(bytes) {
     assert.strictEqual(flow().MODEL.DEP_CAP, 0.80);
     assert.strictEqual(flow().MODEL.USEFUL_LIFE.mixed_chb, 40);
   });
-  await check("twelve published factors, each with a section", () => {
+  await check("eleven surviving factors, each with a section", () => {
     const F = flow();
-    assert.strictEqual(F.FACTORS.length, 12);
+    /* Nine questions plus cornerExposure plus the derived zonalRecency. */
+    assert.strictEqual(F.QUESTIONS.length, 9);
+    assert.strictEqual(F.FACTORS.length, 11);
     F.FACTORS.forEach(f => assert.ok(f.section && f.options && f.options.length, f.id));
   });
 
@@ -130,19 +132,19 @@ function pdfText(bytes) {
     assert.notStrictEqual(r.total, r.birZonalValue);
   });
 
-  /* ---- 5. section split ----------------------------------------------- */
-  await check("a building-section answer never moves a vacant lot", async () => {
-    const a = await flow().compute(VACANT, EST);
-    const b = await flow().compute(Object.assign({}, VACANT, { demand: "300" }), EST);
-    assert.strictEqual(a.total, b.total);
-    assert.strictEqual(a.landValue, b.landValue);
-  });
-
-  await check("a building-section answer moves only the building", async () => {
+  /* ---- 5. no building-section split ------------------------------------
+     Every surviving factor is a land or ownership characteristic, so there is one
+     net and it applies to the land. The building is priced by cost approach and
+     no question may move it. */
+  await check("no factor can move the building", async () => {
     const a = await flow().compute(OPTS, EST);
-    const b = await flow().compute(Object.assign({}, OPTS, { demand: "300" }), EST);
-    assert.strictEqual(b.landValue, a.landValue, "land untouched");
-    assert.ok(b.improvement > a.improvement, "building rises");
+    const b = await flow().compute(Object.assign({}, OPTS, {
+      lotShape: "-500", terrain: "-800", frontage: "-100", roadAccess: "-200",
+      floodRisk: "-500", infrastructure: "0", titleDoc: "tax_declaration",
+      inheritance: "pending", ownership: "informal_settlers", zonalRecency: "-200"
+    }), EST);
+    assert.strictEqual(b.improvement, a.improvement, "the building is untouched");
+    assert.ok(b.landValue < a.landValue, "the land moved");
   });
 
   await check("the land net never touches the building component", async () => {
@@ -153,9 +155,9 @@ function pdfText(bytes) {
   /* ---- 6. additive net ------------------------------------------------ */
   await check("net is additive, not compounded", async () => {
     const F = flow();
-    const zero = await F.compute(Object.assign({}, VACANT, { roadAccess: "", community: "", zonalRecency: "" }), EST);
-    const one  = await F.compute(Object.assign({}, VACANT, { roadAccess: "50", community: "", zonalRecency: "" }), EST);
-    const two  = await F.compute(Object.assign({}, VACANT, { roadAccess: "50", infrastructure: "50", community: "", zonalRecency: "" }), EST);
+    const zero = await F.compute(Object.assign({}, VACANT, { roadAccess: "", infrastructure: "", zonalRecency: "" }), EST);
+    const one  = await F.compute(Object.assign({}, VACANT, { roadAccess: "50", infrastructure: "", zonalRecency: "" }), EST);
+    const two  = await F.compute(Object.assign({}, VACANT, { roadAccess: "50", infrastructure: "50", zonalRecency: "" }), EST);
     assert.strictEqual(zero.referenceModel.net, 0);
     assert.strictEqual(one.referenceModel.net, 0.005);
     assert.strictEqual(two.referenceModel.net, 0.01, "50bp + 50bp = 100bp, not 1.05 x 1.05");
@@ -163,9 +165,15 @@ function pdfText(bytes) {
     assert.notStrictEqual(1 + two.referenceModel.net, compounded);
   });
 
-  await check("the golden fixture lands on the published net of -50 bp", async () => {
+  /* The golden fixture answers roadAccess +50 and zonalRecency -200. The old
+     fixture also carried community +100, which the retirement removed, so the
+     net moved from -50bp to -150bp. Both answered factors are land-bound, so the
+     building figure is unchanged. */
+  await check("the golden fixture lands on the published net of -150 bp", async () => {
     const r = await flow().compute(OPTS, EST);
-    assert.strictEqual(r.referenceModel.net, -0.005);
+    assert.strictEqual(r.referenceModel.net, -0.015);
+    const scored = r.referenceModel.sections.filter(s => s.assessed).map(s => s.id);
+    assert.deepStrictEqual(scored.sort(), ["roadAccess", "zonalRecency"]);
   });
 
   await check("net stays inside every published factor range", async () => {
@@ -246,13 +254,32 @@ function pdfText(bytes) {
     assert.strictEqual(b.comparableListingCount, 1, "listing count recorded");
   });
 
-  await check("methodology prints the twelve factors and the applied net", async () => {
+  await check("methodology prints every factor row and the applied net", async () => {
     const F = flow();
     const r = await F.compute(OPTS, EST);
     const html = F.reportSections(r, EST, []);
-    assert.strictEqual((html.match(/data-vf=/g) || []).length, 12, "twelve factor rows");
-    assert.ok(html.indexOf("-0.50") > 0 || html.indexOf("-0.5%") > 0, "applied net printed");
+    assert.strictEqual((html.match(/data-vf=/g) || []).length, F.FACTORS.length, "one row per factor");
+    assert.ok(html.indexOf("-1.50") > 0 || html.indexOf("-1.5%") > 0, "applied net printed");
     F.FACTORS.forEach(f => assert.ok(html.indexOf('data-vf="' + f.id + '"') > 0, f.id + " row"));
+  });
+
+  /* The 0.00% defect in its original form: a row the user never answered used to
+     print 0.00%, which read as "checked, nothing found". */
+  await check("an unanswered factor prints Not assessed, never 0.00%", async () => {
+    const F = flow();
+    const r = await F.compute(OPTS, EST);
+    const html = F.reportSections(r, EST, []);
+    const unassessed = r.referenceModel.sections.filter(s => !s.assessed);
+    assert.ok(unassessed.length > 0, "the golden fixture leaves questions open");
+    unassessed.forEach(s => {
+      const row = html.split('data-vf="' + s.id + '"')[1].split("</tr>")[0];
+      assert.ok(row.indexOf("Not assessed") > 0, s.id + " reads Not assessed");
+      assert.ok(row.indexOf("0.00%") < 0, s.id + " does not fake a zero");
+      assert.ok(html.indexOf('data-vf-unassessed') > 0, "the row is marked for the PDF path");
+    });
+    assert.ok(html.indexOf("What we didn&#39;t check") > 0 || html.indexOf("What we didn't check") > 0,
+      "the skipped questions are listed by name");
+    assert.ok(html.indexOf("on land.") > 0, "the net is stated as land-only");
   });
 
   await check("loadComparables degrades to an empty list in Node", async () => {
