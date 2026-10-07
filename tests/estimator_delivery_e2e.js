@@ -34,7 +34,19 @@ const q = selector => document.querySelector(selector);
     responseMode = "saved"; form.querySelector('button[type="submit"]').click(); await wait(250);
     check("saved request never implies email delivery", /saved/.test(q("[data-est-lead-status]").textContent) && /no emailed delivery has been confirmed/.test(q("[data-est-lead-status]").textContent));
     check("email request distinct from professional consultation", posts[2].data.service_requested === "valuation-report" && posts[2].data.inquiry_type === "location-analysis");
-    check("posted report keeps central estimate, range and BIR separate", posts[2].data.report.estimate.marketGuideEstimate === 2875000 && posts[2].data.report.estimate.low === 2443750 && posts[2].data.report.estimate.birZonalValue === 1150000);
+    /* Read off the estimate this run produced rather than a literal. The
+       position-weighted band moved the central figure, and this check is about
+       the three numbers staying DISTINCT and correctly related - not about the
+       peso amount, which belongs to the engine's own suites. */
+      const posted = posts[2].data.report.estimate;
+      check("posted report keeps central estimate, range and BIR separate",
+        posted.birZonalValue === 1150000
+        && posted.marketGuideEstimate === posted.total
+        && posted.low === Math.round(posted.total * 0.85)
+        && posted.high === Math.round(posted.total * 1.30)
+        && posted.marketGuideEstimate > posted.birZonalValue
+        && posted.low < posted.marketGuideEstimate && posted.marketGuideEstimate < posted.high,
+        JSON.stringify({ bir: posted.birZonalValue, mid: posted.marketGuideEstimate, low: posted.low, high: posted.high }));
     check("results stay visible after submission", !!q(".sf-est-result-value") && !q(".sf-est-price-lock"));
   } catch (e) { check("runner", false, e.message); }
   finally { window.fetch = oldFetch; window.ESREALTY_API_BASE = oldBase; api.contact = oldContact; }

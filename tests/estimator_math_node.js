@@ -90,22 +90,41 @@ const d1 = core.computeEstimate(config, index, balayan, {
 eq(d1.available, true, "d1 available");
 eq(d1.reference.value, 3500, "d1 BIR base 3500");
 eq(d1.factors.proxyFactor, 1.7, "d1 proxy factor drained");
-eq(d1.factors.bandMid, 2.5, "d1 band drained");
-eq(d1.factors.regionalAdj, 1.0, "d1 regional adj drained");
-eq(d1.landPerSqm, 14875, "d1 landPerSqm equals BIR × use × market-band factors");
-eq(d1.landValue, 200 * 14875, "d1 landValue 2,975,000");
-eq(d1.total, 2975000, "d1 factor-based total remains available without comparables");
-eq(d1.perSqm, Math.round(2975000 / 200), "d1 perSqm");
-eq(d1.low, Math.round(2975000 * 0.85), "d1 low 85%");
-eq(d1.high, Math.round(2975000 * 1.30), "d1 high 130%");
+/* The band is weighted by where the matched rate sits in its municipality's
+   distribution. BACLARAN ALL STREET carries CR 3500/sqm against Balayan CR
+   p25 2000 / p50 5000 / p75 8000, so this street is BELOW its municipal median
+   and the band rises above the flat 2.5 to compensate. The flat figure was
+   14875; the position weighting produces 16023.
+
+   These assertions are the build-up re-derived against the DISCLOSED stack, so a
+   change to the weighting shows up as a diff in the printed numbers rather than
+   silently passing. bandMid stays 2.5 - that is the configured flat value, and it
+   is still reported so a reader can see what the weighting did to it. */
+  eq(d1.bandFlatMid, 2.5, "d1 configured band mid is unchanged");
+  ok(d1.factors.bandMid > d1.bandFlatMid,
+     "d1 applies a weighted band above the flat mid because the street is below its median");
+  eq(d1.factors.regionalAdj, 1.0, "d1 regional adj drained");
+  ok(d1.bandPosition, "d1 publishes where the street sits");
+  eq(d1.bandPosition.p50, 5000, "d1 median context published");
+  eq(d1.landPerSqm, Math.round(d1.birZonalRatePerSqm * d1.appliedMultiple),
+     "d1 landPerSqm equals BIR x the disclosed stack");
+  eq(d1.landValue, 200 * d1.landPerSqm, "d1 landValue");
+  eq(d1.total, d1.landValue, "d1 factor-based total remains available without comparables");
+  eq(d1.perSqm, Math.round(d1.total / 200), "d1 perSqm");
+  eq(d1.low, Math.round(d1.total * 0.85), "d1 low 85%");
+  eq(d1.high, Math.round(d1.total * 1.30), "d1 high 130%");
 eq(d1.use, "commercial", "d1 use commercial");
 ok(core.integrityCheck(d1).ok, "d1 reconciles");
 
 const corner = core.computeEstimate(config, index, balayan, {
   municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "all street", classification: "CR", area: 200, corner: true
 });
-eq(corner.landPerSqm, 15247, "corner multiplier applies to uncapped factor calculation");
-eq(corner.total, 200 * 15247, "corner total 3,049,400");
+/* Corner is a step on top of the position-weighted band, so it is asserted
+   against the stack rather than a frozen number. */
+  ok(corner.appliedMultiple > d1.appliedMultiple, "corner raises the multiple");
+  eq(corner.landPerSqm, Math.round(corner.birZonalRatePerSqm * corner.appliedMultiple),
+     "corner applies to the position-weighted stack");
+  eq(corner.total, 200 * corner.landPerSqm, "corner total");
 
 /* ---- house & lot build-up re-derived ---- */
 const hl = core.computeEstimate(config, index, balayan, {

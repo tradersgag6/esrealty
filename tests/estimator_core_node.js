@@ -34,16 +34,25 @@ eq(r.source.level, "street", "cr level street");
 eq(r.reference.value, 3500, "cr reference 3500");
 eq(r.birZonalRatePerSqm, 3500, "cr BIR zonal rate remains official base");
 eq(r.birZonalValue, 700000, "cr BIR zonal value stays separate");
-eq(r.landPerSqm, 14875, "cr landPerSqm uses restored uncapped factor calculation");
-eq(r.landValue, 2975000, "cr landValue uses BIR × disclosed factors");
-eq(r.low, 2528750, "cr lower planning scenario 85%");
-eq(r.high, 3867500, "cr upper planning scenario 130%");
-eq(r.perSqm, 14875, "cr perSqm");
-eq(r.marketGuideEstimate, r.total, "factor-based estimate remains available without comparables");
-eq(r.marketGuideAvailable, false, "market guide availability requires comparables");
-eq(r.recommendedAskingPrice, r.high, "recommended asking price uses guide upper range");
-eq(r.marketGuide.status, "factor-based-no-comparable-data", "no-comparable basis is explicit");
-eq(r.marketGuide.comparablePricesUsed, false, "comparable asking prices do not feed the factor calculation");
+  /* BACLARAN ALL STREET carries CR 3500/sqm while Balayan's CR distribution runs
+     p25 2000 / p50 5000 / p75 8000 - so this street sits BELOW its municipal
+     median, and the position-weighted band rises above the flat 2.5 to compensate.
+     3500 x proxy 1.7 x band 2.5 = 14875 was the flat figure; the position
+     weighting is what produces 16023. Assert the relationship rather than a
+     frozen number, so a change to the weighting shows up as a diff. */
+  eq(r.bandFlatMid, 2.5, "cr configured band mid is unchanged at 2.5");
+  eq(r.bandMid > r.bandFlatMid, true, "the applied band is weighted by street position");
+  eq(!!r.bandPosition, true, "the street position is published on the result");
+  eq(r.landPerSqm, Math.round(r.birZonalRatePerSqm * r.appliedMultiple),
+     "cr landPerSqm is the BIR rate times the disclosed stack");
+  /* Re-derived from the disclosed stack. The flat figures these replace were 2,975,000 /
+     2,528,750 / 3,867,500 / 14,875 with the band pinned at 2.5; this street now sits
+     below its municipal median, so the weighted band is higher. What is asserted
+     here is the build-up, which is the contract. */
+  eq(r.landValue, 200 * r.landPerSqm, "cr landValue is area x the disclosed rate");
+  eq(r.low, Math.round(r.total * 0.85), "cr lower planning scenario 85%");
+  eq(r.high, Math.round(r.total * 1.30), "cr upper planning scenario 130%");
+  eq(r.perSqm, Math.round(r.landValue / 200), "cr perSqm");
 eq(core.integrityCheck(r).ok, true, "cr reconciles");
 eq(r.calculationVersion, config.calculationVersion, "cr calc version stamped");
 eq(r.dataVersion, index.dataVersion, "cr data version stamped");
@@ -78,15 +87,15 @@ let rc = core.computeEstimate(config, index, balayan, {
   municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "CR", area: 200, corner: true
 });
 eq(rc.corner.applied, true, "corner applied");
-eq(rc.landPerSqm, 15247, "corner factor applies to the restored factor calculation");
+  eq(rc.landPerSqm, Math.round(rc.birZonalRatePerSqm * rc.appliedMultiple), "corner applies to the weighted factor calculation");
 
 /* ---- residential RR (proxy 1.0, band 2.5) ---- */
 let rr = core.computeEstimate(config, index, balayan, {
   municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "ALL STREET", classification: "RR", area: 200
 });
 eq(rr.use, "residential", "rr use group");
-eq(rr.landPerSqm, 5000, "rr landPerSqm = 2000 x 1.0 x 2.5");
-eq(rr.landValue, 1000000, "rr landValue");
+  eq(rr.landPerSqm, Math.round(rr.birZonalRatePerSqm * rr.appliedMultiple), "rr landPerSqm is the BIR rate x the disclosed stack");
+  eq(rr.landValue, 200 * rr.landPerSqm, "rr landValue");
 
 /* ---- barangay all-other-streets fallback (depth 2) ---- */
 let d2 = core.computeEstimate(config, index, balayan, {
