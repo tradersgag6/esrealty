@@ -149,15 +149,12 @@ factors, all exact on the report fixture:
 |---|---:|---:|---:|
 | Land multiplier | 1.174 | 2.5 | the open Task 9 decision |
 | Building rate (CHB) | 16,000/sqm | 25,000/sqm | ₱864,000 |
-| Storeys on a total-area input | x1.00 | x1.05 | ₱120,000 |
+| Storeys on a total-area input | x1.00 | x1.05 | ₱120,000 — **removed in Task 4** |
 
-864,000 + 120,000 = 984,000 = the entire building difference. Asserted, so a
-fourth cause cannot appear unnoticed.
-
-**The storeys multiplier is a bug, not a difference of opinion.** The field is
-labelled "Across all storeys", so multiplying by a per-storey factor charges the
-same square metres twice. It is disclosed in the storefront report, so removing it
-is visible rather than hidden. Recommended for Task 4.
+**The storeys multiplier was a bug, not a difference of opinion.** The field is
+labelled "Across all storeys", so multiplying by a per-storey factor charged the
+same square metres twice: it priced a 2-storey house 5% above the same house
+described as 1-storey at an identical floor area. Removed in Task 4.
 
 The land multiplier cannot be settled by engineering — it is which model survives.
 Two land records disagree (1.26x–2.43x vs 0.53x–0.68x) and neither is a verified
@@ -190,6 +187,31 @@ Safeguards:
 
 **Acceptance:** independently calculated fixtures reconcile every component and
 rounding step.
+
+### Done — storeys multiplier removed
+
+Audited, and it was an accidental second count. Every `floors` multiplier in
+`data/zonal-config.json` is now 1, and the generator that writes it agrees.
+
+Changed: `data/zonal-config.json`, `market-scan/build-batangas-data.js`, the two
+reader-facing strings in `js/estimator.js` that promised or printed a storeys factor,
+and `calculationVersion` to `2026.10.4` so a cached report cannot be mistaken for one
+from the old model.
+
+Effect on the report fixture: storefront total ₱5,395,000 → ₱5,275,000. Visible
+reduction, not hidden. Storeys is still recorded as context; it no longer prices.
+
+Re-derived by hand in `tests/estimator_math_node.js` and
+`tests/estimator_core_node.js` (no longer `x 1.05`), and the contract test now asserts
+every multiplier is 1 *and* that the copy no longer mentions one. The
+`value_guide_multiple_node.js` headline moved with the engine and its gap
+recalculated 131.5% → 125.2%.
+
+37/37 node suites green, `js/app.min.js` in sync.
+
+Still open from this task: the CHB rate table (25,000 vs the reference's 16,000) is a
+documented difference of source, not an error, and is left alone. The land multiplier
+remains the Task 9 decision.
 
 ## Task 5 — Make the supplied reference report a reproducible benchmark
 

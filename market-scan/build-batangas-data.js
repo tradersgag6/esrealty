@@ -34,7 +34,7 @@ function check(cond, msg) { if (!cond) errors.push(msg); }
 
 const CONFIG = {
   version: 2,
-  calculationVersion: "2026.09.4",
+  calculationVersion: "2026.10.4",
   dataVersion: "bir-2022-rdo58-59",
   asOf: "2022-07-23",
   note: "Engine + data versions stamped on every estimate output. Deterministic and reconcilable.",
@@ -49,10 +49,18 @@ const CONFIG = {
     mixed_chb: { label: "Mixed / CHB", costPerSqm: 25000 },
     rca_steel: { label: "Reinforced Concrete / Steel", costPerSqm: 40000 }
   },
+  /* Every multiplier is 1. floorArea is one figure entered once, labelled "Total
+     built-up area (sqm) / Across all storeys", so a per-storey factor on top of it
+     charges the same square metres twice - it priced a 2-storey house 5% above the
+     same house described as 1-storey. The reference form labels its field "Total
+     floor area across all storeys" and likewise applies no storeys factor.
+
+     If a genuine multi-storey premium is ever wanted, it belongs in the rate table
+     as a per-storey construction argument, not as a multiply over total area. */
   floors: [
     { key: "1", label: "1 floor", multiplier: 1.0 },
-    { key: "2", label: "2 floors", multiplier: 1.05 },
-    { key: "3plus", label: "3 floors or more", multiplier: 1.1 }
+    { key: "2", label: "2 floors", multiplier: 1.0 },
+    { key: "3plus", label: "3 floors or more", multiplier: 1.0 }
   ],
   ageBands: [
     { key: "0-5", label: "0–5 years", midpoint: 2.5 },

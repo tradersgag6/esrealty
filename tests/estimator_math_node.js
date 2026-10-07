@@ -34,7 +34,7 @@ function ok(cond, label, detail) {
 /* ---- dataset + manifest reconciliation ---- */
 eq(index.municipalities.length, 34, "dataset municipality count 34");
 eq(index.dataVersion, "bir-2022-rdo58-59", "dataset dataVersion");
-eq(config.calculationVersion, "2026.10.3", "config calculationVersion 2026.10.3");
+eq(config.calculationVersion, "2026.10.4", "config calculationVersion 2026.10.4");
 eq(manifest.status, "valid", "manifest status valid");
 eq(manifest.counts.municipalities, 34, "manifest municipality count");
 eq(manifest.counts.streets, 3710, "manifest street count 3710");
@@ -74,7 +74,12 @@ eq(proxies.industrial.factor, 1.35, "proxy industrial 1.35");
 eq(config.cornerLotPct, 0.025, "corner lot +2.5%");
 const floorKeys = (config.floors || []).map(f => f.key);
 eq(JSON.stringify(floorKeys), JSON.stringify(["1", "2", "3plus"]), "floors keys 1/2/3plus");
-ok(config.floors.every(f => f.multiplier > 0), "floors multipliers > 0");
+/* Every storeys multiplier is neutral. The floor-area field is entered once and
+   labelled "Total built-up area (sqm) / Across all storeys", so a per-storey factor
+   on top of it is a double count. The reference form labels its equivalent "Total
+   floor area across all storeys" and applies no storeys factor either. */
+ok(config.floors.every(f => f.multiplier === 1),
+  "no storeys multiplier: " + config.floors.map(f => f.key + "=" + f.multiplier).join(", "));
 const ageKeys = (config.ageBands || []).map(b => b.key);
 eq(JSON.stringify(ageKeys), JSON.stringify(["0-5", "6-10", "11-20", "21-30", "31plus"]), "age band keys");
 ok((config.ageBands || []).every(b => b.midpoint > 0 && b.label), "age bands have midpoint + label");
@@ -115,10 +120,10 @@ const hl = core.computeEstimate(config, index, balayan, {
 });
 eq(hl.kind, "built", "hl kind built");
 eq(hl.floorArea, 160, "hl explicit floorArea 160");
-eq(hl.floorsMultiplier, 1.05, "hl floors 2 multiplier 1.05");
+eq(hl.floorsMultiplier, 1, "hl storeys multiplier neutral - total floor area spans all storeys");
 eq(hl.ageMidpoint, 25, "hl age midpoint 25");
 eq(hl.depreciatedPct, 62.5, "hl dep 25/40 = 62.5%");
-eq(hl.improvement, Math.round(25000 * 160 * 1.05 * (1 - 0.625)) + 700000, "hl improvement = build + features with precise depreciation");
+eq(hl.improvement, Math.round(25000 * 160 * (1 - 0.625)) + 700000, "hl improvement = rate x total floor area x (1 - dep) + features");
 eq(hl.featuresTotal, 700000, "hl features 500000 + 200000");
 eq(hl.total, hl.landValue + hl.improvement, "hl total = land + improvement");
 ok(core.integrityCheck(hl).ok, "hl reconciles");

@@ -131,7 +131,7 @@ check("a scenario that the model does not recognise is refused, not silently pri
 
 /* ------------------------------------------------- divergence, decomposed */
 
-checkAsync("the two surfaces agree on BIR, and differ only on land, rate and storeys", () => {
+checkAsync("the two surfaces agree on BIR, and differ only on land and the rate table", () => {
   return Promise.all([
     EST.estimate(modelOpts(FORM)),
     FLOW.compute(modelOpts(FORM), EST)
@@ -150,37 +150,39 @@ checkAsync("the two surfaces agree on BIR, and differ only on land, rate and sto
     assert.strictEqual(g.buildCostPerSqm, 16000, "guide CHB rate moved");
     assert.strictEqual(s.buildCostPerSqm, 25000, "storefront CHB rate moved");
 
-    /* Decompose the building gap exactly. If these two lines stop summing to the
-       real difference, a third cause has appeared. */
+    /* The building gap must decompose exactly. The storeys factor is gone as of
+       Task 4, so the whole remaining difference is the rate table. If this stops
+       equalling the real difference, a second cause has appeared. */
     const dep = 1 - (8 / 40);                      /* age band 6-10, midpoint 8, life 40 */
     const rateGap = 120 * (25000 - 16000) * dep;
-    const storeysGap = 120 * 25000 * (1.05 - 1) * dep;
     const actual = s.improvement - g.improvement;
-    assert.strictEqual(Math.round(rateGap + storeysGap), Math.round(actual),
-      "building gap no longer decomposes into rate + storeys (" +
-      Math.round(rateGap) + " + " + Math.round(storeysGap) + " != " + Math.round(actual) + ")");
+    assert.strictEqual(Math.round(rateGap), Math.round(actual),
+      "the building gap is no longer explained by the rate table alone (" +
+      Math.round(rateGap) + " != " + Math.round(actual) + ")");
   });
 });
 
-check("the storeys multiplier is a double count on an area already labelled across all storeys", () => {
-  /* The regression this exists to kill. Floor area is entered once and labelled
-     "Total built-up area (sqm) / Across all storeys". Multiplying it by a per-storey
-     factor charges the same square metres twice for a two-storey house.
+check("no surface prices storeys twice on an area already measured across all of them", () => {
+  /* Removed in Task 4. Floor area is entered once and labelled "Total built-up
+     area (sqm) / Across all storeys"; the config then multiplied it by 1.05 for two
+     storeys and 1.10 for three, charging the same square metres a second time. On
+     the report fixture that was 120,000.
 
-     The reference does not do this: its field is "Total floor area across all
-     storeys" and it applies no storeys factor. Our guide already sets
-     floorsMultiplier = 1.
+     The reference labels its field "Total floor area across all storeys" and applies
+     no storeys factor, and our guide already set floorsMultiplier = 1.
 
-     If a multiplier above 1 ever becomes justified, the right place is an explicit
-     per-storey quality argument in the rate table, not a hidden multiply. */
+     If a genuine multi-storey premium is ever justified, it belongs in the rate
+     table as a per-storey construction argument, not as a multiply over a total. */
   assert.strictEqual(FLOW.MODEL.floorsMultiplier, undefined,
     "the guide model should not declare a storeys multiplier at all");
-  const two = cfg.floors.filter(f => f.key === "2")[0];
-  assert.ok(two && two.multiplier > 1,
-    "the storefront table still carries a >1 storeys multiplier, which is the double count");
-  /* And it must be disclosed, so it is not a hidden charge today. */
+  assert.ok(cfg.floors.every(f => f.multiplier === 1),
+    "storefront table still prices storeys: " +
+      cfg.floors.map(f => f.key + "=" + f.multiplier).join(", "));
+  /* It must also be gone from the reader-facing copy, not merely neutralised. A
+     disclosed "x1.05" that no longer applies is worse than never printing it. */
   const src = fs.readFileSync(path.join(ROOT, "js/estimator.js"), "utf8");
-  assert.ok(src.indexOf("Storeys:") > -1, "the storeys factor is not disclosed in the storefront report");
+  assert.ok(src.indexOf('"Storeys: <b>') < 0, "the report still prints a storeys multiplier line");
+  assert.ok(src.indexOf("storeys also apply a cost factor") < 0, "the field hint still promises a storeys factor");
 });
 
 check("the report reconciliation is a separate table, never folded into a multiplier", () => {

@@ -57,11 +57,12 @@ III, Bauan, RR, 100 sqm lot, 120 sqm floor, CHB, 2 storeys, age 6–10.
 |---|---:|---:|---:|
 | BIR rate | 11,500/sqm | 11,500/sqm | 11,500/sqm |
 | Land | 1,350,000 | 1,336,599 | 2,875,000 |
-| Building | 1,536,000 | 1,536,000 | 2,520,000 |
-| **Total** | **2,886,000** | **2,872,599 (−0.5%)** | **5,395,000 (+86.9%)** |
-| Range | 2,453,100–3,751,800 | 2,441,709–3,734,379 | 4,585,750–7,013,500 |
+| Building | 1,536,000 | 1,536,000 | 2,400,000 |
+| **Total** | **2,886,000** | **2,872,599 (−0.5%)** | **5,275,000 (+82.8%)** |
+| Range | 2,453,100–3,751,800 | 2,441,709–3,734,379 | 4,483,750–6,857,500 |
 
-They agree on BIR to the peso. The whole gap is three factors:
+Storefront figures are post-Task-4 (no storeys multiplier). They agree on BIR to the
+peso. The gap is now two factors:
 
 ### 1. Land: 1.174x vs 2.5x — the open decision
 
@@ -83,31 +84,42 @@ fixture that is **₱864,000** of the gap.
 Neither is wrong on its face — they are different tables. But the storefront's is
 roughly 56% above the reference's, and nothing in the repo explains the difference.
 
-### 3. Storeys: x1.05 vs x1.00 — a double count
+### 3. Storeys: x1.05 vs x1.00 — fixed in Task 4
 
-`data/zonal-config.json` gives 2 floors a `multiplier` of 1.05. `estimator.js:241`
-applies it:
+`data/zonal-config.json` gave 2 floors a `multiplier` of 1.05, and 3+ floors 1.10.
+`estimator.js:241` applied it:
 
 ```js
 improvement = Math.round(buildCost * floorArea * floorsMult * (1 - depPct)) + featuresTotal;
 ```
 
 But the floor area field is labelled **"Total built-up area (sqm) / Across all
-storeys"** (`estimator.js:1004`), and the reference labels its equivalent
-**"Total floor area across all storeys"**. Area already spans every storey, so
-multiplying by a per-storey factor charges the same square metres twice. On this
-fixture that is **₱120,000**.
+storeys"**, and the reference labels its equivalent **"Total floor area across all
+storeys"**. Area already spans every storey, so multiplying by a per-storey factor
+charged the same square metres twice. It priced a 2-storey house 5% above the same
+house described as 1-storey, at a fixed floor area.
 
-The reference applies no storeys factor. Our guide already sets `floorsMultiplier = 1`
-(`value_guide_flow.js:323`).
+**Removed.** Every `floors` multiplier is now 1. On the report fixture that lowers
+the storefront total from ₱5,395,000 to ₱5,275,000 — a visible reduction, not a hidden
+one, and the reader-facing copy no longer promises a storeys factor. Storeys is still
+recorded, because knowing a house has two storeys is useful context; it just no longer
+changes the price.
 
-The decomposition is exact and asserted: `864,000 + 120,000 = 984,000`, which is the
-whole building difference. If that stops summing, a fourth cause has appeared.
+If a genuine multi-storey premium is ever justified, it belongs in the rate table as a
+per-storey construction argument, not as a multiply over a total.
 
-**Recommendation:** remove the storeys multiplier. It is the one factor here that is
-demonstrably wrong rather than merely a difference of opinion. It is currently
-disclosed in the storefront report ("Storeys: x1.05"), so removing it is a visible
-reduction, not a hidden one — which is the honest way to do it.
+### Remaining decomposition
+
+Exact, and asserted so a second cause cannot appear unnoticed:
+
+| Factor | Gap |
+|---|---:|
+| CHB rate, 16,000 vs 25,000/sqm | ₱864,000 |
+| Storeys multiplier (removed Task 4) | ₱0 |
+| **Total building difference** | **₱864,000** |
+
+`calculationVersion` bumped to `2026.10.4` so a cached report cannot be mistaken for
+one produced by the old model.
 
 ## Why this is frozen rather than unified
 

@@ -762,7 +762,7 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
      Review finding, reproduced on the real engine before the fix: for
      house_lot the result screen shows a headline TOTAL of 6,655,000 and, two
      lines under the BIR figure, "SEA ESTATES market band factor: 2.5x the BIR
-     reference". A reader multiplying 2.5 x 1,150,000 gets 2,875,000 - a 131.5%
+     reference". A reader multiplying 2.5 x 1,150,000 gets 2,875,000 - a 125.2%
      gap against the headline - and neither the label nor the sentence said
      anything was missing from the product. The multiple IS a land factor: the
      stack multiplies the lot area, and the building component is computed
@@ -817,8 +817,13 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
        is the 131.5% gap, read off the rendered HTML rather than the engine. */
     const headline = /class="sf-est-result-value">(₱[\d,]+)</.exec(houseHtml);
     assert.ok(headline, "could not read the headline total off the house and lot result screen");
-    assert.strictEqual(Number(peso(headline[1])), 6655000,
-      "the rendered headline is " + headline[1] + ", not the 6,655,000 the finding was reproduced on");
+    /* 2,875,000 land + 3,600,000 building (25,000 x 180 sqm x 80% remaining) =
+       6,475,000. The storeys multiplier was 1.05 until Task 4 removed it, which
+       added 180,000. The headline is read off the rendered HTML rather than the
+       engine, so it tracks whatever the model now produces; this assertion names
+       the number a reader can reconcile by hand from the printed rows. */
+    assert.strictEqual(Number(peso(headline[1])), 6475000,
+      "the rendered headline is " + headline[1] + ", not the 6,475,000 the finding was reproduced on");
     assert.notStrictEqual(Number(peso(headline[1])), 2875000,
       "the rendered total equals the land product, so this screen is not the vector the finding was reproduced on");
   });

@@ -1001,9 +1001,9 @@ out += "</div>";
           ["wood_prefab", "mixed_chb", "rca_steel"].map(function (k) {
             return { label: labelFor(DATA.config, "construction", k), value: k, active: est.construction === k };
           }), "construction") + "</label>" +
-        '<label class="sf-est-field">Total built-up area (sqm)<span>Across all storeys. Blank assumes 60% of lot area; storeys also apply a cost factor.</span>' +
+        '<label class="sf-est-field">Total built-up area (sqm)<span>Across all storeys. Blank assumes 60% of lot area.</span>' +
         '<input data-est-floor type="number" min="0" max="100000" step="0.01" inputmode="decimal" placeholder="auto — ' + fmt(Math.round((est.area || 0) * 0.6)) + ' sqm" value="' + esc(est.floorArea) + '"></label>' +
-        '<label class="sf-est-field">Storeys<span>Multiplier on construction</span>' + chipRow(
+        '<label class="sf-est-field">Storeys<span>Recorded; the figure above already covers every storey</span>' + chipRow(
           (DATA.config.floors || []).map(function (f) {
             return { label: f.label, value: f.key, active: est.floors === f.key };
           }), "floors") + "</label>" +
@@ -1332,7 +1332,11 @@ var displayRange = '';
       s.push({ t: "House value (replacement cost approach)", h:
         "<ul class=\"sf-est-rdl\">" +
         "<li>Construction: <b>≈ " + money(r.buildCostPerSqm) + "/sqm</b> on " + fmt(r.floorArea) + " sqm floor area</li>" +
-        "<li>Storeys: <b>×" + r.floorsMultiplier.toFixed(2) + "</b> · Age band midpoint <b>" + r.ageMidpoint + " yrs</b>, depreciation <b>" + r.depreciatedPct + "%</b></li>" +
+        /* No storeys multiplier is printed. It used to read "Storeys: ×1.05", which
+           invited the reader to believe storeys were counted a second time on top of
+           an area already measured across all of them. They are not: floorArea is a
+           single total, so the factor has been removed rather than hidden. */
+        "<li>Age band midpoint <b>" + r.ageMidpoint + " yrs</b>, depreciation <b>" + r.depreciatedPct + "%</b></li>" +
         "<li>Improvements itemised: <b>" + (r.featuresTotal > 0 ? money(r.featuresTotal) : "none") + "</b></li>" +
         "<li>House value: <b>" + money(r.improvement) + "</b></li>" +
         "</ul>" });

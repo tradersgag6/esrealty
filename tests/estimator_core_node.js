@@ -137,12 +137,14 @@ let hl = core.computeEstimate(config, index, balayan, {
 });
 eq(hl.type, "house_lot", "hl type");
 eq(hl.floorArea, 120, "hl floorArea");
-eq(hl.floorsMultiplier, 1.05, "hl floors 2 = 1.05");
+/* No storeys multiplier. floorArea is entered once and labelled "Across all
+   storeys", so a per-storey factor would charge the same square metres twice. */
+eq(hl.floorsMultiplier, 1, "hl storeys multiplier is neutral");
 eq(hl.ageMidpoint, 15, "hl age midpoint 15");
 eq(hl.depreciatedPct, 37.5, "hl dep 15/40 = 37.5%");
 eq(hl.buildCostPerSqm, 32000, "hl RCA 32000");
 eq(hl.featuresTotal, 380000, "hl features 180000 + 200000");
-eq(hl.improvement, 2900000, "hl improvement exact without premature percentage rounding");
+eq(hl.improvement, 2780000, "hl improvement = rate x total floor area x (1 - dep) + features");
 eq(hl.total, hl.landValue + hl.improvement, "hl total = land + improvement");
 eq(core.integrityCheck(hl).ok, true, "hl reconciles");
 
