@@ -20,43 +20,21 @@ const assert = require("assert"), fs = require("fs"), path = require("path"), vm
 const EST = require("../js/estimator.js"), REF = require("../js/value_guide_reference.js");
 const ROOT = path.join(__dirname, "..");
 const read = path => JSON.parse(fs.readFileSync(path, "utf8"));
-const config = read("data/zonal-config.json"), index = read("data/batangas-zonal.json"), md = read("data/bir-batangas/municipalities/bauan.json"), balayanMuni = read("data/bir-batangas/municipalities/balayan.json");
+const config = read("data/zonal-config.json"), index = read("data/batangas-zonal.json"), md = read("data/bir-batangas/municipalities/bauan.json");
 let count = 0;
 async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] " + name); }
   function check(name, fn) { fn(); count++; console.log("[PASS] " + name); }
 (async () => {
-  /* The identity and disclosure checks below pin the PRODUCT of the disclosed
-     factors, which needs a fixture sitting at its municipal median where the
-     position weighting is a no-op and bandMid equals the configured mid.
-
-     BALAYAN BACLARAN with no street resolves the municipal median at depth 3, so
-     position is exactly 0 and the band stays 2.5. The B Binay St fixture used
-     before carries 11500/sqm against Bauan's residential p50 of 3700, so the
-     weighting would scale the band and the frozen multiples would no longer be
-     the thing under test. Both fixtures are exercised: the median one for the
-     arithmetic, the Binay one for the weighting. */
   const options = { municipality: "BAUAN", barangay: "POBLACION III", streetKey: "binay st ressurreccion st", classification: "RR", area: 100, type: "vacant_lot" };
-  const medianOptions = { municipality: "BALAYAN", barangay: "BACLARAN", streetKey: "", allOther: true, classification: "RR", area: 100, type: "vacant_lot" };
-  /* The disclosed multiples are pinned against the CONFIGURED values, which is
-     what the disclosure promises: proxy x configured band mid x regional adj.
-     The position weighting is a separate, published figure (r.bandMid) and is
-     asserted on its own. */
-  const flatMultiple = (use, corner) => {
-    const b = config.marketBand.bands[use];
-    return (1 + (corner ? config.cornerLotPct : 0)) * config.proxyFactors[use].factor * b.mid * config.marketBand.regionalAdj;
-  };
-  const atMedian = o => EST.core.computeEstimate(config, index, balayanMuni, o);
 
-  check("residential multiple is 2.5 before position weighting", () => {
-    assert.strictEqual(flatMultiple("residential"), 2.5);
-  });
-  check("the applied residential multiple is the configured band scaled by position", () => {
+  // residential, no corner
+  check("residential multiple is 2.5", () => {
     const r = EST.core.computeEstimate(config, index, md, options);
-    /* Binay St carries 11500 against Bauan's residential p50 3700, so it sits
-       above the median and the band steps back below 2.5. */
-    assert.ok(r.bandMid < 2.5, "band weighted down above the median: " + r.bandMid);
-    assert.ok(Math.abs(r.appliedMultiple - r.bandMid) < 1e-12, "and that weighted band is what is applied");
-    assert.ok(Math.abs(r.factorStack - r.appliedMultiple) < 1e-12, "the stack and the applied multiple are one number");
+    assert.strictEqual(r.appliedMultiple, 2.5);
+  });
+  check("residential factorStack is 2.5", () => {
+    const r = EST.core.computeEstimate(config, index, md, options);
+    assert.strictEqual(r.factorStack, 2.5);
   });
 
   /* Every remaining use-group vector. The classification codes are the real BIR
@@ -66,29 +44,25 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
      and market band, which is what the multiples below are made of. */
   check("residential + corner multiple is 2.5625", () => {
     const r = EST.core.computeEstimate(config, index, md, { ...options, corner: true });
-    /* Configured product: (1 + 0.025) x 1 x 2.5 x 1 = 2.5625. The applied figure
-       carries the position weighting on top, so it is asserted as the configured
-       product times that same weighting, not as a frozen number. */
-    assert.strictEqual(flatMultiple("residential", true), 2.5625, "configured corner product is unchanged");
-    const plain = EST.core.computeEstimate(config, index, md, options);
-    assert.ok(Math.abs(r.appliedMultiple / plain.appliedMultiple - 1.025) < 1e-12,
-      "corner is exactly a 2.5% step on the weighted band: " + r.appliedMultiple);
-    /* Full precision, not the rounded rate: the rounded land rate over the zonal
-       rate does not reproduce the stack. */
+    assert.strictEqual(r.appliedMultiple, 2.5625);
+    /* Full precision, not the rounded rate. On this vector rounding is visible:
+       11500 x 2.5625 = 29468.75, so the rounded land rate over the zonal rate
+       reads 29469/11500 = 2.5625217... and is NOT 2.5625. (The residential
+       vector cannot carry this check - 11500 x 2.5 is a whole peso, so its
+       rounded rate happens to reproduce 2.5 exactly.) */
     assert.notStrictEqual(r.factorStack, r.landPerSqm / r.birZonalRatePerSqm);
   });
-  check("commercial, agricultural and industrial configured multiples are unchanged", () => {
-    /* These come from proxyFactors, which pre-date the position weighting and are
-       out of scope for it. The test pins the configured product so a proxy edit
-       still has to be deliberate. */
-    assert.strictEqual(flatMultiple("commercial"), 4.25);
-    assert.strictEqual(flatMultiple("agricultural"), 0.75);
-    assert.strictEqual(flatMultiple("industrial"), 2.7);
-    ["CR", "A50", "I"].forEach(cls => {
-      const r = EST.core.computeEstimate(config, index, md, { ...options, classification: cls });
-      assert.ok(r.bandPosition, cls + " publishes its position");
-      assert.ok(isFinite(r.appliedMultiple) && r.appliedMultiple > 0, cls + " stays positive");
-    });
+  check("commercial multiple is 4.25", () => {
+    const r = EST.core.computeEstimate(config, index, md, { ...options, classification: "CR" });
+    assert.strictEqual(r.appliedMultiple, 4.25);
+  });
+  check("agricultural multiple is 0.75", () => {
+    const r = EST.core.computeEstimate(config, index, md, { ...options, classification: "A50" });
+    assert.strictEqual(r.appliedMultiple, 0.75);
+  });
+  check("industrial multiple is 2.7", () => {
+    const r = EST.core.computeEstimate(config, index, md, { ...options, classification: "I" });
+    assert.strictEqual(r.appliedMultiple, 2.7);
   });
 
   /* The identity is pinned on the corner vector FIRST. On a non-corner result
@@ -125,7 +99,7 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
   /* The indexed scenario is not a factor estimate: no market, region, corner or
      property-use multiplier is stacked onto it, so there is no multiple to
      disclose. null, not 0 and not a leftover factor value. */
-  const indexed = { ...medianOptions, landMethod: "time-indexed", timeSource: "manual", timeAnnualPct: 5, timeBaseDate: "2022-07-23", timeTargetDate: "2026-10-03" };
+  const indexed = { ...options, landMethod: "time-indexed", timeSource: "manual", timeAnnualPct: 5, timeBaseDate: "2022-07-23", timeTargetDate: "2026-10-03" };
   check("time-indexed land method discloses no multiple", () => {
     const r = EST.core.computeEstimate(config, index, md, indexed);
     assert.strictEqual(r.landMethod, "time-indexed");
@@ -160,9 +134,9 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
   const LIMITATION = "The same factor is applied across all Batangas municipalities. It is not adjusted for local demand and is likely too high for rural locations.";
 
   check("disclosure publishes the multiple and the verbatim copy", () => {
-    const r = atMedian(medianOptions);
+    const r = EST.core.computeEstimate(config, index, md, options);
     const d = REF.appliedMultipleDisclosure(r);
-    assert.strictEqual(d.multiple, "2.5", "at the median the published multiple is the configured one");
+    assert.strictEqual(d.multiple, "2.5");
     assert.strictEqual(d.multipleLabel, LABEL);
     assert.strictEqual(d.text, "2.5\u00d7 the BIR reference for land");
     assert.strictEqual(d.assumption, ASSUMPTION);
@@ -180,42 +154,23 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
      only against residential+corner passed while publishing "4.3562x" for a
      commercial corner lot whose applied multiple was 4.35625. See the
      reconciliation check below. */
-  /* The median fixture: BALAYAN BACLARAN with no street resolves the municipal
-     p50 at depth 3, where the position weighting is exactly a no-op and the
-     published multiples are the configured products this suite has always
-     pinned. */
   const vectors = [
-    ["residential", medianOptions, "2.5"],
-    ["residential + corner", { ...medianOptions, corner: true }, "2.5625"],
-    ["commercial", { ...medianOptions, classification: "CR" }, "4.25"],
-    ["commercial + corner", { ...medianOptions, classification: "CR", corner: true }, "4.35625"],
-    ["agricultural", { ...medianOptions, classification: "A50" }, "0.75"],
-    ["agricultural + corner", { ...medianOptions, classification: "A50", corner: true }, "0.76875"],
-    ["industrial", { ...medianOptions, classification: "I" }, "2.7"],
-    ["industrial + corner", { ...medianOptions, classification: "I", corner: true }, "2.7675"]
+    ["residential", options, "2.5"],
+    ["residential + corner", { ...options, corner: true }, "2.5625"],
+    ["commercial", { ...options, classification: "CR" }, "4.25"],
+    ["commercial + corner", { ...options, classification: "CR", corner: true }, "4.35625"],
+    ["agricultural", { ...options, classification: "A50" }, "0.75"],
+    ["agricultural + corner", { ...options, classification: "A50", corner: true }, "0.76875"],
+    ["industrial", { ...options, classification: "I" }, "2.7"],
+    ["industrial + corner", { ...options, classification: "I", corner: true }, "2.7675"]
   ];
   vectors.forEach(([name, opts, expected]) => {
     check("disclosure multiple for " + name + " is " + expected, () => {
-      const r = atMedian(opts);
-      assert.ok(r.available, name + " resolves: " + r.reason);
-      const d = REF.appliedMultipleDisclosure(r);
+      const d = REF.appliedMultipleDisclosure(EST.core.computeEstimate(config, index, md, opts));
       assert.ok(d, "expected a disclosure");
       assert.strictEqual(d.multiple, expected);
       assert.strictEqual(d.text, expected + "\u00d7 the BIR reference for land");
     });
-  });
-
-  /* Off-median the same disclosure must publish a DIFFERENT, still-derived
-     multiple. This is the regression the position weighting introduces: a
-     formatter that rounded to the configured mid would pass every median vector
-     above and print a number the calculation never used. */
-  check("an off-median street publishes its weighted multiple, not the configured one", () => {
-    const r = EST.core.computeEstimate(config, index, md, options);
-    const d = REF.appliedMultipleDisclosure(r);
-    assert.ok(r.bandMid < 2.5, "the fixture sits above its median");
-    assert.strictEqual(d.multiple, REF.formatMultiple(r.bandMid), "published from the weighted band");
-    assert.notStrictEqual(d.multiple, "2.5", "and it is not the configured mid");
-    assert.ok(d.text.indexOf(REF.formatMultiple(r.bandMid)) === 0, "the text carries the same figure");
   });
 
   /* The point of publishing the multiple at all: a reader multiplies it by the
@@ -245,12 +200,9 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
   /* The builder hands back the result's own factor object so the renderers can
      print the build-up that produced the multiple without recomputing it. */
   check("disclosure carries the result's own factors", () => {
-    /* Pinned on the median fixture, so bandMid is the configured 2.5. Off-median
-       the same object carries the weighted band, which the reconciliation checks
-       below verify separately. */
-    const r = atMedian({ ...medianOptions, corner: true });
+    const r = EST.core.computeEstimate(config, index, md, { ...options, corner: true });
     const d = REF.appliedMultipleDisclosure(r);
-    assert.strictEqual(d.factors, r.factors, "the builder hands back the result's own object");
+    assert.strictEqual(d.factors, r.factors);
     assert.deepStrictEqual(d.factors, { proxyFactor: 1, bandMid: 2.5, regionalAdj: 1 });
   });
 
@@ -647,37 +599,18 @@ async function checkAsync(name, fn) { await fn(); count++; console.log("[PASS] "
   const countingDisclosure = function (result) { disclosureCalls += 1; return realDisclosure(result); };
   disclosure.appliedMultipleDisclosure = countingDisclosure;
 
-  /* renderScreen is async because switching municipality loads that
-     municipality's dataset. Callers await it. */
-  async function renderScreen(opts) {
-/* The renderer harness can target either municipality. It is switched to the
-         median fixture (BALAYAN BACLARAN, no street -> the municipal p50) so the
-         position weighting is exactly a no-op and the literal "2.5x" strings this
-         file asserts still describe what is printed.
-
-         The Binay St fixture carries 11500/sqm against Bauan's residential p50 of
-         3700, so its band is weighted below the configured 2.5. Rewriting dozens
-         of rendered-string assertions against a moving number would add churn
-         without adding coverage; the weighting is pinned directly, on that
-         fixture, by tests/market_band_position_node.js and by the off-median
-         disclosure check above. */
-      const renderMuni = opts.municipality === "BALAYAN" ? "balayan" : "bauan";
-      const renderMuniData = renderMuni === "balayan"
-        ? await browserEST.loadMunicipality("balayan")
-        : muniData;
-      const renderMuniRow = browserEST.municipalityRow(opts.municipality);
-      const streetLabel = renderMuni === "balayan" ? "Baclaran (all streets)" : "Binay St Ressurreccion St";
-      const state = browserEST._state();
-      const result = browserEST.core.computeEstimate(referenceTables.config, referenceTables.index, renderMuniData, opts);
+  function renderScreen(opts) {
+    const state = browserEST._state();
+    const result = browserEST.core.computeEstimate(referenceTables.config, referenceTables.index, muniData, opts);
     result.integrity = browserEST.core.integrityCheck(result);
     Object.assign(state, {
-municipality: opts.municipality || "BAUAN", barangay: opts.barangay, streetLabel: streetLabel,
-        classification: opts.classification, area: opts.area, type: opts.type || "vacant_lot",
-        corner: !!opts.corner, landMethod: opts.landMethod || "factor",
-        timeSource: opts.timeSource, timeAnnualPct: opts.timeAnnualPct,
-        timeBaseDate: opts.timeBaseDate, timeTargetDate: opts.timeTargetDate,
-        leadOpen: false, leadSubmitted: false, pricingUnlocked: true,
-        muniRow: renderMuniRow, muniData: renderMuniData
+      municipality: "BAUAN", barangay: opts.barangay, streetLabel: "Binay St Ressurreccion St",
+      classification: opts.classification, area: opts.area, type: opts.type || "vacant_lot",
+      corner: !!opts.corner, landMethod: opts.landMethod || "factor",
+      timeSource: opts.timeSource, timeAnnualPct: opts.timeAnnualPct,
+      timeBaseDate: opts.timeBaseDate, timeTargetDate: opts.timeTargetDate,
+      leadOpen: false, leadSubmitted: false, pricingUnlocked: true,
+      muniRow: muniRow, muniData: muniData
     });
     state.result = result;
     state.screen = 4;
@@ -691,21 +624,15 @@ municipality: opts.municipality || "BAUAN", barangay: opts.barangay, streetLabel
      decoration: 4.35625 is the vector that a 4-decimal formatter truncates, so
      it is the one that proves the RENDERED number reconciles with the rendered
      build-up rather than merely looking plausible. */
-  /* Rendered from the median fixture so the weighted band is a no-op and the
-   literal "2.5x" strings below describe what the renderer prints. */
-const factorHtml = await renderScreen(medianOptions);
-  const cornerCommercialHtml = await renderScreen({ ...options, classification: "CR", corner: true });
-  const indexedHtml = await renderScreen(indexed);
+  const factorHtml = renderScreen(options);
+  const cornerCommercialHtml = renderScreen({ ...options, classification: "CR", corner: true });
+  const indexedHtml = renderScreen(indexed);
   /* A house and lot, on the web as well as in the PDF. This is the vector that
      made the unqualified sentence wrong, so every check below that reads it
      needs a screen that actually renders it. 100 sqm lot, 180 sqm floor,
      mixed CHB, 2 storeys, 6-10 yrs. */
-  /* Built on the median fixture so the position weighting is a no-op and the
-   rendered multiple is the configured 2.5 this file's literal strings describe.
-   renderScreen still targets BALAYAN because the options carry that
-   municipality. */
-  const webHouseOptions = Object.assign({}, medianOptions, { type: "house_lot", floorArea: 180, ageBand: "6-10", floors: "2", construction: "mixed_chb" });
-  const houseHtml = await renderScreen(webHouseOptions);
+  const webHouseOptions = Object.assign({}, options, { type: "house_lot", floorArea: 180, ageBand: "6-10", floors: "2", construction: "mixed_chb" });
+  const houseHtml = renderScreen(webHouseOptions);
 
   const RESULT_BLOCK = /<div class="sf-est-result-multiple">[\s\S]*?<\/div>/;
   const NOTE_BLOCK = /<p class="sf-est-multiple-note">[\s\S]*?<\/p>/;
@@ -861,24 +788,21 @@ const factorHtml = await renderScreen(medianOptions);
      from `multipleLabel` only would NOT turn it red, which is intended: the
      label is deliberately unqualified. */
   check("the disclosed multiple explains the land, not the total", () => {
-const r = atMedian({ ...medianOptions, ...webHouseOptions });
-      const d = REF.appliedMultipleDisclosure(r);
-      assert.strictEqual(r.type, "house_lot", "the fixture stopped being a house and lot");
-      /* Pinned so the check cannot pass on a degenerate result where land and
-         total coincide (a zero improvement value). */
-      assert.ok(r.total > r.landValue, "the house fixture no longer has a building component, so land === total and this check proves nothing");
-      /* The published multiple is rounded to 5 decimals for display, so the
-         product is compared with the rounding tolerance rather than exactly. On
-         the median fixture the band is the configured 2.5, which is exact. */
-      const product = Number(d.multiple) * r.birZonalValue;
-      assert.ok(Math.abs(product - r.landValue) < 100,
-        d.multiple + " x " + r.birZonalValue + " = " + product + ", which is not the land value " + r.landValue);
-      assert.notStrictEqual(product, r.total,
-        "the multiple reproduces the total, so \"for land\" would be false: " + product + " === " + r.total);
+    const r = EST.core.computeEstimate(config, index, md, webHouseOptions);
+    const d = REF.appliedMultipleDisclosure(r);
+    assert.strictEqual(r.type, "house_lot", "the fixture stopped being a house and lot");
+    /* Pinned so the check cannot pass on a degenerate result where land and
+       total coincide (a zero improvement value). */
+    assert.ok(r.total > r.landValue, "the house fixture no longer has a building component, so land === total and this check proves nothing");
+    const product = Number(d.multiple) * r.birZonalValue;
+    assert.strictEqual(product, r.landValue,
+      "2.5 x " + r.birZonalValue + " = " + product + ", which is not the land value " + r.landValue);
+    assert.notStrictEqual(product, r.total,
+      "the multiple reproduces the total, so \"for land\" would be false: " + product + " === " + r.total);
   });
 
   check("the published sentence and the rendered result screen both say 'for land'", () => {
-    const d = REF.appliedMultipleDisclosure(atMedian(webHouseOptions));
+    const d = REF.appliedMultipleDisclosure(EST.core.computeEstimate(config, index, md, webHouseOptions));
     assert.ok(/\u00d7 the BIR reference for land$/.test(d.text), "the published sentence is " + JSON.stringify(d.text));
     /* The label is asserted UNCHANGED and unqualified on purpose: the report
        and PDF build-up print it beside a "Land value" row that already scopes
@@ -888,19 +812,15 @@ const r = atMedian({ ...medianOptions, ...webHouseOptions });
     assert.ok(block, "no .sf-est-result-multiple on the house and lot result screen");
     assert.strictEqual(block[0],
       '<div class="sf-est-result-multiple"><b>' + LABEL + '</b><span>2.5\u00d7 the BIR reference for land</span><small>' + ASSUMPTION + '</small></div>');
-/* The screen the reader reconciles against: the printed total and the printed
-       multiple side by side, and the product is nowhere near it. That gap is the
-       whole reason the disclosure carries the "for land" qualifier, so the check
-       is about the RELATIONSHIP - a rendered total far above the land product -
-       not a frozen peso figure that moves whenever the fixture does. */
+    /* The screen the reader reconciles against: the printed total and the
+       printed multiple side by side, and the product is nowhere near it. This
+       is the 131.5% gap, read off the rendered HTML rather than the engine. */
     const headline = /class="sf-est-result-value">(₱[\d,]+)</.exec(houseHtml);
     assert.ok(headline, "could not read the headline total off the house and lot result screen");
-    const renderedTotal = Number(peso(headline[1]));
-    const hr = atMedian(webHouseOptions);
-    assert.strictEqual(renderedTotal, hr.total, "the rendered headline is this fixture's total");
-    assert.ok(hr.total > hr.landValue, "the building makes the total exceed the land product");
-    assert.ok(renderedTotal / hr.landValue > 1.5,
-      "the total is far enough above the land product for the gap to be visible: " + (renderedTotal / hr.landValue).toFixed(3) + "x");
+    assert.strictEqual(Number(peso(headline[1])), 6655000,
+      "the rendered headline is " + headline[1] + ", not the 6,655,000 the finding was reproduced on");
+    assert.notStrictEqual(Number(peso(headline[1])), 2875000,
+      "the rendered total equals the land product, so this screen is not the vector the finding was reproduced on");
   });
 
   /* The precondition the reconciliation above silently assumes.
@@ -947,7 +867,7 @@ const r = atMedian({ ...medianOptions, ...webHouseOptions });
 
   /* ---- the markup prints the builder's words, not a second copy ---- */
 
-  check("the markup prints the builder's own strings", async () => {
+  check("the markup prints the builder's own strings", () => {
     /* Every field the builder returns is marked. If the renderer carried its
        own copy of the words - or recomputed the multiple - the marker would be
        missing, and if it dropped or duplicated a field the count would be off.
@@ -965,7 +885,7 @@ const r = atMedian({ ...medianOptions, ...webHouseOptions });
       };
     };
     try {
-      const html = await renderScreen(options);
+      const html = renderScreen(options);
       const marked = (html.match(/SENTINEL/g) || []).length;
       /* label + text in the result block, then assumption there: 3. The report
          note repeats label + text + assumption and the limit adds limitation:
@@ -976,7 +896,7 @@ const r = atMedian({ ...medianOptions, ...webHouseOptions });
     }
   });
 
-  check("every interpolated disclosure value is escaped", async () => {
+  check("every interpolated disclosure value is escaped", () => {
     /* Teeth: M5 on 2026-10-04 dropped the esc() on one field only -
        multipleDisclosure.text - and this check went red on it. */
     disclosure.appliedMultipleDisclosure = function (result) {
@@ -989,7 +909,7 @@ const r = atMedian({ ...medianOptions, ...webHouseOptions });
       };
     };
     try {
-      const html = await renderScreen(options);
+      const html = renderScreen(options);
       assert.strictEqual(html.indexOf("<script>boom<"), -1, "the multiple text was interpolated without esc()");
       assert.strictEqual(html.indexOf('<img src=x onerror="boom">'), -1, "the label was interpolated without esc()");
       assert.ok(html.indexOf("&lt;script&gt;boom&lt;/script&gt;") !== -1, "the escaped multiple text is missing from the result screen");
@@ -1001,11 +921,8 @@ const r = atMedian({ ...medianOptions, ...webHouseOptions });
     }
   });
 
-  check("the disclosure is resolved once per render, not once per interpolated field", async () => {
-    /* The median fixture: the disclosure resolves for a result that carries one.
-       Using the off-median fixture would still resolve, but keeping the median
-       means this count test is independent of the band weighting. */
-    await renderScreen(medianOptions);
+  check("the disclosure is resolved once per render, not once per interpolated field", () => {
+    renderScreen(options);
     /* Two render sites, two resolutions: the result summary and the report
        build-up. A renderer that called the builder inside the concatenation
        scores 5 here - once for the guard plus once per field - and the count
@@ -1202,9 +1119,9 @@ const r = atMedian({ ...medianOptions, ...webHouseOptions });
     return text.slice(at, end < 0 ? text.length : end);
   }
 
-  const houseOptions = Object.assign({}, medianOptions, { type: "house_lot", area: 300, floorArea: 180, ageBand: "6-10", floors: "2", construction: "mixed_chb" });
-  const lotPdf = await renderPdf(medianOptions);
-  const cornerCommercialPdf = await renderPdf(Object.assign({}, medianOptions, { classification: "CR", corner: true }));
+  const houseOptions = Object.assign({}, options, { type: "house_lot", area: 300, floorArea: 180, ageBand: "6-10", floors: "2", construction: "mixed_chb" });
+  const lotPdf = await renderPdf(options);
+  const cornerCommercialPdf = await renderPdf(Object.assign({}, options, { classification: "CR", corner: true }));
   const housePdf = await renderPdf(houseOptions);
   const indexedPdf = await renderPdf(indexed);
   const silencedPdf = await renderPdfWithStub(function () { return null; });
@@ -1249,14 +1166,9 @@ const r = atMedian({ ...medianOptions, ...webHouseOptions });
     assert.strictEqual(lotSummary.split(LABEL).length - 1, 1, "the label appears " + (lotSummary.split(LABEL).length - 1) + " times in the summary");
     assert.ok(lotSummary.indexOf(d.text) > at, "the summary does not follow the label with the multiple sentence");
     /* Under the BIR figure, which is the relationship the label explains and
-       the same position the web result screen puts it in. The BIR figure is
-       read off this fixture rather than written as a literal, because the
-       median fixture's rate is not the 11,500/sqm the original finding was
-       reproduced on. */
-    const pesoStr = n => "PHP " + new Intl.NumberFormat("en-PH", { maximumFractionDigits: 0 }).format(n);
-    const birAt = lotSummary.indexOf(pesoStr(lotPdf.result.birZonalValue));
-    assert.ok(birAt > -1, "the summary no longer prints the BIR figure " + pesoStr(lotPdf.result.birZonalValue));
-    assert.ok(birAt < at, "the label is not printed after the BIR reference figure on the summary");
+       the same position the web result screen puts it in. */
+    const birAt = lotSummary.indexOf("PHP 1,150,000");
+    assert.ok(birAt > -1 && birAt < at, "the label is not printed after the BIR reference figure on the summary");
   });
 
   /* ---- the land build-up site ---- */

@@ -41,48 +41,6 @@
     return "residential";
   }
 
-  /* Where a matched BIR rate sits inside its own municipality's distribution for
-     that class, expressed as a log-scaled position from the median. 0 at p50,
-     1 at p75, -1 at p25. Log because the distributions are multiplicative: p75/p25
-     runs 1.25x to 5.56x across the province, so a linear ratio would compress the
-     wide towns and blow up the narrow ones.
-
-     A street with no distribution (a class with one record, a province fallback)
-     returns null, and the caller keeps the flat band mid. */
-  function bandPosition(muniRow, cls, rate) {
-    var dist = muniRow && muniRow.byClass && muniRow.byClass[cls];
-    if (!dist || !(dist.p50 > 0) || !(dist.p75 > 0) || !(rate > 0)) return null;
-    var lo = Number(dist.p25) > 0 ? Number(dist.p25) : Number(dist.p50) / 2;
-    var hi = Number(dist.p75);
-    var mid = Number(dist.p50);
-    if (!(hi > lo)) return null;
-    var pos = (Math.log(Number(rate)) - Math.log(mid)) / (Math.log(hi) - Math.log(lo));
-    if (!isFinite(pos)) return null;
-    return {
-      percentile: Math.max(-2, Math.min(2, pos)),
-      p25: lo, p50: mid, p75: hi,
-      rate: Number(rate)
-    };
-  }
-
-  /* Scale the band by position. The BIR rate already carries where the street
-     sits, so applying the same multiple to a p75 street and a p25 street prices
-     that premium twice. CONVERGENCE is deliberately small: it re-weights the
-     multiple across the distribution rather than re-basing it, and the result is
-     clamped so no municipality can leave the published 1.5x-3.0x market band.
-
-     The clamp is the load-bearing part. Without it a town whose p75 is many times
-     its p25 would push the multiple to a level no market evidence supports. */
-  var POSITION_CONVERGENCE = 0.30;
-  var POSITION_FLOOR = 1.5, POSITION_CEILING = 3.0;
-  function positionAdjustedBand(cfg, use, position) {
-    var mid = bandMid(cfg, use);
-    if (!position) return { mid: mid, adjusted: mid, convergence: 0 };
-    var raw = mid * (1 - POSITION_CONVERGENCE * position.percentile);
-    var adjusted = Math.max(POSITION_FLOOR, Math.min(POSITION_CEILING, raw));
-    return { mid: mid, adjusted: adjusted, convergence: POSITION_CONVERGENCE };
-  }
-
   function bandMid(config, use) {
     var b = config && config.marketBand && config.marketBand.bands && config.marketBand.bands[use];
     return (b && b.mid != null) ? b.mid : 2.5;
@@ -210,14 +168,9 @@
     var use = useOfClassification(cfg, cls);
     var cornerPct = opts.corner ? Number(cfg.cornerLotPct || 0) : 0;
     var proxy = proxyFactor(cfg, use);
-    var base = hit.value;
-    /* The band is weighted by where the matched rate sits inside its own
-       municipality. The BIR schedule already encodes street position; a flat
-       multiple would apply that premium a second time. */
-    var bandPositionInfo = bandPosition(muniRow, cls, base);
-    var bandSet = positionAdjustedBand(cfg, use, bandPositionInfo);
-    var band = bandSet.adjusted;
+    var band = bandMid(cfg, use);
     var adj = regionalAdj(cfg);
+    var base = hit.value;
     var referenceVerification = referenceTools.lookup(config.governmentReferenceRegister, muniRow.rdo, muniRow.name, opts.valuationDate || new Date().toISOString().slice(0, 10));
     var birZonalRatePerSqm = Math.round(base);
     var birZonalValue = Math.round(birZonalRatePerSqm * area);
@@ -361,17 +314,6 @@
          print as a not-selected comparison. */
       factorStack: landMethod === "factor" ? factorStack : null,
       appliedMultiple: landMethod === "factor" ? factorStack : null,
-      /* Published so a reader reconciling the build-up can see both the flat band
-         mid and what the street's position did to it. Without this the multiple
-         looks arbitrary. */
-      bandPosition: bandPositionInfo,
-      /* The band actually applied, which is the configured mid weighted by where
-         the street sits. factors.bandMid reports the same number, so there is one
-         value rather than two that could disagree; bandFlatMid keeps the raw
-         configured mid for a reader who wants to see what the weighting changed. */
-      bandMid: band,
-      bandFlatMid: bandSet.mid,
-      bandConvergence: bandSet.convergence,
       factorSettingsVersion: cfg.factorSettingsVersion || cfg.calculationVersion,
       marketGuide: {
         value: total,

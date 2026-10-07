@@ -22,53 +22,14 @@ function pdfText(bytes) {
   const options = { municipality: "BAUAN", barangay: "POBLACION III", streetKey: "binay st ressurreccion st", classification: "RR", area: 100, type: "vacant_lot" };
   const result = EST.core.computeEstimate(config, index, md, options);
   check("Bauan source fixture matches official residential rate", () => { assert.equal(result.birZonalRatePerSqm, 11500); assert.equal(result.departmentOrder, "035-2022"); });
-  /* The market figure is position-weighted now. The fixture street carries
-     11500/sqm against Bauan's residential p25 1700 / p50 3700 / p75 9000, so it
-     sits above its municipal median and the band falls below the flat 2.5. The BIR
-     figures are the official tax base and are asserted unchanged - a market
-     assumption must never move them. Market figures are re-derived from the
-     disclosed band rather than frozen, so a weighting change shows as a diff. */
-  check("the BIR base is untouched and the market band is position-weighted", () => {
-    assert.equal(result.birZonalValue, 1150000, "BIR value never moves with a market assumption");
-    assert.equal(result.perSqm > 11500, true, "the market figure sits above the BIR rate");
-    assert.equal(result.total, result.landValue, "no improvement on a vacant lot");
-    assert.equal(result.low, Math.round(result.total * 0.85), "low is 85% of the figure");
-    assert.equal(result.high, Math.round(result.total * 1.30), "high is 130%");
-    assert.ok(result.bandFlatMid > result.bandMid, "band weighted down above the median");
-    assert.ok(result.bandPosition.percentile > 0, "position is published and positive");
-  });
+  check("reference valuation figures match independently supplied PDF example", () => { assert.equal(result.birZonalValue, 1150000); assert.equal(result.total, 2875000); assert.equal(result.low, 2443750); assert.equal(result.high, 3737500); assert.equal(result.perSqm, 28750); });
   const costs = EST.core.taxMath(config, result.total, { birZonalValue: result.birZonalValue, marketGuideEstimate: result.total, transactionPrice: result.total });
-  /* Cost lines are pure functions of the statutory base, so they are re-derived
-     from the tax rates rather than frozen. The figures move when the market band
-     moves; the ARITHMETIC must not. */
-  const T = config.tax;
-  check("reference cost lines and total reconcile", () => {
-    const gross = costs.base, sixPct = Math.round(gross * T.cgtPct);
-    assert.equal(costs.cgt, sixPct, "CGT is 6% of the statutory base");
-    assert.equal(costs.dst, Math.round(gross * T.dstPct), "DST matches its rate");
-    assert.equal(costs.total, costs.cgt + costs.dst + costs.transfer + costs.registration, "the lines sum to the total");
-    assert.equal(costs.netAfterAllTransactionCosts, costs.base - costs.total, "net proceeds are the base less costs");
-  });
-  /* Seller costs are the statutory total plus the SELLER'S SHARE of commission,
-     not the whole of it: the allocation splits commission between the parties.
-     Asserting the whole commission here would encode an allocation assumption
-     this layer does not own, and it passed by accident before. */
-  check("commission is charged on the gross and split between the parties", () => {
-    assert.equal(costs.broker, Math.round(costs.base * T.brokerPct), "commission is the configured rate of the base");
-    const sellerShare = costs.sellerCosts - costs.total;
-    assert.ok(sellerShare > 0, "the seller bears part of the commission");
-    assert.ok(sellerShare < costs.broker, "but not all of it - the split is real");
-    assert.equal(costs.projectedNetProceeds, costs.base - costs.sellerCosts, "proceeds are the base less what the seller bears");
-    assert.ok(costs.projectedNetProceeds < costs.base, "proceeds are below the base");
-  });
+  check("reference cost lines and total reconcile", () => { assert.equal(costs.cgt, 172500); assert.equal(costs.dst, 43125); assert.equal(costs.transfer, 14375); assert.equal(costs.registration, 2875); assert.equal(costs.total, 232875); assert.equal(costs.netAfterAllTransactionCosts, 2642125); });
+  check("actual seller proceeds use distinct allocation", () => { assert.equal(costs.broker, 86250); assert.equal(costs.sellerCosts, 258750); assert.equal(costs.projectedNetProceeds, 2616250); });
   const internal = TAX.sellingCosts(result, ref);
-  check("internal PDF adapter shares public cost totals", () => {
-    assert.equal(internal.taxBase, costs.base, "the PDF reads the same base");
-    assert.equal(internal.statutoryTotal, costs.total, "and the same statutory total");
-    assert.equal(internal.netProceeds.beforeCommission, costs.netAfterAllTransactionCosts, "and the same net proceeds");
-  });
-  check("sale price below guide uses full zonal basis, not guide or excess", () => { const c = FINANCE.transaction({}, result.total, { salePrice: 1000000, birZonalValue: 1150000 }); assert.equal(c.base, 1150000); assert.equal(c.cgt, 69000); });
-  check("supplied assessor schedule FMV raises statutory basis", () => { const c = FINANCE.transaction({}, result.total, { salePrice: 3000000, birZonalValue: 1150000, fairMarketValue: 3500000 }); assert.equal(c.base, 3500000); assert.equal(c.cgt, 210000); });
+  check("internal PDF adapter shares public cost totals", () => { assert.equal(internal.taxBase, costs.base); assert.equal(internal.statutoryTotal, costs.total); assert.equal(internal.netProceeds.beforeCommission, 2642125); assert.equal(internal.netProceeds.atLowCommission, 2616250); });
+  check("sale price below guide uses full zonal basis, not guide or excess", () => { const c = FINANCE.transaction({}, 2875000, { salePrice: 1000000, birZonalValue: 1150000 }); assert.equal(c.base, 1150000); assert.equal(c.cgt, 69000); });
+  check("supplied assessor schedule FMV raises statutory basis", () => { const c = FINANCE.transaction({}, 2875000, { salePrice: 3000000, birZonalValue: 1150000, fairMarketValue: 3500000 }); assert.equal(c.base, 3500000); assert.equal(c.cgt, 210000); });
   check("comparable evidence does not alter value or transaction costs", () => { const withComps = EST.core.computeEstimate(config, index, md, { ...options, comparables: [{ price: 3000000, lot_area_sqm: 100, city: "BAUAN", barangay: "POBLACION III", property_type: "lot-only", offer_type: "sale" }] }); assert.equal(withComps.total, result.total); assert.equal(TAX.sellingCosts(withComps, ref).statutoryTotal, internal.statutoryTotal); });
   check("rounded scenario endpoints reconcile for fractional areas", () => { const r = EST.core.computeEstimate(config, index, md, { ...options, area: 123.47, corner: true }); assert(EST.core.integrityCheck(r).ok); assert(!EST.core.integrityCheck({ ...r, high: r.high + 1 }).ok); });
   check("estate deduction is standard, family home conditional", () => { assert.equal(FINANCE.estate(15000000).tax, 600000); assert.equal(FINANCE.estate(15000000, { familyHomeEligible: true, familyHomeValue: 10000000 }).tax, 0); assert.equal(FINANCE.estate(15000000, { familyHomeValue: 10000000 }).tax, 600000); });
@@ -94,25 +55,10 @@ function pdfText(bytes) {
   const api = vm.runInContext("({ buildPdf, sanitizeReport, emailHtml })", context);
   const payload = { report: api.sanitizeReport({ property: { area: 100, kind: "land", typeLabel: "Vacant lot" }, location: { region: "Region IV-A (CALABARZON)", province: "Batangas", town: "Bauan", barangay: "Poblacion III", address: "BINAY ST (RESSURRECCION ST)" }, asOf: result.effectivityDate, disclaimer: result.disclaimer, estimate: { ...result, sourceLevel: result.source.level, proxyFactor: result.factors.proxyFactor, bandMid: result.factors.bandMid, regionalAdj: result.factors.regionalAdj, provenance } }) };
   const bytes = await api.buildPdf(payload), text = pdfText(bytes);
-  /* Derived from the live result, so the PDF is proven to carry THIS figure rather
-     than a literal from an earlier band. The BIR base must still appear
-     unchanged: a market assumption may not move it. */
-  const money = n => "PHP " + new Intl.NumberFormat("en-PH", { maximumFractionDigits: 0 }).format(n);
-  check("emailed public PDF carries this result's figures", () => {
-    /* The renderer derives its own cost lines from the estimate, so the PDF
-       figures are computed here the same way rather than assumed to match the
-       tax engine's. What is asserted is that the PDF shows THIS property's
-       numbers and that the BIR base is unchanged. */
-    [result.total, result.low, result.high, result.birZonalValue]
-      .forEach(n => assert(text.includes(money(n)), money(n)));
-    assert(text.includes(money(Math.round(result.total * config.tax.cgtPct))),
-      "CGT derived from this estimate appears in the PDF: " + money(Math.round(result.total * config.tax.cgtPct)));
-  });
+  check("emailed public PDF contains same valuation and cost fixtures", () => { for (const n of ["2,875,000", "2,443,750", "3,737,500", "1,150,000", "172,500", "43,125", "232,875", "2,642,125", "2,616,250"]) assert(text.includes("PHP " + n), n); });
   check("emailed report contains six ordered sections", () => { let last = -1; for (const title of ["01 Valuation Summary", "02 Detailed Computation", "03 Transaction Costs", "04 Market Evidence", "05 Documents", "06 Pricing Scenarios"]) { const at = text.indexOf(title); assert(at > last, title); last = at; } });
   check("emailed PDF discloses missing analysis, whole-estate assumption and source trust", () => { assert(/not assessed/.test(text)); assert(/property-only scenarios/i.test(text)); assert(/client-supplied/.test(text)); assert(!/50% of the BIR zonal value|excess of the price/.test(text)); });
-  /* The email renders bare amounts, not the PDF's "PHP " prefix, so this asserts
-     on the figure rather than the formatter. */
-  check("email summary uses central estimate and scenario range", () => { const email = api.emailHtml(payload); [result.total, result.low, result.high].forEach(n => assert(email.includes(new Intl.NumberFormat("en-PH", { maximumFractionDigits: 0 }).format(n)), String(n))); });
+  check("email summary uses central estimate and scenario range", () => { const email = api.emailHtml(payload); assert(email.includes("2,875,000") && email.includes("2,443,750") && email.includes("3,737,500")); });
   const timeResult = EST.core.computeEstimate({ ...config, governmentReferenceRegister: read("data/government-reference-register.json") }, index, md, { ...options, landMethod: "time-indexed", timeAnnualPct: 5, timeBaseDate: "2022-07-23", timeTargetDate: "2026-10-03" });
   const timePayload = { report: api.sanitizeReport({ ...payload.report, estimate: { ...timeResult, sourceLevel: timeResult.source.level, proxyFactor: timeResult.factors.proxyFactor, bandMid: timeResult.factors.bandMid, regionalAdj: timeResult.factors.regionalAdj } }) };
   const timeText = pdfText(await api.buildPdf(timePayload));
