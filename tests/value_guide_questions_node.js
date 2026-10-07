@@ -297,6 +297,57 @@ check("the methodology names the rate it used", async () => {
     "the construction rate is printed, not implied");
 });
 
+check("step 2 renders one group per question, each option labelled with its bp", () => {
+  /* The nine questions are rendered from QUESTIONS, not hand-listed, so a factor
+     cannot be scored without a control to set it. Each option shows its own
+     effect before the user picks it: the reference does this and a person who
+     does not know what "estate settled" is worth needs it. */
+  const src = fs.readFileSync(path.join(ROOT, "js/app.js"), "utf8");
+  const stage2 = src.split("function vgStage2")[1].split("function vgReviewRows")[0];
+  const groups = src.split("function vgQuestionGroups")[1].split("\n  }")[0];
+  assert.ok(stage2.length > 0, "vgStage2 located");
+  assert.ok(stage2.indexOf("vgQuestionGroups()") >= 0, "step 2 renders the question groups");
+  assert.ok(groups.indexOf("QUESTIONS") >= 0, "which loop over QUESTIONS");
+  assert.ok(groups.indexOf("data-vg-bp") >= 0, "each option carries its bp for display");
+  assert.ok(groups.indexOf("data-vg-notsure") >= 0, "each group offers Not sure");
+  assert.ok(groups.indexOf(".bp") >= 0, "the bp comes from the factor option");
+  ["occupancy", "titleStatus", "inheritanceStatus"].forEach(k =>
+    assert.ok(stage2.indexOf('data-vg-set=\\"' + k + '\\"') < 0, "the old hand-written " + k + " select is gone"));
+  /* Not sure must delete rather than store a sentinel. */
+  const handler = src.split('el.hasAttribute("data-vg-notsure")')[1].split("return; }")[0];
+  assert.ok(handler.indexOf("delete draft.form[q.input]") >= 0,
+    "the handler deletes the key: " + handler.replace(/\s+/g, " ").slice(0, 160));
+  assert.ok(handler.indexOf("not_sure") < 0, "no sentinel value is stored");
+});
+
+check("the bp labels read from the factor, so they cannot drift from the model", () => {
+  /* A label typed next to the control would be a second place to update. */
+  const src = fs.readFileSync(path.join(ROOT, "js/app.js"), "utf8");
+  const stage = src.split("function vgStage2")[1].split("function vgReviewRows")[0];
+  const bpCall = stage.split("data-vg-bp=")[1];
+  assert.ok(bpCall.indexOf("factorBp") >= 0 || bpCall.indexOf(".bp") >= 0,
+    "the rendered bp comes from the factor option, not a literal in the markup");
+  assert.ok(!/data-vg-bp="-?\d+"/.test(stage), "no hard-coded bp in the markup");
+});
+
+check("step 1 offers the reference's optional sale-stage group", () => {
+  const src = fs.readFileSync(path.join(ROOT, "js/app.js"), "utf8");
+  const stage = src.split("function vgStage1")[1].split("function vgStage2")[0];
+  assert.ok(stage.indexOf("data-vg-stage1-stage") >= 0, "the group renders");
+  ["just_checking", "ready_to_sell", "already_listed", "have_a_buyer"].forEach(k =>
+    assert.ok(stage.indexOf('value: "' + k + '"') >= 0, k + " offered"));
+  assert.ok(stage.indexOf("Optional") >= 0, "and it is marked optional");
+});
+
+check("the nine questions are all reachable from a saved draft", () => {
+  /* Not sure must leave the key unset rather than store a sentinel, otherwise
+     "skipped" and "answered zero" are the same value again. */
+  const out = F.pickInputs({ shape: "", titled: "", occupancy: "" });
+  ["lotShape", "titleDoc", "ownership"].forEach(k =>
+    assert.ok(!(k in out), k + " absent when the user skips"));
+  assert.ok(F.sectionsOf(out).every(s => s.assessed === false), "all read unassessed");
+});
+
 check("net cap and floor are symmetric", () => {
   assert.strictEqual(F.MODEL.NET_FLOOR, -0.15);
   assert.strictEqual(F.MODEL.NET_CAP, 0.15);

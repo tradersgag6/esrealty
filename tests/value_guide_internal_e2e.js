@@ -210,8 +210,17 @@ async function pickLocation() {
     q('[data-vg-next="2"]').click();
     await wait(500);
     chk("stage2-reached", q("[data-vg-calc]") !== null, "details screen");
-    chk("stage2-explains-evidence-led-ownership-policy", /No unsupported flat deductions/.test(q("#content").textContent),
-      "occupancy impact disclosed");
+/* Each option now states the adjustment it carries, so the check reads the bp
+          off a rendered control rather than looking for prose that described the
+          old policy. This is the substantive change: occupancy, title, estate and
+          the site questions all move the number now, and the screen says by how much. */
+       var bpTiles = qa("[data-vg-bp]");
+       chk("stage2-shows-each-options-adjustment", bpTiles.length >= 12,
+         bpTiles.length + " option tiles labelled, first: " + (bpTiles[0] ? bpTiles[0].textContent.trim().slice(0, 60) : ""));
+       chk("stage2-offers-not-sure-per-question", qa("[data-vg-notsure]").length === 9,
+         qa("[data-vg-notsure]").length + " skip affordances");
+       chk("stage2-explains-what-skipping-means", /rather leave it unassessed than guess/i.test(q("#content").textContent),
+         "occupancy impact disclosed");
 
     /* The review list is folded into Details, so it is checked on this screen
        rather than on a step of its own. Read the rows structurally so the
@@ -238,12 +247,18 @@ async function pickLocation() {
        DOM: the fixed model callout, the context-only comparables block and the
        twelve published factor rows. */
     chk("model-callout-in-report",
-      document.body.textContent.indexOf("Reference model: LandValuePH published methodology") >= 0,
-      "callout rendered");
-    chk("comparables-block-in-report", !!q("[data-vg-comparables]"),
-      q("[data-vg-comparables]") ? "present" : "missing");
-    chk("methodology-twelve-factor-rows", qa("[data-vf]").length === 12,
-      qa("[data-vf]").length + " factor rows");
+document.body.textContent.indexOf("Derived from published BIR zonal values") >= 0,
+         "callout rendered");
+       chk("comparables-block-in-report", !!q("[data-vg-comparables]"),
+         q("[data-vg-comparables]") ? "present" : "missing");
+       chk("methodology-one-row-per-factor", qa("[data-vf]").length === 11,
+         qa("[data-vf]").length + " factor rows");
+       /* A row nobody answered must not read as a checked one that found nothing. */
+       var unassessed = qa("[data-vf-unassessed]");
+       chk("unanswered-factors-read-not-assessed", unassessed.length > 0
+         && /Not assessed/.test(document.body.textContent)
+         && !unassessed.some(function (r) { return /0\.00%/.test(r.textContent); }),
+         unassessed.length + " rows unassessed, none printing 0.00%");
 
     /* The two figures must be visibly different kinds of number. */
     var figs = qa(".vg-figure");

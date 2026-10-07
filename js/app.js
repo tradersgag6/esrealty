@@ -10477,6 +10477,20 @@ function vgStage1(d, ref) {
       + vgField("Street not listed", "Uses the all-other-streets rate for the barangay.",
         '<div class="vg-choice"><label><input type="checkbox" data-vg-check="allOther"' + (f.allOther ? " checked" : "") + "> Use the all-other-streets rate</label></div>", 12));
 
+    /* Optional, and revealed once a purpose is picked, because "where are you in
+       the sale" only means something relative to why the estimate is wanted. It
+       never touches the calculation; it only tailors the report's framing. */
+    html += vgGroup("Where are you in the sale?",
+      "Optional. Tap to select, tap again to skip. This shapes the report, not the figure.",
+      '<div class="vg-choice">' + [
+        { value: "just_checking", label: "I&rsquo;m just checking my property&rsquo;s value" },
+        { value: "ready_to_sell", label: "I&rsquo;m getting ready to sell" },
+        { value: "already_listed", label: "My property is already listed" },
+        { value: "have_a_buyer", label: "I already have a buyer" }
+      ].map(o => '<label><input type="radio" name="vg-stage1-stage" data-vg-stage1-stage="'
+        + o.value + '"' + (f.saleStage === o.value ? " checked" : "") + "> " + o.label + "</label>").join("")
+        + "</div>", 12);
+
     html += vgGroup("What is being valued?",
       "Classification and lot area set the base rate and the amount it is applied to.",
       vgSelectField("BIR classification", null, "data-vg-set=\"classification\"",
@@ -10513,7 +10527,10 @@ function vgStage1(d, ref) {
 
   function vgStage2(d, config) {
     const f = d.form;
-    let html = '<div class="card card-pad"><h3 class="mb-16">Describe the property</h3>';
+    const questions = (window.ESREALTY_VG_FLOW || {}).QUESTIONS || [];
+    let html = '<div class="card card-pad"><h3 class="mb-16">Describe your property</h3>';
+    html += '<p class="dim mb-16">' + questions.length + ' quick questions. Tap <b>Not sure</b> on anything you '
+      + "don't know &mdash; we would rather leave it unassessed than guess.</p>";
 
     if (f.type === "house_lot") {
       html += vgGroup("House and lot details",
@@ -10541,18 +10558,39 @@ function vgStage1(d, ref) {
         + "To value a house and lot, go back to step 1 and change the property type.</div></div></div>";
     }
 
-    html += vgGroup("Ownership and title",
-      "Unverified ownership and possession are review conditions. No unsupported flat deductions are applied; unknown answers do not establish clear title.",
-      vgSelectField("Occupancy", null, "data-vg-set=\"occupancy\"", [
-        { value: "empty", label: "Empty" }, { value: "caretaker", label: "Caretaker or family member" },
-        { value: "tenants", label: "Tenants paying rent" }, { value: "informal_settlers", label: "Informal settlers" },
-        { value: "not_sure", label: "Not sure" }], f.occupancy, "— choose —", 6)
-      + vgSelectField("Title status", null, "data-vg-set=\"titleStatus\"", [
-        { value: "titled_self", label: "Titled, in my name" }, { value: "titled_previous", label: "Titled, previous owner's name" },
-        { value: "tax_declaration", label: "Tax declaration only" }, { value: "not_sure", label: "Not sure" }], f.titleStatus, "— choose —", 6)
-      + vgSelectField("Inheritance", null, "data-vg-set=\"inheritanceStatus\"", [
-        { value: "not_inherited", label: "Not inherited" }, { value: "settled", label: "Inherited, settlement done" },
-        { value: "pending", label: "Inherited, settlement pending" }, { value: "not_sure", label: "Not sure" }], f.inheritanceStatus, "— choose —", 6));
+    /* The nine reference questions, rendered from QUESTIONS so a factor cannot be
+       scored without a control that sets it, and so adding a question is a change
+       to one list rather than to markup and code together. Every option shows the
+       adjustment it carries before it is chosen: a person who does not know what
+       "estate settled" is worth needs that, and it is why the answer is credible
+       rather than a black box. Not sure leaves the key unset, which the model reads
+       as unassessed and the report prints as such. */
+function vgQuestionGroups() {
+    const FLOW = window.ESREALTY_VG_FLOW || {};
+    const questions = FLOW.QUESTIONS || [];
+    return questions.map(q => {
+      const factor = (FLOW.FACTORS || []).filter(f => f.id === q.factorId)[0];
+      const options = factor ? factor.options : [];
+      const chosen = vgDraft().form[q.input];
+      const tiles = options.map(o =>
+        '<label class="vg-choice"><input type="radio" name="vg-q-' + esc(q.id) + '"'
+        + ' data-vg-set="' + esc(q.input) + '" value="' + esc(o.value) + '"'
+        + (chosen === o.value ? " checked" : "")
+        + ' data-vg-bp="' + esc(o.bp) + '"> '
+        + esc(o.label) + ' <small class="vg-bp">' + vgBpLabel(o.bp) + "</small></label>").join("");
+      const skip = '<label class="vg-choice"><input type="radio" name="vg-q-' + esc(q.id) + '"'
+        + ' data-vg-notsure="' + esc(q.id) + '"' + (chosen == null || chosen === "" ? " checked" : "")
+        + "> Not sure <small class=\"vg-bp\">not assessed</small></label>";
+      return vgGroup(q.label, q.help || null, tiles + skip, 12);
+    }).join("");
+  }
+
+  function vgBpLabel(bp) {
+    if (!bp) return "no change";
+    return (bp > 0 ? "+" : "") + (bp / 100).toFixed(2) + "%";
+  }
+
+    html += vgQuestionGroups();
 
     /* The review list used to be its own step. Folded into Details so the flow
        is three steps: an operator checks the inputs in the same screen they
@@ -10823,6 +10861,20 @@ window.ESREALTY_VG_FLOW.compute(vgModelOpts(), vgEst()),
         }
         if (el.hasAttribute("data-vg-check")) {
           draft.form[el.getAttribute("data-vg-check")] = el.checked;
+          save(); render(); return;
+        }
+        /* Not sure deletes the key rather than storing a sentinel. Storing
+           "not_sure" would make a skipped question indistinguishable from an
+           answered one, which is the ambiguity the model used to have. */
+        if (el.hasAttribute("data-vg-notsure")) {
+          const qid = el.getAttribute("data-vg-notsure");
+          const q = ((window.ESREALTY_VG_FLOW || {}).QUESTIONS || []).filter(x => x.id === qid)[0];
+          if (q) delete draft.form[q.input];
+          save(); render(); return;
+        }
+        if (el.hasAttribute("data-vg-stage1-stage")) {
+          const v = el.getAttribute("data-vg-stage1-stage");
+          if (draft.form.saleStage === v) delete draft.form.saleStage; else draft.form.saleStage = v;
           save(); render(); return;
         }
         if (!el.hasAttribute("data-vg-set")) return;
