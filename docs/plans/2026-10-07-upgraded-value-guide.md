@@ -133,6 +133,38 @@ amounts. Customer name, purpose, phone and email never change the valuation.
 Asking-price scenarios used for transaction costs do not silently change the
 property estimate.
 
+### Done — `docs/specs/value-guide-calculation-contract.md`
+
+Invariants hold on both surfaces and are asserted:
+metadata never moves a total (6 variants x 2 surfaces); an unrecognised
+`saleContext` is refused with a reason rather than priced; a vacant lot never
+inherits a building even when a floor area is passed; components sum to the
+total and the total sits inside its own range; every result carries model,
+data and factor-settings versions.
+
+**The two surfaces do not agree, and cannot yet.** The gap decomposes into three
+factors, all exact on the report fixture:
+
+| Factor | Guide | Storefront | Gap |
+|---|---:|---:|---:|
+| Land multiplier | 1.174 | 2.5 | the open Task 9 decision |
+| Building rate (CHB) | 16,000/sqm | 25,000/sqm | ₱864,000 |
+| Storeys on a total-area input | x1.00 | x1.05 | ₱120,000 |
+
+864,000 + 120,000 = 984,000 = the entire building difference. Asserted, so a
+fourth cause cannot appear unnoticed.
+
+**The storeys multiplier is a bug, not a difference of opinion.** The field is
+labelled "Across all storeys", so multiplying by a per-storey factor charges the
+same square metres twice. It is disclosed in the storefront report, so removing it
+is visible rather than hidden. Recommended for Task 4.
+
+The land multiplier cannot be settled by engineering — it is which model survives.
+Two land records disagree (1.26x–2.43x vs 0.53x–0.68x) and neither is a verified
+sale. Frozen, not unified, so the eventual decision arrives as a deliberate diff.
+
+`tests/value_guide_contract_node.js` — 9 checks.
+
 ## Task 4 — Preserve and document the fallback computation
 
 ```text
