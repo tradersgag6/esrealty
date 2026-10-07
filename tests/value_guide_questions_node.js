@@ -186,6 +186,39 @@ check("every question's own option values resolve through its factor", () => {
   });
 });
 
+check("no pricing field keeps the superseded model's number", async () => {
+  /* applyModel used to set r.total from the new model and leave r.value holding
+     the estimator's pre-model figure, so any panel reading r.value reported a
+     different number from the one on screen. */
+  const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST);
+  assert.strictEqual(r.value, r.total, "value tracks total");
+  assert.strictEqual(r.marketGuide.value, r.total, "marketGuide tracks total");
+  assert.strictEqual(r.marketGuide.landValue, r.landValue);
+  assert.strictEqual(r.marketGuideEstimate, r.total, "public guide estimate agrees");
+  assert.strictEqual(r.unadjustedTotal, r.total, "no hidden pre-factor total");
+  assert.strictEqual(r.factors, null, "stale factor field stays suppressed");
+  assert.strictEqual(r.factorStack, null);
+  assert.strictEqual(r.appliedMultiple, null);
+});
+
+check("the range follows the single total", async () => {
+  const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST);
+  assert.strictEqual(r.rangeLowFactor, F.MODEL.RANGE_LOW);
+  assert.strictEqual(r.rangeHighFactor, F.MODEL.RANGE_HIGH);
+  assert.strictEqual(r.low, Math.round(r.total * F.MODEL.RANGE_LOW));
+  assert.strictEqual(r.high, Math.round(r.total * F.MODEL.RANGE_HIGH));
+  assert.ok(r.low < r.total && r.total < r.high, "the band brackets the figure");
+});
+
+check("the estimator's own integrity check passes on our result", async () => {
+  /* EST.core.integrityCheck requires total === landValue + improvement when
+     ownershipAdjustmentPct is 0. It is the contract the whole result rests on. */
+  const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({ occupancy: "informal_settlers" })), EST);
+  assert.strictEqual(r.ownershipAdjustmentPct, 0);
+  assert.strictEqual(r.total, r.landValue + r.improvement);
+  assert.strictEqual(EST.core.integrityCheck(r).ok, true, JSON.stringify(EST.core.integrityCheck(r)));
+});
+
 check("net cap and floor are symmetric", () => {
   assert.strictEqual(F.MODEL.NET_FLOOR, -0.15);
   assert.strictEqual(F.MODEL.NET_CAP, 0.15);

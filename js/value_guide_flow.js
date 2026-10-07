@@ -251,11 +251,16 @@
     r.high = Math.round(r.total * MODEL.RANGE_HIGH);
     r.perSqm = r.area ? Math.round(r.total / r.area) : 0;
 
-    /* Public-model fields the report, the tax engine and the PDF read. */
+    /* Public-model fields the report, the tax engine and the PDF read. `value` and
+       `unadjustedTotal` are written here as well: the estimator set them from its
+       own superseded calculation and applyModel only overwrote `total`, so any
+       panel reading r.value reported a different figure from the one on screen.
+       applyModel is now the only writer of a pricing field. */
+    r.value = r.total;
+    r.unadjustedTotal = r.total;
     r.marketGuideEstimate = r.total;
     r.marketGuideRatePerSqm = r.perSqm;
     r.recommendedAskingPrice = r.high;
-    r.unadjustedTotal = r.total;
     r.ownershipAdjustmentPct = 0;
     r.floorsMultiplier = 1;
     r.buildCostPerSqm = rcn;
