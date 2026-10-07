@@ -262,6 +262,41 @@ check("the four offered codes each produce a distinct rate", async () => {
   assert.strictEqual(new Set(rates).size, rates.length, "each class prices differently: " + JSON.stringify(seen));
 });
 
+check("the report states what the figure is derived from", async () => {
+  const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST);
+  const html = F.reportSections(r, EST, []);
+  assert.ok(html.indexOf("Derived from published BIR zonal values") >= 0, "the permitted claim is stated");
+  assert.ok(html.indexOf("RA 9646") >= 0, "and it is not an appraisal under the Act");
+  assert.ok(html.indexOf("LandValuePH") < 0, "the model is not named as the source of the number");
+});
+
+check("the report makes no market-price claim it cannot support", async () => {
+  /* No Batangas listings exist, so there is no active-listing median and no
+     verified sale behind any figure here. A report that said it matched the
+     market would be making a claim the repo cannot evidence. */
+  const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST);
+  const html = F.reportSections(r, EST, []).toLowerCase();
+  ["market price", "market value", "fair market", "matches the market", "current asking"].forEach(phrase =>
+    assert.ok(html.indexOf(phrase) < 0, 'report must not claim "' + phrase + '"'));
+});
+
+check("an empty comparables block says so in words", async () => {
+  /* The listings API holds three records, all Caloocan. A blank section read as
+     "we checked and there are none". */
+  const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST);
+  const html = F.reportSections(r, EST, []);
+  const block = html.split('data-vg-comparables')[1].split("</div>")[0];
+  assert.ok(block.length > 0, "the block renders");
+  assert.ok(/no (matching )?(batangas )?listings/i.test(block), "it says there are none: " + block.slice(0, 120));
+});
+
+check("the methodology names the rate it used", async () => {
+  const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({})), EST);
+  const html = F.reportSections(r, EST, []);
+  assert.ok(html.indexOf(String(r.referenceModel.rcnRate).replace(/\B(?=(\d{3})+(?!\d))/g, ",")) > 0,
+    "the construction rate is printed, not implied");
+});
+
 check("net cap and floor are symmetric", () => {
   assert.strictEqual(F.MODEL.NET_FLOOR, -0.15);
   assert.strictEqual(F.MODEL.NET_CAP, 0.15);

@@ -333,10 +333,10 @@
      for the other. It is the first thing reportSections returns, so the report
      cannot open without it. */
   var MODEL_CALLOUT =
-    "Reference model: LandValuePH published methodology, market-indicator factor 1.174. "
-    + "The public site calculator uses a different model (SEA ESTATES factor stack) "
-    + "and returns a higher figure for the same property: 2.14x on a vacant lot in this fixture. "
-    + "Both are planning figures, not an appraisal.";
+"Derived from published BIR zonal values, adjusted for documented property factors. "
+      + "The public site calculator uses a different model (SEA ESTATES factor stack) "
+      + "and returns a higher figure for the same property: 2.14x on a vacant lot in this fixture. "
+      + "Both are planning figures, not a real estate appraisal under RA 9646.";
 
   function esc(v) {
     return String(v == null ? "" : v).replace(/[&<>"]/g, function (c) {
@@ -407,7 +407,12 @@
     var head = '<div data-vg-comparables class="mt-16"><h3>Our own listings, for context</h3>'
       + "<p>Asking advertisements from our own catalog, not completed sales. "
       + "Shown for context only; no listing price enters the calculation above.</p>";
-    if (!rows.length) return head + "<p>No matching listings for this municipality.</p></div>";
+    /* No Batangas listings exist in the catalog yet, so this branch is the normal
+     case rather than an edge. Say which is true, or a blank block reads as
+     "we checked and found nothing to compare". */
+    if (!rows.length) return head + "<p>No Batangas listings in our catalog for this municipality yet, "
+      + "so there is nothing to compare this figure against. Nothing here has been checked "
+      + "against completed sales.</p></div>";
     var s = summary || {};
     var items = (s.records || rows).slice(0, 8).map(function (rec) {
       return "<li>" + esc(rec.title || rec.id || "Listing") + " · " + peso(rec.price) + "</li>";

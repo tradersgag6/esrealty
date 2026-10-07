@@ -224,10 +224,13 @@ function pdfText(bytes) {
     const F = flow();
     const r = await F.compute(OPTS, EST);
     const html = F.reportSections(r, EST, []);
-    assert.strictEqual(html.indexOf("Reference model: LandValuePH published methodology"), 0, "callout is first");
+    /* The callout now leads with what the figure is derived from rather than naming
+       the reference tool, which is a competitor and not the source of the number. */
+    assert.strictEqual(html.indexOf("Derived from published BIR zonal values"), 0, "callout is first");
     assert.ok(html.indexOf("SEA ESTATES factor stack") > 0, "names the other model");
     assert.ok(html.indexOf("2.14x") > 0, "states the divergence");
-    assert.ok(html.indexOf("not an appraisal") > 0, "closes the caveat");
+    assert.ok(html.indexOf("not a real estate appraisal under RA 9646") > 0, "closes the caveat");
+    assert.ok(html.indexOf("LandValuePH") < 0, "a competitor is not named as the source of the figure");
   });
 
   await check("comparables block renders even when empty", async () => {
@@ -235,7 +238,10 @@ function pdfText(bytes) {
     const r = await F.compute(OPTS, EST);
     const html = F.reportSections(r, EST, []);
     assert.ok(html.indexOf("data-vg-comparables") > 0, "block present");
-    assert.ok(html.indexOf("No matching listings for this municipality") > 0, "empty state stated");
+    /* The catalog holds three records, all Caloocan, so this is the normal path.
+       It has to say the absence rather than read as a blank section. */
+    assert.ok(html.indexOf("No Batangas listings") > 0, "empty state stated");
+    assert.ok(html.indexOf("completed sales") > 0, "and says nothing was checked against sales");
   });
 
   await check("comparables never move the numbers", async () => {
