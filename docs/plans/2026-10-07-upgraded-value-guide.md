@@ -83,6 +83,38 @@ the interaction pattern, but the form must not imply nationwide coverage.
 **Acceptance:** parity verified from the rendered reference, not inferred from a
 PDF or an unconfirmed question count.
 
+### Done — `docs/specs/value-guide-input-parity.md`
+
+Verified in a real browser against the live form. The inventory falsified two
+assumptions this plan started from:
+
+- **"9 quick questions" is the reference's marketing label, not its form.** It
+  renders ten adjustment fields plus frontage, and the count excludes
+  ownership/title and the whole building block. We should copy the fields, not the
+  number.
+- **Terrain is two questions, not one.** Slope and elevation-relative-to-road are
+  priced separately (−7% each). We merged them into "Terrain and slope" and lost
+  that distinction.
+
+Other findings that change Task 9 scope:
+
+- **Street is optional** in the reference, labelled "(Optional)". Our `vgMissing()`
+  requires it. Verified the engine already handles it: an empty street falls through
+  to the barangay all-other-streets rate (6,500/sqm vs 11,500/sqm for the street),
+  stays positive, and borrows no street name. The form block is removable; only the
+  form needs changing.
+- **The sale-stage follow-up is Selling-only.** We ask it generally.
+- **Classification defaults to Residential.** Ours does not.
+- **No storeys multiplier on the building.** The reference labels its field "Total
+  floor area across all storeys" and applies nothing extra. Our `floorsMultiplier`
+  of 1.05 is what Task 4 says to audit.
+- Construction: six options at 8K–22K/sqm. Ours has three at 16K–32K/sqm, from a
+  different table.
+
+Contract frozen in `tests/value_guide_input_parity_node.js` (8 checks), including a
+guard that terrain and elevation are not merged back together and a guard that the
+street-less fallback still prices.
+
 ## Task 3 — Define one calculation contract
 
 Files: `js/estimator.js`, `js/value_guide_flow.js`, `js/value_guide_evidence.js`
