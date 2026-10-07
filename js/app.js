@@ -10435,7 +10435,18 @@ premise: "Fee Simple / As Improved",
       + '<div class="mt-16">' + body + '</div>';
   }
 
-  function vgStage1(d, ref) {
+  /* The four classes the form offers, labelled with the full BIR name so the
+       visitor sees what "RR" means. The old picker listed all 35 codes, which for
+       someone who does not work with BIR zonal values is a wall of agricultural
+       sub-classes. Codes outside these four still resolve in the lookup, so an old
+       saved draft keeps pricing. */
+function vgClasses() {
+    const list = (window.ESREALTY_VG_FLOW || {}).CLASSIFICATIONS || [];
+    const names = ((window.ESREALTY_EST || {}).reference() || {}).classifications || {};
+    return list.map(c => ({ value: c.value, label: c.label + " (" + c.value + " — " + (names[c.value] || c.label) + ")" }));
+}
+
+function vgStage1(d, ref) {
     const f = d.form;
     /* ref.config holds the approved factors; reference() returns it as `config`.
        Reading a bare `config` here threw ReferenceError and took the whole view
@@ -10464,7 +10475,7 @@ premise: "Fee Simple / As Improved",
     html += vgGroup("What is being valued?",
       "Classification and lot area set the base rate and the amount it is applied to.",
       vgSelectField("BIR classification", null, "data-vg-set=\"classification\"",
-        classes.map(c => ({ value: c, label: c + " — " + (ref.classifications[c] || "") })), f.classification, "— choose —", 6)
+        vgClasses(), f.classification, "— choose —", 6)
       + vgField("Lot area (sqm)", "Required.", '<input class="input input-num" data-vg-set="area" inputmode="decimal" value="' + esc(f.area) + '" placeholder="e.g. 200">', 6)
       + vgField("Property type", "Vacant lots carry no improvement component.",
         '<div class="vg-choice">'

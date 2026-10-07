@@ -219,6 +219,49 @@ check("the estimator's own integrity check passes on our result", async () => {
   assert.strictEqual(EST.core.integrityCheck(r).ok, true, JSON.stringify(EST.core.integrityCheck(r)));
 });
 
+check("four classifications map to RR, CR, I and A50", () => {
+  assert.deepStrictEqual(F.CLASSIFICATIONS.map(c => c.value), ["RR", "CR", "I", "A50"]);
+  assert.deepStrictEqual(F.CLASSIFICATIONS.map(c => c.label),
+    ["Residential", "Commercial", "Industrial", "Agricultural"]);
+});
+
+check("the classification picker reads the four, not all 35 codes", () => {
+  /* The form used to enumerate every BIR code from ref.classifications (RR, CR,
+     X, GP, A1..A50). It now renders vgClasses(), which maps over
+     CLASSIFICATIONS. Asserting the render site rather than a browser DOM keeps
+     this in the node suite; the e2e suite covers the rendered option list. */
+  const src = fs.readFileSync(path.join(ROOT, "js/app.js"), "utf8");
+  assert.ok(src.indexOf("vgClasses(), f.classification") >= 0,
+    "the picker renders vgClasses() rather than every code");
+  assert.ok(src.indexOf("classes.map(c => ({ value: c,") < 0,
+    "the old all-codes enumeration is gone");
+  assert.ok(src.indexOf("function vgClasses()") >= 0, "vgClasses is defined");
+  const helper = src.split("function vgClasses()")[1].split("\n}")[0];
+  assert.ok(helper.indexOf("CLASSIFICATIONS") >= 0, "it maps the four");
+  assert.ok(helper.indexOf("ref.classifications") < 0, "it no longer walks every code");
+});
+
+check("legacy and agricultural codes still resolve to a rate", async () => {
+  /* X, GP, CL and the 29 agricultural sub-codes become unreachable from the form,
+     but a saved draft may still carry one. It must price rather than fail. */
+  for (const code of ["X", "GP", "CL", "A1", "A49", "A50"]) {
+    const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({}), { classification: code }), EST);
+    assert.ok(r.available !== false, code + " resolves (" + (r.reason || "") + ")");
+    assert.ok(r.total > 0, code + " produces a figure");
+  }
+});
+
+check("the four offered codes each produce a distinct rate", async () => {
+  const seen = {};
+  for (const c of F.CLASSIFICATIONS) {
+    const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({}), { classification: c.value }), EST);
+    assert.ok(r.available !== false, c.value + " resolves");
+    seen[c.value] = r.birZonalRatePerSqm;
+  }
+  const rates = Object.values(seen);
+  assert.strictEqual(new Set(rates).size, rates.length, "each class prices differently: " + JSON.stringify(seen));
+});
+
 check("net cap and floor are symmetric", () => {
   assert.strictEqual(F.MODEL.NET_FLOOR, -0.15);
   assert.strictEqual(F.MODEL.NET_CAP, 0.15);

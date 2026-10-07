@@ -148,6 +148,19 @@
     return out;
   }
 
+  /* The four classifications the form offers. data/batangas-zonal.json still
+     carries all 35 BIR codes and the estimator still resolves any of them, so a
+     draft saved against the old picker keeps pricing; these are the codes a new
+     answer maps to. Institutional (X), General Purposes (GP), Cemetery (CL) and
+     the 28 narrower agricultural classes are therefore unreachable from the form,
+     which is the accepted cost of matching the reference's four options. */
+  var CLASSIFICATIONS = [
+    { value: "RR", label: "Residential" },
+    { value: "CR", label: "Commercial" },
+    { value: "I", label: "Industrial" },
+    { value: "A50", label: "Agricultural" }
+  ];
+
   function factorById(id) {
     for (var i = 0; i < FACTORS.length; i++) if (FACTORS[i].id === id) return FACTORS[i];
     return null;
@@ -453,6 +466,7 @@
   }
 
   return { MODEL: MODEL, FACTORS: FACTORS, QUESTIONS: QUESTIONS, pickInputs: pickInputs,
+           CLASSIFICATIONS: CLASSIFICATIONS,
            SEC_LAND_TERRAIN: SEC_LAND_TERRAIN,
            SEC_NEIGHBOURING: SEC_NEIGHBOURING, SEC_LEGAL: SEC_LEGAL,
            netOf: netOf, sectionsOf: sectionsOf, factorBp: factorBp, clampBp: clampBp,
