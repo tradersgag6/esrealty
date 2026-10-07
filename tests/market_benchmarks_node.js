@@ -153,13 +153,18 @@ check("the LandValuePH reference report reconciles and is not treated as market 
   /* The purchased reference report is the closest thing to an external check on
      the internal 1.174 model. Its arithmetic does reconcile - which is why the
      internal model reproduces it - but its own text contradicts its own numbers,
-     so it validates the arithmetic and nothing else. */
-  const rb = BM._referenceBenchmark;
-  assert.ok(rb, "the reference report is recorded");
-  const v = rb.reported;
+     so it validates the arithmetic and nothing else.
+
+     The report lives in tests/fixtures/value-guide-reference-bauan.json, the
+     single canonical copy. Do not add a second copy here: two files holding the
+     same numbers will drift, and the whole point of this check is that they are
+     read, not re-typed. */
+  const FX = require(path.join(ROOT, "tests/fixtures/value-guide-reference-bauan.json"));
+  assert.ok(FX.reported && FX.inputs, "the reference fixture is present and complete");
+  const v = FX.reported;
   assert.strictEqual(v.birZonalRatePerSqm, 11500);
-  assert.strictEqual(v.birBase, v.birZonalRatePerSqm * 100, "BIR base is rate x lot area");
-  assert.strictEqual(v.rcn, v.rcnPerSqm * v.floorArea);
+  assert.strictEqual(v.birBase, v.birZonalRatePerSqm * FX.inputs.area, "BIR base is rate x lot area");
+  assert.strictEqual(v.rcn, v.rcnPerSqm * FX.inputs.floorArea);
   assert.strictEqual(v.depreciationAmount, v.rcn * v.accumulatedDepreciationPct / 100);
   assert.strictEqual(v.buildingValue, v.rcn - v.depreciationAmount);
   assert.strictEqual(v.total, v.landValue + v.buildingValue, "land + building = the reported total");
@@ -167,17 +172,17 @@ check("the LandValuePH reference report reconciles and is not treated as market 
   assert.strictEqual(v.rangeHigh, Math.round(v.total * 1.30), "and x 130%");
   /* The multiplier the internal model uses must equal the one this report implies,
      or the "parity" is a coincidence rather than a reference. */
-  assert.strictEqual(rb.arithmeticVerified.landMultiplierRounded, 1.174);
-  assert.ok(Math.abs(rb.arithmeticVerified.landMultiplierImplied - v.landValue / v.birBase) < 1e-6);
+  assert.strictEqual(FX.derived.landMultiplierRounded, 1.174);
+  assert.ok(Math.abs(FX.derived.landMultiplierImplied - v.landValue / v.birBase) < 1e-6);
   /* And the report's own inconsistencies stay recorded, so nobody later cites it
      as proof that a +2.0% net adjustment or a 23000/sqm market rate is real. */
-  assert.ok(rb.internalInconsistencies.length >= 4, "its internal contradictions are kept on file");
-  assert.strictEqual(rb.notMarketEvidence, true, "it must never be promoted to market evidence");
-  assert.strictEqual(rb.numericalAllowed, false);
+  assert.ok(FX._referenceIsNotMarketEvidence.length > 200, "its internal contradictions are kept on file");
+  assert.strictEqual(FX._referenceIsNotMarketEvidence.indexOf("+2.0% net adjustment") > -1, true,
+    "the +2.0% vs +0.5% contradiction is named");
   /* The "no benchmark reaches a formula" rule has to cover this key too. */
-  ["js/estimator.js", "js/value_guide_flow.js", "js/core.js", "js/storefront.js"].forEach(f => {
+  ["js/estimator.js", "js/value_guide_flow.js", "js/core.js", "js/storefront.js", "js/app.js"].forEach(f => {
     const src = fs.readFileSync(path.join(ROOT, f), "utf8");
-    assert.ok(src.indexOf("_referenceBenchmark") < 0, f + " must not read the reference report");
+    assert.ok(src.indexOf("value-guide-reference-bauan") < 0, f + " must not read the reference fixture");
   });
 });
 

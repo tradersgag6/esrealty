@@ -1,0 +1,51 @@
+{
+  "_comment": "The purchased reference report, as a test fixture. Both surfaces are computed from these inputs and their difference from the report is asserted. The report is a benchmark, not market truth: see _referenceIsNotMarketEvidence below.",
+  "_source": "LandValuePH detailed report LVPH-D-9531904C, dated October 5, 2026. 21 pages; text extracted with pypdf from the file the user supplied.",
+  "_sourceLocation": "BINAY ST (RESSURRECCION ST), Poblacion III, Bauan",
+  "_provenance": "Inputs read from report pages 3 (Subject Property Details) and 4 (Building Valuation). Arithmetic reconciled independently in tests/market_benchmarks_node.js and again in tests/value_guide_reference_benchmark_node.js.",
+  "inputs": {
+    "municipality": "BAUAN",
+    "barangay": "POBLACION III",
+    "streetKey": "binay st ressurreccion st",
+    "classification": "RR",
+    "type": "house_lot",
+    "area": 100,
+    "floorArea": 120,
+    "construction": "mixed_chb",
+    "floors": "2",
+    "ageBand": "6-10",
+    "corner": false,
+    "features": [],
+    "landMethod": "factor",
+    "saleContext": "private-resale",
+    "effectivityDate": "2022-07-23",
+    "roadAccess": "50"
+  },
+  "reported": {
+    "birSchedule": "BIR RR 8-2018, as cited by the report",
+    "birZonalRatePerSqm": 11500,
+    "lotArea": 100,
+    "birBase": 1150000,
+    "landValue": 1350000,
+    "rcnPerSqm": 16000,
+    "rcn": 1920000,
+    "usefulLifeYears": 40,
+    "accumulatedDepreciationPct": 20,
+    "depreciationAmount": 384000,
+    "buildingValue": 1536000,
+    "total": 2886000,
+    "rangeLow": 2453100,
+    "rangeHigh": 3751800,
+    "claimedNetAdjustmentPct": 2.0
+  },
+  "derived": {
+    "landMultiplierImplied": 1.173913,
+    "landMultiplierRounded": 1.174,
+    "_note": "1,350,000 / 1,150,000. This is where the guide's MODEL.MARKET_IND comes from - it is read off one report, not derived from market evidence.",
+    "rangeIsTotalTimes085And130": true,
+    "depreciationIsAccumulatedNotAnnual": true,
+    "listedCategoryPctSum": 0.5,
+    "listedCategoryPct": { "landTerrain": 0.5, "neighbours": 0, "legalEnvironmental": 0, "buildingAndFeatures": 0 }
+  },
+  "_referenceIsNotMarketEvidence": "Five internal contradictions, kept here so nobody later cites this report as proof of a real market rate. (1) It claims a +2.0% net adjustment, but the four category rows it prints sum to +0.5%. (2) The +2.0% is never applied to the arithmetic: 1,150,000 x 1.02 = 1,173,000, not the 1,350,000 it reports. (3) Its own tax-visibility page states a market rate of 23,000/sqm (2.0x BIR), inconsistent with the 13,500/sqm it valued the land at. (4) Depreciation is labelled '20.0%/year' but 20% is accumulated over a 40-year life; its remaining-life line says 85% / 34 years, which implies 15%. (5) Page 6 states active market listing data for Bauan is still being compiled and shows no comparables. It is a BIR-referenced AVM, not a market-derived appraisal."
+}

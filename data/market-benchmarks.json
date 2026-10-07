@@ -2,6 +2,7 @@
   "_comment": "Real-market benchmarks for the storefront calculator. Each entry is a public asking price or developer price list with the lot area and floor area needed to derive a per-sqm figure. These are ASKING prices, not completed sales - the only market evidence this project has - so they calibrate the band, they do not become an input to any formula.",
   "_policy": "numericalAllowed is false for every record. Nothing here enters compute() or computeEstimate(). Their purpose is to prove the market band the multiplier sits in, and to fail the benchmark test if the band moves away from published research.",
   "_observedOn": "2026-10-07",
+  "_referenceReportNote": "The purchased LandValuePH report LVPH-D-9531904C lives as a test fixture at tests/fixtures/value-guide-reference-bauan.json, not here. This file holds market evidence; the report is a comparison benchmark with its own provenance and contradictions, so it was moved out to keep one canonical copy. tests/value_guide_reference_benchmark_node.js reads it.",
   "_bandResearch": {
     "statement": "Published Batangas research puts ordinary market at 1.5x to 3.0x the BIR zonal value.",
     "scope": "RESIDENTIAL LAND, in desirable locations. Not a province-wide law. Measured against the matched STREET rate rather than a municipal median, the land-only records below land at 1.26x-2.43x (Splendido Taal) and 0.53x-0.68x (Gavina Ville). The band is a calibration target for the middle of the residential market, not a bound the calculator may never cross. It is clamped to this range rather than widened to absorb the outliers, because over-pricing an entire province to compensate for one premium listing is the worse error.",
@@ -14,42 +15,6 @@
     ],
     "bandLow": 1.5,
     "bandHigh": 3.0
-  },
-  "_referenceBenchmark": {
-    "id": "lvph-d-9531904c",
-    "source": "LandValuePH detailed report LVPH-D-9531904C, dated October 5, 2026 - BINAY ST (RESSURRECCION ST), Poblacion III, Bauan",
-    "inputs": "RR 11500/sqm, 100 sqm lot, 120 sqm floor, 2 storeys, mixed CHB, age 6-10, non-corner, TCT",
-    "reported": {
-      "birZonalRatePerSqm": 11500,
-      "birSchedule": "BIR RR 8-2018, as cited by the report",
-      "lotArea": 100,
-      "floorArea": 120,
-      "birBase": 1150000,
-      "landValue": 1350000,
-      "rcnPerSqm": 16000,
-      "rcn": 1920000,
-      "accumulatedDepreciationPct": 20,
-      "depreciationAmount": 384000,
-      "buildingValue": 1536000,
-      "total": 2886000,
-      "rangeLow": 2453100,
-      "rangeHigh": 3751800
-    },
-    "arithmeticVerified": {
-      "landMultiplierImplied": 1.173913,
-      "landMultiplierRounded": 1.174,
-      "rangeIsTotalTimes085And130": true,
-      "sumReconciles": true
-    },
-    "internalInconsistencies": [
-      "Claimed net factor adjustment is +2.0%, but the four category rows printed in the report sum to +0.5% (land and terrain +0.5, everything else 0.0).",
-      "The +2.0% is never applied to the arithmetic: 1150000 x 1.02 = 1173000, not the reported 1350000.",
-      "The report's own tax-visibility page states a market rate of 23000/sqm (2.0x BIR), which is inconsistent with the 13500/sqm it actually valued the land at.",
-      "Depreciation is labelled '20.0%/year' but 20% is the accumulated figure over a 40-year life, not an annual rate. The remaining-useful-life line states 85% / 34 years, which implies 15% accumulated, not 20%.",
-      "The report states active market listing data for Bauan is still being compiled, and shows no comparables. It is a BIR-referenced AVM, not a market-derived appraisal."
-    ],
-    "notMarketEvidence": true,
-    "numericalAllowed": false
   },
   "records": [
     {

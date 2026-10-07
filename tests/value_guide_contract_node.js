@@ -194,10 +194,11 @@ check("the report reconciliation is a separate table, never folded into a multip
   assert.notStrictEqual(s_val(), FLOW.MODEL.MARKET_IND,
     "the storefront band has become the reference multiplier - that is Task 9's decision, not a silent change");
   function s_val() { return cfg.marketBand.bands.residential.mid; }
-  /* And the benchmark data must remain non-numerical. */
+  /* And the benchmark data must remain non-numerical, in both its homes. */
   const BM = require(path.join(ROOT, "data/market-benchmarks.json"));
-  assert.strictEqual(BM._referenceBenchmark.numericalAllowed, false);
   assert.ok(BM.records.every(r => r.numericalAllowed === false));
+  const FX = require(path.join(ROOT, "tests/fixtures/value-guide-reference-bauan.json"));
+  assert.ok(FX._referenceIsNotMarketEvidence, "the reference fixture still records its non-market status");
 });
 
 check("a vacant lot never inherits a building value", () => {

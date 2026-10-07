@@ -257,6 +257,35 @@ of a +2.0% net adjustment or a 23,000/sqm market rate:
 **Acceptance:** the benchmark reports each model's difference from the reference. It
 never tunes a universal multiplier to match a single property.
 
+### Done — `tests/fixtures/value-guide-reference-bauan.json`
+
+The plan's named fixture exists, and the comparison it calls for is now a suite of
+its own. `tests/value_guide_reference_benchmark_node.js` computes both surfaces from
+the report's own inputs, prints the side-by-side table, and pins the arithmetic:
+
+| | Report | Guide | Storefront |
+|---|---:|---:|---:|
+| Land | 1,350,000 | 1,336,599 (−1.0%) | 2,875,000 (+113.0%) |
+| Building | 1,536,000 | 1,536,000 (0.0%) | 2,400,000 (+56.3%) |
+| **Total** | **2,886,000** | **2,872,599 (−0.5%)** | **5,275,000 (+82.8%)** |
+
+(Storefront figures are post-Task-4; the building row no longer includes the storeys
+multiplier.)
+
+The fixture also corrected a location decision from earlier in this session: the
+report data originally lived inside `data/market-benchmarks.json` under
+`_referenceBenchmark`, which would have been two copies of the same numbers. That
+block is removed from the market file; the fixture is the one canonical copy, and
+`market_benchmarks_node.js` now reads it. Two files holding the same figures would
+drift, which is the exact failure this task exists to prevent.
+
+Asserted: the report's arithmetic reconciles; its five contradictions stay on file;
+`MARKET_IND` still equals the multiplier the report implies; neither surface's
+formula reads the fixture; the guide sits within 2% of the report while the
+storefront stays far above it — as a tripwire, not an accuracy claim.
+
+38/38 node suites green.
+
 ## Task 6 — Research and repair the market-evidence dataset
 
 Files: `data/market-benchmarks.json`, reusing
