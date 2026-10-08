@@ -68,6 +68,14 @@ function chooseOwnershipNotSure() {
     chk("homepage-secondary-cta-has-no-hidden-filter", !q('.sf-est-hero-actions a[href*="state="]'), "hero still ships an unexposed state filter");
     chk("homepage-guide-summary-heading", /What your guide includes/.test(document.body.innerText), "");
     chk("screen1-rendered", !!q('[data-est-screen="1"]'), "");
+    /* Task 12: the progress bar matches the reference's three steps
+       (Location -> Details -> Report), not a longer invented flow. */
+    chk("three-step-progress-labels", (function () {
+      const ol = q('.sf-est-progress');
+      if (!ol) return false;
+      const labels = Array.prototype.map.call(ol.querySelectorAll('span'), s => s.textContent.trim());
+      return labels.length === 3 && labels[0] === "Location" && labels[1] === "Details" && labels[2] === "Report";
+    })(), "progress=" + (q('.sf-est-progress') ? q('.sf-est-progress').textContent.replace(/\s+/g, " ").trim() : "none"));
     chk("screen1-guides-inputs", /START WITH THE DETAILS/.test(q('[data-est-screen="1"]').textContent) && /match the right BIR reference/.test(q('[data-est-screen="1"]').textContent), "");
     chk("region-fixed-batangas", !!q('.sf-est-loc-fixed') && /CALABARZON.*Batangas/.test(q('.sf-est-loc-fixed').textContent), "txt=" + (q('.sf-est-loc-fixed') && q('.sf-est-loc-fixed').textContent));
     chk("mn-options-gte34", pt >= 34, "mn=" + pt);
@@ -191,6 +199,18 @@ chk("report-six-groups", qa('.sf-est-rsec').length === 6, "n=" + qa('.sf-est-rse
 
      // lead block + submit (fallback to contact stub, no email -> "saved")
      chk("lead-block-present", !!q('[data-est-lead]'), "");
+    /* The estimate must be visible with no contact required: the lead block sits
+       after the result and opens only on click. "Request received" says the guide
+       remains above. */
+    chk("estimate-shown-before-any-contact-ask", (function () {
+      const card = q('.sf-est-card');
+      if (!card) return false;
+      const html = card.innerHTML;
+      const resultAt = html.indexOf('data-est-screen="4"');
+      const leadAt = html.indexOf('data-est-lead');
+      return resultAt >= 0 && leadAt > resultAt;
+    })(), "the result renders before the lead block");
+    chk("lead-form-hidden-until-click", !q('[data-est-lead-form]'), "no contact form before the user opts in");
      const leadButtons = qa('[data-est-lead-open]');
      chk("bottom-appraisal-cta-present", leadButtons.length >= 2 && /appraisal consultation/i.test(leadButtons[leadButtons.length - 1].textContent), "buttons=" + leadButtons.length);
      leadButtons[leadButtons.length - 1].click();
@@ -258,6 +278,34 @@ chk("report-six-groups", qa('.sf-est-rsec').length === 6, "n=" + qa('.sf-est-rse
     qa('.sf-est-rsec')[1].open = true;
     chk("house-report-shows-house-value", /House value/.test(document.body.innerText), "");
     chk("seller-net-proceeds-shown", /estimated net proceeds/.test((q('.sf-est-report') || { textContent: "" }).textContent), "");
+
+    /* --- Task 12: mobile fit (usable at 390px) ---
+       The guide must not push the page wider than the viewport on any screen,
+       because a horizontally-scrolling value guide on a phone is a broken value
+       guide. Checked structurally: no element inside the estimator may have a
+       scrollWidth that escapes the card, and the card itself must fit the body.
+       Runs at whatever viewport the harness supplied; when run with
+       run_all.ps1 -Mobile (390x844) this is the real acceptance. */
+    const cardEl = q('.sf-est-card') || q('#sf-estimator');
+    if (cardEl) {
+      const bodyScroll = document.documentElement.scrollWidth;
+      const cardScroll = cardEl.scrollWidth;
+      const bodyWidth = document.documentElement.clientWidth;
+      chk("no-horizontal-page-overflow", bodyScroll <= bodyWidth + 1,
+        "body " + bodyScroll + " vs viewport " + bodyWidth);
+      chk("estimator-card-fits-viewport", cardScroll <= bodyWidth + 1,
+        "card " + cardScroll + " vs viewport " + bodyWidth);
+      /* The result screen must also fit: render it and re-check. */
+      if (estApi()._state().result) {
+        estApi().debug.render(4);
+        await wait(120);
+        const card4 = q('.sf-est-card') || q('#sf-estimator');
+        const fit4 = card4 && card4.scrollWidth <= document.documentElement.clientWidth + 1;
+        chk("result-screen-fits-viewport", !!fit4, "result card " + (card4 && card4.scrollWidth));
+        estApi().debug.render(1);
+        await wait(80);
+      }
+    }
 
     window.__msOk = window.__msChecks.every(c => c.ok) && window.__msChecks.length > 0;
     window.__msDone = true;

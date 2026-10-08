@@ -1605,7 +1605,10 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     var card = getCard();
     if (card) {
       var stage = est.screen === 5 || est.screen === 3 ? 3 : est.screen;
-      var progress = '<ol class="sf-est-progress" aria-label="Value guide progress">' + ["Property & location", "Details", "Review", "Results"].map(function (label, i) { return '<li' + (stage === i + 1 ? ' aria-current="step"' : "") + '><b>' + (i + 1) + '</b><span>' + label + '</span></li>'; }).join("") + '</ol>';
+      /* Three steps, matching the reference's Location -> Details -> Report
+         progression. There is no separate "Review" screen: the ownership review
+         is folded into Details, and the calculating screen is not a step. */
+      var progress = '<ol class="sf-est-progress" aria-label="Value guide progress">' + ["Location", "Details", "Report"].map(function (label, i) { return '<li' + (stage === i + 1 ? ' aria-current="step"' : "") + '><b>' + (i + 1) + '</b><span>' + label + '</span></li>'; }).join("") + '</ol>';
       card.innerHTML = progress + out; bindCard(card);
       if (est.validationIssue && (est.screen === 1 || est.screen === 2)) showErr(card, est.validationIssue);
     }

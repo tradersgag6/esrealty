@@ -679,6 +679,33 @@ estimator / storefront-routing / internal e2e green, bundle rebuilt and in sync
 
 No account or contact details required to see the estimate.
 
+### Done — the public design meets the checklist
+
+Most of the checklist was already satisfied by the storefront rebuilt in earlier
+phases: purpose chips, property-type tiles, searchable street combobox,
+plain-language classification help, visible "Not sure — we'll skip this" options,
+conditional building fields, preserved values on back-navigation (state lives on
+the estimator), result-first layout (hero -> data chips -> analysis summary ->
+estimate -> decision -> next step -> detailed report sections), and the estimate
+rendering before any contact ask (the lead block opens only on click and says the
+guide remains above).
+
+Two gaps were closed on 2026-10-08:
+
+1. **The progress bar claimed four steps** ("Property & location / Details /
+   Review / Results") but the reference uses three. "Review" was a phantom step —
+   the ownership review lives inside Details, and the calculating screen is not a
+   step. The bar now reads **Location -> Details -> Report**, matching the
+   verified reference progression.
+2. **No mobile-fit coverage existed for the estimator.** The e2e now checks, on
+   every run and especially under `run_all.ps1 -Mobile` (390x844), that the body,
+   the estimator card and the result screen never overflow the viewport, and that
+   the estimate renders before the lead block. Measured at 390px: body 390, card
+   317, result 317 — no overflow.
+
+Verified: estimator e2e green on desktop and mobile, storefront-routing and
+internal e2e green, 40/40 node suites green.
+
 ## Task 13 — Add appraiser and broker inquiry paths
 
 Reuse the existing contact infrastructure in `js/listings-api.js`,
