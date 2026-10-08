@@ -30,8 +30,8 @@ const OPTS = {
 
 (async () => {
 
-check("exactly nine questions, each mapped to a live factor", () => {
-  assert.strictEqual(F.QUESTIONS.length, 9);
+check("exactly ten questions, each mapped to a live factor", () => {
+  assert.strictEqual(F.QUESTIONS.length, 10);
   const factorIds = F.FACTORS.map(f => f.id);
   F.QUESTIONS.forEach(q => assert.ok(factorIds.indexOf(q.factorId) >= 0, q.id + " -> " + q.factorId));
 });
@@ -106,11 +106,11 @@ check("all nine skipped: net is zero and every unanswered factor is named", asyn
      here. The assertion is the list, not a count, so adding a legitimately
      derived factor does not need this rewritten. */
   const named = r.assumptions.map(a => a.id).sort();
-  ["lotShape", "terrain", "frontage", "roadAccess", "floodRisk", "infrastructure",
+  ["lotShape", "terrain", "elevation", "frontage", "roadAccess", "floodRisk", "infrastructure",
     "titleDoc", "inheritance", "ownership"].forEach(id =>
     assert.ok(named.indexOf(id) >= 0, id + " reported as skipped"));
   assert.ok(named.indexOf("zonalRecency") >= 0, "the undated schedule is reported too");
-  assert.strictEqual(named.length, 10, "and nothing else: corner is an answer, not a skip");
+  assert.strictEqual(named.length, 11, "and nothing else: corner is an answer, not a skip");
   assert.strictEqual(r.referenceModel.skippedCount, named.length);
   assert.ok(Number.isFinite(r.total) && r.total > 0, "a usable number is still produced");
 });
@@ -433,10 +433,10 @@ check("zonalRecency is derived from the schedule date, not asked", async () => {
 });
 
 check("a report where nothing was skipped has an empty assumptions list", async () => {
-  /* With all nine answered and a schedule date present, nothing should be
+  /* With all ten answered and a schedule date present, nothing should be
      reported unassessed. This is what a permanently-unassessed factor breaks. */
   const r = await F.compute(Object.assign({}, OPTS, F.pickInputs({
-    shape: "0", topography: "0", frontage: "0", access: "0", flood: "0",
+    shape: "0", topography: "0", elevation: "0", frontage: "0", access: "0", flood: "0",
     utilities: "0", titled: "titled_self", estate_settled: "settled",
     occupancy: "empty", corner: false
   }), { effectivityDate: "2026-06-01" }), EST);

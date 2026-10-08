@@ -439,6 +439,35 @@ HTML and PDF must show the same amounts, methods, sources and assumptions.
 **Acceptance:** no old-model number survives in a secondary panel; skipped questions
 never print as verified zero adjustments.
 
+### Done — parity gaps closed and the result screen rebuilt
+
+Four reference-parity gaps from Task 2 were closed:
+
+1. **Street is optional.** `vgMissing()` no longer requires it. The form labels it
+   "(Optional)" and a street-less parcel resolves to the barangay all-other-streets
+   rate (already proven priceable in `value_guide_input_parity_node.js`).
+2. **Sale-stage follow-up is Selling-only.** The four "where are you in the sale"
+   options now render only when purpose is Selling, matching the reference's
+   conditional follow-up.
+3. **Classification defaults to Residential.** The draft now starts at `RR`,
+   matching the reference's default.
+4. **Terrain split into slope + elevation-vs-road.** The merged "Terrain and
+   elevation" factor is gone. Two factors now price the reference's two -7%
+   deductions independently: `terrain` (Level 0 / Sloping -700) and `elevation`
+   (At road level 0 / Below road -700). A level lot below the road is no longer
+   priced as flat. QUESTIONS went 9 -> 10, FACTORS 11 -> 12.
+
+The result screen now shows the property type prominently ("House & lot" / "Vacant
+lot") and a land vs building breakdown beneath the headline figure, so a reader can
+see what the total is made of before opening the methodology. The PDF cover also
+states the property type.
+
+Asserted in `tests/value_guide_input_parity_node.js` (two new checks: the factors
+are separate and both -700 bp, and ten questions each bound to a factor) and in the
+browser `value_guide_internal_e2e.js` (ten skip affordances, twelve factor rows).
+39/39 node suites green; internal, PDF-browser, purpose, simplify and estimator e2e
+all pass. `app.min.js` rebuilt.
+
 ## Task 10 — Backend release gate
 
 ```powershell

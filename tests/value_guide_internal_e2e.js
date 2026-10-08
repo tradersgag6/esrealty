@@ -217,8 +217,8 @@ async function pickLocation() {
        var bpTiles = qa("[data-vg-bp]");
        chk("stage2-shows-each-options-adjustment", bpTiles.length >= 12,
          bpTiles.length + " option tiles labelled, first: " + (bpTiles[0] ? bpTiles[0].textContent.trim().slice(0, 60) : ""));
-       chk("stage2-offers-not-sure-per-question", qa("[data-vg-notsure]").length === 9,
-         qa("[data-vg-notsure]").length + " skip affordances");
+chk("stage2-offers-not-sure-per-question", qa("[data-vg-notsure]").length === 10,
+          qa("[data-vg-notsure]").length + " skip affordances (10 questions: the reference splits slope from elevation-vs-road)");
        chk("stage2-explains-what-skipping-means", /rather leave it unassessed than guess/i.test(q("#content").textContent),
          "occupancy impact disclosed");
 
@@ -245,13 +245,14 @@ async function pickLocation() {
 
     /* The report body assembled by FLOW.reportSections must actually reach the
        DOM: the fixed model callout, the context-only comparables block and the
-       twelve published factor rows. */
+       twelve published factor rows (twelve since the terrain split added
+       elevation-vs-road as a factor of its own). */
     chk("model-callout-in-report",
 document.body.textContent.indexOf("Derived from published BIR zonal values") >= 0,
          "callout rendered");
        chk("comparables-block-in-report", !!q("[data-vg-comparables]"),
          q("[data-vg-comparables]") ? "present" : "missing");
-       chk("methodology-one-row-per-factor", qa("[data-vf]").length === 11,
+       chk("methodology-one-row-per-factor", qa("[data-vf]").length === 12,
          qa("[data-vf]").length + " factor rows");
        /* A row nobody answered must not read as a checked one that found nothing. */
        var unassessed = qa("[data-vf-unassessed]");

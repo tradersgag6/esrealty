@@ -1,7 +1,7 @@
 /* The Value Guide's reference calculation.
  *
  * Clean-room implementation of the LandValuePH published methodology: a BIR
- * zonal base, a market-indicator factor, one additive net of twelve published
+ * zonal base, a market-indicator factor, one additive net of thirteen published
  * question factors, and a replacement-cost building component. It reuses the
  * storefront estimator for everything that is NOT pricing - the BIR lookup,
  * coverage metadata, ownership review, comparables and transaction options -
@@ -54,7 +54,7 @@
   LAND_SECTIONS[SEC_NEIGHBOURING] = 1;
   LAND_SECTIONS[SEC_LEGAL] = 1;
 
-  /* Twelve published factors. `bp` is hundredths of a percent and every option
+  /* Thirteen published factors. `bp` is hundredths of a percent and every option
      sits inside the range published on /methodology; tests/value_guide_flow_node.js
      asserts that and fails if a future edit widens one. */
   var FACTORS = [
@@ -63,11 +63,12 @@
       { value: "-150", label: "Slightly irregular", bp: -150 },
       { value: "-300", label: "Irregular", bp: -300 },
       { value: "-500", label: "Severely irregular or pie-cut", bp: -500 }] },
-    { id: "terrain", input: "terrain", section: SEC_LAND_TERRAIN, label: "Terrain and elevation", min: -800, max: 0, options: [
-      { value: "0", label: "Flat", bp: 0 },
-      { value: "-300", label: "Gently sloping", bp: -300 },
-      { value: "-500", label: "Sloping", bp: -500 },
-      { value: "-800", label: "Steep / terraced", bp: -800 }] },
+    { id: "terrain", input: "terrain", section: SEC_LAND_TERRAIN, label: "Terrain and slope", min: -700, max: 0, options: [
+      { value: "0", label: "Level", bp: 0 },
+      { value: "-700", label: "Sloping", bp: -700 }] },
+    { id: "elevation", input: "elevation", section: SEC_LAND_TERRAIN, label: "Elevation vs road", min: -700, max: 0, options: [
+      { value: "0", label: "At road level", bp: 0 },
+      { value: "-700", label: "Below road", bp: -700 }] },
     { id: "cornerExposure", input: "corner", type: "bool", section: SEC_LAND_TERRAIN, label: "Corner exposure", min: 0, max: 500, options: [
       { value: "corner", label: "Frontage on two roads", bp: 250 }] },
     { id: "frontage", input: "frontage", section: SEC_LAND_TERRAIN, label: "Frontage", min: -100, max: 150, options: [
@@ -110,7 +111,7 @@
       { value: "-200", label: "Schedule is materially stale", bp: -200 }] }
   ];
 
-  /* The nine questions the reference asks, in its order, each bound to the
+  /* The ten questions the reference asks, in its order, each bound to the
      factor that consumes it. `pickInputs` is the only route from form state
      into the model, so a question can never be collected without being
      scored, and a factor can never lack a question. The keys below are the
@@ -121,6 +122,7 @@
   var QUESTIONS = [
     { id: "lotShape",   label: "Lot shape",        input: "shape",        factorId: "lotShape" },
     { id: "terrain",    label: "Terrain and slope", input: "topography",  factorId: "terrain" },
+    { id: "elevation",  label: "Elevation vs road", input: "elevation",    factorId: "elevation" },
     { id: "frontage",   label: "Frontage",         input: "frontage",     factorId: "frontage" },
     { id: "roadAccess", label: "Road access",      input: "access",       factorId: "roadAccess" },
     { id: "floodRisk",  label: "Flood risk",       input: "flood",        factorId: "floodRisk" },
@@ -273,7 +275,7 @@
     opts = opts || {};
 
     /* Every surviving factor is a land or ownership characteristic, so there is one
-       net and it applies to the land. There is no building-section net: the nine
+       net and it applies to the land. There is no building-section net: the ten
        questions describe the lot and the paperwork, and the building is priced by
        cost approach alone. This replaced a bldgNet that became permanently zero
        when its only factor (demand) was retired. */

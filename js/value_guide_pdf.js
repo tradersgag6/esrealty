@@ -588,7 +588,8 @@
       page.drawRectangle({ x: M, y: y - 74, width: W - M * 2, height: 74, color: rgb(0.11, 0.09, 0.08) });
       page.drawText("PROPERTY VALUATION REPORT", { x: M + 16, y: y - 20, size: 7.4, font: bold, color: rgb(0.85, 0.62, 0.42) });
       page.drawText(r.municipality + (r.barangay ? ", " + r.barangay : ""), { x: M + 16, y: y - 40, size: 15, font: bold, color: rgb(1, 1, 1) });
-      page.drawText((r.streetName || "Street not listed") + "  ·  " + fmtArea(r.area), {
+      page.drawText((r.streetName || "Street not listed") + "  ·  " + fmtArea(r.area)
+        + "  ·  " + (r.type === "house_lot" ? "House & Lot" : "Vacant Lot"), {
         x: M + 16, y: y - 55, size: 8.4, font: font, color: rgb(0.82, 0.80, 0.78)
       });
       var rid = "Ref " + reportId;

@@ -98,11 +98,12 @@ function pdfText(bytes) {
     assert.strictEqual(flow().MODEL.DEP_CAP, 0.80);
     assert.strictEqual(flow().MODEL.USEFUL_LIFE.mixed_chb, 40);
   });
-  await check("eleven surviving factors, each with a section", () => {
+  await check("twelve surviving factors, each with a section", () => {
     const F = flow();
-    /* Nine questions plus cornerExposure plus the derived zonalRecency. */
-    assert.strictEqual(F.QUESTIONS.length, 9);
-    assert.strictEqual(F.FACTORS.length, 11);
+    /* Ten questions (the reference splits slope from elevation-vs-road) plus
+       cornerExposure plus the derived zonalRecency. */
+    assert.strictEqual(F.QUESTIONS.length, 10);
+    assert.strictEqual(F.FACTORS.length, 12);
     F.FACTORS.forEach(f => assert.ok(f.section && f.options && f.options.length, f.id));
   });
 

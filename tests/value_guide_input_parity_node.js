@@ -13,10 +13,9 @@
  *    reach a price. Our BIR data has an all-other-streets rate, so we can price a
  *    street-less parcel without asking.
  *
- * 2. Terrain slope and elevation-relative-to-road are currently carried as ONE
- *    factor; the reference prices them separately. That split is Task 9 work and
- *    is tracked as a deliberate unit (see the terrain check below), not merged
- *    silently or split silently.
+ * 2. Terrain slope and elevation-relative-to-road are separate factors, priced
+ *    independently at -7% each, exactly as the reference prices them. A level lot
+ *    can still sit below the road, so they must not be merged.
  *
  * This file asserts the inventory, not the arithmetic. value_guide_flow_node.js
  * owns the arithmetic.
@@ -54,7 +53,7 @@ const REFERENCE_ADJUSTMENTS = [
   { ref: "road access", ours: "roadAccess" },
   { ref: "lot shape", ours: "lotShape" },
   { ref: "right of way", ours: null },
-  { ref: "elevation vs road", ours: null },
+  { ref: "elevation vs road", ours: "elevation" },
   { ref: "utilities", ours: "infrastructure" }
 ];
 
@@ -64,20 +63,15 @@ check("the factor inventory is present and uniquely keyed", () => {
   assert.strictEqual(new Set(ids).size, ids.length, "factor ids are unique");
 });
 
-check("terrain and elevation-vs-road are tracked as one deliberate unit until Task 9 splits them", () => {
+check("terrain slope and elevation-vs-road are separate factors, as in the reference", () => {
   /* The reference prices slope and elevation-relative-to-road separately (-7% each),
-     because a lot can be level and still sit below the road. We currently carry
-     them as one merged factor ("Terrain and slope"). docs/specs/value-guide-input-parity.md
-     records the split as Task 9 work.
-
-     This asserts the CURRENT merged state so the split arrives as a deliberate
-     change to this test and the spec together, not as a silent factor edit. It is
-     intentionally a tripwire: when Task 9 lands, the count goes 1 -> 2 and this
-     check must be updated by the same commit. */
+     because a lot can be level and still sit below the road. Task 9 splits them. */
   const terrainish = FLOW.FACTORS.filter(f => /terrain|elev|slope/i.test(f.id + " " + f.label));
-  assert.strictEqual(terrainish.length, 1,
-    "terrain/slope factor count changed (now " + terrainish.map(f => f.id).join(", ") +
-      "). Expected exactly 1 (merged) until Task 9 splits slope from elevation-vs-road.");
+  assert.strictEqual(terrainish.length, 2,
+    "expected slope and elevation as two factors, found: " + terrainish.map(f => f.id).join(", "));
+  const ids = terrainish.map(f => f.id).sort();
+  assert.deepStrictEqual(ids, ["elevation", "terrain"],
+    "the split factor ids are terrain (slope) and elevation (vs road)");
 });
 
 check("every factor we price has a declared range that its options stay inside", () => {
@@ -121,7 +115,7 @@ check("a question we cannot map to a reference field is a deliberate decision, n
      test fails when a THIRD one appears, which is how an accidental merge or a
      half-done edit gets caught. */
   const unmapped = REFERENCE_ADJUSTMENTS.filter(a => !a.ours).map(a => a.ref);
-  assert.deepStrictEqual(unmapped.sort(), ["community type", "elevation vs road", "right of way"],
+  assert.deepStrictEqual(unmapped.sort(), ["community type", "right of way"],
     "the set of unported reference fields changed - update this test and the spec together");
 });
 
@@ -165,6 +159,42 @@ check("the reference's own '9 quick questions' label is not copied as a count", 
      building block. Copying the number would bake in an inaccuracy. */
   assert.ok(FLOW.QUESTIONS.length !== 9 || FLOW.FACTORS.length >= 10,
     "question count drifted to a number copied from the reference's marketing label");
+});
+
+checkAsync("slope and elevation deduct independently, as the reference prices them", async () => {
+  /* The reference deducts -7% for a sloping lot AND -7% for a lot below the road,
+     separately, because a level lot can still sit below the road. Our split must
+     price the same way: each is its own -700 bp factor, and both can stack. */
+  const opts = { municipality: "BAUAN", barangay: "POBLACION III", classification: "RR",
+    type: "vacant_lot", area: 100, effectivityDate: "2026-06-01" };
+  const EST = require(path.join(ROOT, "js/estimator.js"));
+  const FLOW2 = FLOW;
+  const plain = await FLOW2.compute(opts, EST);
+  const sloping = await FLOW2.compute(Object.assign({}, opts, { terrain: "-700" }), EST);
+  const below = await FLOW2.compute(Object.assign({}, opts, { elevation: "-700" }), EST);
+  const both = await FLOW2.compute(Object.assign({}, opts, { terrain: "-700", elevation: "-700" }), EST);
+  assert.ok(sloping.landValue < plain.landValue, "sloping lowers the value");
+  assert.ok(below.landValue < plain.landValue, "below-road lowers the value");
+  assert.ok(both.landValue < sloping.landValue && both.landValue < below.landValue,
+    "the two deduct independently - a level lot below the road is not priced as flat");
+  /* Each is exactly -700 bp on the land base. */
+  const readNet = r => r.referenceModel.sections.filter(s => s.id === "terrain" || s.id === "elevation");
+  const terra = readNet(sloping).filter(s => s.id === "terrain")[0];
+  const elev = readNet(below).filter(s => s.id === "elevation")[0];
+  assert.strictEqual(terra.bp, -700, "slope is -7%");
+  assert.strictEqual(elev.bp, -700, "elevation is -7%");
+});
+
+check("ten questions render, each bound to a factor the reference also prices", () => {
+  /* After the Task 9 split the form asks ten. The two that used to be one - slope
+     and elevation vs road - are both present and both bound to their own factor. */
+  assert.strictEqual(FLOW.QUESTIONS.length, 10, "expected ten questions after the terrain split");
+  const inputs = FLOW.QUESTIONS.map(q => q.input);
+  assert.ok(inputs.indexOf("topography") >= 0, "slope question present");
+  assert.ok(inputs.indexOf("elevation") >= 0, "elevation-vs-road question present");
+  const factorIds = FLOW.FACTORS.map(f => f.id);
+  FLOW.QUESTIONS.forEach(q => assert.ok(factorIds.indexOf(q.factorId) >= 0,
+    q.id + " points at a missing factor"));
 });
 
 Promise.all(pending).then(function () {

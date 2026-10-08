@@ -10299,13 +10299,15 @@ premise: "Fee Simple / As Improved",
           salePrice: "", saleContext: "private-resale", developerFees: "",
           landMethod: "factor",
           municipality: "", barangay: "", streetKey: "", allOther: false,
-          classification: "", area: "", corner: false,
+          /* Defaults to Residential, matching the reference form. The four
+             classifications are RR / CR / I / A50 and Residential is the default. */
+          classification: "RR", area: "", corner: false,
           construction: "mixed_chb", floorArea: "", floors: "1", ageBand: "0-5",
           features: [],
-          /* The nine question fields, named to match QUESTIONS. An old draft may
+          /* The ten question fields, named to match QUESTIONS. An old draft may
              carry the previous occupancy/titleStatus/inheritanceStatus names;
              vgModelOpts migrates them so a saved answer is not silently dropped. */
-          shape: "", topography: "", frontage: "", access: "", flood: "",
+          shape: "", topography: "", elevation: "", frontage: "", access: "", flood: "",
           utilities: "", titled: "", estate_settled: "", occupancy: ""
         }
       };
@@ -10374,7 +10376,11 @@ function vgMigrateLegacy(f) {
     const missing = [];
     if (!f.municipality) missing.push("municipality");
     if (!f.barangay) missing.push("barangay");
-    if (!f.allOther && !f.streetKey) missing.push("street");
+    /* Street is OPTIONAL, matching the reference form which labels it "(Optional)".
+       A street-less parcel resolves to the barangay's all-other-streets rate, so it
+       prices correctly without forcing the user through a fake "street not listed"
+       choice. All-other remains a real option for a parcel that genuinely has no
+       listed street. */
     if (!f.classification) missing.push("classification");
     /* coerce, because a numeric field can hold "200" (string) or a real number and
        Number("") is 0. A blank-but-present value is still missing, so the
@@ -10492,7 +10498,7 @@ function vgStage1(d, ref) {
       + vgSelectField("Barangay", null, "data-vg-set=\"barangay\"",
         (d.barangayOptions || []).map(b => ({ value: b, label: b })), f.barangay,
         f.municipality ? "— choose a barangay —" : "choose a municipality first", 6)
-      + vgSelectField("Street", null, "data-vg-set=\"streetKey\"",
+      + vgSelectField("Street (optional)", "A street-less parcel uses the barangay's all-other-streets rate.", "data-vg-set=\"streetKey\"",
         (d.streetOptions || []).map(s => ({ value: s.key, label: s.name })), f.streetKey,
         f.barangay ? "— choose a street —" : "choose a barangay first", 12)
       + vgField("Street not listed", "Uses the all-other-streets rate for the barangay.",
@@ -10501,16 +10507,24 @@ function vgStage1(d, ref) {
     /* Optional, and revealed once a purpose is picked, because "where are you in
        the sale" only means something relative to why the estimate is wanted. It
        never touches the calculation; it only tailors the report's framing. */
-    html += vgGroup("Where are you in the sale?",
-      "Optional. Tap to select, tap again to skip. This shapes the report, not the figure.",
-      '<div class="vg-choice">' + [
-        { value: "just_checking", label: "I&rsquo;m just checking my property&rsquo;s value" },
-        { value: "ready_to_sell", label: "I&rsquo;m getting ready to sell" },
-        { value: "already_listed", label: "My property is already listed" },
-        { value: "have_a_buyer", label: "I already have a buyer" }
-      ].map(o => '<label><input type="radio" name="vg-stage1-stage" data-vg-stage1-stage="'
-        + o.value + '"' + (f.saleStage === o.value ? " checked" : "") + "> " + o.label + "</label>").join("")
-        + "</div>", 12);
+    /* Shown only when the purpose is Selling, matching the reference form. The
+       reference asks "I'm just checking / getting ready to sell / already listed /
+       I already have a buyer" ONLY after you pick Selling; for Buying, Estate,
+       Loan, Other it never appears, because the stage of a sale is meaningless if
+       you are not selling. It never touches the calculation, only the report's
+       framing. */
+    if (f.purpose === "Selling") {
+      html += vgGroup("Where are you in the sale?",
+        "Optional. Tap to select, tap again to skip. This shapes the report, not the figure.",
+        '<div class="vg-choice">' + [
+          { value: "just_checking", label: "I&rsquo;m just checking my property&rsquo;s value" },
+          { value: "ready_to_sell", label: "I&rsquo;m getting ready to sell" },
+          { value: "already_listed", label: "My property is already listed" },
+          { value: "have_a_buyer", label: "I already have a buyer" }
+        ].map(o => '<label><input type="radio" name="vg-stage1-stage" data-vg-stage1-stage="'
+          + o.value + '"' + (f.saleStage === o.value ? " checked" : "") + "> " + o.label + "</label>").join("")
+          + "</div>", 12);
+    }
 
     html += vgGroup("What is being valued?",
       "Classification and lot area set the base rate and the amount it is applied to.",
@@ -10684,11 +10698,23 @@ function vgQuestionGroups() {
       vgEst().municipalityRow(d.form.municipality)?.rdo, d.form.municipality, new Date().toISOString().slice(0, 10));
     const wrap = "<p><b>How to read these figures:</b> the BIR zonal reference is an official tax reference. The market guide estimate is a planning figure built from disclosed factors. They are not interchangeable, and comparable asking listings are context only — their prices are not calculation inputs.</p>";
     let html = '<div class="card card-pad"><h3 class="mb-16">Estimated value</h3>'
+      + '<p class="vg-property-kind">' + (r.type === "house_lot" ? "🏠 House & lot" : "🌿 Vacant lot")
+      + ' · ' + esc(r.classificationLabel || r.classification) + ' · ' + C.fmtNum(Number(r.area)) + " sqm lot"
+      + (r.type === "house_lot" && r.floorArea ? " · " + C.fmtNum(Number(r.floorArea)) + " sqm floor" : "") + '</p>'
       + '<div class="vg-figures">'
       + '<div class="vg-figure vg-figure-primary"><span>Market guide estimate</span><b>' + C.money(r.marketGuideEstimate) + "</b>"
       + "<small>Planning figure from the disclosed reference factors.</small></div>"
       + '<div class="vg-figure"><span>Official BIR zonal reference</span><b>' + C.money(r.birZonalValue) + "</b>"
       + "<small>" + C.money(r.birZonalRatePerSqm) + "/sqm · tax reference, separate from the estimate</small></div>"
+      + "</div>"
+      + '<div class="vg-components">'
+      + '<div class="vg-component"><span>Land value</span><b>' + C.money(r.landValue) + "</b>"
+      + "<small>BIR rate × market-indicator factor, plus the answered land factors</small></div>"
+      + (r.type === "house_lot"
+        ? '<div class="vg-component"><span>Building value</span><b>' + C.money(r.improvement) + "</b>"
+          + "<small>Replacement cost less depreciation, plus any features</small></div>"
+        : '<div class="vg-component vg-component-none"><span>Building value</span><b>—</b>'
+          + "<small>Vacant lot: no improvement component</small></div>")
       + "</div>"
       + '<div class="vg-callout" data-vg-reference-status><b>Government reference: ' + esc(status.label) + "</b>"
       + "<p>Schedule effectivity, dataset generation and legal applicability are separate. "
