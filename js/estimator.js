@@ -527,10 +527,16 @@
       loadOptionalGuideSettings(),
       loadJSON("data/data-manifest.json").catch(function () { return null; }),
       loadJSON("data/value-guide-project-evidence.json").catch(function () { return { records: [], unavailable: true }; }),
-      loadJSON("data/government-reference-register.json").catch(function () { return { records: [], unavailable: true }; })
+      loadJSON("data/government-reference-register.json").catch(function () { return { records: [], unavailable: true }; }),
+      /* Researched asking prices, loaded for DISPLAY ONLY. They are context the
+         result screen cites next to the estimate - the reader sees what asking
+         evidence exists and how it compares to the street's BIR rate. They never
+         enter computeEstimate(), exactly as market_benchmarks_node.js asserts. */
+      loadJSON("data/market-benchmarks.json").catch(function () { return { records: [], unavailable: true }; })
     ]).then(function (parts) {
       DATA = { config: applyGuideSettings(parts[0], parts[2]), index: parts[1], manifest: parts[3], projectEvidence: parts[4] };
       DATA.config.governmentReferenceRegister = parts[5];
+      DATA.marketBenchmarks = parts[6];
       return DATA;
     });
     return dataPromise;
@@ -1189,6 +1195,34 @@ out += "</div>";
       return '<article class="sf-est-project-record"><h5>' + esc(record.project + ' — ' + record.model) + '</h5><p>' + esc(area + floor) + '</p><p>' + esc(price) + ' · ' + esc(record.sourceTier) + '</p>' + (record.notes ? '<p>' + esc(record.notes) + '</p>' : '') + (/^https:\/\//.test(record.sourceUrl || "") ? '<a href="' + esc(record.sourceUrl) + '" target="_blank" rel="noopener noreferrer">View source</a>' : '') + '</article>';
     }).join("");
   }
+  /* Researched asking prices near the subject, read from data/market-benchmarks.json
+     as DISPLAY CONTEXT ONLY. Each record already carries its own street-level BIR
+     multiple, so the panel explains what the asking evidence implies in the same
+     vocabulary as the estimate (x the BIR rate) without ever feeding the price into
+     computeEstimate(). The summary sentence is generated from the records - a
+     deterministic analysis of the gathered evidence, not a model call. */
+  function benchmarkContextHtml(r) {
+    var rows = (DATA.marketBenchmarks && DATA.marketBenchmarks.records) || [];
+    if (!rows.length) return '<p class="sf-est-rdp">No researched asking-price records are loaded. This does not mean the area has no properties for sale.</p>';
+    var here = rows.filter(function (rec) { return evidence.place(rec.municipality) === evidence.place(r.municipality); });
+    var near = rows.filter(function (rec) { return evidence.place(rec.municipality) !== evidence.place(r.municipality); }).slice(0, 3);
+    var list = here.concat(near);
+    if (!list.length) return '<p class="sf-est-rdp">No researched asking-price records near ' + esc(r.municipality) + ' yet. Researched records exist for: ' + esc(rows.map(function (rec) { return rec.municipality; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join(", ")) + '.</p>';
+    var cards = list.map(function (rec) {
+      var perSqm = rec.askingPricePerSqmMin ? fmt(rec.askingPricePerSqmMin) + (rec.askingPricePerSqmMax ? "–" + fmt(rec.askingPricePerSqmMax) : "") + "/sqm"
+        : (rec.askingPrice && rec.lotArea) ? fmt(Math.round(rec.askingPrice / rec.lotArea)) + "/sqm"
+        : rec.askingPriceMin && rec.lotAreaMin ? "from " + fmt(Math.round(rec.askingPriceMin / rec.lotAreaMin)) + "/sqm"
+        : null;
+      var multiple = rec.birStreetCheck && rec.birStreetCheck.impliedMultiple;
+      var project = rec.project || rec.model || rec.id;
+      var source = rec.sourceUrl ? ' <a href="' + esc(rec.sourceUrl) + '" target="_blank" rel="noopener noreferrer">source</a>' : "";
+      return '<article class="sf-est-benchmark-record"><h5>' + esc(project + (rec.municipality !== r.municipality ? " · " + rec.municipality : "")) + '</h5>'
+        + '<p>' + (perSqm ? '<b>' + esc(perSqm) + '</b>' : '') + (multiple ? ' · ' + esc(multiple) : '') + '</p>'
+        + '<p class="sf-est-rdp">' + esc((rec.notes || rec.priceBasis || "").slice(0, 160)) + '</p>' + source + '</article>';
+    }).join("");
+    var sameMuni = here.length ? " This municipality has " + here.length + " researched asking record(s)." : " This municipality has no researched asking record yet; nearby records are shown for context.";
+    return '<div class="sf-est-benchmark-context" data-est-benchmark-context><h5>Researched asking prices' + (here.length ? " in " + esc(r.municipality) : " nearby") + '</h5>' + cards + '<p class="sf-est-rdp">Researched asking prices are advertised prices, not achieved sales, and they are context only - they never change the estimate above.' + sameMuni + '</p></div>';
+  }
   function evidenceHtml(r) {
     var c = r.comparableSummary || {}, indication = r.askingIndication;
     var out = '<p class="sf-est-rdp">' + Number(c.count || 0) + ' context record(s); ' + Number(c.eligibleCount || 0) + ' passed the provisional asking screen. ' + esc(c.policy || "") + '</p>';
@@ -1196,7 +1230,7 @@ out += "</div>";
     else out += '<p class="sf-est-rdp">Insufficient qualified asking evidence for a numerical indication. The factor guide is not calibrated to achieved sales.</p>';
     if (c.rejected && c.rejected.length) out += '<ul class="sf-est-rdl">' + c.rejected.slice(0, 8).map(function (row) { return '<li>' + esc((row.id || "Record") + ': ' + row.reasons.join('; ')) + '</li>'; }).join("") + '</ul>';
     out += '<p class="sf-est-rdp">Search status: ' + esc((r.evidenceRetrieval || []).map(function (status) { return status.source + ': ' + status.status; }).join(' · ') || "No live asking search supplied") + '. Failed or limited searches do not establish market scarcity.</p>';
-    return out + '<details class="sf-est-project-context"><summary>Published project specifications and price context</summary>' + projectContextHtml(r.municipality) + '</details>';
+    return out + '<details class="sf-est-project-context"><summary>Published project specifications and price context</summary>' + projectContextHtml(r.municipality) + '</details>' + benchmarkContextHtml(r);
   }
 
   function reviewHtml() {

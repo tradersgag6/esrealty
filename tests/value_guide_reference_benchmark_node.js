@@ -160,12 +160,24 @@ checkAsync("the land multiplier choice, and nothing else, explains the residual 
 });
 
 check("no benchmark or reference figure reaches a formula", () => {
-  ["js/estimator.js", "js/value_guide_flow.js", "js/core.js", "js/storefront.js", "js/app.js"].forEach(f => {
+  /* estimator.js may LOAD market-benchmarks.json as display context (the result
+     screen cites researched asking prices) - that is a read for the reader, not a
+     formula input, and market_benchmarks_node.js asserts the compute path never
+     touches it. The other files may not read it at all. The reference report
+     fixture and the report block are never loaded by any of these. */
+  ["js/value_guide_flow.js", "js/core.js", "js/storefront.js", "js/app.js"].forEach(f => {
     const src = fs.readFileSync(path.join(ROOT, f), "utf8");
     assert.ok(src.indexOf("market-benchmarks") < 0, f + " must not read the benchmark file");
     assert.ok(src.indexOf("value-guide-reference-bauan") < 0, f + " must not read the report fixture");
     assert.ok(src.indexOf("_referenceBenchmark") < 0, f + " must not read the report block");
   });
+  /* estimator.js: the benchmark file exists only as a display feed; the report
+     fixture never. */
+  const est = fs.readFileSync(path.join(ROOT, "js/estimator.js"), "utf8");
+  const loads = est.match(/loadJSON\("data\/market-benchmarks\.json"\)/g) || [];
+  assert.strictEqual(loads.length, 1, "estimator loads the benchmark file exactly once, as display data");
+  assert.ok(est.indexOf("value-guide-reference-bauan") < 0, "estimator must not read the report fixture");
+  assert.ok(est.indexOf("_referenceBenchmark") < 0, "estimator must not read the report block");
 });
 
 Promise.all(pending).then(function () {

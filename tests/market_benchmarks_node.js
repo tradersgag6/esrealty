@@ -79,11 +79,36 @@ check("the range is symmetric around the mid, so the disclosure cannot mislead",
 });
 
 check("no benchmark price ever reaches a formula", () => {
-  /* The regression that matters: a future edit must not start reading this file. */
-  ["js/estimator.js", "js/value_guide_flow.js", "js/core.js", "js/storefront.js"].forEach(f => {
+  /* The boundary that matters: benchmark PRICES must never enter a calculation.
+     estimator.js now LOADS the file for display context (the result screen cites
+     researched asking prices beside the estimate), which is fine - the forbidden
+     thing is a price changing the estimate. The intent is encoded:
+
+     1. Only ONE loadJSON("data/market-benchmarks.json") may exist in estimator.js,
+        inside loadData(). It lands in DATA.marketBenchmarks, which nothing in the
+        compute path reads.
+     2. The only other references are inside the benchmarkContextHtml renderer
+        (which states the prices never change the estimate) and its comment.
+     3. value_guide_flow.js, core.js and storefront.js must not read it at all. */
+  ["js/value_guide_flow.js", "js/core.js", "js/storefront.js"].forEach(f => {
     const src = fs.readFileSync(path.join(ROOT, f), "utf8");
     assert.ok(src.indexOf("market-benchmarks") < 0, f + " must not read the benchmark file");
   });
+  const est = fs.readFileSync(path.join(ROOT, "js/estimator.js"), "utf8");
+  /* Exactly one load line, in loadData. */
+  const loads = est.match(/loadJSON\("data\/market-benchmarks\.json"\)/g) || [];
+  assert.strictEqual(loads.length, 1, "exactly one load of the benchmark file: " + loads.length);
+  assert.ok(est.indexOf("DATA.marketBenchmarks = parts[6]") > -1,
+    "the load lands in DATA.marketBenchmarks, which the compute path never reads");
+  /* The compute path must not reference the display data. computeEstimate ends
+     before the loadData block begins, so the slice up to loadData is the math. */
+  const compute = est.slice(est.indexOf("function computeEstimate"), est.indexOf("function loadData"));
+  assert.ok(compute.indexOf("marketBenchmarks") < 0 && compute.indexOf("market-benchmarks") < 0,
+    "computeEstimate must not read the benchmark data");
+  /* The renderer must state the boundary to the reader. */
+  const render = est.slice(est.indexOf("function benchmarkContextHtml"), est.indexOf("function evidenceHtml"));
+  assert.ok(render.indexOf("never change the estimate") > -1,
+    "the rendered context states the prices never change the estimate");
 });
 
 /* Reads the RR rate BIR actually assigns to a named street. A municipal p50 is
