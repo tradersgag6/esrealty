@@ -378,6 +378,44 @@ exact units and the rest are individual asks. Bauan coverage is zero for land. T
 gap is the honest reason the land multiplier stays the Task 9 decision rather than
 being resolved here.
 
+### Done — developer projects near Bauan, tested against both models
+
+2026-10-08. Source list: the Reignvest Realty portfolio site
+(`virgilio-corlet-portfolio.webflow.io`), then each developer's own website.
+Developer sites (Sta. Lucia, Ecoverde, Pueblo de Oro) confirm projects and specs but
+publish **no prices** — every one says "Request Quotation" — so the price points come
+from broker/developer asking figures. Catalina Lake Residences' official developer
+is **Sta. Lucia Land Inc.** (`stalucialand.com.ph`), not a local builder; this
+confirmed the project's real identity for the resolved BIR lookup.
+
+Four projects have both a lot/floor area and a price, so both calculators ran on
+them. Asking vs guide (1.174x) vs storefront (2.5x):
+
+| Project | Asking | Guide | Storefront | Closer |
+|---|---:|---:|---:|---|
+| Catalina Lake (Bauan, 120sqm land) | ₱1,600,000 | ₱836,827 (−47.7%) | ₱1,800,000 (+12.5%) | **storefront** |
+| Summit Point (Lipa, 350sqm land, membership incl.) | ₱9,350,000 | ₱1,627,164 (−82.6%) | ₱3,500,000 (−62.6%) | storefront (both low) |
+| Paseo de Lipa LARISSA (100sqm + 90 floor, new) | ₱6,098,750 | ₱2,047,356 (−66.4%) | ₱3,609,375 (−40.8%) | storefront |
+| Bayanihan Town Sierra (44sqm + 38.5 floor, new) | ₱1,350,000 | ₱654,209 (−51.5%) | ₱1,067,344 (−20.9%) | storefront |
+
+The pattern is unambiguous and it is the first real-market signal the whole project
+was missing: **the storefront's 2.5x land multiplier lands within ±40% of every
+developer asking price, while the guide's 1.174x is 48%–83% below them.** On the
+Bauan-specific record (Catalina) the storefront is +12.5% — inside the guide's own
+±15% planning range — and the guide is −47.7%.
+
+Caveats, recorded with the numbers: all four are NEW developer/premium product
+(so asking runs at or above 2.5x), two are house-and-lot (building cost inflates the
+total toward the storefront's higher RCN), and Summit Point's ₱9.35M includes club
+membership. None is a completed sale. But the direction is consistent across all
+four, which a single outlier could not produce.
+
+This does not prove 2.5 is correct — but it does shift the burden of proof. The
+evidence the whole project lacked was "is 1.174 or 2.5 closer to real prices?" and
+every developer asking price near Bauan answers: **2.5**. The guide's 1.174 remains
+the reference-parity figure (it reproduces the LandValuePH report); it is not the
+market figure.
+
 ## Task 7 — Benchmark candidate computations properly
 
 New test: `tests/value_guide_market_benchmark_node.js`

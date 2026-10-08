@@ -196,20 +196,33 @@ check("the calculator still produces a figure for every classification", () => {
   });
 });
 
-check("the coverage summary records that Bauan has no land-only evidence", () => {
-  /* The single most important fact the dataset proves: a full listd.ph search for
-     vacant lots in Bauan returned zero results, only "similar locations near Bauan".
-     The one Bauan record is a beachfront house and lot. This means the subject
-     municipality - the one the purchased report prices - has NO land-only asking
-     price anywhere in the evidence, so no multiplier can be calibrated for it from
-     this dataset. Anyone who later cites a Bauan-specific band must first delete
-     this assertion. */
+check("the coverage summary records the resolved Catalina vacant-lot record", () => {
+  /* For most of the project Bauan had no land-only evidence at all. That changed
+     on 2026-10-08: Catalina Lake Residences (Manghinao I, Bauan) resolved to its
+     own street BIR rate and became the first and only Bauan vacant-lot record.
+     The gap is no longer absolute, but it is still one record - a single asking
+     price, not a calibrator. If a second Bauan vacant-lot record ever appears,
+     this assertion moves up and the summary's note should say so. */
   const cs = BM._coverageSummary;
   assert.ok(cs, "coverage summary present");
-  assert.strictEqual(cs.directBauanVacantLotRecords, 0, "there is still no Bauan vacant-lot record");
-  assert.strictEqual(cs.directBauanRecords, 1, "the single Bauan record is the beachfront house and lot");
-  assert.ok(cs.note.indexOf("NO land-only asking-price evidence") > -1, "the gap is stated plainly");
-  assert.ok(BM.records.length >= 10, "the dataset grew past the original seven, got " + BM.records.length);
+  assert.ok(cs.directBauanVacantLotRecords >= 1, "Catalina gave Bauan its first vacant-lot record");
+  assert.ok(cs.directBauanRecords >= 2, "Bauan now has the Catalina lot plus the beach house and lot");
+  assert.ok(BM.records.length >= 14, "the dataset grew past twelve, got " + BM.records.length);
+});
+
+check("the calculator comparison is recorded on the developer-project records", () => {
+  /* The developer projects near Bauan now carry both calculators' outputs, so the
+     direction of the market signal is pinned and cannot be silently re-measured. */
+  ["catalina-fs131-bench", "summit-point-plaridel", "paseo-larissa-bench", "bayanihan-sierra-bench"].forEach(id => {
+    const r = BM.records.filter(x => x.id === id)[0];
+    assert.ok(r, id + " present");
+    assert.ok(r.calculatorComparison, id + " carries the comparison");
+    assert.ok(r.calculatorComparison.closer, id + " records which model was closer");
+    assert.strictEqual(r.numericalAllowed, false, id + " stays non-numerical");
+  });
+  const cat = BM.records.filter(x => x.id === "catalina-fs131-bench")[0];
+  assert.strictEqual(cat.calculatorComparison.closer, "storefront",
+    "the Bauan land record's closer model is the storefront (2.5x), not the guide (1.174x)");
 });
 
 check("the San Juan developer price list is the strongest record and stays non-numerical", () => {

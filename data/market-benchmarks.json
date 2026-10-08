@@ -4,11 +4,11 @@
   "_observedOn": "2026-10-07",
   "_coverageSummary": {
     "asOf": "2026-10-08",
-    "records": 12,
-    "municipalities": ["BAUAN", "BATANGAS CITY", "LAUREL", "LIPA CITY", "NASUGBU", "SAN PASCUAL", "SAN JUAN", "TUY"],
-    "directBauanRecords": 1,
-    "directBauanVacantLotRecords": 0,
-    "note": "A full listd.ph search for vacant lots in Bauan returned zero results - the page showed only 'similar locations near Bauan'. The single Bauan record is a beachfront house and lot. Bauan therefore has NO land-only asking-price evidence at all, which is why no multiplier can be calibrated for the subject municipality from this dataset."
+    "records": 16,
+    "municipalities": ["BAUAN", "BATANGAS CITY", "LAUREL", "LIPA CITY", "NASUGBU", "SAN PASCUAL", "SAN JUAN", "TUY", "ALITAGTAG"],
+    "directBauanRecords": 2,
+    "directBauanVacantLotRecords": 1,
+    "note": "Resolved on 2026-10-08: Catalina Lake Residences (Manghinao I, Bauan) is now a confirmed vacant-lot record with its own street BIR rate - the first and only Bauan land-only price point in the dataset. A full listd.ph search still returns zero additional Bauan vacant-lot listings. Four developer projects near Bauan were also added (Catalina, Summit Point, Paseo de Lipa, Bayanihan) with both calculators' outputs recorded; the storefront 2.5x model lands within +12.5% to -62.6% of their asking prices while the guide's 1.174x is 48%-83% below."
   },
   "_referenceReportNote": "The purchased LandValuePH report LVPH-D-9531904C lives as a test fixture at tests/fixtures/value-guide-reference-bauan.json, not here. This file holds market evidence; the report is a comparison benchmark with its own provenance and contradictions, so it was moved out to keep one canonical copy. tests/value_guide_reference_benchmark_node.js reads it.",
   "_bandResearch": {
@@ -296,6 +296,116 @@
         "impliedMultiple": "42,550/25,000 = 1.70x"
       },
       "notes": "8.51M / 200 = 42,550/sqm, a resale asking well above the 25,000/sqm beachfront BIR rate (1.70x) and far above the developer price list's own 21,000-28,000/sqm range for the same area. A single high ask; useful as the top of the beachfront range, not as the band."
+    },
+    {
+      "id": "catalina-fs131-bench",
+      "project": "Catalina Lake Residences Bauan",
+      "model": "residential lot, 120 sqm, broker code FS131",
+      "municipality": "BAUAN",
+      "barangay": "MANGHINAO I",
+      "propertyType": "vacant_lot",
+      "lotArea": 120,
+      "floorArea": 0,
+      "askingPrice": 1600000,
+      "priceBasis": "exact-unit broker listing, land only",
+      "sourceTier": "broker-parcel-asking",
+      "sourceUrl": "https://www.dotproperty.com.ph/ads/land-for-sale-in-san-teodoro-batangas_167ca9c66f5b-f46f-2b32-a23a-77541089",
+      "observedOn": "2026-10-08",
+      "priceAsOf": null,
+      "numericalAllowed": false,
+      "birStreetCheck": {
+        "barangay": "MANGHINAO I",
+        "street": "CATALINA LAKE RESIDENCES",
+        "birRateRR": 6000,
+        "birSchedule": "BIR 035-2022",
+        "impliedMultiple": "13,333/6,000 = 2.22x"
+      },
+      "calculatorComparison": {
+        "guide1_174": 836827,
+        "storefront2_5": 1800000,
+        "guideGapPct": "-47.7",
+        "storefrontGapPct": "+12.5",
+        "closer": "storefront",
+        "measuredOn": "2026-10-08"
+      },
+      "notes": "The only Bauan land-only price point in the dataset, now with its own street rate resolved (Manghinao I / CATALINA LAKE RESIDENCES, RR 6000). Asking 13,333/sqm = 2.22x BIR. The storefront 2.5x model prices it at 1.8M (+12.5%, inside the planning range); the reference 1.174x model prices it at 837K (-47.7%). Asking price, not a sale."
+    },
+    {
+      "id": "summit-point-plaridel",
+      "project": "Summit Point Golf & Residential Estates",
+      "model": "fairway residential lot, 350 sqm",
+      "municipality": "LIPA CITY",
+      "barangay": "PLARIDEL",
+      "propertyType": "vacant_lot",
+      "lotArea": 350,
+      "floorArea": 0,
+      "askingPrice": 9350000,
+      "priceBasis": "broker parcel asking, club membership included",
+      "sourceTier": "broker-parcel-asking",
+      "sourceUrl": "https://www.dotproperty.com.ph/ads/land-for-sale-in-plaridel-batangas_0b122bdb77df-3fb0-7292-1744-8b749f89",
+      "observedOn": "2026-10-08",
+      "priceAsOf": null,
+      "numericalAllowed": false,
+      "calculatorComparison": {
+        "guide1_174": 1627164,
+        "storefront2_5": 3500000,
+        "guideGapPct": "-82.6",
+        "storefrontGapPct": "-62.6",
+        "closer": "storefront (both low)",
+        "measuredOn": "2026-10-08"
+      },
+      "notes": "26,714/sqm against a Plaridel BIR rate of 4,000/sqm = 6.7x. Club membership and golf-course premium make it a country-club outlier, so both models underprice it - the point of the record is direction, not closeness."
+    },
+    {
+      "id": "paseo-larissa-bench",
+      "project": "Paseo de Lipa LARISSA",
+      "model": "single attached, 100 sqm lot / 90 sqm floor, new",
+      "municipality": "LIPA CITY",
+      "propertyType": "house_lot",
+      "lotArea": 100,
+      "floorArea": 90,
+      "askingPrice": 6098750,
+      "priceBasis": "developer-published model price",
+      "sourceTier": "developer-price-list",
+      "sourceUrl": "https://www.paseodelipa.com.ph/madeira/",
+      "observedOn": "2026-10-08",
+      "priceAsOf": "2026-03",
+      "numericalAllowed": false,
+      "calculatorComparison": {
+        "guide1_174": 2047356,
+        "storefront2_5": 3609375,
+        "guideGapPct": "-66.4",
+        "storefrontGapPct": "-40.8",
+        "closer": "storefront",
+        "measuredOn": "2026-10-08"
+      },
+      "notes": "New developer H&L package. Building cost inflates the total toward the storefront's higher RCN. Both models underprice a new township home; storefront far closer."
+    },
+    {
+      "id": "bayanihan-sierra-bench",
+      "project": "Bayanihan Town Batangas Sierra",
+      "model": "townhouse, 44 sqm lot / 38.5 sqm floor, new",
+      "municipality": "ALITAGTAG",
+      "barangay": "CONCORDIA",
+      "propertyType": "house_lot",
+      "lotArea": 44,
+      "floorArea": 38.5,
+      "askingPrice": 1350000,
+      "priceBasis": "broker model price, mass-housing",
+      "sourceTier": "broker-model-price",
+      "sourceUrl": "https://bayanihantownbatangas.com/house-models/",
+      "observedOn": "2026-10-08",
+      "priceAsOf": null,
+      "numericalAllowed": false,
+      "calculatorComparison": {
+        "guide1_174": 654209,
+        "storefront2_5": 1067344,
+        "guideGapPct": "-51.5",
+        "storefrontGapPct": "-20.9",
+        "closer": "storefront",
+        "measuredOn": "2026-10-08"
+      },
+      "notes": "Affordable mass-housing townhouse. Storefront within 21%, guide half the asking price."
     }
   ]
 }
