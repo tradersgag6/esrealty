@@ -13,10 +13,10 @@
  *    reach a price. Our BIR data has an all-other-streets rate, so we can price a
  *    street-less parcel without asking.
  *
- * 2. The adjustment questions must not be merged back together. We collapsed
- *    terrain slope and elevation-relative-to-road into one question. The reference
- *    prices them separately, because a lot can be level and still sit well below the
- *    road. Merging loses that.
+ * 2. Terrain slope and elevation-relative-to-road are currently carried as ONE
+ *    factor; the reference prices them separately. That split is Task 9 work and
+ *    is tracked as a deliberate unit (see the terrain check below), not merged
+ *    silently or split silently.
  *
  * This file asserts the inventory, not the arithmetic. value_guide_flow_node.js
  * owns the arithmetic.
@@ -64,14 +64,20 @@ check("the factor inventory is present and uniquely keyed", () => {
   assert.strictEqual(new Set(ids).size, ids.length, "factor ids are unique");
 });
 
-check("terrain slope and elevation-vs-road are not the same factor again", () => {
-  /* The regression this guards: one "Terrain and elevation" question carrying both
-     concepts. A lot can be flat and still sit below the road, and the reference
-     deducts for those independently (-7% sloping, -7% below road). */
+check("terrain and elevation-vs-road are tracked as one deliberate unit until Task 9 splits them", () => {
+  /* The reference prices slope and elevation-relative-to-road separately (-7% each),
+     because a lot can be level and still sit below the road. We currently carry
+     them as one merged factor ("Terrain and slope"). docs/specs/value-guide-input-parity.md
+     records the split as Task 9 work.
+
+     This asserts the CURRENT merged state so the split arrives as a deliberate
+     change to this test and the spec together, not as a silent factor edit. It is
+     intentionally a tripwire: when Task 9 lands, the count goes 1 -> 2 and this
+     check must be updated by the same commit. */
   const terrainish = FLOW.FACTORS.filter(f => /terrain|elev|slope/i.test(f.id + " " + f.label));
-  assert.ok(terrainish.length <= 1,
-    "terrain and elevation must not be collapsed into one factor, found: " +
-      terrainish.map(f => f.id).join(", "));
+  assert.strictEqual(terrainish.length, 1,
+    "terrain/slope factor count changed (now " + terrainish.map(f => f.id).join(", ") +
+      "). Expected exactly 1 (merged) until Task 9 splits slope from elevation-vs-road.");
 });
 
 check("every factor we price has a declared range that its options stay inside", () => {

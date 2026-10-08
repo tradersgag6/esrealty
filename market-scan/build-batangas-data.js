@@ -35,6 +35,8 @@ function check(cond, msg) { if (!cond) errors.push(msg); }
 const CONFIG = {
   version: 2,
   calculationVersion: "2026.10.4",
+  riskPolicy: "Evidence-led: unverified occupancy/title/site flags are conditions, not automatic price discounts",
+  scenarioRange: { lowFactor: 0.85, highFactor: 1.3, meaning: "Planning scenarios, not statistical accuracy" },
   dataVersion: "bir-2022-rdo58-59",
   asOf: "2022-07-23",
   note: "Engine + data versions stamped on every estimate output. Deterministic and reconcilable.",
@@ -44,10 +46,16 @@ const CONFIG = {
     house_lot: { label: "House & Lot", kind: "built", floorDefaultRatio: 0.6 }
   },
   cornerLotPct: 0.025,
+  /* These rates and their provenance are the source of truth for
+     data/zonal-config.json. If you change them here, run
+     `node market-scan/build-batangas-data.js` to regenerate the data file, and
+     update tests/estimator_math_node.js which pins them. The previous values
+     (15000 / 40000) were a stale table; 16000 / 25000 / 32000 is the committed
+     SEA ESTATES table the data file already carried. */
   construction: {
-    wood_prefab: { label: "Wood / Pre-fab", costPerSqm: 15000 },
-    mixed_chb: { label: "Mixed / CHB", costPerSqm: 25000 },
-    rca_steel: { label: "Reinforced Concrete / Steel", costPerSqm: 40000 }
+    wood_prefab: { label: "Wood / Pre-fab", costPerSqm: 16000, sourceType: "SEA ESTATES appraisal RCN table (2026 PH mid-range)", sourceDate: "2026" },
+    mixed_chb: { label: "Mixed / CHB", costPerSqm: 25000, sourceType: "SEA ESTATES appraisal RCN table (2026 PH mid-range)", sourceDate: "2026" },
+    rca_steel: { label: "Reinforced Concrete / Steel", costPerSqm: 32000, sourceType: "SEA ESTATES appraisal RCN table (2026 PH mid-range)", sourceDate: "2026" }
   },
   /* Every multiplier is 1. floorArea is one figure entered once, labelled "Total
      built-up area (sqm) / Across all storeys", so a per-storey factor on top of it
@@ -95,8 +103,16 @@ const CONFIG = {
       industrial: { min: 1.5, max: 2.5, mid: 2.0 }
     }
   },
-  tax: { cgtPct: 0.06, dstPct: 0.015, transferPct: 0.005, registrationPct: 0.001 },
-  disclaimer: "Indicative guide estimate — not a certified appraisal (RA 9646). Land figures follow the official BIR zonal schedule for your municipality, barangay, street and classification; improvements use typical replacement construction cost less straight-line age depreciation. Confirm the current schedule and verify on the ground before any transaction.",
+  marketGuide: {
+    label: "SEA ESTATES Market Guide Estimate",
+    sourceType: "SEA ESTATES approved factors",
+    comparablePolicy: "Use SEA ESTATES listings first; external asking-price evidence only when internal data is unavailable.",
+    factorApproval: "Admin approval required",
+    status: "assumption-backed",
+    note: "The factor-based guide is separate from official BIR reference values. Comparable asking-listing prices are shown as context and do not directly determine the calculation."
+  },
+  tax: { cgtPct: 0.06, dstPct: 0.015, transferPct: 0.005, registrationPct: 0.001, brokerPct: 0.03 },
+  disclaimer: "SEA ESTATES Property Value Guide — a planning estimate using the imported BIR zonal reference, disclosed SEA ESTATES factors, and disclosed improvement-cost assumptions where applicable. Comparable asking-listing prices are reported as context and are not direct calculation inputs. Review the selected schedule, match level, factors, and assumptions; confirm current BIR/LGU references and property details before a transaction. A site and document review can further refine the estimate.",
   labels: {
     reference: "BIR zonal reference",
     locality: "Locality",

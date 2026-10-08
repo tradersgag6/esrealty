@@ -718,7 +718,6 @@
         table(null, [
           ["Construction", r.constructionLabel || r.construction || "-"],
           ["Construction rate", fmtMoney(r.buildCostPerSqm) + "/sqm"],
-          ["Storeys multiplier", "x " + fmtNum(r.floorsMultiplier)],
           ["Floor area", fmtArea(r.floorArea)],
           ["Age band midpoint", r.ageMidpoint + " years"],
           ["Depreciation applied", r.depreciatedPct + "%"],
