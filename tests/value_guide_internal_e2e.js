@@ -317,6 +317,35 @@ document.body.textContent.indexOf("Derived from published BIR zonal values") >= 
     chk("pdf-filename-set", !!(created && /\.pdf$/.test(created.name || "")),
       created && created.name ? created.name : "no filename");
 
+    /* ---------- 4b. editing inputs after calculating ---------- */
+    /* A report is only trustworthy if changing an input changes the figure, and
+       going back must not silently lose the draft. Change the lot area from the
+       result screen, recalculate, and require the headline total to move. */
+    var totalBefore = (function () { var n = q(".vg-figure-primary b"); return n ? n.textContent : ""; })();
+    var editBtn = q('[data-vg-next="1"]');
+    chk("edit-inputs-reachable", !!editBtn, "Edit inputs button on the result screen");
+    if (editBtn) {
+      editBtn.click();
+      await waitFor(function () { return q('[data-vg-set="area"]'); }, 40, 150);
+      var areaEdit = q('[data-vg-set="area"]');
+      chk("draft-survived-edit", !!areaEdit && /^\d+$/.test(areaEdit.value || ""),
+        "lot area still holds " + (areaEdit && areaEdit.value));
+      var bigger = String(Number(areaEdit.value) * 2);
+      areaEdit.focus(); areaEdit.value = bigger;
+      areaEdit.dispatchEvent(new Event("input", { bubbles: true }));
+      q('[data-vg-set="classification"]').focus();
+      await waitFor(function () { var n2 = q('[data-vg-next="2"]'); return n2 && !n2.disabled; }, 40, 150);
+      q('[data-vg-next="2"]').click();
+      await waitFor(function () { return q("[data-vg-calc]"); }, 40, 150);
+      q("[data-vg-calc]").click();
+      await waitFor(function () { return q(".vg-figure-primary b"); }, 120, 200);
+      var totalAfter = q(".vg-figure-primary b").textContent;
+      chk("editing-inputs-recalculates", totalAfter !== totalBefore,
+        "total moved " + totalBefore + " -> " + totalAfter);
+      chk("result-shows-property-type", /House & lot|Vacant lot/.test(q("#content").textContent),
+        "property kind is visible on the result screen");
+    }
+
     /* ---------- 5. no lead, no email, nothing persisted ---------- */
     chk("no-lead-endpoint-called", LEAD_CALLS.length === 0, LEAD_CALLS.join(", ") || "none");
     chk("no-site-settings-fetch", MAIL_CALLS.length === 0, MAIL_CALLS.join(", ") || "none");

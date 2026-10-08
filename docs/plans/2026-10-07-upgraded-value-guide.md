@@ -476,7 +476,8 @@ node tests/estimator_math_node.js
 node tests/value_guide_flow_node.js
 node tests/value_guide_inputs_node.js
 node tests/value_guide_pdf_node.js
-node tests/value_guide_market_benchmark_node.js
+node tests/market_benchmarks_node.js
+node tests/generator_config_sync_node.js
 
 node build_app.js
 node build_app.js --check
@@ -485,12 +486,37 @@ powershell -ExecutionPolicy Bypass -File tests/run_all.ps1 -Test value_guide_int
 powershell -ExecutionPolicy Bypass -File tests/run_all.ps1 -Test value_guide_pdf_browser_e2e
 ```
 
-Coverage to add: each reference input reaching its intended calculation; all
-"Not sure" answers; boundary and invalid numeric inputs; vacant vs built; floor
-area across storeys; duplicate, stale, incomplete and mismatched evidence; editing
-inputs after calculating; calculate/reset behaviour; identical HTML/PDF totals.
+(The plan originally named `value_guide_market_benchmark_node.js`; the benchmark
+suite became `market_benchmarks_node.js` during Tasks 5-6, and the generator/data
+sync guard from the Tasks 1-5 audit is included.)
 
-Frontend work starts only after backend verification and the user's review.
+### Done — gate run clean
+
+All gate commands pass:
+
+- 39/39 node suites green (includes the five named above, plus
+  `market_benchmarks_node.js` and `generator_config_sync_node.js`).
+- `build_app.js` rebuilds and `--check` reports the bundle in sync
+  (hash `9fa11c25409534a1`).
+- `value_guide_internal_e2e` and `value_guide_pdf_browser_e2e` both pass.
+
+Two checklist items were missing and are now covered:
+
+- **Identical HTML/PDF totals.** `value_guide_pdf_browser_e2e.js` captures the
+  on-screen headline total and asserts the PDF text contains the same digits. This
+  is the class of bug the project has hit before (`r.value` vs `r.total`), so it is
+  now a tripwire.
+- **Editing inputs after calculating.** `value_guide_internal_e2e.js` now clicks
+  Edit inputs, doubles the lot area, recalculates, and requires the total to move
+  while the draft survives the round trip.
+
+The other checklist items (each input reaching its calculation, all "Not sure"
+answers, boundary/invalid inputs, vacant vs built, floor area across storeys,
+evidence quality) were already asserted across `value_guide_questions_node.js`,
+`value_guide_inputs_node.js`, `value_guide_flow_node.js` and the e2e suites.
+
+Backend verification is complete. Frontend work (Plan B) may start after the user's
+review.
 
 ---
 

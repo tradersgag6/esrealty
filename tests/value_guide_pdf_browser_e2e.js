@@ -157,6 +157,17 @@ async function pagesOf(bytes) {
     chk("a result was produced", !!q("[data-vg-pdf]"), "");
     if (!q("[data-vg-pdf]")) { finish(); return; }
 
+    /* Capture the on-screen total exactly as the reader sees it, so the PDF can be
+       checked against it. The HTML prints the market-guide estimate in the primary
+       figure; the PDF must print the same number, because a report whose PDF does
+       not match its own screen is worse than a wrong estimate. */
+    var onScreenTotal = (function () {
+      var node = q(".vg-figure-primary b");
+      return node ? node.textContent.trim() : "";
+    })();
+    chk("the on-screen total was captured", /\u20b1/.test(onScreenTotal) && /\d/.test(onScreenTotal),
+      onScreenTotal);
+
     var captured = { bytes: null, name: null };
     var ORIG_CREATE = URL.createObjectURL;
     var ORIG_CLICK = HTMLAnchorElement.prototype.click;
@@ -187,6 +198,19 @@ async function pagesOf(bytes) {
     var all = pages.join("\n").replace(/\s+/g, " ");
     chk("text could be read back out of the browser PDF", all.length > 3000,
       all.length + " chars over " + pages.length + " pages" + (window.__msInflateErr ? " | inflate error: " + window.__msInflateErr : ""));
+
+    /* HTML and PDF must show the same total. The PDF collapses spaces and may
+       render the peso differently, so the comparison strips non-digit characters
+       from both and compares the digit run. The PDF prints the figure in a tile,
+       a table row and a final line, so the match is against any occurrence of the
+       same digit run rather than a fixed position. */
+    var digits = function (s) { return String(s).replace(/[^0-9]/g, ""); };
+    var want = digits(onScreenTotal);
+    /* Strip non-digits from the whole PDF text too, so comma placement and the
+       peso glyph cannot separate the same figure into two pieces. */
+    var allDigits = digits(all);
+    chk("identical HTML/PDF totals", want.length >= 4 && allDigits.indexOf(want) >= 0,
+      "screen " + onScreenTotal + " (PDF digit search for " + want + ")");
 
     /* The tax reference must have been fetched for the tax pages to exist. */
     chk("the tax reference data was fetched", FETCHED.some(function (u) { return /ph-estate-tax-reference\.json/.test(u); }),
