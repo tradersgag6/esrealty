@@ -8,7 +8,7 @@
     "municipalities": ["BAUAN", "BATANGAS CITY", "LAUREL", "LIPA CITY", "NASUGBU", "SAN PASCUAL", "SAN JUAN", "TUY", "ALITAGTAG"],
     "directBauanRecords": 2,
     "directBauanVacantLotRecords": 1,
-    "note": "Resolved on 2026-10-08: Catalina Lake Residences (Manghinao I, Bauan) is now a confirmed vacant-lot record with its own street BIR rate - the first and only Bauan land-only price point in the dataset. A full listd.ph search still returns zero additional Bauan vacant-lot listings. Four developer projects near Bauan were also added (Catalina, Summit Point, Paseo de Lipa, Bayanihan) with both calculators' outputs recorded; the storefront 2.5x model lands within +12.5% to -62.6% of their asking prices while the guide's 1.174x is 48%-83% below."
+    "note": "Resolved on 2026-10-08: Catalina Lake Residences (Manghinao I, Bauan) is now a confirmed vacant-lot record with its own street BIR rate - the first and only Bauan land-only price point in the dataset. A full listd.ph search still returns zero additional Bauan vacant-lot listings. Four developer projects near Bauan were also added (Catalina, Summit Point, Paseo de Lipa, Bayanihan) with both calculators' outputs recorded under the 2026.10.5 rate-ramped model; the storefront lands within +3.9% to -64.0% of their asking prices while the guide's 1.174x is 48%-83% below."
   },
   "_referenceReportNote": "The purchased LandValuePH report LVPH-D-9531904C lives as a test fixture at tests/fixtures/value-guide-reference-bauan.json, not here. This file holds market evidence; the report is a comparison benchmark with its own provenance and contradictions, so it was moved out to keep one canonical copy. tests/value_guide_reference_benchmark_node.js reads it.",
   "_bandResearch": {
@@ -322,11 +322,12 @@
       },
       "calculatorComparison": {
         "guide1_174": 836827,
-        "storefront2_5": 1800000,
+        "storefront2_5": 1662240,
         "guideGapPct": "-47.7",
-        "storefrontGapPct": "+12.5",
+        "storefrontGapPct": "+3.9",
         "closer": "storefront",
-        "measuredOn": "2026-10-08"
+        "measuredOn": "2026-10-08",
+        "modelVersion": "2026.10.5 rate-ramped band (2.3087x at 6000/sqm)"
       },
       "notes": "The only Bauan land-only price point in the dataset, now with its own street rate resolved (Manghinao I / CATALINA LAKE RESIDENCES, RR 6000). Asking 13,333/sqm = 2.22x BIR. The storefront 2.5x model prices it at 1.8M (+12.5%, inside the planning range); the reference 1.174x model prices it at 837K (-47.7%). Asking price, not a sale."
     },
@@ -348,11 +349,12 @@
       "numericalAllowed": false,
       "calculatorComparison": {
         "guide1_174": 1627164,
-        "storefront2_5": 3500000,
+        "storefront2_5": 3365950,
         "guideGapPct": "-82.6",
-        "storefrontGapPct": "-62.6",
+        "storefrontGapPct": "-64.0",
         "closer": "storefront (both low)",
-        "measuredOn": "2026-10-08"
+        "measuredOn": "2026-10-08",
+        "modelVersion": "2026.10.5 rate-ramped band (2.4043x at 4000/sqm)"
       },
       "notes": "26,714/sqm against a Plaridel BIR rate of 4,000/sqm = 6.7x. Club membership and golf-course premium make it a country-club outlier, so both models underprice it - the point of the record is direction, not closeness."
     },
@@ -376,11 +378,12 @@
       "numericalAllowed": false,
       "calculatorComparison": {
         "guide1_174": 2047356,
-        "storefront2_5": 3609375,
+        "storefront2_5": 3494575,
         "guideGapPct": "-66.4",
-        "storefrontGapPct": "-40.8",
+        "storefrontGapPct": "-42.7",
         "closer": "storefront",
-        "measuredOn": "2026-10-08"
+        "measuredOn": "2026-10-08",
+        "modelVersion": "2026.10.5 rate-ramped band (2.3087x at 6000/sqm)"
       },
       "notes": "New developer H&L package, confirmed as a two-storey home on the official site (100 sqm lot / 90 sqm floor). PRICE UNVERIFIED as of 2026-10-08: the official site publishes no price, and both prior sources (CBDI article, now 404; Businesses10, now Cloudflare-blocked) are unavailable. The figure is the top of a 5.75M-6.48M range recorded earlier from the CBDI page; keep as context, not a firm asking price. Property type itself (house_and_lot) is confirmed correct."
     },
@@ -409,7 +412,8 @@
         "guideGapPct": "-51.5",
         "storefrontGapPct": "-20.9",
         "closer": "storefront",
-        "measuredOn": "2026-10-08"
+        "measuredOn": "2026-10-08",
+        "modelVersion": "2026.10.5 rate-ramped band (2.5x at 1500/sqm, unchanged)"
       },
       "notes": "Affordable mass-housing townhouse. Storefront within 21%, guide half the asking price."
     }

@@ -163,20 +163,26 @@ at `:596`). Public and internal PDFs share this renderer.
 
 ```
 multipleLabel SEA ESTATES market band factor
-multiple      2.5 (already formatted; the renderer must not re-round)
-text          2.5× the BIR reference for land
+multiple      2.04565 (already formatted; the renderer must not re-round)
+text          2.04565× the BIR reference for land
 assumption    A SEA ESTATES planning assumption. It is not derived from
               completed sales and has not been reviewed by an independent
               qualified appraiser.
-limitation    The same factor is applied across all Batangas municipalities.
-              It is not adjusted for local demand and is likely too high for
-              rural locations.
+limitation    The factor descends from 2.5x for low BIR rates toward 1.4x at
+              25,000/sqm and above, because high-BIR streets (beachfront,
+              prime town centres) already carry their location premium in the
+              BIR rate itself. It is a planning assumption, not a
+              market-comparable calibration.
 ```
 
-State the limitation rather than hide it: a flat factor is wrong by the
-competitor's own published reasoning, which says the gap is wider in prime
-areas and narrower in rural ones. Publishing that costs less than being found
-out by a broker who knows the area.
+The multiple is the 2026.10.5 rate-ramped value for the fixture (Binay St,
+11,500/sqm). It is read off the result at render time; these strings are the
+verbatim copy, not a hardcoded number.
+
+State the limitation rather than hide it: the ramp is directional, not calibrated.
+It descends where the BIR rate already prices the location (beachfront, prime
+streets) and holds the flat value where it does not. Publishing that costs less
+than being found out by a broker who knows the area.
 
 ### 5. Accuracy-language guard
 
@@ -246,10 +252,11 @@ required here.
 - **A stated multiple invites "why 2.5?"** The honest answer is that it targets
   a price band, which is a commercial decision, not a valuation. That belongs
   in a sales conversation, not in public copy - hence "planning assumption" and
-  nothing further.
-- **"Likely too high for rural locations" may cost rural leads.** It is
-  accurate and deliberately included; accept it consciously or drop that line
-  only. Do not soften it into vagueness.
+  nothing further. The 2026.10.5 ramp answers it more precisely: the factor
+  descends where the BIR rate already prices the location.
+- **The ramp is directional, not calibrated.** Six land records cannot fit a
+  curve; the limitation says so, and the numbers sharpen as records accumulate.
+  Do not present the ramp as a market-comparable calibration.
 - **Competitors publish vaguer numbers with no provenance** and may outspend
   on presentation. The ground worth competing on is traceability.
 - **Copy drift between HTML and PDF** is the main implementation hazard, and

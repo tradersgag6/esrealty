@@ -34,7 +34,7 @@ function check(cond, msg) { if (!cond) errors.push(msg); }
 
 const CONFIG = {
   version: 2,
-  calculationVersion: "2026.10.4",
+  calculationVersion: "2026.10.5",
   riskPolicy: "Evidence-led: unverified occupancy/title/site flags are conditions, not automatic price discounts",
   scenarioRange: { lowFactor: 0.85, highFactor: 1.3, meaning: "Planning scenarios, not statistical accuracy" },
   dataVersion: "bir-2022-rdo58-59",
@@ -96,6 +96,14 @@ const CONFIG = {
   },
   marketBand: {
     regionalAdj: 1.0,
+    rateRamp: {
+      appliesTo: "residential",
+      lowRate: 2000,
+      highRate: 25000,
+      floor: 1.4,
+      meaning: "The residential band mid descends linearly from its full value at BIR <= 2000/sqm to the floor at BIR >= 25000/sqm. High-BIR streets (beachfront, prime town centres) already carry the location premium in the BIR rate itself, so applying a flat 2.5x on top double-counts it. LandValuePH's own published code uses a 1.5x-2.5x rural band - the top matches our flat value, and the descent lands inside their range. Evidence: Catalina 6000 -> 2.22x observed, Playa Laiya 25000 -> 0.84x-1.70x observed.",
+      source: "Gathered market evidence 2026-10-08 + reverse-engineered LandValuePH rural residential band (1.5x-2.5x). See docs/reference/landvalueph-reverse-engineering.md"
+    },
     bands: {
       residential: { min: 1.8, max: 3.2, mid: 2.5 },
       commercial: { min: 1.8, max: 3.2, mid: 2.5 },

@@ -46,6 +46,27 @@
     return (b && b.mid != null) ? b.mid : 2.5;
   }
 
+  /* Rate-ramped residential band (marketBand.rateRamp, data/zonal-config.json).
+     The flat mid is right for low-BIR land (2.5x at <= 2000/sqm matches the
+     gathered evidence and the top of LandValuePH's own rural band). As the BIR
+     rate rises, the multiplier descends linearly to a floor at highRate: a street
+     at 25,000/sqm is already a beachfront/prime rate - the premium is in the BIR
+     figure itself, and multiplying it by 2.5 again would charge for the location
+     twice. Catalina (6,000 -> 2.22x observed) and Playa Laiya (25,000 -> 0.84x-
+     1.70x observed) bracket the descent. Commercial, agricultural and industrial
+     keep their flat bands: the evidence is all residential. */
+  function rampBandMid(config, use, base) {
+    var mid = bandMid(config, use);
+    if (use !== "residential") return mid;
+    var ramp = config && config.marketBand && config.marketBand.rateRamp;
+    if (!ramp) return mid;
+    var lo = Number(ramp.lowRate || 2000), hi = Number(ramp.highRate || 25000), floor = Number(ramp.floor || 1.4);
+    if (!(lo > 0) || !(hi > lo) || !(floor < mid)) return mid;
+    if (!(base > lo)) return mid;
+    if (base >= hi) return floor;
+    return mid - ((base - lo) / (hi - lo)) * (mid - floor);
+  }
+
   function proxyFactor(config, use) {
     var f = config && config.proxyFactors && config.proxyFactors[use];
     return (f && f.factor != null) ? f.factor : 1;
@@ -168,9 +189,9 @@
     var use = useOfClassification(cfg, cls);
     var cornerPct = opts.corner ? Number(cfg.cornerLotPct || 0) : 0;
     var proxy = proxyFactor(cfg, use);
-    var band = bandMid(cfg, use);
-    var adj = regionalAdj(cfg);
     var base = hit.value;
+    var band = rampBandMid(cfg, use, base);
+    var adj = regionalAdj(cfg);
     var referenceVerification = referenceTools.lookup(config.governmentReferenceRegister, muniRow.rdo, muniRow.name, opts.valuationDate || new Date().toISOString().slice(0, 10));
     var birZonalRatePerSqm = Math.round(base);
     var birZonalValue = Math.round(birZonalRatePerSqm * area);

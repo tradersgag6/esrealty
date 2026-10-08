@@ -79,7 +79,7 @@
      all until a reviewer signs off - and is recorded in the spec. */
   var MULTIPLE_LABEL = "SEA ESTATES market band factor";
   var MULTIPLE_ASSUMPTION = "A SEA ESTATES planning assumption. It is not derived from completed sales and has not been reviewed by an independent qualified appraiser.";
-  var MULTIPLE_LIMITATION = "The same factor is applied across all Batangas municipalities. It is not adjusted for local demand and is likely too high for rural locations.";
+  var MULTIPLE_LIMITATION = "The factor descends from 2.5x for low BIR rates toward 1.4x at 25,000/sqm and above, because high-BIR streets (beachfront, prime town centres) already carry their location premium in the BIR rate itself. It is a planning assumption, not a market-comparable calibration.";
 
   /* Presentation only. The value itself is applied unrounded by
      js/estimator.js. This rounds for display to 5 decimals and then String()

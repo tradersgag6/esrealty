@@ -135,16 +135,33 @@ checkAsync("the two surfaces agree on BIR, and differ only on land and the rate 
   return Promise.all([
     EST.estimate(modelOpts(FORM)),
     FLOW.compute(modelOpts(FORM), EST)
-  ]).then(([s, g]) => {
+  ]).then(async ([s, g]) => {
     /* They read the same BIR rate. If this ever fails the divergence below has a
        fourth cause and the decomposition is no longer complete. */
     assert.strictEqual(s.birZonalRatePerSqm, g.birZonalRatePerSqm, "BIR rate disagreement");
     assert.strictEqual(s.birZonalRatePerSqm, REPORT.birRate, "BIR rate differs from the report");
 
-    /* Land: flat band vs the report-implied indicator. */
-    assert.strictEqual(s.appliedMultiple, 2.5, "storefront residential band moved");
-    assert.strictEqual(s.landValue, REPORT.birBase * 2.5, "storefront land is not BIR x 2.5");
-    assert.ok(g.landValue < s.landValue, "the guide's land is lower than the flat band");
+    /* Land: the storefront now applies the rate-ramped residential band
+       (marketBand.rateRamp) instead of a flat 2.5. Binay St is 11,500/sqm, so the
+       multiplier descends toward the 1.4 floor: mid - t*(mid-floor) with
+       t = (11500-2000)/(25000-2000) = 0.4130 -> 2.0457. The ramp is what makes a
+       beachfront street (25,000/sqm, already premium in the BIR rate) not get
+       charged the location premium twice. */
+    const rampMid = (mid, rate, lo, hi, floor) =>
+      rate <= lo ? mid : rate >= hi ? floor : mid - ((rate - lo) / (hi - lo)) * (mid - floor);
+    const expectedMult = rampMid(2.5, 11500, 2000, 25000, 1.4);
+    assert.ok(Math.abs(s.appliedMultiple - expectedMult) < 1e-6,
+      "storefront residential multiplier is not the ramped value (" + s.appliedMultiple + " vs " + expectedMult + ")");
+    assert.strictEqual(s.landValue, Math.round(REPORT.birBase * s.appliedMultiple),
+      "storefront land is not BIR x the ramped multiplier");
+    assert.ok(g.landValue < s.landValue, "the guide's land is lower than the ramped band");
+    /* A high-BIR street must sit at the ramp floor, not the flat 2.5. */
+    const beach = await EST.estimate(modelOpts(Object.assign({}, FORM, {
+      municipality: "SAN JUAN", barangay: "LAIYA APLAYA",
+      streetKey: "playa laiya phase 3f 4 near beachfront"
+    })));
+    assert.ok(Math.abs(beach.appliedMultiple - 1.4) < 1e-6,
+      "a 25,000/sqm beachfront street is not at the ramp floor (" + beach.appliedMultiple + ")");
 
     /* Building: rate table, then the storeys multiplier on top. */
     assert.strictEqual(g.buildCostPerSqm, 16000, "guide CHB rate moved");

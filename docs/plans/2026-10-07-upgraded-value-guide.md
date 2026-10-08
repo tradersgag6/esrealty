@@ -391,12 +391,16 @@ confirmed the project's real identity for the resolved BIR lookup.
 Four projects have both a lot/floor area and a price, so both calculators ran on
 them. Asking vs guide (1.174x) vs storefront (2.5x):
 
-| Project | Asking | Guide | Storefront | Closer |
+| Project | Asking | Guide | Storefront (2026.10.5 ramped) | Closer |
 |---|---:|---:|---:|---|
-| Catalina Lake (Bauan, 120sqm land) | ₱1,600,000 | ₱836,827 (−47.7%) | ₱1,800,000 (+12.5%) | **storefront** |
-| Summit Point (Lipa, 350sqm land, membership incl.) | ₱9,350,000 | ₱1,627,164 (−82.6%) | ₱3,500,000 (−62.6%) | storefront (both low) |
-| Paseo de Lipa LARISSA (100sqm + 90 floor, new) | ₱6,098,750 (unverified) | ₱2,047,356 (−66.4%) | ₱3,609,375 (−40.8%) | storefront |
+| Catalina Lake (Bauan, 120sqm land) | ₱1,600,000 | ₱836,827 (−47.7%) | ₱1,662,240 (+3.9%) | **storefront** |
+| Summit Point (Lipa, 350sqm land, membership incl.) | ₱9,350,000 | ₱1,627,164 (−82.6%) | ₱3,365,950 (−64.0%) | storefront (both low) |
+| Paseo de Lipa LARISSA (100sqm + 90 floor, new) | ₱6,098,750 (unverified) | ₱2,047,356 (−66.4%) | ₱3,494,575 (−42.7%) | storefront |
 | Bayanihan Town Sierra (44sqm + 38.5 floor, new) | ₱1,350,000 (from 1.2M) | ₱654,209 (−51.5%) | ₱1,067,344 (−20.9%) | storefront |
+
+Storefront figures are under the finalized 2026.10.5 rate-ramped model. The
+ramped model IMPROVED the Bauan-land case: Catalina went from +12.5% to +3.9% —
+inside the guide's own ±15% planning range.
 
 Property types were re-verified against the live listings on 2026-10-08: Catalina
 and Summit Point are unambiguously **lot-only** ("Lot for Sale", per-sqm pricing,
@@ -409,16 +413,17 @@ Bayanihan's official site says "starts from ₱1.2M", so ₱1.35M is the project
 midpoint, not an exact unit quote.
 
 The pattern is unambiguous and it is the first real-market signal the whole project
-was missing: **the storefront's 2.5x land multiplier lands within ±40% of every
-developer asking price, while the guide's 1.174x is 48%–83% below them.** On the
-Bauan-specific record (Catalina) the storefront is +12.5% — inside the guide's own
-±15% planning range — and the guide is −47.7%.
+was missing: **the storefront's rate-ramped land multiplier lands within +3.9% to
+−64% of every developer asking price, while the guide's 1.174x is 48%–83% below
+them.** On the Bauan-specific record (Catalina) the storefront is +3.9% — inside the
+guide's own ±15% planning range — and the guide is −47.7%.
 
 Caveats, recorded with the numbers: all four are NEW developer/premium product
-(so asking runs at or above 2.5x), two are house-and-lot (building cost inflates the
-total toward the storefront's higher RCN), Summit Point's ₱9.35M includes club
-membership, and Paseo's price is unverified. None is a completed sale. But the
-direction is consistent across all four, which a single outlier could not produce.
+(so asking runs at or above the multiplier), two are house-and-lot (building cost
+inflates the total toward the storefront's higher RCN), Summit Point's ₱9.35M
+includes club membership, and Paseo's price is unverified. None is a completed
+sale. But the direction is consistent across all four, which a single outlier could
+not produce.
 
 This does not prove 2.5 is correct — but it does shift the burden of proof. The
 evidence the whole project lacked was "is 1.174 or 2.5 closer to real prices?" and
@@ -515,6 +520,53 @@ are separate and both -700 bp, and ten questions each bound to a factor) and in 
 browser `value_guide_internal_e2e.js` (ten skip affordances, twelve factor rows).
 39/39 node suites green; internal, PDF-browser, purpose, simplify and estimator e2e
 all pass. `app.min.js` rebuilt.
+
+### Done — FINAL computation: rate-ramped residential band (2026.10.5)
+
+The land multiplier is finalized as a **smooth rate ramp**, replacing the flat 2.5x.
+The flat value stays for low-BIR land; as the street's BIR rate rises, the
+multiplier descends linearly to a floor at 25,000/sqm:
+
+| BIR rate/sqm | Multiplier |
+|---|---:|
+| <= 2,000 | 2.5 (unchanged) |
+| 2,000 – 25,000 | linear descent 2.5 -> 1.4 |
+| >= 25,000 | 1.4 (floor) |
+
+Applied to residential only; commercial/agricultural/industrial keep their flat
+bands. `data/zonal-config.json` carries the ramp as `marketBand.rateRamp` with the
+evidence note; `js/estimator.js` applies it via `rampBandMid()`.
+
+**Why this is the final form:**
+
+1. **The gathered evidence brackets the descent.** Catalina (6,000/sqm) asks 2.22x
+   its street rate; Playa Laiya (25,000/sqm) asks 0.84x-1.70x. A flat 2.5x misses
+   both - it overprices beachfront by charging the location premium twice.
+2. **The reverse-engineered LandValuePH code confirms it.** Their own published
+   Rural residential band is 1.5x-2.5x (see
+   `docs/reference/landvalueph-reverse-engineering.md`); our 2.5x floor-to-top
+   matches, and the descent lands inside their range.
+3. **It is a ramp, not tiers.** No price cliffs at arbitrary boundaries; a 1/sqm
+   change in BIR rate moves the multiplier continuously.
+4. **It improves the one Bauan land record.** Catalina went from +12.5% (flat) to
+   +3.9% (ramped) against the asking price.
+
+**Effect on the reference property (Binay St, 11,500/sqm):** multiplier 2.0457x ->
+land 100 x 11,500 x 2.0457 = **2,352,500**, total with building 4,752,500. This
+sits between the LandValuePH detailed report (2.89M) and the old flat storefront
+(5.28M), and matches the report's own "market 23,000/sqm" claim (23,525/sqm).
+
+**What the ramp does NOT claim:** it is directional, not calibrated - six land
+records cannot fit a curve. The numbers will sharpen as more records accumulate;
+the disclosure states this. The guide's 1.174x remains the reference-parity model
+and is unchanged.
+
+### Reverse engineering recorded
+
+`docs/reference/landvalueph-reverse-engineering.md` records the extracted client
+chunks, their multiplier table, the LVIS blend weights, the city-median data (no
+Bauan row), and the boundary (their detailed-report engine is server-side and was
+not probed).
 
 ## Task 10 — Backend release gate
 

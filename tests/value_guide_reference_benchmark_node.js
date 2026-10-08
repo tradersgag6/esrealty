@@ -135,10 +135,14 @@ checkAsync("the land multiplier choice, and nothing else, explains the residual 
     FLOW.compute(guideOpts(f), EST)
   ]).then(([storefront, guide]) => {
     /* The two differences between the surfaces, asserted exactly. Land: the
-       storefront's is BIR base x 2.5; the guide's is the same base x the report's
-       implied multiplier, then factor-adjusted (hence the few-peso delta). */
-    assert.strictEqual(Math.round(FX.reported.birBase * 2.5), storefront.landValue,
-      "the storefront land is not simply BIR base x 2.5");
+       storefront's is BIR base x the RAMPED residential band (Binay St is
+       11,500/sqm, so 2.5 descends toward the 1.4 floor: 2.0457); the guide's is
+       the same base x the report's implied multiplier, then factor-adjusted
+       (hence the few-peso delta). The ramp is the 2026.10.5 storefront model. */
+    const rampMid = (mid, rate) => rate <= 2000 ? mid : rate >= 25000 ? 1.4 : mid - ((rate - 2000) / 23000) * (mid - 1.4);
+    const expected = Math.round(FX.reported.birBase * rampMid(2.5, FX.reported.birZonalRatePerSqm));
+    assert.strictEqual(expected, storefront.landValue,
+      "the storefront land is not BIR base x the ramped band (" + expected + " vs " + storefront.landValue + ")");
     assert.ok(Math.abs(guide.landValue - FX.reported.landValue) < FX.reported.landValue * 0.02,
       "the guide's land sits near the report's, not at the storefront's");
 
