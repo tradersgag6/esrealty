@@ -365,9 +365,12 @@
       "lotArea": 100,
       "floorArea": 90,
       "askingPrice": 6098750,
-      "priceBasis": "developer-published model price",
+      "askingPriceRange": [5753875, 6476875],
+      "priceBasis": "developer model price range; top of range used for the comparison",
+      "priceVerified": false,
       "sourceTier": "developer-price-list",
       "sourceUrl": "https://www.paseodelipa.com.ph/madeira/",
+      "sourceUrlStatus": "live - confirms 100 sqm lot / 90 sqm floor but publishes NO price",
       "observedOn": "2026-10-08",
       "priceAsOf": "2026-03",
       "numericalAllowed": false,
@@ -379,7 +382,7 @@
         "closer": "storefront",
         "measuredOn": "2026-10-08"
       },
-      "notes": "New developer H&L package. Building cost inflates the total toward the storefront's higher RCN. Both models underprice a new township home; storefront far closer."
+      "notes": "New developer H&L package, confirmed as a two-storey home on the official site (100 sqm lot / 90 sqm floor). PRICE UNVERIFIED as of 2026-10-08: the official site publishes no price, and both prior sources (CBDI article, now 404; Businesses10, now Cloudflare-blocked) are unavailable. The figure is the top of a 5.75M-6.48M range recorded earlier from the CBDI page; keep as context, not a firm asking price. Property type itself (house_and_lot) is confirmed correct."
     },
     {
       "id": "bayanihan-sierra-bench",
@@ -391,9 +394,12 @@
       "lotArea": 44,
       "floorArea": 38.5,
       "askingPrice": 1350000,
-      "priceBasis": "broker model price, mass-housing",
+      "askingPriceFrom": 1200000,
+      "priceBasis": "official site says 'starts from 1.2M'; 1.35M is the project midpoint, not an exact unit quote",
+      "priceVerified": "starts-from-only",
       "sourceTier": "broker-model-price",
       "sourceUrl": "https://bayanihantownbatangas.com/house-models/",
+      "sourceUrlStatus": "live - confirms 2-storey townhouse, 44 sqm lot / 38.5 sqm floor, price starts from 1.2M",
       "observedOn": "2026-10-08",
       "priceAsOf": null,
       "numericalAllowed": false,

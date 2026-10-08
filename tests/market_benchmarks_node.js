@@ -225,6 +225,40 @@ check("the calculator comparison is recorded on the developer-project records", 
     "the Bauan land record's closer model is the storefront (2.5x), not the guide (1.174x)");
 });
 
+check("the four project property types are verified against the live listings", () => {
+  /* Re-verified on 2026-10-08. The two lot-only records carry per-sqm pricing and
+     a "lot" listing title with no building; the two house-and-lot records are
+     two-storey homes on their official sites. A listing whose asking price bundles
+     a house must never be treated as land, and vice versa - that is the failure
+     this whole dataset exists to prevent. */
+  const cat = BM.records.filter(x => x.id === "catalina-fs131-bench")[0];
+  const summit = BM.records.filter(x => x.id === "summit-point-plaridel")[0];
+  const paseo = BM.records.filter(x => x.id === "paseo-larissa-bench")[0];
+  const bayanihan = BM.records.filter(x => x.id === "bayanihan-sierra-bench")[0];
+  assert.strictEqual(cat.propertyType, "vacant_lot", "Catalina is a land listing");
+  assert.strictEqual(summit.propertyType, "vacant_lot", "Summit Point is a land listing");
+  assert.strictEqual(paseo.propertyType, "house_lot", "Paseo LARISSA is a house and lot");
+  assert.strictEqual(bayanihan.propertyType, "house_lot", "Bayanihan Sierra is a house and lot");
+  /* Land-only records must have zero floor area; house-and-lot must have positive
+     floor area and a building-comparable area basis. */
+  assert.strictEqual(cat.floorArea, 0, "a land listing has no floor area");
+  assert.strictEqual(summit.floorArea, 0, "a land listing has no floor area");
+  assert.ok(paseo.floorArea > 0, "a house and lot carries a floor area");
+  assert.ok(bayanihan.floorArea > 0, "a house and lot carries a floor area");
+});
+
+check("price caveats stay recorded on the two house-and-lot projects", () => {
+  /* Paseo's price could not be re-verified on 2026-10-08 (official site publishes
+     none; both prior corroborating sources are blocked). Bayanihan's official site
+     says only "starts from 1.2M". These caveats must survive, or a later reader
+     mistakes an unverified figure for a firm asking price. */
+  const paseo = BM.records.filter(x => x.id === "paseo-larissa-bench")[0];
+  const bayanihan = BM.records.filter(x => x.id === "bayanihan-sierra-bench")[0];
+  assert.strictEqual(paseo.priceVerified, false, "Paseo's price is flagged unverified");
+  assert.ok((bayanihan.priceVerified || "").indexOf("starts-from") >= 0,
+    "Bayanihan's price is flagged as starts-from, not an exact quote");
+});
+
 check("the San Juan developer price list is the strongest record and stays non-numerical", () => {
   /* Eight exact developer-priced units in Laiya Ibabao. This is the record that
      could actually inform a beachfront band, so it must be kept honest: exact

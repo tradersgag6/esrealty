@@ -395,8 +395,18 @@ them. Asking vs guide (1.174x) vs storefront (2.5x):
 |---|---:|---:|---:|---|
 | Catalina Lake (Bauan, 120sqm land) | ₱1,600,000 | ₱836,827 (−47.7%) | ₱1,800,000 (+12.5%) | **storefront** |
 | Summit Point (Lipa, 350sqm land, membership incl.) | ₱9,350,000 | ₱1,627,164 (−82.6%) | ₱3,500,000 (−62.6%) | storefront (both low) |
-| Paseo de Lipa LARISSA (100sqm + 90 floor, new) | ₱6,098,750 | ₱2,047,356 (−66.4%) | ₱3,609,375 (−40.8%) | storefront |
-| Bayanihan Town Sierra (44sqm + 38.5 floor, new) | ₱1,350,000 | ₱654,209 (−51.5%) | ₱1,067,344 (−20.9%) | storefront |
+| Paseo de Lipa LARISSA (100sqm + 90 floor, new) | ₱6,098,750 (unverified) | ₱2,047,356 (−66.4%) | ₱3,609,375 (−40.8%) | storefront |
+| Bayanihan Town Sierra (44sqm + 38.5 floor, new) | ₱1,350,000 (from 1.2M) | ₱654,209 (−51.5%) | ₱1,067,344 (−20.9%) | storefront |
+
+Property types were re-verified against the live listings on 2026-10-08: Catalina
+and Summit Point are unambiguously **lot-only** ("Lot for Sale", per-sqm pricing,
+no building); Paseo LARISSA and Bayanihan Sierra are unambiguously **house-and-lot**
+(two-storey homes on their official sites). Two price caveats were added to the
+records: Paseo's official site publishes no price and both prior corroborating
+sources are now unavailable (CBDI 404, Businesses10 Cloudflare-blocked), so
+₱6,098,750 is the top of an earlier-recorded range and is flagged unverified;
+Bayanihan's official site says "starts from ₱1.2M", so ₱1.35M is the project
+midpoint, not an exact unit quote.
 
 The pattern is unambiguous and it is the first real-market signal the whole project
 was missing: **the storefront's 2.5x land multiplier lands within ±40% of every
@@ -406,9 +416,9 @@ Bauan-specific record (Catalina) the storefront is +12.5% — inside the guide's
 
 Caveats, recorded with the numbers: all four are NEW developer/premium product
 (so asking runs at or above 2.5x), two are house-and-lot (building cost inflates the
-total toward the storefront's higher RCN), and Summit Point's ₱9.35M includes club
-membership. None is a completed sale. But the direction is consistent across all
-four, which a single outlier could not produce.
+total toward the storefront's higher RCN), Summit Point's ₱9.35M includes club
+membership, and Paseo's price is unverified. None is a completed sale. But the
+direction is consistent across all four, which a single outlier could not produce.
 
 This does not prove 2.5 is correct — but it does shift the burden of proof. The
 evidence the whole project lacked was "is 1.174 or 2.5 closer to real prices?" and
