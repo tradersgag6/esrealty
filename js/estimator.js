@@ -628,8 +628,9 @@
     streetKey: "",
     streetLabel: "",
     allOther: false,
-    classification: "",
-    classificationUse: "",
+    /* Defaults to Residential (RR), matching the reference form's default. */
+    classification: "RR",
+    classificationUse: "residential",
     occupancy: "",
     titleStatus: "",
     inheritanceStatus: "",
@@ -761,6 +762,23 @@
     var selected = selectedClassificationUse();
     return '<option value="">— choose a category —</option>' + classificationUses().map(function (use) {
       return '<option value="' + use + '"' + (use === selected ? " selected" : "") + '>' + use.charAt(0).toUpperCase() + use.slice(1) + "</option>";
+    }).join("");
+  }
+
+  function simpleClassOptions() {
+    /* The reference offers exactly four options with Residential as the
+       default. The internal codes RR / CR / I / A50 map to those four; a saved
+       legacy draft with a narrower code still resolves at estimate time via the
+       use-of-classification mapping. */
+    var codes = [
+      { code: "RR", label: "Residential" },
+      { code: "CR", label: "Commercial" },
+      { code: "I", label: "Industrial" },
+      { code: "A50", label: "Agricultural" }
+    ];
+    var current = est.classification || "RR";
+    return codes.map(function (c) {
+      return '<option value="' + c.code + '"' + (c.code === current ? " selected" : "") + ">" + c.label + "</option>";
     }).join("");
   }
 
@@ -908,11 +926,15 @@
       }), "purpose") + "</label>";
 
     if (est.purpose === "Selling") {
-      out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">◷</i>Selling stage</span><span>Optional — helps us prepare the right advice.</span>' +
+      /* The reference's four selling-stage options, verbatim values shared with
+         the internal guide (js/app.js saleStage) so a saved answer keeps meaning
+         across surfaces. */
+      out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">◷</i>Where are you in the sale?</span><span>Optional — helps us prepare the right advice.</span>' +
         chipRow([
-          { label: "Just checking", value: "just-checking", active: est.stage === "just-checking" },
-          { label: "Preparing to list", value: "preparing", active: est.stage === "preparing" },
-          { label: "Ready to list now", value: "ready", active: est.stage === "ready" }
+          { label: "I'm just checking my property's value", value: "just_checking", active: est.stage === "just_checking" },
+          { label: "I'm getting ready to sell", value: "ready_to_sell", active: est.stage === "ready_to_sell" },
+          { label: "My property is already listed", value: "already_listed", active: est.stage === "already_listed" },
+          { label: "I already have a buyer", value: "have_a_buyer", active: est.stage === "have_a_buyer" }
         ], "stage") + "</label>";
     }
 
@@ -928,16 +950,15 @@
     out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌖</i>Barangay</span><span>Choose after selecting the municipality</span>' +
       '<select data-est-barangay>' + barangayOptions() + "</select></label>";
 
-    out += '<div class="sf-est-field sf-est-span2 sf-est-street-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌕</i>Street</span><span>Search for your street, or choose “Street not listed” below.</span>' +
+    out += '<div class="sf-est-field sf-est-span2 sf-est-street-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌕</i>Street <em>(optional)</em></span><span>Skip to use the barangay all-other-streets rate, or search below.</span>' +
       '<div class="sf-est-street-input-wrap"><input data-est-street-q type="search" placeholder="' + (est.allOther ? "Street not listed — choose another street" : "Type to search streets…") + '" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="sf-est-street-options" aria-expanded="false" aria-label="Search the BIR street list" value="' + esc(est.allOther ? "" : est.streetLabel) + '">' +
       (est.allOther ? '<span class="sf-est-street-selected"><i aria-hidden="true">✓</i>Using all-other-streets rate</span>' : '') + '</div>' +
       '<div id="sf-est-street-options" class="sf-est-street-list" data-est-street-list role="listbox" aria-label="BIR streets"></div></div>';
     out += '<button type="button" class="sf-est-street-fallback sf-est-span2" data-est-street-fallback' + (!est.barangay ? " disabled" : "") + '>My street is not listed — use the best available BIR reference</button>';
 
-    out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">▣</i>BIR classification</span><span>Choose a land-use category, then the exact BIR code</span>' +
-      '<select data-est-class-use aria-label="BIR classification category">' + classUseOptions() + "</select>" +
-      '<select data-est-class aria-label="Exact BIR classification code">' + classOptions() + "</select></label>";
-    out += '<details class="sf-est-help sf-est-span2"><summary>What does BIR classification mean?</summary><p>The BIR schedule groups land by use, such as residential, commercial or agricultural. Choose the category and code that match the property. If you are unsure, confirm the classification with the relevant Revenue District Office before relying on the guide.</p></details>';
+    out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">▣</i>Classification</span><span>Residential is the default — pick what fits the property</span>' +
+      '<select data-est-class aria-label="BIR classification">' + simpleClassOptions() + "</select></label>";
+    out += '<details class="sf-est-help sf-est-span2"><summary>What does BIR classification mean?</summary><p>The BIR schedule groups land by use: residential, commercial, agricultural or industrial. Choose the one that matches the property. If you are unsure, confirm the classification with the relevant Revenue District Office before relying on the guide.</p></details>';
 
     out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">▤</i>Lot area (sqm)</span><span>Total land area, in square metres</span>' +
       '<input data-est-area type="number" min="20" max="100000" step="1" inputmode="decimal" placeholder="e.g. 200" value="' + esc(est.area != null ? est.area : "") + '"></label>';
@@ -1705,8 +1726,10 @@ var saleContext = $q(card, "[data-est-sale-context]");
     $qa(card, "[data-est-edit]").forEach(function (button) { button.addEventListener("click", function () { est.screen = Number(button.getAttribute("data-est-edit")); renderLayout(); revealEstimatorScreen(); }); });
     var fallback = $q(card, "[data-est-street-fallback]");
     if (fallback) fallback.addEventListener("click", function () {
-      est.allOther = true; est.streetKey = ""; est.streetLabel = ""; est.classification = ""; est.classificationUse = "";
-      renderLayout(); var classification = getCard().querySelector("[data-est-class-use]"); if (classification) classification.focus();
+      /* The classification (default Residential) survives: it is a property
+         fact, not a location fact, so a street fallback must not clear it. */
+      est.allOther = true; est.streetKey = ""; est.streetLabel = "";
+      renderLayout(); var classification = getCard().querySelector("[data-est-class]"); if (classification) classification.focus();
     });
     var retryCalculation = $q(card, "[data-est-calc-retry]");
     if (retryCalculation) retryCalculation.addEventListener("click", runEstimate);
@@ -1739,8 +1762,6 @@ var saleContext = $q(card, "[data-est-sale-context]");
       est.streetKey = "";
       est.streetLabel = "";
       est.allOther = false;
-      est.classification = "";
-      est.classificationUse = "";
       est.result = null;
       var row = null;
       (DATA.index.municipalities || []).forEach(function (m) { if (m.name === v) row = m; });
@@ -1774,8 +1795,6 @@ var saleContext = $q(card, "[data-est-sale-context]");
       est.streetKey = "";
       est.streetLabel = "";
       est.allOther = false;
-      est.classification = "";
-      est.classificationUse = "";
       est.result = null;
       renderLayout();
     });
@@ -1786,7 +1805,7 @@ var saleContext = $q(card, "[data-est-sale-context]");
       var refreshList = function () {
         if ((est.streetKey && normKey(sq.value) !== normKey(est.streetLabel)) || (est.allOther && sq.value.trim())) {
           est.streetKey = ""; est.streetLabel = ""; est.allOther = false; est.result = null;
-          var codes = $q(card, "[data-est-class]"); if (codes) codes.innerHTML = classOptions();
+          var codes = $q(card, "[data-est-class]"); if (codes) codes.innerHTML = simpleClassOptions();
         }
         if (listEl) {
           listEl.innerHTML = streetListHtml(sq.value);
@@ -2023,10 +2042,13 @@ var saleContext = $q(card, "[data-est-sale-context]");
     });
   }
 
-  function missingScreen1Field() {
+function missingScreen1Field() {
     if (!est.municipality) return { field: "[data-est-muni]", msg: "Choose a municipality to continue." };
     if (!est.barangay) return { field: "[data-est-barangay]", msg: "Choose a barangay to continue." };
-    if (!est.streetKey && !est.allOther) return { field: "[data-est-street-q]", msg: "Pick a street from the list, or choose “Street not listed” to continue." };
+    /* Street is optional, matching the reference form which labels it
+       "(Optional)". A street-less parcel resolves to the barangay's
+       all-other-streets rate, so the guide stays honest without forcing a
+       non-technical user through a street search they cannot answer. */
     if (!est.classification) return { field: "[data-est-class]", msg: "Choose a BIR classification to continue." };
     if (!(est.area > 0)) return { field: "[data-est-area]", msg: "Enter the lot area in sqm to continue." };
     if (!isFinite(Number(est.area)) || est.area < 20 || est.area > 100000) return { field: "[data-est-area]", msg: "Enter a lot area between 20 and 100,000 sqm." };

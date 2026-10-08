@@ -34,7 +34,7 @@ const q = selector => document.querySelector(selector);
     responseMode = "saved"; form.querySelector('button[type="submit"]').click(); await wait(250);
     check("saved request never implies email delivery", /saved/.test(q("[data-est-lead-status]").textContent) && /no emailed delivery has been confirmed/.test(q("[data-est-lead-status]").textContent));
     check("email request distinct from professional consultation", posts[2].data.service_requested === "valuation-report" && posts[2].data.inquiry_type === "location-analysis");
-    check("posted report keeps central estimate, range and BIR separate", posts[2].data.report.estimate.marketGuideEstimate === 2875000 && posts[2].data.report.estimate.low === 2443750 && posts[2].data.report.estimate.birZonalValue === 1150000);
+    check("posted report keeps central estimate, range and BIR separate", posts[2].data.report.estimate.marketGuideEstimate === 2352500 && posts[2].data.report.estimate.low === 1999625 && posts[2].data.report.estimate.birZonalValue === 1150000);
     check("results stay visible after submission", !!q(".sf-est-result-value") && !q(".sf-est-price-lock"));
   } catch (e) { check("runner", false, e.message); }
   finally { window.fetch = oldFetch; window.ESREALTY_API_BASE = oldBase; api.contact = oldContact; }

@@ -81,7 +81,8 @@ function chooseOwnershipNotSure() {
     chk("mn-options-gte34", pt >= 34, "mn=" + pt);
     chk("legacy-map-removed", !document.getElementById("est-map") && !q('[data-est-step]'), "");
     chk("street-search-input", !!q('[data-est-street-q]'), "");
-    chk("classification-starts-empty", !!q('[data-est-class]') && q('[data-est-class]').value === "", "value=" + (q('[data-est-class]') && q('[data-est-class]').value));
+    chk("classification-starts-residential", !!q('[data-est-class]') && q('[data-est-class]').value === "RR",
+      "value=" + (q('[data-est-class]') && q('[data-est-class]').value) + " — Residential is the reference's default");
 
     q('[data-est-next]').click();
     await wait(60);
@@ -115,9 +116,8 @@ function chooseOwnershipNotSure() {
     q('[data-est-street-q]').dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     await wait(80);
     chk("street-keyboard-selects", !!estApi()._state().streetKey && !estApi()._state().allOther, "");
-    setValue('[data-est-class-use]', "commercial");
-    chk("class-options-from-street", Array.from(q('[data-est-class]').options).some(o => o.value === "CR"), "opts=" + q('[data-est-class]').options.length);
     setValue('[data-est-class]', "CR");
+    chk("class-select-offers-commercial", Array.from(q('[data-est-class]').options).some(o => o.value === "CR"), "opts=" + q('[data-est-class]').options.length);
     setInput('[data-est-area]', "200");
     const corner = q('[data-est-corner]');
     if (corner && !corner.checked) { corner.checked = true; corner.dispatchEvent(new Event("change", { bubbles: true })); }
@@ -230,16 +230,19 @@ chk("report-six-groups", qa('.sf-est-rsec').length === 6, "n=" + qa('.sf-est-rse
      chk("lead-confirmation-shown", !!q('.sf-est-lead-done') && /Request received/.test(q('.sf-est-lead-done').textContent) && !q('.sf-est-nextstep'), "");
 
     // --- depth 2: "Street not listed" (barangay all-other) ---
+    /* Agoncillo / Bangin has an all-other-streets RR rate of 1500, so with
+       the simple select's RR (Residential) the fallback resolves at depth 2. */
     estApi().debug.render(1);
     await wait(70);
-    q('[data-est-street-q]').focus();
-    chk("back-to-screen1", !!q('[data-est-screen="1"]'), "");
-    q('[data-est-screen="1"] [data-est-street-all]').click();
+    setValue('[data-est-muni]', "AGONCILLO");
+    await waitFor(() => qa('[data-est-barangay] option').some(o => o.value === "BANGIN"), 60, ESP);
+    setValue('[data-est-barangay]', "BANGIN");
+    await wait(150);
+    q('[data-est-screen="1"] [data-est-street-fallback]').click();
     await wait(90);
-    setValue('[data-est-class-use]', "agricultural");
     const cs2 = q('[data-est-class]');
-    chk("class-options-after-allother", Array.from(cs2.options).some(o => o.value === "A40"), "opts=" + Array.from(cs2.options).map(o => o.value).join(","));
-    setValue('[data-est-class]', "A40");
+    chk("class-select-offers-residential", Array.from(cs2.options).some(o => o.value === "RR"), "opts=" + Array.from(cs2.options).map(o => o.value).join(","));
+    setValue('[data-est-class]', "RR");
     setInput('[data-est-area]', "100");
     q('[data-est-next]').click();
     await waitFor(() => q('[data-est-screen="2"]'), 30, ESP);
@@ -250,7 +253,7 @@ chk("report-six-groups", qa('.sf-est-rsec').length === 6, "n=" + qa('.sf-est-rse
     const rD2 = estApi()._state().result;
     chk("depth2-available", rD2 && rD2.available, "");
     chk("depth2-level", rD2 && rD2.source.depth === 2 && rD2.source.level === "barangay-other", "lvl=" + (rD2 && rD2.source && rD2.source.level));
-    chk("depth2-other-value-2500", rD2 && rD2.reference && rD2.reference.value === 2500, "ref=" + (rD2 && rD2.reference && rD2.reference.value));
+    chk("depth2-other-value-1500", rD2 && rD2.reference && rD2.reference.value === 1500, "ref=" + (rD2 && rD2.reference && rD2.reference.value));
 
     // --- house & lot flow (screen 2 inputs) ---
     estApi().debug.render(1);

@@ -12,7 +12,7 @@ const q = selector => document.querySelector(selector), wait = ms => new Promise
     const selling = await result({});
     check("seller guidance and net proceeds", /Your selling decision/.test(q("[data-est-decision]").textContent) && /2,730,000/.test(q("[data-est-decision]").textContent));
     const buying = await result({ purpose: "Buying" });
-    check("buyer shares underlying valuation", buying.total === selling.total && q(".sf-est-result-value").textContent === "₱2,875,000");
+    check("buyer shares underlying valuation", buying.total === selling.total && q(".sf-est-result-value").textContent === "₱2,352,500");
     check("buyer acquisition budget is distinct", /Your buying decision/.test(q("[data-est-decision]").textContent) && /3,063,000/.test(q("[data-est-decision]").textContent));
     check("price comparison is not a fairness guarantee", /does not establish a fair transaction price/.test(q("[data-est-decision]").textContent));
     await result({ purpose: "Buying", saleContext: "developer", developerFees: 100000 });
@@ -34,9 +34,17 @@ const q = selector => document.querySelector(selector), wait = ms => new Promise
     check("buying input label appropriate", /Asking price or your offer/.test(q('[data-est-sale-price]').closest("label").textContent));
     const street = q("[data-est-street-q]"); street.value = "A DIFFERENT STREET"; street.dispatchEvent(new Event("input", { bubbles: true }));
     q("[data-est-next]").click();
-    check("editing selected street clears stale calculation key", api._state().streetKey === "" && /Pick a street/.test(q("[data-est-next-hint]").textContent));
+    /* Street is optional (reference parity): typing a different street clears
+       the stale calculation key, and proceeding without a match is allowed. */
+    check("editing selected street clears stale calculation key", api._state().streetKey === "");
+    /* The optional street let us advance; go back to screen 1 for the cost
+       validation checks, which live on the location screen. */
+    await wait(150);
+    const prev = q("[data-est-prev]");
+    if (prev) prev.click();
+    await wait(150);
+    check("back-on-screen1-after-optional-street", !!q('[data-est-screen="1"]'));
     q("[data-est-street-fallback]").click();
-    q("[data-est-class-use]").value = "residential"; q("[data-est-class-use]").dispatchEvent(new Event("change", { bubbles: true }));
     q("[data-est-class]").value = "RR"; q("[data-est-class]").dispatchEvent(new Event("change", { bubbles: true }));
     q('[data-est-sale-price]').value = "-1"; q('[data-est-sale-price]').dispatchEvent(new Event("input", { bubbles: true }));
     q("[data-est-next]").click(); check("negative price rejected rather than treated as blank", /non-negative selling price/.test(q("[data-est-next-hint]").textContent));
