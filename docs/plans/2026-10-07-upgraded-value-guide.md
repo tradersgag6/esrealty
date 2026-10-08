@@ -44,10 +44,16 @@ Files: `js/estimator.js`, `js/value_guide_flow.js`, `js/app.js`, existing tests.
 
 - [x] Record current commit, calculator versions and configuration.
 - [x] Run the existing Node suite.
-- [ ] Run the browser suite and record individual failures, separating existing
-      failures from regressions.
-- [ ] Check that async tests await their assertions and report meaningful counts.
-- [ ] Save the baseline results during execution.
+- [x] Run the browser suite and record individual failures, separating existing
+      failures from regressions. (Full run: only the pre-existing
+      `stores_freshness_e2e` failure, which also fails on a clean checkout; it
+      requires the market-scan worker on `:8932`.)
+- [x] Check that async tests await their assertions and report meaningful counts.
+      (The async-runner patterns in `value_guide_questions_node.js`,
+      `value_guide_contract_node.js` and `value_guide_input_parity_node.js` were
+      audited while writing the Task 2-3 suites; each awaits its promise list.)
+- [x] Save the baseline results during execution. (Baseline below + the Task 10
+      gate run: 39/39 node suites, estimator/internal/PDF-browser e2e green.)
 
 ### Baseline recorded
 
@@ -635,6 +641,28 @@ reference-equivalent valuation inputs. Both call the same calculation contract.
 
 Replace `ESREALTY_EST.cardSection()` in `js/storefront.js` after the backend gate.
 
+### Done — `js/value_guide_ui.js` with `mountGuide(container, { mode })`
+
+The shared entry point exists and both hosts route through it:
+
+- `publicMarkup()` returns the estimator card contract (`data-est-root` /
+  `data-est-card`) that the estimator's auto-mount binds to. `storefront.js`
+  home() now calls `ESREALTY_GUIDE_UI.publicMarkup()` instead of reaching into
+  `ESREALTY_EST.cardSection()` directly (which remains as the fallback path).
+- `agentMarkup()` delegates to `window.ESREALTY_APP_GUIDE.render`
+  (`renderValueGuide` in `js/app.js`, now exposed), falling back to the public
+  card when the app renderer is absent, and saying "unavailable" when the
+  estimator itself is missing.
+- `mountGuide(container, { mode })` renders into a live container and triggers
+  the estimator mount for post-DOMContentLoaded routing.
+
+Both modes read the same estimator reference data and calculation contract
+(pinned by `tests/value_guide_contract_node.js`). No calculation was duplicated.
+
+Verified: 40/40 node suites (incl. new `tests/value_guide_ui_node.js`),
+estimator / storefront-routing / internal e2e green, bundle rebuilt and in sync
+(hash `5fe8a98cb0af2bee`).
+
 ## Task 12 — Improve the public design
 
 - Three steps: Location -> Property Details -> Your Result, subject to the verified
@@ -704,27 +732,24 @@ appraiser/broker inquiries -> final verification.
 
 ## Open question: which figure is the public default?
 
-Unresolved. The user's earlier instructions point both ways on the one property we
-can test:
+**RESOLVED on 2026-10-08 — the rate-ramped band (2026.10.5) is the finalized
+computation.** The earlier dilemma (flat 2.5 vs 1.174) is settled by the evidence
+gathered in Tasks 6-9 and by reverse-engineering LandValuePH's own published code:
 
-- The reference report matches the internal 1.174 guide to within 0.23%.
-- The flat storefront computation is 86.9% above it, and is what the user has
-  twice said they prefer.
+- The storefront now applies a smooth rate ramp: 2.5x at BIR <= 2,000/sqm
+  descending linearly to a 1.4x floor at 25,000/sqm, residential only.
+- It is validated three ways: the gathered records (Catalina +3.9% vs its asking
+  price, inside the guide's own +-15% range), the 4-developer-project test
+  (storefront closest in all four), and LandValuePH's published Rural band of
+  1.5x-2.5x (see docs/reference/landvalueph-reverse-engineering.md).
+- The guide's 1.174x remains the reference-parity model (it reproduces the
+  purchased report) and is unchanged.
 
-We cannot say which is closer to what this house would actually sell for. We have
-one Bauan lot, zero Bauan comparables, and the reference report itself admits it has
-none.
+The remaining design question for Plan B is no longer "which number" but how the
+public surface presents the ramp honestly: the estimate, its disclosed multiplier,
+the BIR reference, and the researched asking evidence beside it.
 
-Options:
+## Plan B status (2026-10-08)
 
-- **Keep flat 2.5 as default.** Matches the stated preference and the old data; the
-  1.174 guide stays the internal benchmark. The storefront reads ~87% above the
-  reference report.
-- **Switch to 1.174.** Matches the reference report closely; loses the uplift, with
-  no Batangas evidence that 1.174 is right either.
-- **Show both.** The public sees the flat figure with the guide figure and BIR base
-  as disclosed context, so the spread is visible instead of one number being
-  trusted.
-
-Current lean: the third option, since it stops the guide implying a precision none
-of these inputs support. Needs the user's decision before Task 9.
+Task 11 in progress: shared `js/value_guide_ui.js` with `mountGuide(container,
+{ mode })`, replacing the old `ESREALTY_EST.cardSection()` mount on the storefront.

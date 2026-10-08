@@ -17563,4 +17563,10 @@ const ccBtn = e.target.closest("[data-cc-calc]");
     document.body.classList.remove("preload");
     window.__ESREALTY_READY = true;
   });
+  /* The agent value-guide renderer, exposed for js/value_guide_ui.js
+     mountGuide(container, { mode: "agent" }) so the shared entry point can mount
+     the internal three-step guide into a host container without reaching into
+     the app router. The renderer still reads the same estimator reference data
+     as the public surface. */
+  window.ESREALTY_APP_GUIDE = { render: renderValueGuide };
 })();

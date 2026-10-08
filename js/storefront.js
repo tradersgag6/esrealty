@@ -681,7 +681,9 @@
       '<div class="sf-est-proof"><span><b>Free</b> planning guide</span><span><b>No account</b> to start</span><span><b>BIR reference</b> shown separately</span></div>' +
       '<p class="sf-est-hero-bir-note">Current guide coverage: Batangas. SEA ESTATES is independent of the BIR.<span class="sf-home-disclaimer">A planning guide, not a certified appraisal.</span></p>' +
       '</div>' +
-      (typeof window.ESREALTY_EST === "object" && window.ESREALTY_EST.cardSection ? window.ESREALTY_EST.cardSection() : '<section class="sf-section sf-est" id="sf-estimator" data-est-root><div class="sf-est-card" data-est-card><p class="sf-est-empty">Loading the value guide…</p></div></section>') +
+      (typeof window.ESREALTY_GUIDE_UI === "object" && window.ESREALTY_GUIDE_UI.publicMarkup
+        ? window.ESREALTY_GUIDE_UI.publicMarkup()
+        : (typeof window.ESREALTY_EST === "object" && window.ESREALTY_EST.cardSection ? window.ESREALTY_EST.cardSection() : '<section class="sf-section sf-est" id="sf-estimator" data-est-root><div class="sf-est-card" data-est-card><p class="sf-est-empty">Loading the value guide…</p></div></section>')) +
       '</section>' +
 
       '<section class="sf-section sf-guide-summary"><div class="sf-section-head sf-reveal"><div><p class="sf-eyebrow">YOUR VALUE GUIDE</p><h2>What your guide includes.</h2></div><p>Understand the reference, review the estimate, and decide what to check next.</p></div>' +
