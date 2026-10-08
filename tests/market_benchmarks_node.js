@@ -196,6 +196,42 @@ check("the calculator still produces a figure for every classification", () => {
   });
 });
 
+check("the coverage summary records that Bauan has no land-only evidence", () => {
+  /* The single most important fact the dataset proves: a full listd.ph search for
+     vacant lots in Bauan returned zero results, only "similar locations near Bauan".
+     The one Bauan record is a beachfront house and lot. This means the subject
+     municipality - the one the purchased report prices - has NO land-only asking
+     price anywhere in the evidence, so no multiplier can be calibrated for it from
+     this dataset. Anyone who later cites a Bauan-specific band must first delete
+     this assertion. */
+  const cs = BM._coverageSummary;
+  assert.ok(cs, "coverage summary present");
+  assert.strictEqual(cs.directBauanVacantLotRecords, 0, "there is still no Bauan vacant-lot record");
+  assert.strictEqual(cs.directBauanRecords, 1, "the single Bauan record is the beachfront house and lot");
+  assert.ok(cs.note.indexOf("NO land-only asking-price evidence") > -1, "the gap is stated plainly");
+  assert.ok(BM.records.length >= 10, "the dataset grew past the original seven, got " + BM.records.length);
+});
+
+check("the San Juan developer price list is the strongest record and stays non-numerical", () => {
+  /* Eight exact developer-priced units in Laiya Ibabao. This is the record that
+     could actually inform a beachfront band, so it must be kept honest: exact
+     totals, per-sqm derived by hand, and the beachfront street rate as the
+     denominator rather than the barangay median. */
+  const r = BM.records.filter(x => x.id === "san-juan-laiya-price-list")[0];
+  assert.ok(r, "the price list record exists");
+  assert.strictEqual(r.numericalAllowed, false);
+  assert.ok(r.lotAreaMin === 264 && r.lotAreaMax === 380, "the lot range is exact");
+  assert.ok(r.askingPriceMin === 5558784 && r.askingPriceMax === 10852800, "the price range is exact");
+  const perSqm = (min, lot) => min / lot;
+  assert.ok(perSqm(r.askingPriceMin, r.lotAreaMin) > 20000, "264 sqm at 5.56M is ~21,056/sqm");
+  /* The whole point of the record: a beachfront developer prices AT its BIR rate,
+     not far above it. Against Playa Laiya's 25000 the multiple must be under 1.2x. */
+  const implied = (r.askingPriceMax / r.lotAreaMax) / 25000;
+  assert.ok(implied < 1.2, "the top unit stays within 1.2x of the beachfront BIR rate, got " + implied.toFixed(2));
+  assert.ok(r.birStreetCheck.streetRates["PLAYA LAIYA PHASE 3F, 4 (NEAR BEACHFRONT)"] === 25000,
+    "the beachfront street rate is named as the denominator");
+});
+
 check("a larger lot in a better street still scores higher", () => {
   /* Monotonicity is the property that must survive any band change: more area
      means more value, and a higher BIR rate means more value. A band change that

@@ -344,8 +344,39 @@ change any multiplier.
 - [x] Correct and reclassify the existing records with exact-street BIR checks.
 - [x] Record the reference report as `_referenceBenchmark`, including its internal
       contradictions, with `numericalAllowed: false`.
-- [ ] Expand toward 30–50 screened records, starting with Bauan, then nearby
-      markets. Report actual usable count and coverage gaps.
+- [x] Expand toward screened records, starting with Bauan, then nearby markets.
+      Report actual usable count and coverage gaps.
+
+### Done — expanded to 12 records, and the single most important finding is negative
+
+Researched on 2026-10-08 via listd.ph (Lamudi and MyProperty both return 403 to
+automation; dotproperty has no Batangas lot pages). Added five records:
+
+| id | Where | What | Asking | vs its street's BIR |
+|---|---|---|---:|---:|
+| `bauan-locloc-beach-hl` | Bauan, Locloc | beach H&L, 400 sqm, 100 sqm living | ₱11M | 30.6x vs all-other 900 — beachfront, house included |
+| `tuy-toong-farm-1000` | Tuy, Toong | leisure/farm lot, 1000 sqm | ₱2M (2,000/sqm) | 3.33x vs ALL STREETS 600 |
+| `san-juan-laiya-price-list` | San Juan, Laiya Ibabao | **8 exact developer units**, 264–380 sqm | ₱5.56M–10.85M | **0.84x–1.14x vs Playa Laiya beachfront 25,000** |
+| `nasugbu-munting-indang-price-list` | Nasugbu | commercial 12,800/sqm + regular 8,300/sqm | developer list | 4.3x–8.3x vs rural CR/RR |
+| `san-juan-beach-200` | San Juan | beach lot, 200 sqm | ₱8.51M (42,550/sqm) | 1.70x vs beachfront 25,000 |
+
+**The finding that matters: a full listd.ph search for vacant lots in Bauan
+returned ZERO results** — the page only offered "similar locations near Bauan". The
+single Bauan record is the beachfront house and lot. The subject municipality
+therefore has no land-only asking-price evidence at all, so **no multiplier can be
+calibrated for Bauan from this dataset**. Recorded as `_coverageSummary` and pinned
+by a test that fails if a Bauan vacant-lot record ever appears without review.
+
+Second finding: the strongest new record — eight exact developer-priced beach lots
+in Laiya — asks **at or below the Playa Laiya BIR beachfront rate** (0.84x–1.14x).
+Even a beachfront developer project prices at its BIR rate, not far above it. That
+undercuts any blanket "beachfront = many times BIR" assumption.
+
+The 30–50 record target was not reached: the usable, street-matchable pool is far
+smaller than that. 12 records total, of which two are developer price lists with
+exact units and the rest are individual asks. Bauan coverage is zero for land. That
+gap is the honest reason the land multiplier stays the Task 9 decision rather than
+being resolved here.
 
 ## Task 7 — Benchmark candidate computations properly
 

@@ -2,6 +2,14 @@
   "_comment": "Real-market benchmarks for the storefront calculator. Each entry is a public asking price or developer price list with the lot area and floor area needed to derive a per-sqm figure. These are ASKING prices, not completed sales - the only market evidence this project has - so they calibrate the band, they do not become an input to any formula.",
   "_policy": "numericalAllowed is false for every record. Nothing here enters compute() or computeEstimate(). Their purpose is to prove the market band the multiplier sits in, and to fail the benchmark test if the band moves away from published research.",
   "_observedOn": "2026-10-07",
+  "_coverageSummary": {
+    "asOf": "2026-10-08",
+    "records": 12,
+    "municipalities": ["BAUAN", "BATANGAS CITY", "LAUREL", "LIPA CITY", "NASUGBU", "SAN PASCUAL", "SAN JUAN", "TUY"],
+    "directBauanRecords": 1,
+    "directBauanVacantLotRecords": 0,
+    "note": "A full listd.ph search for vacant lots in Bauan returned zero results - the page showed only 'similar locations near Bauan'. The single Bauan record is a beachfront house and lot. Bauan therefore has NO land-only asking-price evidence at all, which is why no multiplier can be calibrated for the subject municipality from this dataset."
+  },
   "_referenceReportNote": "The purchased LandValuePH report LVPH-D-9531904C lives as a test fixture at tests/fixtures/value-guide-reference-bauan.json, not here. This file holds market evidence; the report is a comparison benchmark with its own provenance and contradictions, so it was moved out to keep one canonical copy. tests/value_guide_reference_benchmark_node.js reads it.",
   "_bandResearch": {
     "statement": "Published Batangas research puts ordinary market at 1.5x to 3.0x the BIR zonal value.",
@@ -159,6 +167,135 @@
       "priceAsOf": "2026-02",
       "numericalAllowed": false,
       "notes": "Listing headline is 10.53M for a 166 sqm lot but the description also offers a 125 sqm house, so the split between land and building is not determinable. Excluded from any ratio test for that reason."
+    },
+    {
+      "id": "bauan-locloc-beach-hl",
+      "project": null,
+      "model": "beach house and lot, 100 sqm living area",
+      "municipality": "BAUAN",
+      "propertyType": "house_lot",
+      "lotArea": 400,
+      "floorArea": 100,
+      "askingPrice": 11000000,
+      "priceBasis": "exact-unit live listing, house and lot",
+      "sourceTier": "live-listing",
+      "sourceUrl": "https://listd.ph/property/400-sqm-house-and-lot-for-sale-in-batangas-bauan-dc348015-a697-4ab5-872b-6fcf88c84bc5",
+      "observedOn": "2026-10-08",
+      "priceAsOf": "2026-10",
+      "listedRaw": "Listed 7 days ago (as of 2026-10-08)",
+      "numericalAllowed": false,
+      "birStreetCheck": {
+        "note": "Locloc carries only an all-other-streets RR rate of 900/sqm and a Balayan Bay street rate of 1000/sqm; there is no named street rate for this beachfront parcel",
+        "streetRates": { "Locloc all-other-streets": 900, "Locloc BALAYAN BAY": 1000 },
+        "impliedMultipleAgainstOther": "30.6x"
+      },
+      "notes": "The only Bauan listing found anywhere in this research. Private beachfront, 400 sqm lot with a 100 sqm open-concept living area. 11M / 400 = 27,500/sqm. Beachfront premium with house included, so it must not be read as ordinary Bauan residential land - and the single listing means it cannot calibrate the Bauan band either. It bounds the ceiling of what Bauan beachfront asks."
+    },
+    {
+      "id": "tuy-toong-farm-1000",
+      "project": null,
+      "model": "residential farm / leisure lot, Mt Batulao view",
+      "municipality": "TUY",
+      "propertyType": "vacant_lot",
+      "lotArea": 1000,
+      "floorArea": 0,
+      "askingPrice": 2000000,
+      "priceBasis": "exact-unit live listing, land only",
+      "sourceTier": "live-listing",
+      "sourceUrl": "https://listd.ph/property/1000-sqm-vacant-lot-for-sale-in-batangas-tuy-ba380840-ec34-42cf-9b6b-e4f852c2b9b6",
+      "observedOn": "2026-10-08",
+      "priceAsOf": "2026-08",
+      "listedRaw": "Listed Aug 8, 2026",
+      "numericalAllowed": false,
+      "birStreetCheck": {
+        "note": "Toong has no named streets; ALL STREETS RR = 600/sqm",
+        "streetRates": { "Toong ALL STREETS": 600 },
+        "impliedMultiple": "3.33x"
+      },
+      "notes": "2,000/sqm leisure/farm land in a mountain-view area, 30km from the Tagaytay-Nasugbu highway. 2M / 1000 = 2,000/sqm against an ALL STREETS rate of 600 = 3.33x. Outside the researched 1.5x-3.0x band, and a single asking price, so it is context for the top of the range rather than calibration."
+    },
+    {
+      "id": "san-juan-laiya-price-list",
+      "project": "Near White Beach Access development lots",
+      "model": "residential / commercial lots, 264-380 sqm, developer price list",
+      "municipality": "SAN JUAN",
+      "propertyType": "vacant_lot",
+      "lotAreaMin": 264,
+      "lotAreaMax": 380,
+      "askingPriceMin": 5558784,
+      "askingPriceMax": 10852800,
+      "priceBasis": "developer-published exact-unit price list (8 units), total contract price",
+      "sourceTier": "developer-price-list",
+      "sourceUrl": "https://listd.ph/property/374-sqm-vacant-lot-for-sale-in-batangas-san-juan-84baf69d-01b6-4ff9-8418-4fa6009c323c",
+      "observedOn": "2026-10-08",
+      "priceAsOf": "2026-02",
+      "listedRaw": "Listed Feb 5, 2026",
+      "numericalAllowed": false,
+      "birStreetCheck": {
+        "note": "Laiya Ibabao all-other-streets RR = 4000/sqm; named beachfront streets run 15000-25000/sqm. The listing is 'Near White Beach Access', so the Playa Laiya rates are the relevant comparison, not the barangay median",
+        "streetRates": {
+          "PLAYA LAIYA PHASE 3F, 4 (NEAR BEACHFRONT)": 25000,
+          "PLAYA LAIYA PHASE 1,2,3A-3F (NO SEA VIEW)": 15000,
+          "SAN JUAN-LAIYA ROAD": 3500,
+          "Laiya Ibabao all-other-streets": 4000
+        },
+        "impliedMultipleRangeAgainstBeachfront": "0.84x - 1.14x",
+        "impliedMultipleAgainstBarangayOther": "5.3x - 7.1x"
+      },
+      "notes": "Eight exact developer-priced units at 21,056-28,560/sqm (calculated: 264 sqm at 5,558,784 up to 380 sqm at 10,852,800). Against the Playa Laiya beachfront BIR rate of 25,000/sqm these ask 0.84x-1.14x - AT or slightly BELOW the BIR zonal rate for beachfront. Against the barangay-other 4,000 they would be 5-7x, which is why the median is the wrong denominator. This is the strongest record in the file: eight exact units, developer list, and it shows even a beachfront project prices at its BIR rate, not far above it."
+    },
+    {
+      "id": "nasugbu-munting-indang-price-list",
+      "project": "Mountain View Leisure Community",
+      "model": "commercial lots 300 sqm and regular lots 144 sqm",
+      "municipality": "NASUGBU",
+      "propertyType": "vacant_lot",
+      "lotArea": 300,
+      "floorArea": 0,
+      "askingPricePerSqm": 12800,
+      "askingPricePerSqmRegular": 8300,
+      "askingPriceRegular": 1195200,
+      "priceBasis": "developer-published exact-unit price list, price per sqm and total contract price",
+      "sourceTier": "developer-price-list",
+      "sourceUrl": "https://listd.ph/property/300-sqm-vacant-lot-for-sale-in-batangas-nasugbu-77eec0f4-9996-401e-b876-7d758148c2ae",
+      "observedOn": "2026-10-08",
+      "priceAsOf": "2026-02",
+      "listedRaw": "Listed Feb 5, 2026",
+      "numericalAllowed": false,
+      "birStreetCheck": {
+        "note": "Munting Indang has one named street, PROVINCIAL ROAD (RR 1800, CR 3000); all-other-streets is RR 1000, CR 2000",
+        "streetRates": {
+          "PROVINCIAL ROAD RR": 1800,
+          "PROVINCIAL ROAD CR": 3000,
+          "Munting Indang all-other RR": 1000,
+          "Munting Indang all-other CR": 2000
+        },
+        "impliedMultiple": "commercial 12,800/sqm vs CR 2000-3000 = 4.3x-6.4x; regular 8,300/sqm vs RR 1000-1800 = 4.6x-8.3x"
+      },
+      "notes": "A leisure community outside Nasugbu proper. Both the commercial (12,800/sqm) and regular (8,300/sqm) rates sit 4x-8x above their street's BIR rates. A leisure-community asking price in the 8,300/sqm range against a rural BIR floor of 1000-1800 shows how far a titled leisure lot can sit above its zonal rate - context, not a calibrator for ordinary residential."
+    },
+    {
+      "id": "san-juan-beach-200",
+      "project": null,
+      "model": "beach lot near white sand",
+      "municipality": "SAN JUAN",
+      "propertyType": "vacant_lot",
+      "lotArea": 200,
+      "floorArea": 0,
+      "askingPrice": 8510000,
+      "priceBasis": "exact-unit live listing, land only",
+      "sourceTier": "live-listing",
+      "sourceUrl": "https://listd.ph/property/200-sqm-vacant-lot-for-sale-in-batangas-san-juan-80b3cb93-51c2-4a5c-b628-700473719cb5",
+      "observedOn": "2026-10-08",
+      "priceAsOf": "2026-02",
+      "listedRaw": "Listed Feb 5, 2026",
+      "numericalAllowed": false,
+      "birStreetCheck": {
+        "note": "beach lot; the Playa Laiya beachfront rate of 25000/sqm is the closest named street",
+        "streetRates": { "PLAYA LAIYA PHASE 3F, 4 (NEAR BEACHFRONT)": 25000 },
+        "impliedMultiple": "42,550/25,000 = 1.70x"
+      },
+      "notes": "8.51M / 200 = 42,550/sqm, a resale asking well above the 25,000/sqm beachfront BIR rate (1.70x) and far above the developer price list's own 21,000-28,000/sqm range for the same area. A single high ask; useful as the top of the beachfront range, not as the band."
     }
   ]
 }
