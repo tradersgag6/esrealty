@@ -128,23 +128,27 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     check("evidence dropdown offers no fabricated record",
       /No reviewed local land-price history available/.test(q('[data-est-time="timeEvidenceId"]').textContent));
 
-    /* ---------- 6. the review step restates reference and cost basis ------- */
+    /* ---------- 6. Details advances straight to the calculating screen ----- */
+    /* The old review step ("Check your inputs") was removed: its reference and
+       cost facts live in the About panel (asserted in section 2) and in the
+       result report, so the flow is Location -> Details -> calculating ->
+       Result. Ownership answers default to Not sure and are recorded as the
+       specialist's review flags. */
     state.landMethod = "factor"; state.brokerPct = .03; api.debug.render(1);
     q("[data-est-next]").click();
     await wait(120);
     check("default factor method advances without touching the advanced panels",
       !!q('[data-est-screen="2"]'));
-    for (const key of ["occupancy", "titleStatus", "inheritanceStatus"]) {
+    check("ownership answers start on Not sure", ["occupancy", "titleStatus", "inheritanceStatus"].every(key => {
       const btn = q(`[data-est-ownership="${key}"][data-val="not_sure"]`);
-      if (btn) btn.click();
-    }
-    await wait(120);
+      return !!btn && btn.classList.contains("active") && btn.getAttribute("aria-pressed") === "true";
+    }));
     q("[data-est-next]").click();
     await wait(120);
-    const review = q(".sf-est-review");
-    check("review screen reached without opening the panels", !!review);
-    check("review records the reference status", !!review && /Latest applicability unverified/.test(review.textContent));
-    check("review records the cost basis", !!review && /Standard resale illustration/.test(review.textContent));
+    check("no review screen between Details and the calculation",
+      !!q('[data-est-screen="3"]') && !q(".sf-est-review") && !q('[data-est-screen="5"]'));
+    for (let i = 0; i < 80 && !q('[data-est-screen="4"]'); i++) await wait(150);
+    check("calculation completes to the result", !!q('[data-est-screen="4"]'));
 
     check("no page overflow", document.documentElement.scrollWidth <= innerWidth);
   } catch (e) { check("runner", false, e.message); }

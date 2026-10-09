@@ -15,7 +15,12 @@
   "use strict";
 
   var servicesBound = false;
-  var mountedHome = false, calculationRequest = 0;
+  var mountedHome = false, calculationRequest = 0, calculationStartedAt = 0;
+  /* Minimum time the calculating screen stays up so its three stages are
+     readable even when the data comes back in a few milliseconds. It never
+     delays a slow calculation: the result is shown as soon as both the work
+     and the cadence are done. */
+  var CALCULATING_MIN_MS = 1500, STAGE_STEP_MS = 500;
   var finance = typeof module === "object" && module.exports ? require("./value_guide_finance.js") : window.ESREALTY_FINANCE;
   var evidence = typeof module === "object" && module.exports ? require("./value_guide_evidence.js") : window.ESREALTY_EVIDENCE;
   var referenceTools = typeof module === "object" && module.exports ? require("./value_guide_reference.js") : window.ESREALTY_REFERENCE;
@@ -635,9 +640,13 @@
     /* Defaults to Residential (RR), matching the reference form's default. */
     classification: "RR",
     classificationUse: "residential",
-    occupancy: "",
-    titleStatus: "",
-    inheritanceStatus: "",
+    /* "Not sure" is the default answer for all three: they are flags recorded
+       for the specialist, not pricing inputs, and the reference's own pattern
+       is that an unknown answer is safe to skip. A reader who does know can
+       still correct them. */
+    occupancy: "not_sure",
+    titleStatus: "not_sure",
+    inheritanceStatus: "not_sure",
     area: null,
     salePrice: null,
     landMethod: "factor", timeSource: "manual", timeAnnualPct: null, timeBaseDate: "", timeTargetDate: new Date().toISOString().slice(0, 10), timeEvidenceId: "",
@@ -1112,7 +1121,7 @@ out += "</div>";
        section note says plainly. */
     out += '<div class="sf-est-site-review" data-est-site-review>' + reviewFactorBlock() + '</div>';
     out += '<div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-prev>← Back to property details</button>' +
-      '<button type="button" class="sf-est-next" data-est-next>Review my inputs →</button></div>';
+      '<button type="button" class="sf-est-next" data-est-next>Calculate my estimate →</button></div>';
     return out + "</div>";
   }
 
@@ -1120,7 +1129,7 @@ out += "</div>";
     return '<div class="sf-est-step sf-est-anim" data-est-screen="3" role="status" aria-live="polite" aria-busy="true">' +
       locSummary() +
       '<div class="sf-est-anim-head"><span class="sf-est-step-no">03</span><div><p>YOUR PROPERTY VALUE GUIDE</p><h3 class="sf-est-anim-title">Calculating your property value</h3></div></div>' +
-      '<div class="sf-est-anim-panel"><div class="sf-est-anim-stages" aria-label="Calculation progress">' +
+      '<div class="sf-est-anim-panel"><div class="sf-est-anim-bar" aria-hidden="true"><b></b></div><div class="sf-est-anim-stages" aria-label="Calculation progress">' +
       '<div class="sf-est-anim-stage active" data-est-stage="0"><i>1</i><span>Reading the BIR schedule</span></div>' +
       '<div class="sf-est-anim-stage" data-est-stage="1"><i>2</i><span>Checking the property details</span></div>' +
       '<div class="sf-est-anim-stage" data-est-stage="2"><i>3</i><span>Preparing your value guide</span></div>' +
@@ -1312,15 +1321,6 @@ out += "</div>";
     if (c.rejected && c.rejected.length) out += '<ul class="sf-est-rdl">' + c.rejected.slice(0, 8).map(function (row) { return '<li>' + esc((row.id || "Record") + ': ' + row.reasons.join('; ')) + '</li>'; }).join("") + '</ul>';
     out += '<p class="sf-est-rdp">Search status: ' + esc((r.evidenceRetrieval || []).map(function (status) { return status.source + ': ' + status.status; }).join(' · ') || "No live asking search supplied") + '. Failed or limited searches do not establish market scarcity.</p>';
     return out + '<details class="sf-est-project-context"><summary>Published project specifications and price context</summary>' + projectContextHtml(r.municipality) + '</details>' + benchmarkContextHtml(r);
-  }
-
-  function reviewHtml() {
-    var rows = [["Purpose", est.purpose], ["Property", est.type === "house_lot" ? "House & lot" : "Vacant lot"], ["Municipality", est.municipality], ["Barangay", est.barangay], ["Street", est.allOther ? "Street not listed; fallback reference will be shown" : est.streetLabel], ["BIR classification", est.classification], ["Lot area", fmt(est.area) + " sqm"], ["Corner lot", est.corner ? "Yes (+2.5%)" : "No"], ["Selling-price scenario", est.salePrice > 0 ? money(est.salePrice) : "Not supplied; costs will assume the central guide estimate"]];
-    if (est.type === "house_lot") rows = rows.concat([["Built-up area", fmt(Number(est.floorArea) > 0 ? est.floorArea : Math.round(est.area * .6)) + " sqm" + (!(Number(est.floorArea) > 0) ? " (assumed 60% of lot)" : "")], ["Construction", labelFor(DATA.config, "construction", est.construction)], ["Storeys", labelFor(DATA.config, "floors", est.floors)], ["Age", labelFor(DATA.config, "ageBands", est.ageBand)], ["Features", est.features.map(function (key) { return (DATA.config.features[key] || {}).label || key; }).join(", ") || "None selected"]]);
-    rows.push(["Selected land method", est.landMethod === "time-indexed" ? "Indexed reference; no stacked market/corner factors" : "Existing factor guide"]);
-    if (est.landMethod === "time-indexed") rows.push(["Time scenario", (est.timeBaseDate || est.muniRow.effectivityDate) + ' to ' + est.timeTargetDate + '; ' + est.timeSource + (est.timeSource === 'manual' ? '; ' + est.timeAnnualPct + '% annually' : '')]);
-    rows = rows.concat([["Government reference", referencePlainFact()], ["Occupancy", ownershipLabel("occupancy", est.occupancy)], ["Title", ownershipLabel("titleStatus", est.titleStatus)], ["Inheritance", ownershipLabel("inheritanceStatus", est.inheritanceStatus)], ["Risk treatment", "Review flags; no unsupported automatic deduction"], ["Transaction", est.saleContext], ["Cost basis", costPlainFact()], ["Range", "85%–130% of the planning estimate"]]);
-    return '<div class="sf-est-step" data-est-screen="5"><div class="sf-est-step-head"><span class="sf-est-step-no">03</span><div><h3>Check your inputs</h3><p>Review the property and assumptions before calculating.</p></div></div><dl class="sf-est-review">' + rows.map(function (row) { return '<div><dt>' + esc(row[0]) + '</dt><dd>' + esc(row[1]) + '</dd></div>'; }).join("") + '</dl><p class="sf-est-hint">“Not sure” remains unknown. This is a planning guide, not a certified appraisal.</p><div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-edit="1">Edit location</button><button type="button" class="sf-est-next sf-est-prev" data-est-edit="2">Edit property details</button><button type="button" class="sf-est-next" data-est-next>Calculate my estimate →</button></div></div>';
   }
 
   function pricingStrategyHtml(r, suppliedTax) {
@@ -1610,16 +1610,24 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
    * response volume, ratings, or client counts is invented. */
   function nextStepCard() {
     if (est.leadSubmitted) return "";
+    /* Inline outline icons on one 24px grid with a single stroke weight. Each
+       sits beside its own visible label, so it is decorative and hidden from
+       the accessibility tree. */
+    function icon(body) {
+      return '<svg class="sf-est-nextstep-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + body + "</svg>";
+    }
     return '<div class="sf-est-nextstep">' +
       '<div class="sf-est-nextstep-head">' +
       '<span class="sf-est-nextstep-badge">No obligation to list</span>' +
       "<h4>Choose your next step</h4>" +
+      '<p>Pick what helps most. None of these commits you to anything.</p>' +
       "</div>" +
-      '<div class="sf-est-nextstep-act">' +
-      '<button type="button" class="sf-est-lead-cta" data-est-email-open>Email my guide →</button>' +
-      '<button type="button" class="sf-est-lead-cta alt" data-est-lead-open>Request an appraisal consultation →</button>' +
-      '<button type="button" class="sf-est-lead-cta alt" data-est-broker-open>Talk to a licensed broker →</button>' +
-      '<p class="sf-est-nextstep-reassure">Your results are open above. A specialist replies within one business day.</p></div>' +
+      '<div class="sf-est-nextstep-grid">' +
+      '<button type="button" class="sf-est-nextstep-tile" data-est-email-open>' + icon('<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="m4.5 7.5 7.5 5.5 7.5-5.5"/>') + "<span><b>Email my guide</b><small>Get a copy in your inbox. No follow-up unless you ask.</small></span><i class=\"sf-est-nextstep-go\" aria-hidden=\"true\">→</i></button>" +
+      '<button type="button" class="sf-est-nextstep-tile" data-est-lead-open>' + icon('<path d="M9 4.5h6a1 1 0 0 1 1 1V7H8V5.5a1 1 0 0 1 1-1Z"/><path d="M8 5.5H6.5A1.5 1.5 0 0 0 5 7v12a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19V7a1.5 1.5 0 0 0-1.5-1.5H16"/><path d="m9 13.5 2 2 4-4"/>') + "<span><b>Request an appraisal consultation</b><small>A specialist verifies your inputs against the current BIR schedule.</small></span><i class=\"sf-est-nextstep-go\" aria-hidden=\"true\">→</i></button>" +
+      '<button type="button" class="sf-est-nextstep-tile" data-est-broker-open>' + icon('<path d="M4 7a2.5 2.5 0 0 1 2.5-2.5h11A2.5 2.5 0 0 1 20 7v6.5a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 3.5V16H6.5A2.5 2.5 0 0 1 4 13.5V7Z"/><path d="M8.5 10.5h7"/>') + "<span><b>Talk to a licensed broker</b><small>Discuss selling, buying or marketing this property.</small></span><i class=\"sf-est-nextstep-go\" aria-hidden=\"true\">→</i></button>" +
+      "</div>" +
+      '<p class="sf-est-nextstep-reassure">Your results are open above. A specialist replies within one business day.</p>' +
       "</div>";
   }
 
@@ -1669,14 +1677,13 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
     if (est.screen === 1) out = screen1Html();
     else if (est.screen === 2) out = screen2Html();
     else if (est.screen === 3) out = screen3Html();
-    else if (est.screen === 5) out = reviewHtml();
     else out = screen4Html();
     var card = getCard();
     if (card) {
-      var stage = est.screen === 5 || est.screen === 3 ? 3 : est.screen;
+      var stage = est.screen === 3 ? 3 : est.screen;
       /* Three steps, matching the reference's Location -> Details -> Report
-         progression. There is no separate "Review" screen: the ownership review
-         is folded into Details, and the calculating screen is not a step. */
+         progression. There is no review screen and the calculating screen is
+         not a step: Details advances straight to the calculation. */
       var progress = '<ol class="sf-est-progress" aria-label="Value guide progress">' + ["Location", "Details", "Report"].map(function (label, i) { return '<li' + (stage === i + 1 ? ' aria-current="step"' : "") + '><b>' + (i + 1) + '</b><span>' + label + '</span></li>'; }).join("") + '</ol>';
       card.innerHTML = progress + out; bindCard(card);
       if (est.validationIssue && (est.screen === 1 || est.screen === 2)) showErr(card, est.validationIssue);
@@ -1771,7 +1778,6 @@ var saleContext = $q(card, "[data-est-sale-context]");
     var condition = $q(card, "[data-est-condition]");
     if (condition) condition.addEventListener("change", function () { est.condition = condition.value; });
     $qa(card, "[data-est-cost]").forEach(function (input) { input.addEventListener("input", function () { var key = input.getAttribute("data-est-cost"), value = input.value === "" ? null : Number(input.value); est[key] = key === "brokerPct" ? (value == null ? .03 : value / 100) : value; est.result = null; }); });
-    $qa(card, "[data-est-edit]").forEach(function (button) { button.addEventListener("click", function () { est.screen = Number(button.getAttribute("data-est-edit")); renderLayout(); revealEstimatorScreen(); }); });
     var fallback = $q(card, "[data-est-street-fallback]");
     if (fallback) fallback.addEventListener("click", function () {
       /* The classification (default Residential) survives: it is a property
@@ -2057,12 +2063,10 @@ var saleContext = $q(card, "[data-est-sale-context]");
               renderLayout();
               revealEstimatorScreen();
            } else showErr(card);
-       } else if (est.screen === 2) {
-          var missingOwnership = missingScreen2Field();
-          if (missingOwnership) showErr(card, missingOwnership);
-           else { est.screen = 5; renderLayout(); revealEstimatorScreen(); }
-        } else if (est.screen === 5) {
-          runEstimate();
+        } else if (est.screen === 2) {
+          var missingDetails = missingScreen2Field();
+          if (missingDetails) showErr(card, missingDetails);
+          else runEstimate();
         }
       });
     }
@@ -2128,10 +2132,9 @@ function missingScreen1Field() {
     return null;
   }
 
+  /* Ownership answers default to "Not sure", so the only Details input that can
+     be invalid on submit is the optional built-up area. */
   function missingScreen2Field() {
-    if (!est.occupancy) return { field: '[data-est-ownership="occupancy"]', msg: "Choose the occupancy status to continue." };
-    if (!est.titleStatus) return { field: '[data-est-ownership="titleStatus"]', msg: "Choose the title status to continue." };
-    if (!est.inheritanceStatus) return { field: '[data-est-ownership="inheritanceStatus"]', msg: "Choose the inheritance status to continue." };
     if (est.type === "house_lot" && (!isFinite(Number(est.floorArea || 0)) || Number(est.floorArea) < 0 || Number(est.floorArea) > 100000)) return { field: "[data-est-floor]", msg: "Enter a built-up area up to 100,000 sqm, or leave it blank for the stated assumption." };
     return null;
   }
@@ -2189,12 +2192,14 @@ function missingScreen1Field() {
   function runEstimate() {
     if (!validScreen1()) return;
     var currentCalculation = ++calculationRequest;
+    calculationStartedAt = Date.now();
     est.result = null;
     est.pricingUnlocked = true;
     est.leadSubmitted = false;
     est.screen = 3;
     renderLayout();
     revealEstimatorScreen();
+    startStageMotion();
     var config = DATA.config;
     var index = DATA.index;
     var opts = {
@@ -2235,18 +2240,43 @@ function missingScreen1Field() {
         r.evidenceRetrieval = [internal.retrievalStatus || { source: "Catalog", status: "not-configured" }, evidenceSet.externalStatus];
         r.projectContext = ((DATA.projectEvidence || {}).records || []).filter(function (record) { return evidence.place(record.municipality) === evidence.place(opts.municipality); });
         est.result = r;
-        animateThenReport();
+        animateThenReport(currentCalculation);
       });
     }).catch(function () {
       if (currentCalculation !== calculationRequest || !getCard()) return;
       est.result = { available: false, reason: "connection" };
-      animateThenReport();
+      animateThenReport(currentCalculation);
     });
   }
 
-  function animateThenReport() {
-    // Progress reflects real data work; no artificial post-calculation delay.
-    est.screen = 4; renderLayout(); revealEstimatorScreen();
+  /* The three stages advance on a fixed cadence while the real data work runs.
+     The result waits for both the data (resolved by the caller) and the
+     cadence: on a cached local run the calculation returns in a few
+     milliseconds and the progress screen read as a flicker, so the fastest run
+     is padded to the cadence while a slow run is never padded at all — the
+     result appears as soon as its data exists, and never before. */
+  function startStageMotion() {
+    var stages = $qa(getCard(), '[data-est-screen="3"] [data-est-stage]');
+    if (stages.length < 2) return;
+    stages.forEach(function (el, i) { el.classList.toggle("active", i === 0); el.classList.remove("complete"); });
+    stages.slice(1).forEach(function (el, i) {
+      setTimeout(function () {
+        if (!el.parentNode || !stages[i].parentNode) return;
+        stages[i].classList.remove("active");
+        stages[i].classList.add("complete");
+        el.classList.add("active");
+      }, (i + 1) * STAGE_STEP_MS);
+    });
+  }
+
+  function animateThenReport(requestId) {
+    function report() {
+      if (requestId !== calculationRequest || !getCard()) return;
+      est.screen = 4; renderLayout(); revealEstimatorScreen();
+    }
+    var waitMs = Math.max(0, CALCULATING_MIN_MS - (Date.now() - calculationStartedAt));
+    if (!waitMs) { report(); return; }
+    setTimeout(report, waitMs);
   }
 
   /* ---------------------------------------------------------- */

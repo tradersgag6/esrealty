@@ -41,12 +41,6 @@ async function estimateExpected(opts) {
 }
 function setValue(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new Event("change", { bubbles: true })); }
 function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new Event("input", { bubbles: true })); }
-function chooseOwnershipNotSure() {
-  ["occupancy", "titleStatus", "inheritanceStatus"].forEach(key => {
-    const button = q('[data-est-ownership="' + key + '"][data-val="not_sure"]');
-    if (button) button.click();
-  });
-}
 (async () => {
   try {
     window.__msLog.push("funnel-e2e start");
@@ -137,13 +131,14 @@ function chooseOwnershipNotSure() {
       const group = document.querySelector('[data-chip-group][data-t="' + t + '"]');
       return !!group && Array.from(group.querySelectorAll("button")).some(b => b.getAttribute("data-val") === "");
     }), "every site-review group offers a Not-sure skip");
-    chooseOwnershipNotSure();
+    chk("ownership-answers-default-to-not-sure", ["occupancy", "titleStatus", "inheritanceStatus"].every(function (key) {
+      const b = q('[data-est-ownership="' + key + '"][data-val="not_sure"]');
+      return !!b && b.classList.contains("active") && b.getAttribute("aria-pressed") === "true";
+    }), "ownership questions preselect Not sure");
     q('[data-est-next]').click();
-    chk("review-before-calculate", !!q('[data-est-screen="5"]') && /Check your inputs/.test(q('[data-est-screen="5"]').textContent), "");
-    chk("review-explains-unknowns-and-range", /remains unknown/.test(q('[data-est-screen="5"]').textContent) && /85%–130%/.test(q('[data-est-screen="5"]').textContent), "");
+    chk("details-advances-straight-to-calculation", !!q('[data-est-screen="3"]') && !q('[data-est-screen="5"]'), "no review screen");
     estApi().mount(); await wait(40);
-    chk("same-home-rerender-keeps-review-stage", !!q('[data-est-screen="5"]') && /200 sqm/.test(q('[data-est-screen="5"]').textContent), "");
-    q('[data-est-next]').click();
+    chk("same-home-rerender-keeps-calculating-stage", !!q('[data-est-screen="3"]') && /BACLARAN/.test(q('[data-est-screen="3"]').textContent), "");
     const screen3 = q('[data-est-screen="3"]');
     chk("screen3-no-rotating-indicator", !q('[data-est-screen="3"] [data-est-spin]') && !q('[data-est-screen="3"] [data-est-anim-mark]'), "");
     chk("screen3-progress-design", !!q('[data-est-screen="3"] .sf-est-anim-panel') && qa('[data-est-screen="3"] [data-est-stage]').length === 3 && /Calculating your property value/.test(q('[data-est-screen="3"] .sf-est-anim-title').textContent), "");
@@ -256,9 +251,7 @@ chk("report-six-groups", qa('.sf-est-rsec').length === 6, "n=" + qa('.sf-est-rse
     setInput('[data-est-area]', "100");
     q('[data-est-next]').click();
     await waitFor(() => q('[data-est-screen="2"]'), 30, ESP);
-    chooseOwnershipNotSure();
     q('[data-est-next]').click();
-    q('[data-est-screen="5"] [data-est-next]').click();
     await waitFor(() => q('[data-est-screen="4"]'), 90, ESP);
     const rD2 = estApi()._state().result;
     chk("depth2-available", rD2 && rD2.available, "");
@@ -279,9 +272,7 @@ chk("report-six-groups", qa('.sf-est-rsec').length === 6, "n=" + qa('.sf-est-rse
     setInput('[data-est-floor]', "160");
     const wg = qa('[data-est-feature]').find(cb => cb.getAttribute("data-est-feature") === "wall_gate");
     if (wg) { wg.checked = true; wg.dispatchEvent(new Event("change", { bubbles: true })); }
-    chooseOwnershipNotSure();
     q('[data-est-next]').click();
-    q('[data-est-screen="5"] [data-est-next]').click();
     await waitFor(() => q('[data-est-screen="4"]'), 90, ESP);
     const rH = estApi()._state().result;
     const eH = await estimateExpected(stateOpts());

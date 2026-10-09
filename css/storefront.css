@@ -1132,12 +1132,10 @@ body .sf-search-form button { min-height: 52px !important; height: 52px !importa
 .sf-est-project-record a { display: inline-flex; align-items: center; min-height: 44px; font-size: 16px; }
 .sf-est-asking-indication { padding: 16px; border: 1px solid var(--sf-line); background: var(--sf-paper-warm); border-radius: 10px; }
 @media (max-width: 600px) { .sf-est-decision-grid { grid-template-columns: minmax(0, 1fr); } }
-.sf-est-progress { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; list-style: none; margin: 0 0 28px; padding: 0; }
+.sf-est-progress { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; list-style: none; margin: 0 0 28px; padding: 0; }
 .sf-est-progress li { display: flex; align-items: center; gap: 8px; padding: 10px; font-size: 14px; color: var(--sf-ink-soft); border-bottom: 2px solid var(--sf-line); }
 .sf-est-progress li[aria-current="step"] { color: var(--sf-accent); border-color: var(--sf-accent); font-weight: 700; }
 .sf-est-progress b { flex: none; }
-.sf-est-review > div { display: grid; grid-template-columns: minmax(140px, .6fr) minmax(0, 1fr); gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--sf-line); }
-.sf-est-review dt, .sf-est-review dd { margin: 0; font-size: 16px; overflow-wrap: anywhere; }
 .sf-est-street-fallback { border: 1px solid var(--sf-accent-line); background: var(--sf-accent-soft); color: var(--sf-accent-hover); border-radius: 8px; padding: 12px; min-height: 48px; text-align: left; font-size: 16px; }
 .sf-est-step { scroll-margin-top: 96px; }
 .sf-est-site-review { padding: 16px 0; }
@@ -1168,7 +1166,6 @@ body .sf-search-form button { min-height: 52px !important; height: 52px !importa
   .sf-est-step { scroll-margin-top: 80px; }
   .sf-est-progress li { display: block; padding: 8px 4px; font-size: 12px; }
   .sf-est-progress span { display: block; }
-  .sf-est-review > div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
 }
 .sf-compare-toggle { position: relative; z-index: 3; margin-top: 12px; min-height: 44px; padding: 8px 14px; border: 1px solid var(--sf-accent-line); border-radius: 8px; background: var(--sf-paper); color: var(--sf-accent); font-size: 16px; cursor: pointer; }
 .sf-compare-toggle[aria-pressed="true"] { background: var(--sf-accent-soft); border-color: var(--sf-accent); font-weight: 700; }
