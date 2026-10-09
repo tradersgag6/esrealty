@@ -49,6 +49,10 @@ function chk(n, ok, d) { window.__msChecks.push({ name: n, ok: !!ok, detail: d |
        used to be posted verbatim as the lead's message. */
     chk("planning-posts-human-label", !!planningSelect && planningSelect.value === planningSelect.options[planningSelect.selectedIndex].textContent, "value=" + (planningSelect && planningSelect.value));
     chk("broker-submit-label", /Request broker contact/.test((q(".sf-pv-form button[type=submit]") || {}).textContent || ""), "submit=" + ((q(".sf-pv-form button[type=submit]") || {}).textContent));
+    /* The consent checkbox must keep a native rendering (appearance:none with
+       no custom :checked style made ticking it invisible) and must toggle. */
+    const consent = q(".sf-pv-form .sf-consent input");
+    chk("consent-checkbox-native-and-toggles", !!consent && getComputedStyle(consent).appearance !== "none" && (consent.click(), consent.checked === true) && (consent.click(), consent.checked === false), "appearance=" + (consent && getComputedStyle(consent).appearance));
 
     /* ---- a different service still adapts the page ---- */
     await go("#/property-value?service=finance", 2200);

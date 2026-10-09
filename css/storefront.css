@@ -581,7 +581,10 @@
   font-weight: 600;
   color: var(--sf-ink-soft);
 }
-.sf-pv-form input,
+/* Text-like controls only. The consent checkbox must keep its native
+   appearance (or it needs a full custom :checked rendering); excluding it here
+   is why the box previously looked dead when ticked. */
+.sf-pv-form input:not([type="checkbox"]),
 .sf-pv-form select {
   width: 100%;
   min-height: 48px;
@@ -605,8 +608,8 @@
   background-repeat: no-repeat;
   padding-right: 2.4rem;
 }
-.sf-pv-form input::placeholder { color: #9A8F88; }
-.sf-pv-form input:focus-visible,
+.sf-pv-form input:not([type="checkbox"])::placeholder { color: #9A8F88; }
+.sf-pv-form input:not([type="checkbox"]):focus-visible,
 .sf-pv-form select:focus-visible {
   background: var(--sf-paper);
   border-color: var(--sf-accent);
@@ -684,6 +687,7 @@
   color: var(--sf-ink-mute);
   font-size: var(--sf-micro);
   line-height: 1.5;
+  cursor: pointer;
 }
 .sf-site .sf-consent input {
   width: 20px;
@@ -693,6 +697,7 @@
   margin: 0;
   justify-self: start;
   accent-color: var(--sf-accent);
+  cursor: pointer;
 }
 .sf-site .sf-consent span { min-width: 0; }
 .sf-site .sf-consent a { color: #174b5e; font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }

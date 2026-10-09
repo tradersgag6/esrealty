@@ -153,7 +153,7 @@
 
   function footer() {
     return '<footer class="sf-footer"><div class="sf-brand"><span class="sf-brand-mark">S.E</span><span><b>SEA ESTATES</b><small>Property &amp; local guidance.</small></span></div>' +
-      '<p>Browse properties, review a value guide, and plan your next step. <span class="sf-copyright">&copy; SEA ESTATES ' + new Date().getFullYear() + '</span><br><small>SEA ESTATES is independent of the BIR. BATANGAS VALUE GUIDE currently covers Batangas; BIR values are tax references.</small></p>' +
+      '<p>Browse properties, review a value guide, and plan your next step. <span class="sf-copyright">&copy; SEA ESTATES ' + new Date().getFullYear() + '</span><br><small>Independent of the BIR · Batangas coverage only · BIR values are tax references.</small></p>' +
       '<div><a href="#/search">Browse properties</a><a href="#/privacy">Privacy notice</a><button data-sf-auth="signin">Agent sign in</button></div></footer>';
   }
 

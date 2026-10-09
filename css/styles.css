@@ -1747,10 +1747,10 @@ body.preload .topbar { visibility: hidden !important; }
   .sf-cta-form input, .sf-cta-form textarea,
   .sf-contact-card input, .sf-contact-card textarea,
   .sf-contact-card select,
-  .sf-consent input,
+  .sf-consent input:not([type="checkbox"]),
   .sf-guide input,
   .bt-inquiry-form input, .bt-inquiry-form select, .bt-inquiry-form textarea,
-  .sf-consent input,
+  .sf-consent input:not([type="checkbox"]),
   .input, select.input, textarea.input,
   .st-select, .auth-tab, .role-select {
     font-size: 16px !important;
@@ -1992,10 +1992,10 @@ body .chip, body .sf-chip { font-size: 12px !important; }
   .sf-cta-form input, .sf-cta-form textarea,
   .sf-contact-card input, .sf-contact-card textarea,
   .sf-contact-card select,
-  .sf-consent input,
+  .sf-consent input:not([type="checkbox"]),
   .sf-guide input,
   .bt-inquiry-form input, .bt-inquiry-form select, .bt-inquiry-form textarea,
-  .sf-consent input {
+  .sf-consent input:not([type="checkbox"]) {
     font-size: 16px !important;
     min-height: 48px !important;
     padding: 14px 16px !important;
