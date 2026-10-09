@@ -12579,9 +12579,23 @@ window.ESREALTY_VG_FLOW.compute(vgModelOpts(), vgEst()),
   function leadCanEdit(l) {
     if (!leadCanManage()) return false;
     if (currentUser && currentUser.demo) return true;
-    if (roleIs("super-admin")) return !!(currentUser && currentUser.id && l && l.createdBy && String(l.createdBy) === String(currentUser.id));
-    if (userRole() !== "broker") return true;
-    return !!(currentUser && currentUser.id && l && l.createdBy && String(l.createdBy) === String(currentUser.id));
+    const myId = currentUser && currentUser.id;
+    /* Super-admin edits leads they created (website leads land here) or leads
+       assigned to them. */
+    if (roleIs("super-admin")) return !!myId && (String(l.createdBy) === String(myId) || String(l.assignedToId) === String(myId) || !l.assignedToId);
+    /* Broker edits leads they created, leads assigned to them, or leads
+       assigned to their own team - the routing path is super-admin -> broker
+       -> agent, so a broker must be able to pass a website lead down. */
+    if (userRole() === "broker") {
+      if (!myId) return false;
+      if (String(l.createdBy) === String(myId) || String(l.assignedToId) === String(myId)) return true;
+      const teamIds = brokerTeamMembers().map(m => m.id).filter(Boolean);
+      return teamIds.indexOf(String(l.assignedToId)) >= 0;
+    }
+    /* Agent edits only leads assigned to them, and website leads are never
+       assigned to an agent directly - they come through the broker. */
+    if (userRole() === "agent") return !!myId && String(l.assignedToId) === String(myId);
+    return true;
   }
   function leadInitials(name) { return String(name || "?").split(/\s+/).map(w => w.charAt(0)).slice(0, 2).join("").toUpperCase(); }
   function leadAvatar(name, size) { return '<div class="lead-avatar" style="width:' + (size || 34) + 'px;height:' + (size || 34) + 'px;font-size:' + (size ? Math.round(size * 0.4) : 13) + 'px">' + esc(leadInitials(name)) + "</div>"; }
@@ -13080,6 +13094,7 @@ window.ESREALTY_VG_FLOW.compute(vgModelOpts(), vgEst()),
       '<div class="lead-card-meta">' +
         (snoozing ? '<div style="margin-bottom:4px"><span class="badge purple">' + icon("bell", 11) + " Snoozed until " + esc(snzAt.toLocaleDateString()) + "</span></div>" : "") +
         (fu ? '<div style="margin-bottom:4px"><span class="badge ' + fu.cls + '">' + icon("calendar", 11) + " " + fu.label + "</span></div>" : "") +
+        (l.serviceRequested ? '<div style="margin-bottom:4px"><span class="badge blue">' + icon("briefcase", 11) + " " + esc(l.serviceRequested) + "</span></div>" : "") +
         (l.budget || l.askingPrice || l.rentBudget ? '<div class="lead-card-budget">' + leadBudget(l) + "</div>" : "") +
         '<div class="dim tiny">' + icon("pin", 11) + " " + esc(l.source ? leadSourceLabel(l.source) : "—") + "</div>" +
       "</div>" +
@@ -13563,6 +13578,7 @@ window.ESREALTY_VG_FLOW.compute(vgModelOpts(), vgEst()),
        (can ? '<button class="btn btn-ghost btn-sm" data-lead-edit="' + esc(l.id) + '">' + icon("edit", 14) + " Edit</button>" : "") +
        (can ? '<button class="btn btn-ghost btn-sm" data-lead-visit="' + esc(l.id) + '">' + icon("calendar", 14) + " Schedule Viewing</button>" : "") +
       (can && l.status !== "closed" && l.status !== "lost" ? '<button class="btn btn-ghost btn-sm" data-lead-advance="' + esc(l.id) + '">' + icon("arrow", 14) + " Advance</button>" : "") +
+      (can && l.status !== "closed" && l.status !== "lost" ? '<button class="btn btn-ghost btn-sm" data-lead-transact="' + esc(l.id) + '">' + icon("check", 14) + " Mark Service Transacted</button>" : "") +
       (can && l.status !== "closed" && l.status !== "lost" ? '<button class="btn btn-ghost btn-sm" data-lead-lost="' + esc(l.id) + '">' + icon("trash", 14) + " Mark Lost</button>" : "") +
       (can && l.status === "closed" && !l.convertedTxId ? '<button class="btn btn-primary btn-sm" data-tx-convert="' + esc(l.id) + '">' + icon("plus", 14) + " Convert to Transaction</button>" : "") +
       (l.convertedTxId ? '<span class="badge green">Converted → ' + esc(l.convertedTxId) + "</span>" : "") +
@@ -13573,6 +13589,10 @@ window.ESREALTY_VG_FLOW.compute(vgModelOpts(), vgEst()),
       '<h3>Lead Information</h3><div class="table-wrap mt-8"><table class="data"><tbody>' +
       leadDetailRow("Reference", l.ref) +
       leadDetailRow("Lead Type", leadTypeLabel(l.type)) +
+      /* The requested service is labeled on the lead so routing does not
+         depend on reading the message. Fallbacks keep older leads readable. */
+      leadDetailRow("Requested Service", l.serviceRequested || (l.channel === "professional-appraisal-request" ? "Appraisal consultation" : l.channel === "broker-consultation" ? "Broker consultation" : l.channel === "location-analysis" ? "Location analysis report" : "—")) +
+      (l.serviceTransacted ? leadDetailRow("Service Transacted", "Yes — " + esc(l.serviceTransacted.service) + " by " + esc(l.serviceTransacted.by) + " (" + esc(l.serviceTransacted.byRole) + ")") : "") +
       leadDetailRow("Status", leadStatusCfg(l.status) ? leadStatusCfg(l.status)[1] : "—") +
       leadDetailRow("Email", l.email) +
       leadDetailRowRaw("Phone", phoneChatLinks(l.phone)) +
@@ -13629,10 +13649,19 @@ window.ESREALTY_VG_FLOW.compute(vgModelOpts(), vgEst()),
     const listOpts = '<option value="">No linked listing</option>' + (state.listings || []).map(x => '<option value="' + esc(x.id) + '"' + (l.listingId === x.id ? " selected" : "") + ">" + esc(x.title) + "</option>").join("");
     const myName = ((currentUser && currentUser.name) || "").trim();
     const defaultAgent = roleIs("agent") ? myName : (roleIs("broker") && !id ? myName : (l.assignedTo || ""));
-    let agentPool = (state.leads || []).filter(z => z.assignedTo).map(z => ({ id: z.assignedToId || "", name: z.assignedTo }));
-    if (roleIs("broker")) {
+    /* Assignee pool is scoped by the routing hierarchy: super-admin picks
+       brokers, a broker picks themselves or their own team. Agents never see
+       the picker (their branch below forces self). */
+    let agentPool = [];
+    if (roleIs("super-admin")) {
+      agentPool = (state.users || []).filter(u => u.role === "broker" && u.active !== false)
+        .map(u => ({ id: u.id, name: (u.name || u.email || "").trim() }));
+      if (l.assignedTo && !agentPool.find(a => a.name === l.assignedTo)) agentPool.push({ id: l.assignedToId || "", name: l.assignedTo });
+    } else if (roleIs("broker")) {
       agentPool = [{ id: currentUser && currentUser.id || "", name: myName, own: true }].concat(brokerTeamMembers());
       if (l.assignedTo && !agentPool.find(a => a.name === l.assignedTo)) agentPool.push({ id: l.assignedToId || "", name: l.assignedTo });
+    } else {
+      agentPool = (state.leads || []).filter(z => z.assignedTo).map(z => ({ id: z.assignedToId || "", name: z.assignedTo }));
     }
     agentPool = agentPool.filter((a, i, arr) => a.name && arr.findIndex(x => x.id && a.id ? x.id === a.id : x.name === a.name) === i).sort((a, b) => a.name.localeCompare(b.name));
     const agentOpts = roleIs("agent")
@@ -13692,6 +13721,21 @@ window.ESREALTY_VG_FLOW.compute(vgModelOpts(), vgEst()),
     const agentOption = agentField && agentField.options[agentField.selectedIndex];
     rec.assignedTo = roleIs("agent") ? ((currentUser && currentUser.name) || "").trim() : $v("ld-agent");
     rec.assignedToId = roleIs("agent") ? (currentUser && currentUser.id || "") : (agentOption && agentOption.getAttribute("data-agent-id") || "");
+    /* Assignment audit: record who moved the lead to whom, so the
+       super-admin -> broker -> agent route is traceable. Only logged when the
+       assignee actually changed. */
+    if (editId) {
+      const prior = (state.leads || []).find(x => x.id === rec.id) || {};
+      if (String(prior.assignedToId || "") !== String(rec.assignedToId || "")) {
+        const actorName = ((currentUser && (currentUser.name || currentUser.email)) || "system").trim();
+        const actorRole = userRole() || "unknown";
+        rec.activity = rec.activity || [];
+        rec.activity.push({
+          date: new Date().toISOString(),
+          text: "Assigned to " + (rec.assignedTo || "Unassigned") + " by " + actorName + " (" + actorRole + ")"
+        });
+      }
+    }
     rec.propertyInterest = $v("ld-interest");
     rec.finMode = $v("ld-finmode");
     rec.incomeBand = $v("ld-income");
@@ -13770,6 +13814,28 @@ window.ESREALTY_VG_FLOW.compute(vgModelOpts(), vgEst()),
     save(); render();
     syncLead(l);
     toast("Lead status updated");
+  }
+  /* Records that the lead's requested service (appraisal, broker consultation,
+     location report) was fulfilled, by whom and when. Super-admin and broker
+     can both transact; the lead status moves to closed so the funnel reads in
+     one place. The Appraisal module keeps its own completion records — this is
+     the lead-level marker. */
+  function leadMarkServiceTransacted(id) {
+    const l = (state.leads || []).find(x => x.id === id);
+    if (!l) return;
+    if (!leadCanEdit(l)) { toast("You can only edit leads you created", "err"); return; }
+    const actor = ((currentUser && (currentUser.name || currentUser.email)) || "system").trim();
+    const actorRole = userRole() || "unknown";
+    const requested = (l.serviceRequested || l.channel || l.propertyInterest || "the requested service");
+    l.serviceTransacted = { by: actor, byRole: actorRole, at: new Date().toISOString(), service: requested };
+    l.updatedAt = new Date().toISOString();
+    l.activity = l.activity || [];
+    l.activity.push({ date: l.updatedAt, text: "Service transacted (" + requested + ") by " + actor + " (" + actorRole + ")" });
+    l.status = "closed";
+    l.activity.push({ date: l.updatedAt, text: "Status changed: → Closed (service transacted)" });
+    save(); render();
+    syncLead(l);
+    toast("Service marked as transacted", "ok");
   }
   function leadSnooze(id, days) {
     const l = (leadScope() || []).find(x => x.id === id);
@@ -13994,6 +14060,8 @@ window.ESREALTY_VG_FLOW.compute(vgModelOpts(), vgEst()),
         if (nw) { openLeadEditor(); return; }
         const adv = e.target.closest("[data-lead-advance]");
         if (adv) { leadAdvance(adv.getAttribute("data-lead-advance")); return; }
+        const trx = e.target.closest("[data-lead-transact]");
+        if (trx) { leadMarkServiceTransacted(trx.getAttribute("data-lead-transact")); return; }
         const lostB = e.target.closest("[data-lead-lost]");
         if (lostB) { leadSetStatus(lostB.getAttribute("data-lead-lost"), "lost"); return; }
         const conv = e.target.closest("[data-tx-convert]");

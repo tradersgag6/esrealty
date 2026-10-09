@@ -34,6 +34,28 @@ const q = selector => document.querySelector(selector);
     responseMode = "saved"; form.querySelector('button[type="submit"]').click(); await wait(250);
     check("saved request never implies email delivery", /saved/.test(q("[data-est-lead-status]").textContent) && /no emailed delivery has been confirmed/.test(q("[data-est-lead-status]").textContent));
     check("email request distinct from professional consultation", posts[2].data.service_requested === "valuation-report" && posts[2].data.inquiry_type === "location-analysis");
+
+    /* --- broker path: the second professional CTA labels the lead --- */
+    /* Reset the submission state so the CTAs render again. */
+    est._state().leadSubmitted = false; est._state().leadOpen = false; est.debug.render(4); await wait(150);
+    const brokerBtn = q("[data-est-broker-open]");
+    check("broker CTA present", !!brokerBtn && /licensed broker/.test(brokerBtn.textContent), "btn=" + (brokerBtn && brokerBtn.textContent.trim()));
+    brokerBtn.click(); await wait(200);
+    const brokerForm = q("[data-est-lead-form]");
+    check("broker form labelled for broker", /Talk to a licensed broker/.test(brokerForm.querySelector("h3").textContent) && brokerForm.elements.phone.required, "h3=" + brokerForm.querySelector("h3").textContent);
+    brokerForm.elements.name.value = "Broker fixture"; brokerForm.elements.email.value = "broker@example.com"; brokerForm.elements.phone.value = "0917"; brokerForm.elements.consent.checked = true;
+    responseMode = "saved"; brokerForm.querySelector('button[type="submit"]').click(); await wait(250);
+    check("broker lead labeled broker-consultation", posts[3].data.service_requested === "broker-consultation" && posts[3].data.inquiry_type === "broker-consultation", "svc=" + posts[3].data.service_requested);
+
+    /* --- appraisal path: existing CTA still labels correctly --- */
+    est._state().leadSubmitted = false; est._state().leadOpen = false; est.debug.render(4); await wait(150);
+    const appraisalBtn = q("[data-est-lead-open]");
+    appraisalBtn.click(); await wait(200);
+    const apprForm = q("[data-est-lead-form]");
+    apprForm.elements.name.value = "Appr fixture"; apprForm.elements.email.value = "appr@example.com"; apprForm.elements.phone.value = "0917"; apprForm.elements.consent.checked = true;
+    responseMode = "saved"; apprForm.querySelector('button[type="submit"]').click(); await wait(250);
+    check("appraisal lead labeled professional-appraisal-request", posts[4].data.service_requested === "professional-appraisal-consultation" && posts[4].data.inquiry_type === "professional-appraisal-request", "svc=" + posts[4].data.service_requested);
+
     check("posted report keeps central estimate, range and BIR separate", posts[2].data.report.estimate.marketGuideEstimate === 2352500 && posts[2].data.report.estimate.low === 1999625 && posts[2].data.report.estimate.birZonalValue === 1150000);
     check("results stay visible after submission", !!q(".sf-est-result-value") && !q(".sf-est-price-lock"));
   } catch (e) { check("runner", false, e.message); }

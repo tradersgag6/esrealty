@@ -627,9 +627,20 @@ Deno.serve(async (req) => {
   const location = report.location || {};
   const estimate = report.estimate || {};
   const inquiryType = str(body.inquiry_type, 80) === "professional-appraisal-request"
-    ? "professional-appraisal-request" : "location-analysis";
+    ? "professional-appraisal-request"
+    : str(body.inquiry_type, 80) === "broker-consultation"
+      ? "broker-consultation"
+      : "location-analysis";
+  /* The service the user asked for, carried on the lead so the CRM can route it
+     without reading the message. `service_requested` is the human label shown in
+     the lead list; `inquiry_type` is the machine value. */
+  const serviceRequested = inquiryType === "professional-appraisal-request"
+    ? "Appraisal consultation"
+    : inquiryType === "broker-consultation"
+      ? "Broker consultation"
+      : "Location analysis report";
   const summary = [
-    inquiryType === "professional-appraisal-request" ? "Professional appraisal consultation request" : "Location analysis full report request",
+    inquiryType === "professional-appraisal-request" ? "Professional appraisal consultation request" : inquiryType === "broker-consultation" ? "Broker consultation request" : "Location analysis full report request",
     location.town ? "Town: " + location.town + (location.barangay ? " · " + location.barangay : "") : "",
     location.address ? "Address: " + location.address : "",
     Number(estimate.marketGuideEstimate) > 0 ? "Central planning estimate: " + money(estimate.marketGuideEstimate) + " · " + (estimate.marketGuideAvailable === true ? "asking listings shown as context" : "no comparable asking listings available") : (estimate.birZonalValue ? "BIR zonal reference: " + money(estimate.birZonalValue) + " · no estimate available" : "Not estimated"),
@@ -662,6 +673,10 @@ Deno.serve(async (req) => {
       consent: true,
       origin: "storefront",
       channel: inquiryType,
+      /* Label the requested service on the lead so the CRM routes it without
+         parsing prose. Shown in the lead list; never a pricing input. */
+      serviceRequested: serviceRequested,
+      serviceTransacted: null,
       propertyInterest: report.property?.typeLabel || "Location analysis report",
       notes: summary,
       assignedTo: "",
@@ -669,7 +684,7 @@ Deno.serve(async (req) => {
       createdBy: null,
       createdAt: now,
       updatedAt: now,
-      activity: [{ date: now, text: inquiryType === "professional-appraisal-request" ? "Professional appraisal consultation requested from the website." : "Full location analysis report requested from the website." }],
+      activity: [{ date: now, text: inquiryType === "professional-appraisal-request" ? "Professional appraisal consultation requested from the website." : inquiryType === "broker-consultation" ? "Broker consultation requested from the website." : "Full location analysis report requested from the website." }],
       fullReport: report,
       idempotencyKey,
     },
@@ -702,6 +717,14 @@ Deno.serve(async (req) => {
     const pdfBytes = await buildPdf(pdfReport);
     const b64 = btoa(String.fromCharCode(...pdfBytes));
     if (RESEND_API_KEY) {
+      const subjectPrefix = inquiryType === "professional-appraisal-request"
+        ? "Your SEA ESTATES Property Value Report — "
+        : inquiryType === "broker-consultation"
+          ? "Your SEA ESTATES Property Value Report — "
+          : "Your SEA ESTATES Location Analysis Report — ";
+      const attachmentName = inquiryType === "location-analysis"
+        ? "SEA-ESTATES-Location-Analysis.pdf"
+        : "SEA-ESTATES-Property-Value-Report.pdf";
       const resp = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -711,9 +734,9 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           from: MAIL_FROM,
           to: [email],
-          subject: "Your SEA ESTATES Location Analysis Report — " + (location.town || "pin"),
+          subject: subjectPrefix + (location.town || "pin"),
           html: emailHtml({ full_name: fullName, report }),
-          attachments: [{ filename: "SEA-ESTATES-Location-Analysis.pdf", content: b64 }],
+          attachments: [{ filename: attachmentName, content: b64 }],
         }),
       });
       pdfSent = resp.ok;

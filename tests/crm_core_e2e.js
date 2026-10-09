@@ -38,6 +38,14 @@
     html=document.querySelector("#content").innerHTML;
     checks.push({name:"stage advanced", ok:/Contacted/.test(html), detail:""});
     checks.push({name:"activity logged", ok:/Status changed/.test(html), detail:""});
+    // Service label + transact (lead routing, Task 13)
+    checks.push({name:"service label present", ok:/Requested Service/.test(html), detail:""});
+    var trx=document.querySelector("[data-lead-transact]");
+    checks.push({name:"transact btn", ok:!!trx, detail:""});
+    if(trx){trx.click(); await wait(450);}
+    html=document.querySelector("#content").innerHTML;
+    checks.push({name:"transact records service", ok:/Service transacted/.test(html)||/Service Transacted/.test(html), detail:""});
+    checks.push({name:"transact closes lead", ok:/Closed/.test(html), detail:""});
     // back to pipeline
     var backBtn=Array.from(document.querySelectorAll("button")).find(b=>/Pipeline|Back to/i.test(b.textContent));
     if(backBtn){backBtn.click(); await wait(350);}

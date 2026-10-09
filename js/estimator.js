@@ -662,6 +662,11 @@
     elevation: "",
     utilities: "",
     result: null,
+    /* Which professional service the user asked for: "appraisal", "broker",
+       or "" for the plain email-my-guide path. Drives the lead's
+       serviceRequested label end to end. appraisalRequested below is kept as
+       the boolean alias the existing form logic reads. */
+    leadKind: "",
     appraisalRequested: false,
     pricingUnlocked: false,
     leadSubmitted: false,
@@ -1611,7 +1616,10 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
       "<li><b>Document and site review</b><span>Title, occupancy, access, and condition checked against what you entered.</span></li>" +
       "<li><b>A specialist&rsquo;s next step</b><span>What to fix, what to hold, and what to ask for &mdash; before you list.</span></li>" +
       "</ul>" +
-      '<div class="sf-est-nextstep-act"><button type="button" class="sf-est-lead-cta" data-est-email-open>Email my guide →</button><button type="button" class="sf-est-lead-cta alt" data-est-lead-open>Request an appraisal consultation →</button>' +
+      '<div class="sf-est-nextstep-act">' +
+      '<button type="button" class="sf-est-lead-cta" data-est-email-open>Email my guide →</button>' +
+      '<button type="button" class="sf-est-lead-cta alt" data-est-lead-open>Request an appraisal consultation →</button>' +
+      '<button type="button" class="sf-est-lead-cta alt" data-est-broker-open>Talk to a licensed broker →</button>' +
       '<p class="sf-est-nextstep-reassure">A specialist replies within one business day. No obligation to list.</p></div>' +
       "</div>";
   }
@@ -1626,20 +1634,28 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
         "<p>Your request has been received. Your guide remains available above.</p>" +
         "</div></div></div>";
     }
-    out += '<div class="sf-est-lead-ctas"><button type="button" class="sf-est-lead-cta alt" data-est-lead-open><span class="sf-est-cta-icon" aria-hidden="true">✓</span>Request an appraisal consultation →</button></div>';
+    out += '<div class="sf-est-lead-ctas">' +
+      '<button type="button" class="sf-est-lead-cta alt" data-est-lead-open><span class="sf-est-cta-icon" aria-hidden="true">✓</span>Request an appraisal consultation →</button>' +
+      '<button type="button" class="sf-est-lead-cta alt" data-est-broker-open><span class="sf-est-cta-icon" aria-hidden="true">✓</span>Talk to a licensed broker →</button></div>';
     if (est.leadOpen) {
+      var leadTitle = est.leadKind === "broker" ? "Talk to a licensed broker" : est.leadKind === "appraisal" ? "Request an appraisal consultation" : "Email my guide";
+      var leadReassure = est.leadKind === "broker"
+        ? "A licensed broker will contact you about selling, buying, or marketing this property. No obligation."
+        : est.leadKind === "appraisal"
+          ? "No obligation to list. A specialist replies within one business day."
+          : "We email the guide to you. No follow-up unless you ask.";
       out += '<form class="sf-est-lead-form" data-est-lead-form>' +
-        "<h3>" + (est.appraisalRequested ? "Request an appraisal consultation" : "Email my guide") + "</h3>" +
+        "<h3>" + leadTitle + "</h3>" +
         '<p class="sf-est-lead-ctx">For: <b>' + esc(est.municipality + " · " + est.barangay + (est.streetLabel && !est.allOther ? " · " + est.streetLabel : "")) + "</b> · " + leadValue + ".</p>" +
-        '<p class="sf-est-lead-reassure">No obligation to list. A specialist replies within one business day.</p>' +
+        '<p class="sf-est-lead-reassure">' + leadReassure + '</p>' +
         '<div class="sf-est-lead-grid">' +
         '<label>Full name<input name="name" autocomplete="name" required maxlength="160" placeholder="Your name"></label>' +
         '<label>Email<input type="email" name="email" autocomplete="email" required maxlength="254" placeholder="you@email.com"></label>' +
-        '<label>Phone' + (est.appraisalRequested ? "" : " (optional)") + '<input name="phone" type="tel" autocomplete="tel"' + (est.appraisalRequested ? " required" : "") + ' maxlength="50" placeholder="Mobile number"></label>' +
-        '<label>Message<textarea name="message" maxlength="600" rows="3">I’m interested in this Batangas property estimate.</textarea></label>' +
+        '<label>Phone' + (est.leadKind === "appraisal" || est.leadKind === "broker" ? "" : " (optional)") + '<input name="phone" type="tel" autocomplete="tel"' + (est.leadKind === "appraisal" || est.leadKind === "broker" ? " required" : "") + ' maxlength="50" placeholder="Mobile number"></label>' +
+        '<label>Message<textarea name="message" maxlength="600" rows="3">' + (est.leadKind === "broker" ? "I’m interested in buying or selling this Batangas property." : est.leadKind === "appraisal" ? "I’m interested in an appraisal consultation for this property." : "I’m interested in this Batangas property estimate.") + '</textarea></label>' +
         "</div>" +
         '<label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to SEA ESTATES emailing this report to me and contacting me about this request. See our <a href="#/privacy">Privacy Notice</a>.</span></label>' +
-        '<button type="submit">' + (est.appraisalRequested ? "Send my consultation request →" : "Email my guide →") + '</button>' +
+        '<button type="submit">' + (est.leadKind === "broker" ? "Request broker contact →" : est.leadKind === "appraisal" ? "Send my consultation request →" : "Email my guide →") + '</button>' +
         '<p class="sf-form-status" data-est-lead-status aria-live="polite"></p></form>';
     }
     return out + "</div>";
@@ -2055,14 +2071,25 @@ var saleContext = $q(card, "[data-est-sale-context]");
      $qa(card, "[data-est-lead-open]").forEach(function (leadBtn) {
        leadBtn.addEventListener("click", function () {
          est.leadOpen = true;
+         est.leadKind = "appraisal";
          est.appraisalRequested = true;
          renderLayout();
          revealLeadForm();
        });
      });
+    $qa(card, "[data-est-broker-open]").forEach(function (brokerBtn) {
+      brokerBtn.addEventListener("click", function () {
+        est.leadOpen = true;
+        est.leadKind = "broker";
+        est.appraisalRequested = true;
+        renderLayout();
+        revealLeadForm();
+      });
+    });
     var appraisalBtn = $q(card, "[data-est-appraisal-open]");
     if (appraisalBtn) appraisalBtn.addEventListener("click", function () {
       est.leadOpen = true;
+      est.leadKind = "appraisal";
       est.appraisalRequested = true;
       renderLayout();
       revealLeadForm();
@@ -2304,13 +2331,21 @@ return {
     var notes = data.get("message");
     if (notes) message.push("Notes: " + notes);
     var payload = {
-      inquiry_type: est.appraisalRequested ? "professional-appraisal-request" : "location-analysis",
+      /* The lead's requested service, labeled on the CRM record:
+         appraisal -> professional-appraisal-request,
+         broker -> broker-consultation,
+         email path -> location-analysis. */
+      inquiry_type: est.leadKind === "appraisal" ? "professional-appraisal-request"
+        : est.leadKind === "broker" ? "broker-consultation"
+        : "location-analysis",
       full_name: data.get("name"),
       email: data.get("email"),
       phone: data.get("phone"),
       consent: data.get("consent") === "on",
       purpose: est.purpose,
-      service_requested: est.appraisalRequested ? "professional-appraisal-consultation" : "valuation-report",
+      service_requested: est.leadKind === "appraisal" ? "professional-appraisal-consultation"
+        : est.leadKind === "broker" ? "broker-consultation"
+        : "valuation-report",
       message: message.join(" | "),
       report: {
         property: {
