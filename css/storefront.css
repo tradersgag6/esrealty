@@ -645,12 +645,16 @@
     transition: transform .16s var(--sf-ease), box-shadow .16s var(--sf-ease),
       background-color .16s var(--sf-ease), border-color .16s var(--sf-ease);
   }
-  .sf-pv .sf-primary-btn:hover,
-  .sf-pv .sf-outline-btn:hover { transform: translateY(-1px); }
+  .sf-pv .sf-primary-btn:not(:disabled):hover,
+  .sf-pv .sf-outline-btn:not(:disabled):hover { transform: translateY(-1px); }
 }
 /* Pressed feedback stays inside the 80-150ms budget and moves nothing else. */
-.sf-pv .sf-primary-btn:active,
-.sf-pv .sf-outline-btn:active { transform: translateY(0) scale(.995); }
+.sf-pv .sf-primary-btn:not(:disabled):active,
+.sf-pv .sf-outline-btn:not(:disabled):active { transform: translateY(0) scale(.995); }
+/* Disabled work-in-flight state: reduced emphasis plus a progress cursor, so
+   a sending button never reads as a normal tappable one. */
+.sf-pv .sf-primary-btn:disabled,
+.sf-pv .sf-primary-btn[aria-disabled="true"] { opacity: .65; cursor: progress; }
 
 /* The consult form's confirmation rises in instead of hard-swapping, and a
    check glyph leads the success message. Scoped to this landing so the

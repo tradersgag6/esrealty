@@ -1682,12 +1682,30 @@
         var consultStatus = consult.querySelector(".sf-form-status");
         var consultButton = consult.querySelector("button[type=submit]");
         var consultData = new FormData(consult);
+        /* Errors are announced assertively (role=alert + assertive live region,
+           the same pattern the estimator's validation uses); the success state
+           returns to the polite live region the markup declares. */
+        var setConsultError = function (message) {
+          if (!consultStatus) return;
+          consultStatus.textContent = message;
+          consultStatus.className = "sf-form-status error";
+          consultStatus.setAttribute("role", "alert");
+          consultStatus.setAttribute("aria-live", "assertive");
+        };
         if (!(API && API.contact)) {
-          if (consultStatus) { consultStatus.textContent = "The contact service is unavailable right now. Please try again in a moment."; consultStatus.className = "sf-form-status error"; }
+          setConsultError("The contact service is unavailable right now. Please try again in a moment.");
           return;
         }
         consultButton.disabled = true;
-        if (consultStatus) { consultStatus.textContent = "Sending…"; consultStatus.className = "sf-form-status"; }
+        /* aria-busy marks the form as working for assistive tech while the
+           request is in flight, matching the visible "Sending…" state. */
+        consult.setAttribute("aria-busy", "true");
+        if (consultStatus) {
+          consultStatus.textContent = "Sending…";
+          consultStatus.className = "sf-form-status";
+          consultStatus.removeAttribute("role");
+          consultStatus.setAttribute("aria-live", "polite");
+        }
         API.contact({
           inquiry_type: "consult",
           full_name: consultData.get("name"),
@@ -1699,8 +1717,8 @@
           consult.reset();
           if (consultStatus) { consultStatus.textContent = "Your request has been received. The SEA ESTATES team will review your details and follow up using the contact information you provided."; consultStatus.className = "sf-form-status success"; }
         }).catch(function (error) {
-          if (consultStatus) { consultStatus.textContent = error.message || "Could not send. Please try again."; consultStatus.className = "sf-form-status error"; }
-        }).finally(function () { consultButton.disabled = false; });
+          setConsultError(error.message || "Could not send. Please try again.");
+        }).finally(function () { consultButton.disabled = false; consult.removeAttribute("aria-busy"); });
       }
     });
   }
