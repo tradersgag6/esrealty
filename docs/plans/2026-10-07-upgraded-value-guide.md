@@ -738,9 +738,11 @@ honest"; the building-condition helper changed from jargon ("used to screen
 asking comparisons, not an invented discount") to "Best guess is fine".
 
 The inquiry paths (appraiser / broker with service classification, idempotent
-submission) remain for Task 14 — the existing lead block already routes a
-valuation-report request through the contact API with one idempotency key, so
-the appraiser/broker split will extend that path rather than build a new one.
+submission) were delivered in `ffdab09` — see
+`docs/plans/2026-10-08-lead-routing.md` for the implemented routing, scoped
+assignment and audit decisions. The lead block routes each request through the
+contact API with one idempotency key, extended with the service label rather
+than rebuilt.
 
 | Action | Customer intent |
 |---|---|
@@ -806,7 +808,25 @@ The remaining design question for Plan B is no longer "which number" but how the
 public surface presents the ramp honestly: the estimate, its disclosed multiplier,
 the BIR reference, and the researched asking evidence beside it.
 
-## Plan B status (2026-10-08)
+## Plan B status (2026-10-09)
 
-Task 11 in progress: shared `js/value_guide_ui.js` with `mountGuide(container,
-{ mode })`, replacing the old `ESREALTY_EST.cardSection()` mount on the storefront.
+Tasks 11–14 are complete; the storefront and the internal app render the same
+completed guide.
+
+- Task 11: shared entry point `js/value_guide_ui.js` (`mountGuide`).
+- Task 12: public design aligned to the reference (Location → Details → Report
+  progress; mobile fit coverage at 390px).
+- Task 13: lead routing split (appraisal / broker / email) with scoped
+  assignment, service-transact audit, and the two-path inquiry UI
+  (`docs/plans/2026-10-08-lead-routing.md`).
+- Final design pass (`ef5043c`): the review screen is removed — Details
+  calculates directly, so the flow is Location → Details → calculating →
+  Result. The calculating screen now runs a real 500ms stage cadence plus an
+  indeterminate bar (minimum 1.5s so a cached run is readable). Ownership &
+  Title default to "Not sure" as recorded review flags. The next-step card is
+  three icon tiles (inline outline SVGs) keeping the asserted copy and hooks.
+  `value_guide_simplify_e2e.js` coverage was rewritten for the merged flow.
+- Task 14: full regression 108/108 green on desktop; estimator, simplify and
+  mobile-readability suites green at 390px; bundle `180cb2abdf06cf12` IN SYNC;
+  service-worker cache bumped to `esrealty-pages-v12`. No pre-existing
+  failures remain — `stores_freshness_e2e` was green with the worker running.
