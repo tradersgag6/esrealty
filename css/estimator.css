@@ -401,6 +401,7 @@
 .sf-est-data-icon { display: grid; grid-row: span 2; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: #eef8fa; color: #17647c; font-size: 15px; font-style: normal; }
 .sf-est-result-data b { color: #263442; font-size: 12px; }
 .sf-est-result-data small { color: #65737b; font-size: 11px; }
+.sf-est-result-data-note { margin: -14px 0 24px; color: #65737b; font-size: 12px; line-height: 1.55; }
 .sf-est-analysis-summary { display: grid; gap: 14px; margin: 0 0 22px; padding: 16px; border: 1px solid #e2e6e7; border-radius: 12px; background: #fff; }
 .sf-est-analysis-status { display: flex; align-items: center; gap: 10px; }
 .sf-est-analysis-check { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 50%; background: #dcefe2; color: #236c43; font-weight: 900; }

@@ -153,7 +153,8 @@ function setInput(sel, v) { const e = q(sel); e.value = v; e.dispatchEvent(new E
     chk("result-heading-is-clear", !!q('#sf-est-result-heading') && /Your guide is ready\./.test(q('#sf-est-result-heading').textContent), "");
     chk("selling-result-design", !!q('.sf-est-selling-result') && /YOUR PROPERTY VALUE GUIDE/.test(q('.sf-est-result-eyebrow').textContent) && !!q('.sf-est-nextstep') && /04/.test(q('.sf-est-step-no').textContent), "");
     chk("result-scroll-cue", !!q('[data-est-scroll-report]') && /Explore calculation details/.test(q('[data-est-scroll-report]').textContent), "");
-    chk("result-data-strip", !!q('.sf-est-result-data') && /BIR source match/.test(q('.sf-est-result-data').textContent) && /2022-07-23/.test(q('.sf-est-result-data').textContent), "");
+    chk("result-data-strip", !!q('.sf-est-result-data') && /BIR source match/.test(q('.sf-est-result-data').textContent) && /BIR schedule in effect since/.test(q('.sf-est-result-data').textContent) && /2022-07-23/.test(q('.sf-est-result-data').textContent), "");
+    chk("result-schedule-date-framed-as-ongoing", !!q('.sf-est-result-data-note') && /remain in force until a newer Department Order/.test(q('.sf-est-result-data-note').textContent) && /re-checked every 30 days/.test(q('.sf-est-result-data-note').textContent), (q('.sf-est-result-data-note') || { textContent: "" }).textContent);
     chk("analysis-summary", !!q('.sf-est-analysis-summary') && /Analysis complete/.test(q('.sf-est-analysis-summary').textContent) && /Vacant lot/i.test(q('.sf-est-analysis-summary').textContent), "");
     chk("next-step-card-above-report", !!q('.sf-est-nextstep') && !!q('[data-est-lead-open]') &&
         q('.sf-est-nextstep').compareDocumentPosition(q('.sf-est-report')) & Node.DOCUMENT_POSITION_FOLLOWING &&
