@@ -87,7 +87,11 @@ const ROUTES = ["#/home", "#/search", "#/property-value", "#/project-bt"];
     const flow = await page_flowLinks();
     chk("pv-no-broken-home-anchor", flow.broken.length === 0, "dead/looping links: " + flow.broken.join(", "));
     chk("pv-primary-targets-the-form", flow.primaryTargetsForm, "primary CTA target=" + flow.primaryTarget);
-    chk("pv-has-working-guide-link", flow.guideLinkUsesHandler, "value-guide link does not use data-est-services");
+    /* The landing is a services conversation: it must not link out to the
+       home calculator (the reader chose a service, not a calculator session)
+       and must not mount one. The calculator stays on the home page. */
+    chk("pv-carries-no-guide-link", !flow.guideLinkUsesHandler, "landing still links to the home guide");
+    chk("pv-carries-no-calculator", !document.querySelector(".sf-pv [data-est-root]"), "calculator mounted on the landing");
     chk("pv-form-has-scroll-target", flow.formHasId, "form wrapper has no id for the CTA to scroll to");
 
     /* ---- stylesheets must be structurally valid ---- */

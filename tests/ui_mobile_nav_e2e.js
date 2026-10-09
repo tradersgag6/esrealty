@@ -14,7 +14,7 @@
  *  5. The panel had overflow:visible and no height, so on a 375x667 phone the
  *     auth actions at the bottom were unreachable.
  *  6. Tapping a Services accordion header both expanded it and closed the menu
- *     containing it, so the seven services were unreachable on a phone.
+ *     containing it, so the services were unreachable on a phone.
  *
  * The per-viewport sweep lives in tests/run_mobile_nav_sweep.ps1, which re-runs
  * this same file at each width in turn - a page script cannot resize its own
@@ -212,7 +212,7 @@ const BP = 1024;
         chk("accordion-keeps-panel-open", panel.classList.contains("open"),
           "tapping an accordion header must not dismiss the menu");
         const rows = first.querySelectorAll(".sf-menu-acc-body a");
-        chk("accordion-has-children", rows.length === 7, "services=" + rows.length);
+        chk("accordion-has-children", rows.length === 9, "services=" + rows.length);
         /* Touch targets */
         let small = 0;
         first.querySelectorAll("a, .sf-menu-acc-sum").forEach(a => {

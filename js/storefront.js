@@ -67,9 +67,12 @@
    * a destination without editing both. Both surfaces are now generated from
    * these lists, so a new destination is one edit.
    *
-   * Services and Project B.T have no pages of their own yet, so their items
-   * resolve to the homepage services section and the Project B.T coming-soon
-   * page respectively. Nothing here is a dead link.
+   * Services route through the Get My Property Value page, which embeds the
+   * actual value guide: the reader enters their details, sees the estimate,
+   * and requests the service they came for on one page. Buying and Renting
+   * keep their functional destinations (the listings search). Project B.T
+   * resolves to its coming-soon page. Nothing here is a dead link, and the
+   * homepage services section renders from this same array.
    * ------------------------------------------------------------------ */
   var NAV = [
     { href: "#/home", label: "Home" },
@@ -84,11 +87,13 @@
   var SERVICES = [
     { href: "#/search", label: "Buying a property", note: "Find listings, arrange viewings and review offers." },
     { href: "#/property-value?service=sell", label: "Selling a property", note: "Review your value guide and discuss a sale." },
-    { href: "#/search?offer_type=rent", label: "Renting", note: "Tenant matching and lease support." },
-    { href: "#/property-value?service=pre-selling", label: "Pre-selling", note: "Prepare, price and launch with confidence." },
-    { href: "#/home?section=services", label: "Property management", note: "Support with rent, tenants and property upkeep." },
-    { href: "#/home?section=services", label: "Title and legal", note: "Coordinate title and document checks." },
-    { href: "#/home?section=services", label: "Financing", note: "Explore bank and developer financing options." }
+    { href: "#/search?offer_type=rent", label: "Renting / leasing", note: "Tenant matching and lease support." },
+    { href: "#/property-value?service=pre-selling", label: "Pre-selling & developer projects", note: "Prepare, price and launch with confidence." },
+    { href: "#/property-value?service=appraisal", label: "Property appraisal & valuation", note: "A guided estimate first, then a professional valuation." },
+    { href: "#/property-value?service=broker", label: "Talk to a licensed broker", note: "Discuss selling, buying or marketing with a licensed broker." },
+    { href: "#/property-value?service=manage", label: "Property management", note: "Support with rent, tenants and property upkeep." },
+    { href: "#/property-value?service=title", label: "Title & documentation", note: "Coordinate title checks and document processing." },
+    { href: "#/property-value?service=finance", label: "Financing / Pag-IBIG & bank", note: "Explore bank and developer financing options." }
   ];
 
   /* Shophouse and Project B.T are temporarily closed and are presented as one
@@ -207,56 +212,115 @@
   }
 
   /* ------------------------------------------------------------------
-   * Get My Property Value - seller lead capture.
+   * Get My Property Value - the selling-services landing.
    *
-   * Research guidance applied here: a dedicated landing page with one goal, a
-   * first-person benefit-led headline, only 3-4 form fields (short forms
-   * convert materially better), trust-reducing microcopy next to the button,
-   * and an explicit "what happens next" so people know a human calls them.
+   * One page, one goal: the owner tells us about the property and the service
+   * they need (selling, appraisal, broker contact, management, title or
+   * financing), and the team replies within one business day. The value
+   * calculator lives on the home page; this page deliberately carries no
+   * calculator so it stays a services conversation. The hero, document title
+   * and primary CTA adapt to ?service=... and the form preselects it.
    * ------------------------------------------------------------------ */
+  var PV_DEFAULT = {
+    eyebrow: "Selling & property services",
+    h1: "Get my property value.",
+    cta: "Talk to our team",
+    lede: "Tell us about your property and what you are planning. A specialist reviews it with you and points you to the right service — professional appraisal, broker support for selling, property management, title or financing. No obligation to list with us."
+  };
+
+  var PV_SERVICES = {
+    "sell": {
+      title: "Selling a property | SEA ESTATES",
+      eyebrow: "Selling support",
+      h1: "Sell with a plan, not a guess.",
+      cta: "Get selling support",
+      lede: "Tell us about your property and your timing. We help with pricing, preparation and a selling plan, and we scope the work before you commit. No obligation to list with us."
+    },
+    "pre-selling": {
+      title: "Pre-selling support | SEA ESTATES",
+      eyebrow: "Pre-selling support",
+      h1: "Sell with a plan, not a guess.",
+      cta: "Plan my pre-selling",
+      lede: "We help owners prepare, price and launch a property so it sells well from the first week on the market. Tell us where you are in the process."
+    },
+    "appraisal": {
+      title: "Property appraisal & valuation | SEA ESTATES",
+      eyebrow: "Appraisal & valuation",
+      h1: "A defensible value, not a guess.",
+      cta: "Request an appraisal consultation",
+      lede: "Request a professional appraisal consultation for financing, estate or documentation needs. Tell us about the property and what the valuation is for."
+    },
+    "broker": {
+      title: "Talk to a licensed broker | SEA ESTATES",
+      eyebrow: "Licensed brokerage",
+      h1: "Talk to a licensed broker.",
+      cta: "Talk to a licensed broker",
+      lede: "Tell us about the property and request broker contact for selling, buying or marketing. A licensed broker replies, with no obligation to list."
+    },
+    "manage": {
+      title: "Property management | SEA ESTATES",
+      eyebrow: "Property management",
+      h1: "Let someone else handle the day-to-day.",
+      cta: "Ask about management",
+      lede: "Tell us what needs managing — tenants, rent, upkeep or turnover — and we will walk through the options with you."
+    },
+    "title": {
+      title: "Title & documentation | SEA ESTATES",
+      eyebrow: "Title & documentation",
+      h1: "Get the paperwork in order.",
+      cta: "Ask about documentation",
+      lede: "Ask our team to coordinate title checks and document processing, and tell us what stage the paperwork is at."
+    },
+    "finance": {
+      title: "Financing support | SEA ESTATES",
+      eyebrow: "Financing",
+      h1: "Plan the financing before the commitment.",
+      cta: "Ask about financing",
+      lede: "Tell us what you are planning and we will walk through bank, Pag-IBIG and developer financing options with you."
+    }
+  };
+
   function propertyValuePage(params) {
     var service = String((params && params.get("service")) || "").toLowerCase();
-    var isPreSelling = service === "pre-selling";
+    var copy = PV_SERVICES[service] || PV_DEFAULT;
+    var planning = [
+      ["", "Just want to know my property value"],
+      ["sell", "I want to sell soon"],
+      ["pre-selling", "I am preparing to sell in the future"],
+      ["buy", "I am looking to buy"],
+      ["rent", "Renting out my property"],
+      ["broker", "Talk to a licensed broker"],
+      ["manage", "Property management"],
+      ["title", "Title or documentation help"],
+      ["finance", "Financing options"]
+    ];
     return shell('<section class="sf-pv">' +
       '<div class="sf-pv-hero sf-reveal sf-reveal-up">' +
-      '<p class="sf-eyebrow">' + (isPreSelling ? "Pre-selling support" : "Free property value guide") + '</p>' +
-      '<h1>' + (isPreSelling ? "Sell with a plan, not a guess." : "Get my property value.") + '</h1>' +
-      '<p class="sf-pv-lede">' + (isPreSelling
-        ? "We help owners prepare, price and launch a property so it sells well from the first week on the market."
-        : "Answer a few questions and get a Batangas property value guide using the selected BIR reference and disclosed property factors. Available asking listings are shown as context; their prices do not directly determine the estimate.") + '</p>' +
-      /* One job per screen. This page is the HUMAN step - talk to a person about
-       * an appraisal - so the primary action is the form, which is right there.
-       *
-       * It used to lead with "Start the value guide" -> #/home#sf-estimator,
-       * which was both a loop (the value guide lives on the home page this
-       * route competes with) and broken: the router splits on "?" only, so
-       * "#/home#sf-estimator" parses to the path "home#sf-estimator", matches no
-       * branch, and renders home without ever scrolling to the estimator.
-       * data-est-services is the estimator's own handler and does the navigate +
-       * scroll properly. */
-      '<div class="sf-pv-actions"><a class="sf-primary-btn" href="#sf-pv-form" data-sf-scroll="sf-pv-form">Request an appraisal consultation</a>' +
+      '<p class="sf-eyebrow">' + esc(copy.eyebrow) + '</p>' +
+      '<h1>' + esc(copy.h1) + '</h1>' +
+      '<p class="sf-pv-lede">' + esc(copy.lede) + '</p>' +
+      '<div class="sf-pv-actions"><a class="sf-primary-btn" href="#sf-pv-form" data-sf-scroll="sf-pv-form">' + esc(copy.cta) + '</a>' +
       '<a class="sf-outline-btn" href="#/search">Browse properties</a></div>' +
       '<p class="sf-pv-reassure">No obligation to sell, and none to list with us.</p>' +
-      '<p class="sf-pv-or"><a href="#/home" data-est-services>Not ready yet? Start with the free value guide</a></p>' +
       '</div>' +
 
       '<div class="sf-pv-steps"><h2 class="sf-pv-h2">What happens</h2><ol class="sf-pv-steps-list">' +
-      '<li><span>01</span><div><b>Get your indicative value</b><p>The value guide takes about a minute. You get a BIR zonal reference and an indicative market range immediately.</p></div></li>' +
-      '<li><span>02</span><div><b>Have a short call with our team</b><p>A member of SEA ESTATES reviews your guide with you and asks about your plans, timing and the property itself.</p></div></li>' +
-       '<li><span>03</span><div><b>Discuss a professional valuation</b><p>If a formal valuation fits your needs, we can discuss the scope, documents, site review, and fee before you decide. There is no pressure to list.</p></div></li>' +
+      '<li><span>01</span><div><b>Tell us about your property</b><p>Share the location, the property and what you are planning. The short form below is enough to start.</p></div></li>' +
+      '<li><span>02</span><div><b>Have a short call with our team</b><p>A member of SEA ESTATES reviews your situation with you and asks about your plans, timing and the property itself.</p></div></li>' +
+       '<li><span>03</span><div><b>Choose the service you need</b><p>Appraisal, selling support, broker contact, management, title or financing — we scope it, say what it costs, and you decide. There is no pressure to list.</p></div></li>' +
       '</ol></div>' +
 
-      '<div class="sf-pv-form-wrap" id="sf-pv-form"><div class="sf-pv-form-copy"><h2 class="sf-pv-h2">Talk to us about your property</h2>' +
-      '<p>Tell us a little about what you are planning. We reply within one business day.</p>' +
-       '<ul class="sf-pv-list"><li>No obligation to list your property</li><li>A real person reviews your request</li><li>BIR reference and disclosed estimate factors</li><li>Available asking listings are context, not confirmed sale prices</li></ul></div>' +
+      '<div class="sf-pv-form-wrap" id="sf-pv-form"><div class="sf-pv-form-copy"><h2 class="sf-pv-h2">Tell us what you need</h2>' +
+      '<p>A few details and the service you are after. We reply within one business day.</p>' +
+       '<ul class="sf-pv-list"><li>No obligation to list your property</li><li>A real person reviews your request</li><li>Appraisal, selling, management, title or financing</li><li>Available asking listings are context, not confirmed sale prices</li></ul></div>' +
       '<form class="sf-pv-form" data-sf-consult><label>Full name<input name="name" required maxlength="160" autocomplete="name" placeholder="Juan dela Cruz"></label>' +
       '<label>Mobile number<input name="phone" required maxlength="50" autocomplete="tel" placeholder="09xx xxx xxxx"></label>' +
       '<label>Email<input type="email" name="email" maxlength="254" autocomplete="email" placeholder="you@example.com"></label>' +
-      '<label>What are you planning?<select name="message"><option value="">Choose one</option>' +
-      '<option>Just want to know my property value</option><option>I want to sell soon</option>' +
-      '<option>I am preparing to sell in the future</option><option>I am looking to buy</option><option>Renting out my property</option></select></label>' +
+      '<label>What are you planning?<select name="message"><option value="">Choose one</option>' + planning.map(function (pair) {
+        return '<option value="' + esc(pair[0]) + '"' + (pair[0] === service ? " selected" : "") + '>' + esc(pair[1]) + '</option>';
+      }).join("") + '</select></label>' +
        '<label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to SEA ESTATES contacting me about my property. Read our <a href="#/privacy">Privacy Notice</a>. I can opt out of follow-up at any time.</span></label>' +
-       '<button class="sf-primary-btn" type="submit">Request an appraisal consultation</button>' +
+       '<button class="sf-primary-btn" type="submit">Send my request</button>' +
       '<p class="sf-pv-micro">Takes 30 seconds. No spam. No obligation.</p>' +
       '<p class="sf-form-status" aria-live="polite"></p></form></div></section>');
   }
@@ -1047,14 +1111,15 @@
     "home": "SEA ESTATES | Properties & Batangas Value Guide",
     "search": "Properties for sale and rent | SEA ESTATES",
     "compare": "Compare two properties | SEA ESTATES",
-    "property-value": "Appraisal consultation | SEA ESTATES",
+    "property-value": "Get my property value | SEA ESTATES",
     "privacy": "Privacy Notice | SEA ESTATES",
     "project-bt": "Project B.T — Coming Soon | SEA ESTATES",
     "listing": "Property details | SEA ESTATES"
   };
 
-  /* Services have no pages of their own yet. They resolve to the homepage
-   * services section so the nav never exposes a dead link. */
+  /* Services no longer point at the homepage services section: they are real
+     links into the Get My Property Value funnel. The helper stays for the
+     #/home?section=... deep links the homepage still uses. */
   function scrollToSection(name) {
     if (!name) return false;
     var target = document.getElementById("sf-" + name) || document.getElementById(name);
@@ -1079,10 +1144,14 @@
     setTimeout(function () { scrollToSectionWhenSettled(name, attemptsLeft - 1); }, 180);
   }
 
-  function setTitle(path) {
+  function setTitle(path, params) {
     try {
       var key = path.indexOf("listing/") === 0 ? "listing" : path;
       var next = PAGE_TITLES[key] || PAGE_TITLES.home;
+      if (key === "property-value") {
+        var service = String((params && params.get("service")) || "").toLowerCase();
+        if (PV_SERVICES[service] && PV_SERVICES[service].title) next = PV_SERVICES[service].title;
+      }
       if (document.title !== next) document.title = next;
     } catch (e) { /* noop */ }
   }
@@ -1102,7 +1171,7 @@
     else if (current.path === "search") host.innerHTML = searchPage(current.params);
     else if (current.path === "compare") host.innerHTML = comparisonPage();
     else host.innerHTML = home();
-    setTitle(current.path);
+    setTitle(current.path, current.params);
     syncSearchFilters();
     if (current.path === "search") {
       compareReturn = location.hash;
@@ -1429,8 +1498,6 @@
       if (event.target.closest("[data-sf-drop] a")) closeDrops(null);
       var auth = event.target.closest("[data-sf-auth]");
       if (auth) { openAuth(auth.getAttribute("data-sf-auth")); return; }
-      var services = event.target.closest("[data-sf-services]");
-      if (services) { event.preventDefault(); go("home"); setTimeout(function () { var target = document.getElementById("sf-process"); if (target) target.scrollIntoView({ behavior: "smooth" }); }, 80); return; }
       var scroll = event.target.closest("[data-sf-scroll]");
       if (scroll) {
         event.preventDefault();

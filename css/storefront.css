@@ -413,8 +413,6 @@
   font-size: var(--sf-small);
   color: var(--sf-ink-mute);
 }
-/* The demoted escape hatch to the value guide. It used to be the page's primary
-   button, which made the page argue with its own form. */
 /* The value guide is the one deliberate "tool" moment on the page, and it was
  * #fbfaf7 sitting on a #fff section - a difference of two RGB points, so it read
  * only through its 1px border. One clear elevated surface is calmer than a
@@ -428,19 +426,6 @@
 /* The hero faded cream -> white, which implied a separate zone that does not
  * exist. Inherit the page instead. */
 .sf-est-hero { background: transparent; }
-
-/* The demoted escape hatch to the value guide. It used to be the page's primary
-   button, which made the page argue with its own form. */
-.sf-pv-or {
-  margin: .2rem 0 0;
-  font-size: var(--sf-small);
-}
-.sf-pv-or a {
-  color: var(--sf-ink-mute);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.sf-pv-or a:hover { color: var(--sf-accent); }
 
 /* Scroll target for the hero CTA. Without an offset the sticky header would
    cover the form's first field. */
@@ -471,7 +456,6 @@
   /* align-self:end levels the buttons with the baseline of the headline block */
   .sf-pv-hero > .sf-pv-actions  { grid-area: 2 / 2; align-self: end; margin-bottom: 0; }
   .sf-pv-hero > .sf-pv-reassure { grid-area: 3 / 2; margin: 0; }
-  .sf-pv-hero > .sf-pv-or       { grid-area: 4 / 2; }
 }
 
 .sf-pv-h2 {

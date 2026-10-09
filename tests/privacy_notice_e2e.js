@@ -24,7 +24,7 @@
     location.hash = "#/property-value";
     await wait(500);
     check("appraisal consultation consent links privacy notice", !!document.querySelector('.sf-pv-form a[href="#/privacy"]'), "property-value consent link");
-    check("consultation CTA avoids promising a free formal appraisal", !/Request my free appraisal/i.test(document.body.textContent) && /Request an appraisal consultation/.test(document.body.textContent), "consultation wording");
+    check("consultation CTA avoids promising a free formal appraisal", !/Request my free appraisal/i.test(document.body.textContent) && /Talk to our team|Request an appraisal consultation/.test(document.body.textContent), "consultation wording");
   } catch (error) {
     checks.push({ name: "privacy runner", ok: false, detail: String(error && error.message || error) });
   }

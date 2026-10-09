@@ -32,10 +32,18 @@ function chk(n, ok, d) { window.__msChecks.push({ name: n, ok: !!ok, detail: d |
     /* ---- services mega-menu content ---- */
     const svc = drops.find(d => (d.querySelector("summary").textContent || "").indexOf("Services") === 0);
     const svcItems = svc ? Array.from(svc.querySelectorAll(".sf-drop-panel a")) : [];
-    chk("nav-services-seven-items", svcItems.length === 7, "count=" + svcItems.length);
+    chk("nav-services-nine-items", svcItems.length === 9, "count=" + svcItems.length);
     const svcLabels = svcItems.map(a => a.textContent.replace(/\s+/g, " ").trim());
-    ["Buying a property", "Selling a property", "Renting", "Pre-selling", "Property management", "Title and legal", "Financing"]
+    ["Buying a property", "Selling a property", "Renting / leasing", "Pre-selling & developer projects", "Property appraisal & valuation", "Talk to a licensed broker", "Property management", "Title & documentation", "Financing / Pag-IBIG & bank"]
       .forEach((label, i) => chk("nav-service-" + i + "-" + label.toLowerCase().replace(/[^a-z]/g, ""), (svcLabels[i] || "").indexOf(label) === 0, "got=" + svcLabels[i]));
+    /* Every service must land somewhere real. Buying/Renting keep the listings
+       search; everything else funnels through Get My Property Value with its
+       own intro. None may bounce to the homepage services section. */
+    const svcHrefList = svcItems.map(a => a.getAttribute("href"));
+    chk("nav-services-no-homepage-bounce", svcHrefList.every(h => (h || "").indexOf("#/home?section=services") === -1), JSON.stringify(svcHrefList));
+    chk("nav-services-buying-renting-to-search", svcHrefList[0] === "#/search" && svcHrefList[2] === "#/search?offer_type=rent", JSON.stringify(svcHrefList.slice(0, 3)));
+    chk("nav-services-funnel-to-property-value", svcHrefList.filter(h => h.indexOf("#/property-value?service=") === 0).length === 7, JSON.stringify(svcHrefList));
+    chk("nav-services-broker-item", svcHrefList.indexOf("#/property-value?service=broker") === 5, "broker=" + svcHrefList[5]);
 
     /* ---- Project B.T merges shophouse + project, both to coming soon ---- */
     const bt = drops.find(d => (d.querySelector("summary").textContent || "").indexOf("Project B.T") === 0);
@@ -67,7 +75,9 @@ function chk(n, ok, d) { window.__msChecks.push({ name: n, ok: !!ok, detail: d |
 
     /* ---- route titles ---- */
     await go("#/property-value", 1600);
-    chk("title-property-value", document.title === "Appraisal consultation | SEA ESTATES", "title=" + document.title);
+    chk("title-property-value", document.title === "Get my property value | SEA ESTATES", "title=" + document.title);
+    await go("#/property-value?service=broker", 1600);
+    chk("title-property-value-broker", document.title === "Talk to a licensed broker | SEA ESTATES", "title=" + document.title);
     await go("#/project-bt", 1600);
     chk("title-project-bt", document.title.indexOf("Project B.T") === 0, "title=" + document.title);
     await go("#/search", 1800);
@@ -116,7 +126,7 @@ function chk(n, ok, d) { window.__msChecks.push({ name: n, ok: !!ok, detail: d |
     const homeForm = await go("#/home", 1700).then(() => document.querySelector("#sf-contact [data-sf-consult]"));
     chk("home-consult-name-field-matches-handler", !!(homeForm && homeForm.querySelector("[name=name]")), "home consult form drifted from the handler");
     await go("#/property-value", 1500);
-    chk("pv-free-and-no-obligation", /free/i.test(document.querySelector(".sf-pv").textContent) && /no obligation/i.test(document.querySelector(".sf-pv").textContent), "missing free/no-obligation");
+    chk("pv-no-obligation-note", /no obligation/i.test(document.querySelector(".sf-pv").textContent), "missing no-obligation note");
     chk("pv-no-false-claims", !/\d+\s*(properties sold|clients|homes sold|happy families)/i.test(document.querySelector(".sf-pv").textContent), "fabricated stat found");
 
     /* ---- services section on home, generated from the same array ---- */
@@ -124,7 +134,7 @@ function chk(n, ok, d) { window.__msChecks.push({ name: n, ok: !!ok, detail: d |
     const svcSection = document.getElementById("sf-services");
     chk("home-services-section", !!svcSection, "no #sf-services");
     const svcCards = svcSection ? Array.from(svcSection.querySelectorAll(".sf-service-card")) : [];
-    chk("home-services-seven-cards", svcCards.length === 7, "cards=" + svcCards.length);
+    chk("home-services-nine-cards", svcCards.length === 9, "cards=" + svcCards.length);
     /* The nav dropdown and the homepage section must offer the same set of
        destinations, or the marketing copy silently diverges from the nav. */
     const svcHrefs = svcCards.map(a => a.getAttribute("href")).sort().join("|");
