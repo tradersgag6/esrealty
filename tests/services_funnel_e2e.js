@@ -70,6 +70,28 @@ function chk(n, ok, d) { window.__msChecks.push({ name: n, ok: !!ok, detail: d |
        is already selected, so a visitor can submit without opening the select. */
     const defaultSelect = q(".sf-pv-form select[name=message]");
     chk("default-preselects-first-answer", !!defaultSelect && defaultSelect.value === "Just want to know my property value", "value=" + (defaultSelect && defaultSelect.value));
+
+    /* ---- common questions: objections answered before the ask ---- */
+    /* The FAQ must exist, start collapsed, toggle, restate only promises the
+       page already makes, and add no fabricated proof. */
+    const faq = q(".sf-pv-faq");
+    const faqItems = faq ? Array.from(faq.querySelectorAll(".sf-pv-faq-item")) : [];
+    chk("faq-present", !!faq && faqItems.length >= 5, "items=" + faqItems.length);
+    chk("faq-all-collapsed", faqItems.length > 0 && faqItems.every(d => !d.open), "open=" + faqItems.filter(d => d.open).length);
+    if (faqItems[0]) {
+      faqItems[0].querySelector("summary").click();
+      await wait(120);
+      const opened = faqItems[0].open === true;
+      faqItems[0].querySelector("summary").click();
+      await wait(80);
+      chk("faq-toggle-works", opened && faqItems[0].open === false, "afterOpen=" + opened + " afterClose=" + faqItems[0].open);
+    } else {
+      chk("faq-toggle-works", false, "no items");
+    }
+    const faqText = faq ? faq.textContent.replace(/\s+/g, " ") : "";
+    chk("faq-answers-objections", /free/i.test(faqText) && /no obligation/i.test(faqText) && /one business day/i.test(faqText) && /never sold/i.test(faqText), "faq=" + faqText.slice(0, 120));
+    chk("faq-no-fabricated-stats", !/\d+\s*(clients|properties sold|homes sold|years|happy families)/i.test(faqText), "stat found");
+    chk("faq-privacy-link", !!q(".sf-pv-faq a[href='#/privacy']"), "no privacy link");
   } catch (e) {
     window.__msChecks.push({ name: "runner", ok: false, detail: (e && e.message || e) });
   }

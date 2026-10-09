@@ -333,6 +333,21 @@
        '<li class="sf-reveal sf-reveal-up"><span>03</span><div><b>Choose the service you need</b><p>Appraisal, selling support, broker contact, management, title or financing — we scope it, say what it costs, and you decide. There is no pressure to list.</p></div></li>' +
       '</ol></div>' +
 
+      /* Objection handling directly before the ask. Every answer restates a
+         promise already made elsewhere on the page (free to ask, no
+         obligation, one business day, never sold); nothing numeric or
+         testimonial is invented. All items start collapsed. */
+      '<div class="sf-pv-faq sf-reveal sf-reveal-up"><h2 class="sf-pv-h2">Common questions</h2>' +
+      [
+        ["Is asking free?", "Yes — sending a request and the first conversation are free. If a formal appraisal or listing is the right next step, we explain the scope and fees first, so you decide before anything is charged or signed."],
+        ["Will you pressure me to list?", "No. There is no obligation to sell or list with us, and nothing goes to a broker or appraiser until you ask."],
+        ["What happens to my details?", "They are used only to respond to this request and are never sold. See our <a href=\"#/privacy\">Privacy Notice</a>."],
+        ["How soon will I hear back?", "A specialist replies within one business day."],
+        ["What can you help with?", "Professional appraisal, selling support, broker contact, property management, title and documentation, and financing options."]
+      ].map(function (pair) {
+        return '<details class="sf-pv-faq-item"><summary><h3>' + esc(pair[0]) + '</h3><span class="sf-pv-faq-chev" aria-hidden="true"></span></summary><div class="sf-pv-faq-body"><p>' + pair[1] + '</p></div></details>';
+      }).join("") + '</div>' +
+
       '<div class="sf-pv-form-wrap" id="sf-pv-form"><div class="sf-pv-form-copy sf-reveal sf-reveal-up"><h2 class="sf-pv-h2">Tell us what you need</h2>' +
       '<p>A few details and the service you are after. We reply within one business day.</p>' +
        '<ul class="sf-pv-list"><li>No obligation to list your property</li><li>A real person reviews your request</li><li>Appraisal, selling, management, title or financing</li><li>Available asking listings are context, not confirmed sale prices</li></ul></div>' +

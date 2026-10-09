@@ -524,6 +524,51 @@
   color: var(--sf-ink-soft);
 }
 
+/* Common questions (FAQ) ------------------------------------------------- */
+/* Native details/summary so the disclosure works with no JS at all; the
+   summary is the full 48px row, and the chevron matches the report
+   accordions' rotate gesture. */
+.sf-pv-faq-item { border-bottom: 1px solid var(--sf-line); }
+.sf-pv-faq-item:first-of-type { border-top: 1px solid var(--sf-line); }
+.sf-pv-faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 48px;
+  padding: .95rem 0;
+  cursor: pointer;
+  list-style: none;
+}
+.sf-pv-faq-item summary::-webkit-details-marker { display: none; }
+.sf-pv-faq-item summary h3 {
+  margin: 0;
+  font-size: var(--sf-h3);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--sf-ink);
+}
+.sf-pv-faq-item summary:focus-visible { outline: 3px solid rgba(23, 100, 124, .35); outline-offset: 2px; border-radius: 4px; }
+.sf-pv-faq-chev {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--sf-ink-mute);
+  border-bottom: 2px solid var(--sf-ink-mute);
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform .2s var(--sf-ease);
+}
+.sf-pv-faq-item[open] .sf-pv-faq-chev { transform: rotate(225deg) translate(-2px, -2px); }
+.sf-pv-faq-body { padding: 0 0 1.1rem; }
+.sf-pv-faq-body p {
+  margin: 0;
+  max-width: 46rem;
+  font-size: var(--sf-body);
+  line-height: 1.62;
+  color: var(--sf-ink-soft);
+}
+.sf-pv-faq-body a { color: #174b5e; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+
 /* Form ------------------------------------------------------------------ */
 .sf-pv-form-wrap {
   display: grid;
@@ -641,6 +686,16 @@
 .sf-pv-hero > .sf-reveal:nth-child(5) { --d: .28s; }
 .sf-pv-steps-list > .sf-reveal:nth-child(2) { --d: .07s; }
 .sf-pv-steps-list > .sf-reveal:nth-child(3) { --d: .14s; }
+
+/* Subtle motion tier for the landing (design-system guidance): a short
+   fade-up instead of the site-wide 30px / .7-.85s entrance, so the page
+   settles faster. Scoped to .sf-pv; the global reduced-motion rule still
+   collapses the durations. */
+.sf-pv .sf-reveal { transform: translateY(14px); transition-duration: .45s, .45s; }
+.sf-pv .sf-reveal.sf-reveal-right { transform: translateX(22px); }
+@media (max-width: 760px) {
+  .sf-pv .sf-reveal.sf-reveal-right { transform: translateY(14px); }
+}
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .sf-pv .sf-primary-btn,
