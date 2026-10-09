@@ -712,6 +712,36 @@ Reuse the existing contact infrastructure in `js/listings-api.js`,
 `js/storefront.js`, `supabase/functions/listing-api/index.ts`, and existing
 notification/dispatch handlers.
 
+### Done — public Details screen now asks the reference's full inventory
+
+2026-10-08. The public value guide's Details screen previously hid four site
+questions in a collapsed "Optional site review notes" details block and omitted
+six more the reference asks. It now renders the reference's remaining questions
+as visible chip groups, each with a "Not sure" skip chip:
+
+- **Surroundings**: Community (Open area / Subdivision / Gated community),
+  Flood risk, Road access (Footpath / Barangay / Municipal / Highway)
+- **Land & access**: Frontage, Lot shape (Regular / Irregular), Right of way
+  (Direct / Shared / Landlocked)
+- **The land itself**: Elevation vs the road (At road level / Below road level)
+- **Utilities**: Power & water (Full / Partial / None)
+
+All are recorded on the result (`siteReview` gains `lotShape`, `rightOfWay`,
+`elevation`, `utilities`) and printed in the report's "Site review factors you
+recorded" section. They do not change the estimate — the section note says so
+plainly — consistent with the existing "flags, not deductions" policy.
+
+Copy trimmed at the same pass: the Details subtitle now says "Answer what you
+know — tap Not sure to skip anything you don't", matching the reference's
+clarity instead of "A few details help us make the guide more useful and
+honest"; the building-condition helper changed from jargon ("used to screen
+asking comparisons, not an invented discount") to "Best guess is fine".
+
+The inquiry paths (appraiser / broker with service classification, idempotent
+submission) remain for Task 14 — the existing lead block already routes a
+valuation-report request through the contact API with one idempotency key, so
+the appraiser/broker split will extend that path rather than build a new one.
+
 | Action | Customer intent |
 |---|---|
 | Request a licensed appraiser | Formal valuation, financing, or a documented appraisal assignment. |

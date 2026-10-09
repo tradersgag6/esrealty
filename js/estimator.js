@@ -349,7 +349,7 @@
       ownershipAdjustmentPct: ownershipAdjustmentPct,
       legacyOwnershipScenario: { pct: legacyOwnershipScenarioPct, value: Math.round(unadjustedTotal * (1 - legacyOwnershipScenarioPct / 100)), applied: false, basis: "Historical uncalibrated deduction; not applied to the neutral planning estimate" },
       ownership: { occupancy: opts.occupancy || "not_sure", titleStatus: opts.titleStatus || "not_sure", inheritanceStatus: opts.inheritanceStatus || "not_sure" },
-      siteReview: { community: opts.community || "not stated", floodRisk: opts.floodRisk || "not stated", roadAccess: opts.roadAccess || "not stated", frontage: opts.frontage || "not stated" },
+      siteReview: { community: opts.community || "not stated", floodRisk: opts.floodRisk || "not stated", roadAccess: opts.roadAccess || "not stated", frontage: opts.frontage || "not stated", lotShape: opts.lotShape || "not stated", rightOfWay: opts.rightOfWay || "not stated", elevation: opts.elevation || "not stated", utilities: opts.utilities || "not stated" },
       reviewFlags: [opts.occupancy || "not_sure", opts.titleStatus || "not_sure", opts.inheritanceStatus || "not_sure"].filter(function (v) { return ["empty", "titled_self", "not_inherited", "settled"].indexOf(v) === -1; }),
       conditions: "Conditional planning figure; title, possession, condition and legal access remain unverified. No unsupported ownership discount applied.",
       saleContext: opts.saleContext || "private-resale",
@@ -486,10 +486,14 @@
     return (it && it.label) ? it.label : String(key || "");
   }
 
-  var COMMUNITIES = ["Established residential", "Mixed residential/commercial", "Coastal", "Agricultural", "Mountain / hillside", "Riverside"];
-  var FLOOD_RISKS = ["Low", "Moderate", "High"];
-  var ROAD_ACCESS = ["Concrete road frontage", "Gravel road frontage", "Dirt track access", "No direct road access"];
-  var FRONTAGE = ["Wide (20m+)", "Standard (8–20m)", "Narrow (under 8m)"];
+  var COMMUNITIES = ["Open area", "Subdivision", "Gated community"];
+  var FLOOD_RISKS = ["No flooding", "Occasional flooding", "Flood-prone"];
+  var ROAD_ACCESS = ["Footpath", "Barangay road", "Municipal road", "Highway"];
+  var FRONTAGE = ["Narrow (under 8m)", "About average (8–20m)", "Wide (20m+)"];
+  var LOT_SHAPES = ["Regular", "Irregular"];
+  var RIGHT_OF_WAY = ["Direct road access", "Shared right of way", "Landlocked"];
+  var ELEVATIONS = ["At road level", "Below road level"];
+  var UTILITIES = ["Full power & water", "Partial", "None"];
 
   /* ---------------------------------------------------------- */
   /*  loaders                                                     */
@@ -653,6 +657,10 @@
     floodRisk: "",
     roadAccess: "",
     frontage: "",
+    lotShape: "",
+    rightOfWay: "",
+    elevation: "",
+    utilities: "",
     result: null,
     appraisalRequested: false,
     pricingUnlocked: false,
@@ -992,20 +1000,37 @@ out += "</div>";
   }
 
   function reviewFactorBlock() {
-    return '<div class="sf-est-fields">' +
-      '<label class="sf-est-field">Community / setting<span>Non-monetary — recorded for your specialist</span>' +
-      '<select data-est-community><option value="">— choose —</option>' +
-      COMMUNITIES.map(function (c) { return '<option' + (est.community === c ? " selected" : "") + ">" + esc(c) + "</option>"; }).join("") + "</select></label>" +
-      '<label class="sf-est-field">Flood risk<span>Non-monetary — site-review flag</span>' + chipRow(
-        FLOOD_RISKS.map(function (r) { return { label: r, value: r, active: est.floodRisk === r }; }), "floodRisk"
-      ) + "</label>" +
-      '<label class="sf-est-field">Road access<span>Non-monetary — site-review flag</span>' +
-      '<select data-est-road><option value="">— choose —</option>' +
-      ROAD_ACCESS.map(function (r) { return '<option' + (est.roadAccess === r ? " selected" : "") + ">" + esc(r) + "</option>"; }).join("") + "</select></label>" +
-      '<label class="sf-est-field">Frontage<span>Non-monetary — site-review flag</span>' +
-      '<select data-est-frontage><option value="">— choose —</option>' +
-      FRONTAGE.map(function (f) { return '<option' + (est.frontage === f ? " selected" : "") + ">" + esc(f) + "</option>"; }).join("") + "</select></label>" +
-      "</div>";
+    /* The reference's remaining questions, as visible groups with tiled
+       options and a "Not sure" skip on each. Recorded for the specialist;
+       none of them change the estimate, which the section note says plainly. */
+    var skip = function (key) {
+      return { label: "Not sure", value: "", active: !est[key], skip: true };
+    };
+    var group = function (title, note, fields) {
+      return '<div class="sf-est-review-group"><h4>' + esc(title) + '</h4>' + (note ? '<p class="sf-est-review-note">' + esc(note) + '</p>' : "") + '<div class="sf-est-fields">' + fields.join("") + '</div></div>';
+    };
+    var tile = function (label, opts, key) {
+      return '<label class="sf-est-field sf-est-span2"><span class="sf-est-label">' + esc(label) + '</span>' + chipRow(
+        opts.map(function (o) {
+          return { label: o.label, value: o.skip ? "" : (o.value || o.label), active: o.skip ? !est[key] : est[key] === (o.value || o.label), skip: o.skip };
+        }), key) + "</label>";
+    };
+    return group("Surroundings", "Recorded for the specialist — none of these change the estimate.",
+      [
+        tile("Community", COMMUNITIES.map(function (c) { return { label: c }; }).concat([skip("community")]), "community"),
+        tile("Flood risk", FLOOD_RISKS.map(function (c) { return { label: c }; }).concat([skip("floodRisk")]), "floodRisk"),
+        tile("Road access", ROAD_ACCESS.map(function (c) { return { label: c }; }).concat([skip("roadAccess")]), "roadAccess")
+      ]) +
+    group("Land & access", "Recorded for the specialist — none of these change the estimate.",
+      [
+        tile("Frontage", FRONTAGE.map(function (c) { return { label: c }; }).concat([skip("frontage")]), "frontage"),
+        tile("Lot shape", LOT_SHAPES.map(function (c) { return { label: c }; }).concat([skip("lotShape")]), "lotShape"),
+        tile("Right of way", RIGHT_OF_WAY.map(function (c) { return { label: c }; }).concat([skip("rightOfWay")]), "rightOfWay")
+      ]) +
+    group("The land itself", "Recorded for the specialist — none of these change the estimate.",
+      [tile("Elevation vs the road", ELEVATIONS.map(function (c) { return { label: c }; }).concat([skip("elevation")]), "elevation")]) +
+    group("Utilities", "Recorded for the specialist — none of these change the estimate.",
+      [tile("Power & water", UTILITIES.map(function (c) { return { label: c }; }).concat([skip("utilities")]), "utilities")]);
   }
 
   function ownershipQuestion(key, title, description, options) {
@@ -1041,10 +1066,10 @@ out += "</div>";
   function screen2Html() {
     var out = '<div class="sf-est-step" data-est-screen="2">';
     out += locSummary();
-    out += '<div class="sf-est-step-head"><span class="sf-est-step-no">02</span><div><p class="sf-est-step-eyebrow">PROPERTY DETAILS</p><h3>Describe your property</h3><p class="sf-est-step-subtitle">A few details help us make the guide more useful and honest.</p></div></div>';
+    out += '<div class="sf-est-step-head"><span class="sf-est-step-no">02</span><div><p class="sf-est-step-eyebrow">PROPERTY DETAILS</p><h3>Describe your property</h3><p class="sf-est-step-subtitle">Answer what you know — tap “Not sure” to skip anything you don’t.</p></div></div>';
     if (est.type === "house_lot") {
       out += '<div class="sf-est-fields">' +
-        '<label class="sf-est-field sf-est-span2">Building condition<select data-est-condition>' + [["unknown", "Not inspected / unknown"], ["new", "New / completed finish"], ["good", "Good condition"], ["repair", "Repairs needed"]].map(function (pair) { return '<option value="' + pair[0] + '"' + (est.condition === pair[0] ? " selected" : "") + '>' + pair[1] + '</option>'; }).join("") + '</select><span>Used to screen asking comparisons, not an invented discount</span></label>' +
+        '<label class="sf-est-field sf-est-span2">Building condition<select data-est-condition>' + [["unknown", "Not inspected / unknown"], ["new", "New / completed finish"], ["good", "Good condition"], ["repair", "Repairs needed"]].map(function (pair) { return '<option value="' + pair[0] + '"' + (est.condition === pair[0] ? " selected" : "") + '>' + pair[1] + '</option>'; }).join("") + '</select><span>Best guess is fine</span></label>' +
         '<label class="sf-est-field sf-est-span2">Construction style<span>Main build type</span>' + chipRow(
           ["wood_prefab", "mixed_chb", "rca_steel"].map(function (k) {
             return { label: labelFor(DATA.config, "construction", k), value: k, active: est.construction === k };
@@ -1071,7 +1096,11 @@ out += "</div>";
       out += '<p class="sf-est-hint">As a vacant lot there is no house to value — we only look at the land.</p>';
     }
     out += ownershipQuestions();
-    out += '<details class="sf-est-site-review"><summary>Optional site review notes</summary>' + reviewFactorBlock() + '</details>';
+    /* The reference asks these questions visibly, each with a "Not sure" skip,
+       so they sit in the main flow rather than a collapsed corner. They are
+       recorded for the specialist and do not change the estimate, which the
+       section note says plainly. */
+    out += '<div class="sf-est-site-review" data-est-site-review>' + reviewFactorBlock() + '</div>';
     out += '<div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-prev>← Back to property details</button>' +
       '<button type="button" class="sf-est-next" data-est-next>Review my inputs →</button></div>';
     return out + "</div>";
@@ -1431,12 +1460,16 @@ var displayRange = '';
 
     s.push({ t: "Site review factors you recorded", h:
       "<ul class=\"sf-est-rdl\">" +
-      "<li>Community/setting: <b>" + esc(r.siteReview.community) + "</b></li>" +
+      "<li>Community: <b>" + esc(r.siteReview.community) + "</b></li>" +
       "<li>Flood risk: <b>" + esc(r.siteReview.floodRisk) + "</b></li>" +
       "<li>Road access: <b>" + esc(r.siteReview.roadAccess) + "</b></li>" +
       "<li>Frontage: <b>" + esc(r.siteReview.frontage) + "</b></li>" +
+      "<li>Lot shape: <b>" + esc(r.siteReview.lotShape) + "</b></li>" +
+      "<li>Right of way: <b>" + esc(r.siteReview.rightOfWay) + "</b></li>" +
+      "<li>Elevation: <b>" + esc(r.siteReview.elevation) + "</b></li>" +
+      "<li>Utilities: <b>" + esc(r.siteReview.utilities) + "</b></li>" +
       "</ul>" +
-      "<p class=\"sf-est-rdp\">These flags do not change the arithmetic — they are recorded so a specialist verifies them on site.</p>" });
+      "<p class=\"sf-est-rdp\">These factors are recorded for a specialist to verify on site; they do not change the arithmetic.</p>" });
 
     s.push({ t: "Methodology", h:
       "<p class=\"sf-est-rdp\">The same inputs and data version produce the same calculation. The report shows the BIR reference, applied factors, building-cost/depreciation calculation when relevant, and the resulting range. Listing prices provide context only; they do not directly determine this estimate.</p>" });
@@ -1955,22 +1988,28 @@ var saleContext = $q(card, "[data-est-sale-context]");
       });
     });
 
-    var com = $q(card, "[data-est-community]");
-    if (com) com.addEventListener("change", function () { est.community = com.value; });
-    var road = $q(card, "[data-est-road]");
-    if (road) road.addEventListener("change", function () { est.roadAccess = road.value; });
-    var front = $q(card, "[data-est-frontage]");
-    if (front) front.addEventListener("change", function () { est.frontage = front.value; });
     var floodGroup = {};
     $qa(card, '[data-est-screen="2"] .sf-est-chips').forEach(function (group) {
       group.addEventListener("click", function (e) {
         var btn = e.target.closest("[data-val]");
         if (!btn) return;
         var t = group.getAttribute("data-t");
-        if (t === "floodRisk") est.floodRisk = btn.getAttribute("data-val");
+        /* The "Not sure" chip carries value "" so it clears the answer —
+           unset, not "checked and found nothing". The screen re-renders so the
+           active chip state (including the skip chip) matches the state. */
+        var review = false;
+        if (t === "floodRisk") { est.floodRisk = btn.getAttribute("data-val"); review = true; }
+        else if (t === "community") { est.community = btn.getAttribute("data-val"); review = true; }
+        else if (t === "roadAccess") { est.roadAccess = btn.getAttribute("data-val"); review = true; }
+        else if (t === "frontage") { est.frontage = btn.getAttribute("data-val"); review = true; }
+        else if (t === "lotShape") { est.lotShape = btn.getAttribute("data-val"); review = true; }
+        else if (t === "rightOfWay") { est.rightOfWay = btn.getAttribute("data-val"); review = true; }
+        else if (t === "elevation") { est.elevation = btn.getAttribute("data-val"); review = true; }
+        else if (t === "utilities") { est.utilities = btn.getAttribute("data-val"); review = true; }
         else if (t === "construction") est.construction = btn.getAttribute("data-val");
         else if (t === "floors") est.floors = btn.getAttribute("data-val");
         else if (t === "ageBand") est.ageBand = btn.getAttribute("data-val");
+        if (review) renderLayout();
       });
     });
 
@@ -2149,7 +2188,8 @@ function missingScreen1Field() {
       occupancy: est.occupancy,
       titleStatus: est.titleStatus,
       inheritanceStatus: est.inheritanceStatus,
-      community: est.community, floodRisk: est.floodRisk, roadAccess: est.roadAccess, frontage: est.frontage
+      community: est.community, floodRisk: est.floodRisk, roadAccess: est.roadAccess, frontage: est.frontage,
+      lotShape: est.lotShape, rightOfWay: est.rightOfWay, elevation: est.elevation, utilities: est.utilities
     };
     Promise.all([loadMunicipality(est.municipalitySlug), loadComparableListings(opts)]).then(function (parts) {
       if (currentCalculation !== calculationRequest || !getCard()) return;

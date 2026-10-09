@@ -127,6 +127,16 @@ function chooseOwnershipNotSure() {
     chk("describe-property-screen-present", !!q('[data-est-screen="2"]') && /Describe your property/.test(q('[data-est-screen="2"] h3').textContent), "");
     chk("screen2-is-revealed", !!q('[data-est-screen="2"]') && q('[data-est-screen="2"]').getBoundingClientRect().top < window.innerHeight, "top=" + (q('[data-est-screen="2"]') && q('[data-est-screen="2"]').getBoundingClientRect().top));
     chk("ownership-title-questions-present", qa('[data-est-ownership]').length === 13, "options=" + qa('[data-est-ownership]').length);
+    /* Task 13: the reference's site-review questions render visibly in the
+       Details flow as chip groups, each with a "Not sure" skip chip. */
+    chk("site-review-groups-visible", (function () {
+      const groups = Array.from(document.querySelectorAll(".sf-est-review-group h4")).map(h => h.textContent.trim());
+      return ["Surroundings", "Land & access", "The land itself", "Utilities"].every(g => groups.indexOf(g) >= 0);
+    })(), "groups=" + Array.from(document.querySelectorAll(".sf-est-review-group h4")).map(h => h.textContent.trim()).join(","));
+    chk("site-review-not-sure-chips", ["community", "floodRisk", "roadAccess", "frontage", "lotShape", "rightOfWay", "elevation", "utilities"].every(function (t) {
+      const group = document.querySelector('[data-chip-group][data-t="' + t + '"]');
+      return !!group && Array.from(group.querySelectorAll("button")).some(b => b.getAttribute("data-val") === "");
+    }), "every site-review group offers a Not-sure skip");
     chooseOwnershipNotSure();
     q('[data-est-next]').click();
     chk("review-before-calculate", !!q('[data-est-screen="5"]') && /Check your inputs/.test(q('[data-est-screen="5"]').textContent), "");
