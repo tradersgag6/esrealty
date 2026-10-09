@@ -225,6 +225,7 @@
     eyebrow: "Selling & property services",
     h1: "Get my property value.",
     cta: "Talk to our team",
+    submit: "Send my request",
     lede: "Tell us about your property and what you are planning. A specialist reviews it with you and points you to the right service — professional appraisal, broker support for selling, property management, title or financing. No obligation to list with us."
   };
 
@@ -234,6 +235,7 @@
       eyebrow: "Selling support",
       h1: "Sell with a plan, not a guess.",
       cta: "Get selling support",
+      submit: "Get selling support",
       lede: "Tell us about your property and your timing. We help with pricing, preparation and a selling plan, and we scope the work before you commit. No obligation to list with us."
     },
     "pre-selling": {
@@ -241,6 +243,7 @@
       eyebrow: "Pre-selling support",
       h1: "Sell with a plan, not a guess.",
       cta: "Plan my pre-selling",
+      submit: "Plan my pre-selling",
       lede: "We help owners prepare, price and launch a property so it sells well from the first week on the market. Tell us where you are in the process."
     },
     "appraisal": {
@@ -248,6 +251,7 @@
       eyebrow: "Appraisal & valuation",
       h1: "A defensible value, not a guess.",
       cta: "Request an appraisal consultation",
+      submit: "Request an appraisal consultation",
       lede: "Request a professional appraisal consultation for financing, estate or documentation needs. Tell us about the property and what the valuation is for."
     },
     "broker": {
@@ -255,6 +259,7 @@
       eyebrow: "Licensed brokerage",
       h1: "Talk to a licensed broker.",
       cta: "Talk to a licensed broker",
+      submit: "Request broker contact",
       lede: "Tell us about the property and request broker contact for selling, buying or marketing. A licensed broker replies, with no obligation to list."
     },
     "manage": {
@@ -262,6 +267,7 @@
       eyebrow: "Property management",
       h1: "Let someone else handle the day-to-day.",
       cta: "Ask about management",
+      submit: "Ask about management",
       lede: "Tell us what needs managing — tenants, rent, upkeep or turnover — and we will walk through the options with you."
     },
     "title": {
@@ -269,6 +275,7 @@
       eyebrow: "Title & documentation",
       h1: "Get the paperwork in order.",
       cta: "Ask about documentation",
+      submit: "Ask about documentation",
       lede: "Ask our team to coordinate title checks and document processing, and tell us what stage the paperwork is at."
     },
     "finance": {
@@ -276,6 +283,7 @@
       eyebrow: "Financing",
       h1: "Plan the financing before the commitment.",
       cta: "Ask about financing",
+      submit: "Ask about financing",
       lede: "Tell us what you are planning and we will walk through bank, Pag-IBIG and developer financing options with you."
     }
   };
@@ -329,13 +337,18 @@
       '<p>A few details and the service you are after. We reply within one business day.</p>' +
        '<ul class="sf-pv-list"><li>No obligation to list your property</li><li>A real person reviews your request</li><li>Appraisal, selling, management, title or financing</li><li>Available asking listings are context, not confirmed sale prices</li></ul></div>' +
       '<form class="sf-pv-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" autocomplete="name" placeholder="Juan dela Cruz"></label>' +
-      '<label>Mobile number<input name="phone" required maxlength="50" autocomplete="tel" placeholder="09xx xxx xxxx"></label>' +
+      '<label>Mobile number<input name="phone" required maxlength="50" autocomplete="tel" inputmode="tel" placeholder="09xx xxx xxxx"></label>' +
       '<label>Email<input type="email" name="email" maxlength="254" autocomplete="email" placeholder="you@example.com"></label>' +
-      '<label>What are you planning?<select name="message"><option value="">Choose one</option>' + planning.map(function (pair) {
-        return '<option value="' + esc(pair[0]) + '"' + (pair[0] === service ? " selected" : "") + '>' + esc(pair[1]) + '</option>';
+      /* The option value is the human label, so the lead's message reads the
+         same to the team as it does to the reader (a service key like "broker"
+         used to be posted verbatim). The first option is the default, so the
+         plain landing arrives with a sensible answer already selected instead
+         of a "Choose one" gate; a ?service=... link preselects its own row. */
+      '<label>What are you planning?<select name="message">' + planning.map(function (pair) {
+        return '<option value="' + esc(pair[1]) + '"' + (pair[0] === service ? " selected" : "") + '>' + esc(pair[1]) + '</option>';
       }).join("") + '</select></label>' +
        '<label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to SEA ESTATES contacting me about my property. Read our <a href="#/privacy">Privacy Notice</a>. I can opt out of follow-up at any time.</span></label>' +
-       '<button class="sf-primary-btn" type="submit">Send my request</button>' +
+       '<button class="sf-primary-btn" type="submit">' + esc(copy.submit) + '</button>' +
       '<p class="sf-pv-micro">Takes 30 seconds. No spam. No obligation.</p>' +
       '<p class="sf-form-status" aria-live="polite"></p></form></div></section>');
   }

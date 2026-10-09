@@ -44,13 +44,17 @@ function chk(n, ok, d) { window.__msChecks.push({ name: n, ok: !!ok, detail: d |
     chk("landing-has-no-calculator", !q(".sf-pv [data-est-root]") && !q(".sf-pv [data-est-card]"), "calculator leaked onto the landing");
     chk("landing-fallback-form", !!q(".sf-pv-form[data-sf-consult]"), "no consult form");
     const planningSelect = q(".sf-pv-form select[name=message]");
-    chk("fallback-preselects-broker", !!planningSelect && planningSelect.value === "broker", "value=" + (planningSelect && planningSelect.value));
+    chk("fallback-preselects-broker", !!planningSelect && planningSelect.value === "Talk to a licensed broker", "value=" + (planningSelect && planningSelect.value));
+    /* The option value must be the human label, not the service key: the key
+       used to be posted verbatim as the lead's message. */
+    chk("planning-posts-human-label", !!planningSelect && planningSelect.value === planningSelect.options[planningSelect.selectedIndex].textContent, "value=" + (planningSelect && planningSelect.value));
+    chk("broker-submit-label", /Request broker contact/.test((q(".sf-pv-form button[type=submit]") || {}).textContent || ""), "submit=" + ((q(".sf-pv-form button[type=submit]") || {}).textContent));
 
     /* ---- a different service still adapts the page ---- */
     await go("#/property-value?service=finance", 2200);
     chk("finance-page-hero", /Plan the financing/.test((q(".sf-pv-hero h1") || {}).textContent || ""), "h1=" + ((q(".sf-pv-hero h1") || {}).textContent));
     chk("finance-page-title", document.title === "Financing support | SEA ESTATES", "title=" + document.title);
-    chk("finance-preselects-fallback", (q(".sf-pv-form select[name=message]") || {}).value === "finance", "value=" + ((q(".sf-pv-form select[name=message]") || {}).value));
+    chk("finance-preselects-fallback", (q(".sf-pv-form select[name=message]") || {}).value === "Financing options", "value=" + ((q(".sf-pv-form select[name=message]") || {}).value));
 
     /* ---- the default landing keeps the first-person CTA promise ---- */
     await go("#/property-value", 2200);
@@ -58,6 +62,10 @@ function chk(n, ok, d) { window.__msChecks.push({ name: n, ok: !!ok, detail: d |
     chk("default-landing-no-calculator", !q(".sf-pv [data-est-root]"), "calculator mounted on the default landing");
     chk("default-cta-scrolls-to-form", (q(".sf-pv-actions .sf-primary-btn") || {}).getAttribute("data-sf-scroll") === "sf-pv-form", "cta target missing");
     chk("default-no-obligation-note", /no obligation/i.test((q(".sf-pv") || {}).textContent || ""), "no obligation note missing");
+    /* No "Choose one" gate on the default landing: the first meaningful answer
+       is already selected, so a visitor can submit without opening the select. */
+    const defaultSelect = q(".sf-pv-form select[name=message]");
+    chk("default-preselects-first-answer", !!defaultSelect && defaultSelect.value === "Just want to know my property value", "value=" + (defaultSelect && defaultSelect.value));
   } catch (e) {
     window.__msChecks.push({ name: "runner", ok: false, detail: (e && e.message || e) });
   }
