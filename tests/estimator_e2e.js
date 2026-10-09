@@ -76,7 +76,7 @@ function chooseOwnershipNotSure() {
       const labels = Array.prototype.map.call(ol.querySelectorAll('span'), s => s.textContent.trim());
       return labels.length === 3 && labels[0] === "Location" && labels[1] === "Details" && labels[2] === "Report";
     })(), "progress=" + (q('.sf-est-progress') ? q('.sf-est-progress').textContent.replace(/\s+/g, " ").trim() : "none"));
-    chk("screen1-guides-inputs", /START WITH THE DETAILS/.test(q('[data-est-screen="1"]').textContent) && /match the right BIR reference/.test(q('[data-est-screen="1"]').textContent), "");
+    chk("screen1-guides-inputs", /LOCATION/.test(q('[data-est-screen="1"]').textContent) && /match the right BIR reference/.test(q('[data-est-screen="1"]').textContent), "");
     chk("region-fixed-batangas", !!q('.sf-est-loc-fixed') && /CALABARZON.*Batangas/.test(q('.sf-est-loc-fixed').textContent), "txt=" + (q('.sf-est-loc-fixed') && q('.sf-est-loc-fixed').textContent));
     chk("mn-options-gte34", pt >= 34, "mn=" + pt);
     chk("legacy-map-removed", !document.getElementById("est-map") && !q('[data-est-step]'), "");

@@ -930,10 +930,10 @@
   function screen1Html() {
     var out = '<div class="sf-est-step" data-est-screen="1">';
     out += locSummary();
-    out += '<div class="sf-est-step-head"><span class="sf-est-step-no">01</span><div><p class="sf-est-step-eyebrow">START WITH THE DETAILS</p><h3>Tell us about your property</h3><p class="sf-est-step-subtitle">Your location and lot area help us match the right BIR reference. We’ll show the planning estimate separately, with the details behind it.</p></div></div>';
+    out += '<div class="sf-est-step-head"><span class="sf-est-step-no">01</span><div><p class="sf-est-step-eyebrow">LOCATION</p><h3>Tell us about your property</h3><p class="sf-est-step-subtitle">Location and lot area match the right BIR reference.</p></div></div>';
     out += '<div class="sf-est-fields">';
 
-    out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">✦</i>Purpose</span><span>Why do you want to know the value?</span>' +
+    out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">✦</i>What do you need this valuation for?</span>' +
       chipRow((DATA.config.purposes || []).map(function (p) {
         return { label: p, value: p, active: est.purpose === p };
       }), "purpose") + "</label>";
@@ -942,7 +942,7 @@
       /* The reference's four selling-stage options, verbatim values shared with
          the internal guide (js/app.js saleStage) so a saved answer keeps meaning
          across surfaces. */
-      out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">◷</i>Where are you in the sale?</span><span>Optional — helps us prepare the right advice.</span>' +
+      out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">◷</i>Where are you in the sale?</span><span>Optional</span>' +
         chipRow([
           { label: "I'm just checking my property's value", value: "just_checking", active: est.stage === "just_checking" },
           { label: "I'm getting ready to sell", value: "ready_to_sell", active: est.stage === "ready_to_sell" },
@@ -951,32 +951,32 @@
         ], "stage") + "</label>";
     }
 
-    out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌂</i>Property type</span><span>Vacant lot, or house &amp; lot?</span>' +
+    out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌂</i>Property type</span>' +
       chipRow([
         { label: "Vacant lot", value: "vacant_lot", active: est.type === "vacant_lot" },
         { label: "House & lot", value: "house_lot", active: est.type === "house_lot" }
       ], "type") + "</label>";
 
-    out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌖</i>Municipality</span><span>Which municipality in Batangas?</span>' +
+    out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌖</i>Municipality</span>' +
       '<select data-est-muni><option value="">— choose —</option>' + muniOptions() + "</select></label>";
 
     out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌖</i>Barangay</span><span>Choose after selecting the municipality</span>' +
       '<select data-est-barangay>' + barangayOptions() + "</select></label>";
 
-    out += '<div class="sf-est-field sf-est-span2 sf-est-street-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌕</i>Street <em>(optional)</em></span><span>Skip to use the barangay all-other-streets rate, or search below.</span>' +
+    out += '<div class="sf-est-field sf-est-span2 sf-est-street-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">⌕</i>Street <em>(optional)</em></span><span>Skip to use the barangay rate.</span>' +
       '<div class="sf-est-street-input-wrap"><input data-est-street-q type="search" placeholder="' + (est.allOther ? "Street not listed — choose another street" : "Type to search streets…") + '" autocomplete="off" role="combobox" aria-autocomplete="list" aria-controls="sf-est-street-options" aria-expanded="false" aria-label="Search the BIR street list" value="' + esc(est.allOther ? "" : est.streetLabel) + '">' +
       (est.allOther ? '<span class="sf-est-street-selected"><i aria-hidden="true">✓</i>Using all-other-streets rate</span>' : '') + '</div>' +
       '<div id="sf-est-street-options" class="sf-est-street-list" data-est-street-list role="listbox" aria-label="BIR streets"></div></div>';
     out += '<button type="button" class="sf-est-street-fallback sf-est-span2" data-est-street-fallback' + (!est.barangay ? " disabled" : "") + '>My street is not listed — use the best available BIR reference</button>';
 
-    out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">▣</i>Classification</span><span>Residential is the default — pick what fits the property</span>' +
+    out += '<label class="sf-est-field sf-est-span2"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">▣</i>Classification</span><span>Residential is the default</span>' +
       '<select data-est-class aria-label="BIR classification">' + simpleClassOptions() + "</select></label>";
     out += '<details class="sf-est-help sf-est-span2"><summary>What does BIR classification mean?</summary><p>The BIR schedule groups land by use: residential, commercial, agricultural or industrial. Choose the one that matches the property. If you are unsure, confirm the classification with the relevant Revenue District Office before relying on the guide.</p></details>';
 
-    out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">▤</i>Lot area (sqm)</span><span>Total land area, in square metres</span>' +
+    out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">▤</i>Lot area (sqm)</span>' +
       '<input data-est-area type="number" min="20" max="100000" step="1" inputmode="decimal" placeholder="e.g. 200" value="' + esc(est.area != null ? est.area : "") + '"></label>';
 
-    out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">₱</i>' + (est.purpose === "Buying" ? "Asking price or your offer" : est.purpose === "I received an offer" ? "Offer received" : "Expected selling price") + '</span><span>Optional — changes costs and price comparison, not the property estimate</span>' +
+    out += '<label class="sf-est-field"><span class="sf-est-label"><i class="sf-est-icon" aria-hidden="true">₱</i>' + (est.purpose === "Buying" ? "Asking price or your offer" : est.purpose === "I received an offer" ? "Offer received" : "Expected selling price") + '</span><span>Optional — affects costs, not the estimate</span>' +
       '<input data-est-sale-price type="number" min="0" max="1000000000" step="1000" inputmode="decimal" placeholder="e.g. 5000000" value="' + esc(est.salePrice != null ? est.salePrice : "") + '"></label>';
 
 out += "</div>";
@@ -1005,14 +1005,19 @@ out += "</div>";
   }
 
   function reviewFactorBlock() {
-    /* The reference's remaining questions, as visible groups with tiled
-       options and a "Not sure" skip on each. Recorded for the specialist;
-       none of them change the estimate, which the section note says plainly. */
+    /* The reference's remaining questions, as collapsed accordions whose
+       headers show the picked values, with a "Not sure" skip on each.
+       Recorded for the specialist; none change the estimate. */
     var skip = function (key) {
       return { label: "Not sure", value: "", active: !est[key], skip: true };
     };
-    var group = function (title, note, fields) {
-      return '<div class="sf-est-review-group"><h4>' + esc(title) + '</h4>' + (note ? '<p class="sf-est-review-note">' + esc(note) + '</p>' : "") + '<div class="sf-est-fields">' + fields.join("") + '</div></div>';
+    var summary = function (keys) {
+      var picked = keys.map(function (k) { return est[k]; }).filter(Boolean);
+      return picked.length ? picked.join(" · ") : "Not set";
+    };
+    var group = function (title, keys, fields) {
+      return '<details class="sf-est-review-group"><summary><h4>' + esc(title) + '</h4><span class="sf-est-review-picked">' + esc(summary(keys)) + "</span></summary>" +
+        '<div class="sf-est-fields">' + fields.join("") + "</div></details>";
     };
     var tile = function (label, opts, key) {
       return '<label class="sf-est-field sf-est-span2"><span class="sf-est-label">' + esc(label) + '</span>' + chipRow(
@@ -1020,21 +1025,21 @@ out += "</div>";
           return { label: o.label, value: o.skip ? "" : (o.value || o.label), active: o.skip ? !est[key] : est[key] === (o.value || o.label), skip: o.skip };
         }), key) + "</label>";
     };
-    return group("Surroundings", "Recorded for the specialist — none of these change the estimate.",
+    return group("Surroundings", ["community", "floodRisk", "roadAccess"],
       [
         tile("Community", COMMUNITIES.map(function (c) { return { label: c }; }).concat([skip("community")]), "community"),
         tile("Flood risk", FLOOD_RISKS.map(function (c) { return { label: c }; }).concat([skip("floodRisk")]), "floodRisk"),
         tile("Road access", ROAD_ACCESS.map(function (c) { return { label: c }; }).concat([skip("roadAccess")]), "roadAccess")
       ]) +
-    group("Land & access", "Recorded for the specialist — none of these change the estimate.",
+    group("Land & access", ["frontage", "lotShape", "rightOfWay"],
       [
         tile("Frontage", FRONTAGE.map(function (c) { return { label: c }; }).concat([skip("frontage")]), "frontage"),
         tile("Lot shape", LOT_SHAPES.map(function (c) { return { label: c }; }).concat([skip("lotShape")]), "lotShape"),
         tile("Right of way", RIGHT_OF_WAY.map(function (c) { return { label: c }; }).concat([skip("rightOfWay")]), "rightOfWay")
       ]) +
-    group("The land itself", "Recorded for the specialist — none of these change the estimate.",
+    group("The land itself", ["elevation"],
       [tile("Elevation vs the road", ELEVATIONS.map(function (c) { return { label: c }; }).concat([skip("elevation")]), "elevation")]) +
-    group("Utilities", "Recorded for the specialist — none of these change the estimate.",
+    group("Utilities", ["utilities"],
       [tile("Power & water", UTILITIES.map(function (c) { return { label: c }; }).concat([skip("utilities")]), "utilities")]);
   }
 
@@ -1315,7 +1320,7 @@ out += "</div>";
     rows.push(["Selected land method", est.landMethod === "time-indexed" ? "Indexed reference; no stacked market/corner factors" : "Existing factor guide"]);
     if (est.landMethod === "time-indexed") rows.push(["Time scenario", (est.timeBaseDate || est.muniRow.effectivityDate) + ' to ' + est.timeTargetDate + '; ' + est.timeSource + (est.timeSource === 'manual' ? '; ' + est.timeAnnualPct + '% annually' : '')]);
     rows = rows.concat([["Government reference", referencePlainFact()], ["Occupancy", ownershipLabel("occupancy", est.occupancy)], ["Title", ownershipLabel("titleStatus", est.titleStatus)], ["Inheritance", ownershipLabel("inheritanceStatus", est.inheritanceStatus)], ["Risk treatment", "Review flags; no unsupported automatic deduction"], ["Transaction", est.saleContext], ["Cost basis", costPlainFact()], ["Range", "85%–130% of the planning estimate"]]);
-    return '<div class="sf-est-step" data-est-screen="5"><div class="sf-est-step-head"><span class="sf-est-step-no">03</span><div><h3>Check your inputs</h3><p>Review the property and assumptions before calculating.</p></div></div><dl class="sf-est-review">' + rows.map(function (row) { return '<div><dt>' + esc(row[0]) + '</dt><dd>' + esc(row[1]) + '</dd></div>'; }).join("") + '</dl><p class="sf-est-hint">“Not sure” remains unknown; it does not verify title or remove risk. Marketability deductions and construction allowances are model assumptions. This is a planning guide, not a certified appraisal.</p><div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-edit="1">Edit location</button><button type="button" class="sf-est-next sf-est-prev" data-est-edit="2">Edit property details</button><button type="button" class="sf-est-next" data-est-next>Calculate my estimate →</button></div></div>';
+    return '<div class="sf-est-step" data-est-screen="5"><div class="sf-est-step-head"><span class="sf-est-step-no">03</span><div><h3>Check your inputs</h3><p>Review the property and assumptions before calculating.</p></div></div><dl class="sf-est-review">' + rows.map(function (row) { return '<div><dt>' + esc(row[0]) + '</dt><dd>' + esc(row[1]) + '</dd></div>'; }).join("") + '</dl><p class="sf-est-hint">“Not sure” remains unknown. This is a planning guide, not a certified appraisal.</p><div class="sf-est-actions"><button type="button" class="sf-est-next sf-est-prev" data-est-edit="1">Edit location</button><button type="button" class="sf-est-next sf-est-prev" data-est-edit="2">Edit property details</button><button type="button" class="sf-est-next" data-est-next>Calculate my estimate →</button></div></div>';
   }
 
   function pricingStrategyHtml(r, suppliedTax) {
@@ -1609,18 +1614,12 @@ return '<section class="sf-est-result-summary" aria-label="Estimated property va
       '<div class="sf-est-nextstep-head">' +
       '<span class="sf-est-nextstep-badge">No obligation to list</span>' +
       "<h4>Choose your next step</h4>" +
-      "<p>Your indicative guide is ready. A professional review covers the three things an online tool cannot: your documents, the actual site, and what buyers are paying right now.</p>" +
       "</div>" +
-      '<ul class="sf-est-nextstep-list">' +
-      "<li><b>Your results are open</b><span>The central estimate, scenario range, BIR reference and cost assumptions are available above.</span></li>" +
-      "<li><b>Document and site review</b><span>Title, occupancy, access, and condition checked against what you entered.</span></li>" +
-      "<li><b>A specialist&rsquo;s next step</b><span>What to fix, what to hold, and what to ask for &mdash; before you list.</span></li>" +
-      "</ul>" +
       '<div class="sf-est-nextstep-act">' +
       '<button type="button" class="sf-est-lead-cta" data-est-email-open>Email my guide →</button>' +
       '<button type="button" class="sf-est-lead-cta alt" data-est-lead-open>Request an appraisal consultation →</button>' +
       '<button type="button" class="sf-est-lead-cta alt" data-est-broker-open>Talk to a licensed broker →</button>' +
-      '<p class="sf-est-nextstep-reassure">A specialist replies within one business day. No obligation to list.</p></div>' +
+      '<p class="sf-est-nextstep-reassure">Your results are open above. A specialist replies within one business day.</p></div>' +
       "</div>";
   }
 

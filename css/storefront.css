@@ -1141,10 +1141,19 @@ body .sf-search-form button { min-height: 52px !important; height: 52px !importa
 .sf-est-street-fallback { border: 1px solid var(--sf-accent-line); background: var(--sf-accent-soft); color: var(--sf-accent-hover); border-radius: 8px; padding: 12px; min-height: 48px; text-align: left; font-size: 16px; }
 .sf-est-step { scroll-margin-top: 96px; }
 .sf-est-site-review { padding: 16px 0; }
-.sf-est-review-group { padding: 14px 0 2px; border-top: 1px solid var(--sf-line); }
-.sf-est-review-group h4 { margin: 0 0 2px; font-size: 17px; color: var(--sf-ink); }
-.sf-est-review-note { margin: 0 0 10px; font-size: 13px; color: var(--sf-ink-mute); }
-.sf-est-site-review .sf-est-fields { margin-top: 4px; }
+.sf-est-review-group { border-top: 1px solid var(--sf-line); }
+.sf-est-review-group > summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 48px; padding: 12px 0; cursor: pointer; list-style: none;
+}
+.sf-est-review-group > summary::-webkit-details-marker { display: none; }
+.sf-est-review-group > summary::after {
+  content: "+"; flex: none; font-size: 18px; line-height: 1; color: var(--sf-ink-mute);
+}
+.sf-est-review-group[open] > summary::after { content: "−"; }
+.sf-est-review-group h4 { margin: 0; font-size: 17px; color: var(--sf-ink); }
+.sf-est-review-picked { margin-left: auto; font-size: 13px; color: var(--sf-ink-mute); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 55%; }
+.sf-est-review-group .sf-est-fields { margin: 0 0 14px; }
 .sf-est-report-group { margin: 0 0 24px; }
 .sf-est-report-group h5 { font-size: 18px; margin: 0 0 12px; }
 .sf-est-scenario-range { font-size: 16px; line-height: 1.6; margin: 16px 0; }
