@@ -408,11 +408,25 @@
   gap: .7rem;
   margin-bottom: 1rem;
 }
-.sf-pv-reassure {
-  margin: 0;
+/* Trust row under the hero actions: response time, privacy and the
+   no-obligation line, each with an outline icon (18px, 1.7 stroke, same
+   family as the result screen's next-step icons). */
+.sf-pv-trust {
+  display: grid;
+  gap: .55rem;
+  margin: 1.05rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.sf-pv-trust li {
+  display: flex;
+  align-items: flex-start;
+  gap: .55rem;
   font-size: var(--sf-small);
+  line-height: 1.45;
   color: var(--sf-ink-mute);
 }
+.sf-pv-trust svg { width: 18px; height: 18px; flex: none; margin-top: .08rem; color: var(--sf-accent); }
 /* The value guide is the one deliberate "tool" moment on the page, and it was
  * #fbfaf7 sitting on a #fff section - a difference of two RGB points, so it read
  * only through its 1px border. One clear elevated surface is calmer than a
@@ -455,7 +469,7 @@
   .sf-pv-hero > .sf-pv-lede   { grid-area: 3 / 1; }
   /* align-self:end levels the buttons with the baseline of the headline block */
   .sf-pv-hero > .sf-pv-actions  { grid-area: 2 / 2; align-self: end; margin-bottom: 0; }
-  .sf-pv-hero > .sf-pv-reassure { grid-area: 3 / 2; margin: 0; }
+  .sf-pv-hero > .sf-pv-trust    { grid-area: 3 / 2; margin: 0; }
 }
 
 .sf-pv-h2 {
@@ -608,6 +622,47 @@
   text-align: center;
 }
 .sf-pv-form .sf-form-status { margin: 0; }
+
+/* ---------------------------------------------------------------------
+   Landing motion and feedback
+   ---------------------------------------------------------------------
+   The reveal system adds `.in` per element; these rules only set the
+   cadence so the hero enters as a sequence and the steps follow on
+   scroll. Every effect is opacity/transform only (no layout shift), and
+   the global reduced-motion rule collapses the durations for readers who
+   ask for it. */
+.sf-pv-hero > .sf-reveal:nth-child(1) { --d: 0s; }
+.sf-pv-hero > .sf-reveal:nth-child(2) { --d: .07s; }
+.sf-pv-hero > .sf-reveal:nth-child(3) { --d: .14s; }
+.sf-pv-hero > .sf-reveal:nth-child(4) { --d: .21s; }
+.sf-pv-hero > .sf-reveal:nth-child(5) { --d: .28s; }
+.sf-pv-steps-list > .sf-reveal:nth-child(2) { --d: .07s; }
+.sf-pv-steps-list > .sf-reveal:nth-child(3) { --d: .14s; }
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .sf-pv .sf-primary-btn,
+  .sf-pv .sf-outline-btn {
+    transition: transform .16s var(--sf-ease), box-shadow .16s var(--sf-ease),
+      background-color .16s var(--sf-ease), border-color .16s var(--sf-ease);
+  }
+  .sf-pv .sf-primary-btn:hover,
+  .sf-pv .sf-outline-btn:hover { transform: translateY(-1px); }
+}
+/* Pressed feedback stays inside the 80-150ms budget and moves nothing else. */
+.sf-pv .sf-primary-btn:active,
+.sf-pv .sf-outline-btn:active { transform: translateY(0) scale(.995); }
+
+/* The consult form's confirmation rises in instead of hard-swapping, and a
+   check glyph leads the success message. Scoped to this landing so the
+   estimator's own status line is untouched. */
+@media (prefers-reduced-motion: no-preference) {
+  .sf-pv .sf-form-status.success { animation: sf-pv-status-in .3s var(--sf-ease) both; }
+}
+.sf-pv .sf-form-status.success::before { content: "✓ "; font-weight: 900; color: var(--sf-accent); }
+@keyframes sf-pv-status-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
 
 /* ---------------------------------------------------------------------
    Consent + status text

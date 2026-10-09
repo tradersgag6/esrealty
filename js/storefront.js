@@ -280,6 +280,21 @@
     }
   };
 
+  /* Outline icons for the landing's trust row - the same visual language as
+     the result screen's next-step icons: one 24px grid, 1.7 stroke,
+     currentColor, decorative beside their visible text. */
+  function pvTrustIcon(body) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' + body + "</svg>";
+  }
+
+  function pvTrustRow(extraClass) {
+    return '<ul class="sf-pv-trust' + (extraClass ? " " + extraClass : "") + '">' +
+      '<li>' + pvTrustIcon('<circle cx="12" cy="12" r="8.25"/><path d="M12 7.5V12l2.9 1.7"/>') + "<span>A specialist replies within one business day</span></li>" +
+      '<li>' + pvTrustIcon('<path d="M12 3.5 5.5 6v5.2c0 4.2 2.7 7.2 6.5 9.3 3.8-2.1 6.5-5.1 6.5-9.3V6L12 3.5Z"/><path d="m9 11.6 2.1 2.1 4-4.2"/>') + "<span>Your details are never sold</span></li>" +
+      '<li>' + pvTrustIcon('<circle cx="12" cy="12" r="8.25"/><path d="m8.5 12.3 2.4 2.4 4.6-4.9"/>') + "<span>Free to ask — no obligation to sell or list</span></li>" +
+      "</ul>";
+  }
+
   function propertyValuePage(params) {
     var service = String((params && params.get("service")) || "").toLowerCase();
     var copy = PV_SERVICES[service] || PV_DEFAULT;
@@ -295,25 +310,25 @@
       ["finance", "Financing options"]
     ];
     return shell('<section class="sf-pv">' +
-      '<div class="sf-pv-hero sf-reveal sf-reveal-up">' +
-      '<p class="sf-eyebrow">' + esc(copy.eyebrow) + '</p>' +
-      '<h1>' + esc(copy.h1) + '</h1>' +
-      '<p class="sf-pv-lede">' + esc(copy.lede) + '</p>' +
-      '<div class="sf-pv-actions"><a class="sf-primary-btn" href="#sf-pv-form" data-sf-scroll="sf-pv-form">' + esc(copy.cta) + '</a>' +
+      '<div class="sf-pv-hero">' +
+      '<p class="sf-eyebrow sf-reveal sf-reveal-up">' + esc(copy.eyebrow) + '</p>' +
+      '<h1 class="sf-reveal sf-reveal-up">' + esc(copy.h1) + '</h1>' +
+      '<p class="sf-pv-lede sf-reveal sf-reveal-up">' + esc(copy.lede) + '</p>' +
+      '<div class="sf-pv-actions sf-reveal sf-reveal-up"><a class="sf-primary-btn" href="#sf-pv-form" data-sf-scroll="sf-pv-form">' + esc(copy.cta) + '</a>' +
       '<a class="sf-outline-btn" href="#/search">Browse properties</a></div>' +
-      '<p class="sf-pv-reassure">No obligation to sell, and none to list with us.</p>' +
+      pvTrustRow("sf-reveal sf-reveal-up") +
       '</div>' +
 
       '<div class="sf-pv-steps"><h2 class="sf-pv-h2">What happens</h2><ol class="sf-pv-steps-list">' +
-      '<li><span>01</span><div><b>Tell us about your property</b><p>Share the location, the property and what you are planning. The short form below is enough to start.</p></div></li>' +
-      '<li><span>02</span><div><b>Have a short call with our team</b><p>A member of SEA ESTATES reviews your situation with you and asks about your plans, timing and the property itself.</p></div></li>' +
-       '<li><span>03</span><div><b>Choose the service you need</b><p>Appraisal, selling support, broker contact, management, title or financing — we scope it, say what it costs, and you decide. There is no pressure to list.</p></div></li>' +
+      '<li class="sf-reveal sf-reveal-up"><span>01</span><div><b>Tell us about your property</b><p>Share the location, the property and what you are planning. The short form below is enough to start.</p></div></li>' +
+      '<li class="sf-reveal sf-reveal-up"><span>02</span><div><b>Have a short call with our team</b><p>A member of SEA ESTATES reviews your situation with you and asks about your plans, timing and the property itself.</p></div></li>' +
+       '<li class="sf-reveal sf-reveal-up"><span>03</span><div><b>Choose the service you need</b><p>Appraisal, selling support, broker contact, management, title or financing — we scope it, say what it costs, and you decide. There is no pressure to list.</p></div></li>' +
       '</ol></div>' +
 
-      '<div class="sf-pv-form-wrap" id="sf-pv-form"><div class="sf-pv-form-copy"><h2 class="sf-pv-h2">Tell us what you need</h2>' +
+      '<div class="sf-pv-form-wrap" id="sf-pv-form"><div class="sf-pv-form-copy sf-reveal sf-reveal-up"><h2 class="sf-pv-h2">Tell us what you need</h2>' +
       '<p>A few details and the service you are after. We reply within one business day.</p>' +
        '<ul class="sf-pv-list"><li>No obligation to list your property</li><li>A real person reviews your request</li><li>Appraisal, selling, management, title or financing</li><li>Available asking listings are context, not confirmed sale prices</li></ul></div>' +
-      '<form class="sf-pv-form" data-sf-consult><label>Full name<input name="name" required maxlength="160" autocomplete="name" placeholder="Juan dela Cruz"></label>' +
+      '<form class="sf-pv-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" autocomplete="name" placeholder="Juan dela Cruz"></label>' +
       '<label>Mobile number<input name="phone" required maxlength="50" autocomplete="tel" placeholder="09xx xxx xxxx"></label>' +
       '<label>Email<input type="email" name="email" maxlength="254" autocomplete="email" placeholder="you@example.com"></label>' +
       '<label>What are you planning?<select name="message"><option value="">Choose one</option>' + planning.map(function (pair) {
