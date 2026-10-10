@@ -67,7 +67,11 @@ Deno.serve(async (req) => {
     } catch (e) {
       vfail = "fetch threw: " + String(e);
     }
-    if (!email) return json({ ok: false, error: "Unauthorized (" + (vfail || "token verify failed") + ")" }, 401);
+    if (!email) {
+      // Keep the diagnostic in server logs; never hand internals to the caller.
+      console.error("notify-dispatch auth failed:", vfail || "token verify failed");
+      return json({ ok: false, error: "Unauthorized" }, 401);
+    }
       if (String(body.to).toLowerCase() !== String(email).toLowerCase()) {
         return json({ ok: false, error: "Self-send only: you may only email your own address" }, 403);
       }

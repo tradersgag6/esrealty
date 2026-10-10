@@ -100,7 +100,9 @@ Deno.serve(async (req) => {
     const img = Array.isArray(l.images) && l.images[0] ? l.images[0] : "";
     const desc = (l.description || "").slice(0, 300) || `${l.property_type} for ${l.offer_type === "rent" ? "rent" : "sale"} in ${[l.city, l.province].filter(Boolean).join(", ")}.`;
     const priceTxt = money(l.price || l.rent) + (l.offer_type === "rent" ? "/mo" : "");
-    const ld = JSON.stringify(listingJsonLd(l, canonicalUrl));
+    // `<` is escaped so a `</script>` inside listing text cannot break out of
+    // the ld+json block; the escapes are valid JSON and decode back to `<`.
+    const ld = JSON.stringify(listingJsonLd(l, canonicalUrl)).replace(/</g, "\\u003c");
     const out = `<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
@@ -116,11 +118,11 @@ ${img ? `<meta property="og:image" content="${esc(img)}">` : ""}
 <meta property="og:price:currency" content="PHP">
 <meta name="twitter:card" content="${img ? "summary_large_image" : "summary"}">
 <script type="application/ld+json">${ld}</script>
-<meta http-equiv="refresh" content="0;url=${spaUrl}">
+<meta http-equiv="refresh" content="0;url=${esc(spaUrl)}">
 </head><body>
 <p style="font-family:sans-serif">Opening <b>${esc(l.title)}</b> (${priceTxt})…</p>
-<p style="font-family:sans-serif;font-size:14px;color:#666">If nothing happens, <a href="${spaUrl}">click here</a>.</p>
-<script>location.replace(${JSON.stringify(spaUrl)});</script>
+<p style="font-family:sans-serif;font-size:14px;color:#666">If nothing happens, <a href="${esc(spaUrl)}">click here</a>.</p>
+<script>location.replace(${JSON.stringify(spaUrl).replace(/</g, "\\u003c")});</script>
 </body></html>`;
     return html(out);
   }

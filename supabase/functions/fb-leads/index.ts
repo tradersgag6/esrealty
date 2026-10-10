@@ -19,7 +19,7 @@ function json(body: unknown, status = 200) {
 }
 
 async function verifySignature(raw: string, signature: string): Promise<boolean> {
-  if (!APP_SECRET) return true; // optional in dev; strongly recommended in prod
+  if (!APP_SECRET) return false; // fail closed: never accept an unsigned webhook
   if (!signature.startsWith("sha256=")) return false;
   const key = await crypto.subtle.importKey(
     "raw",
