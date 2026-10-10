@@ -16,6 +16,11 @@
    ===================================================================== */
 
 .sf-site {
+  /* The storefront is a light-only design; declaring it keeps native controls
+     (the consent checkbox, date inputs, scrollbars) from rendering in the
+     browser's dark preference - an unchecked checkbox previously painted as a
+     dark square that read as broken. */
+  color-scheme: light;
   /* ---- Colour ---------------------------------------------------- */  --sf-ink:            #14110F;
   --sf-ink-soft:       #443C36;
   --sf-ink-mute:       #6B605A;
@@ -386,7 +391,15 @@
   margin: 0 auto;
 }
 
-.sf-pv-hero { max-width: 36rem; }
+/* Split hero: the copy and its trust row on the left, the request card on the
+   right on wide screens. Below the breakpoint the form follows the copy
+   immediately, so the ask is never more than a short scroll away. */
+.sf-pv-hero {
+  display: grid;
+  gap: clamp(1.75rem, 1.2rem + 2.6vw, 3rem);
+  max-width: none;
+}
+.sf-pv-hero-copy { max-width: 36rem; }
 .sf-pv-hero h1 {
   margin: .5rem 0 1.15rem;
   font-size: var(--sf-display);
@@ -442,34 +455,17 @@
 .sf-est-hero { background: transparent; }
 
 /* Scroll target for the hero CTA. Without an offset the sticky header would
-   cover the form's first field. */
-.sf-pv-form-wrap { scroll-margin-top: 5.5rem; }
-/* This wrapper carried a full-width border-top with ~73px of empty space above
- * and below it and no content attached to either end, so it read as a stray rule
- * rather than a separator. The steps above it already end on their own rhythm,
- * and the section gap does the separating. */
-.sf-pv-form-wrap { border-top: 0; }
+   cover the form card's first field. */
+#sf-pv-form { scroll-margin-top: 5.5rem; min-width: 0; }
 
-/* The hero was capped at 36rem inside a 1184px container, so every child sat in
- * a 576px column with 608px of dead space to its right - the page read as
- * "unfinished" rather than minimal. On a wide screen the call to action moves
- * into that space, which also lifts it above the fold: the form this button
- * scrolls to is three sections down. No copy is added; the buttons and the two
- * reassurance lines that were already stacked underneath just move across. */
+/* Two columns on wide screens: copy (with its trust row) beside the request
+   card, keeping the form in the first view. */
 @media (min-width: 1025px) {
   .sf-pv-hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr);
-    column-gap: clamp(2rem, 4vw, 4.5rem);
+    grid-template-columns: minmax(0, 1.06fr) minmax(0, .94fr);
     align-items: start;
-    max-width: none;
+    column-gap: clamp(2rem, 4vw, 4rem);
   }
-  .sf-pv-hero > .sf-eyebrow   { grid-area: 1 / 1; }
-  .sf-pv-hero > h1            { grid-area: 2 / 1; }
-  .sf-pv-hero > .sf-pv-lede   { grid-area: 3 / 1; }
-  /* align-self:end levels the buttons with the baseline of the headline block */
-  .sf-pv-hero > .sf-pv-actions  { grid-area: 2 / 2; align-self: end; margin-bottom: 0; }
-  .sf-pv-hero > .sf-pv-trust    { grid-area: 3 / 2; margin: 0; }
 }
 
 .sf-pv-h2 {
@@ -480,34 +476,38 @@
   color: var(--sf-ink);
 }
 
-/* What happens ---------------------------------------------------------- */
+/* What happens: three cards on wide screens, one column on phones. */
 .sf-pv-steps-list {
   display: grid;
-  gap: 0;
+  grid-template-columns: 1fr;
+  gap: 1rem;
   margin: 0;
   padding: 0;
   list-style: none;
-  counter-reset: none;
-  border-top: 1px solid var(--sf-line);
+}
+@media (min-width: 900px) {
+  .sf-pv-steps-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 .sf-pv-steps-list li {
   display: grid;
-  grid-template-columns: 3.25rem 1fr;
-  gap: clamp(.75rem, .4rem + 1.4vw, 1.75rem);
-  padding: 1.5rem 0;
-  border-bottom: 1px solid var(--sf-line);
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: .95rem;
+  padding: 1.25rem;
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-r);
+  background: var(--sf-paper);
 }
 .sf-pv-steps-list li > span {
-  font-size: var(--sf-micro);
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--sf-accent-soft);
+  color: var(--sf-accent-hover);
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: .1em;
-  color: var(--sf-accent);
-  padding-top: .28rem;
 }
-/* Every row carries a bottom rule, including the last one, which left a
- * trailing divider stranded below the final step with the next section's
- * padding under it - it read as a stray line rather than a list separator. */
-.sf-pv-steps-list li:last-child { border-bottom: 0; }
 .sf-pv-steps-list b {
   display: block;
   margin-bottom: .3rem;
@@ -569,55 +569,64 @@
 }
 .sf-pv-faq-body a { color: #174b5e; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 
-/* Form ------------------------------------------------------------------ */
-.sf-pv-form-wrap {
+/* Closing CTA ------------------------------------------------------------ */
+.sf-pv-close {
   display: grid;
-  gap: clamp(1.5rem, 1rem + 2.4vw, 3.25rem);
-  padding-top: var(--sf-stack);
-  border-top: 1px solid var(--sf-line);
+  gap: 1.1rem;
+  padding: clamp(1.5rem, 1.2rem + 2vw, 2.4rem);
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-r-lg);
+  background: linear-gradient(140deg, var(--sf-paper-warm) 0%, var(--sf-paper) 72%);
 }
-
-.sf-pv-form-copy p {
-  margin: 0 0 1.1rem;
+.sf-pv-close .sf-pv-h2 { margin: 0 0 .5rem; }
+.sf-pv-close p {
+  margin: 0;
   font-size: var(--sf-body);
-  line-height: 1.62;
+  line-height: 1.6;
   color: var(--sf-ink-soft);
+}
+.sf-pv-close .sf-primary-btn { justify-self: start; }
+@media (min-width: 760px) {
+  .sf-pv-close {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 2rem;
+  }
+  .sf-pv-close .sf-primary-btn { justify-self: end; }
 }
 
-.sf-pv-list { margin: 0; padding: 0; list-style: none; display: grid; gap: .5rem; }
-/* Four short reassurance lines stacked in one column left half the section
- * empty. Two columns on a wide screen uses the width without touching the copy. */
-@media (min-width: 1025px) {
-  .sf-pv-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem 2.75rem; max-width: 52rem; }
+/* Form ------------------------------------------------------------------ */
+/* The request card (hero right column): heading, one-line promise, then the
+   form. Chrome lives on the card so the heading sits inside it. */
+.sf-pv-form-card {
+  padding: clamp(1.4rem, 1.1rem + 1vw, 1.9rem);
+  background: var(--sf-paper);
+  border: 1px solid var(--sf-line);
+  border-radius: var(--sf-r-lg);
+  box-shadow: var(--sf-shadow);
 }
-.sf-pv-list li {
-  position: relative;
-  padding-left: 1.6rem;
+.sf-pv-form-card .sf-pv-h2 {
+  margin: 0 0 .35rem;
+  font-size: clamp(1.25rem, 1.1rem + .5vw, 1.5rem);
+  letter-spacing: -.015em;
+}
+.sf-pv-form-sub {
+  margin: 0 0 1.1rem;
   font-size: var(--sf-small);
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--sf-ink-soft);
-}
-/* Inline SVG-free check using a rotated border box, so there is no glyph
-   dependency and nothing to go missing. */
-.sf-pv-list li::before {
-  content: "";
-  position: absolute;
-  left: .1rem; top: .3rem;
-  width: .42rem; height: .72rem;
-  border-right: 2px solid var(--sf-accent);
-  border-bottom: 2px solid var(--sf-accent);
-  transform: rotate(42deg);
 }
 
 .sf-pv-form {
   display: grid;
   gap: 1rem;
   align-content: start;
-  padding: clamp(1.4rem, 1.1rem + 1vw, 2.1rem);
-  background: var(--sf-paper);
-  border: 1px solid var(--sf-line);
-  border-radius: var(--sf-r-lg);
-  box-shadow: var(--sf-shadow);
+}
+/* Name and mobile pair up where there is room; every other field keeps the
+   full card width. */
+.sf-pv-field-row { display: grid; gap: 1rem; }
+@media (min-width: 560px) {
+  .sf-pv-field-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
 .sf-pv-form label {
   display: grid;
@@ -679,11 +688,12 @@
    scroll. Every effect is opacity/transform only (no layout shift), and
    the global reduced-motion rule collapses the durations for readers who
    ask for it. */
-.sf-pv-hero > .sf-reveal:nth-child(1) { --d: 0s; }
-.sf-pv-hero > .sf-reveal:nth-child(2) { --d: .07s; }
-.sf-pv-hero > .sf-reveal:nth-child(3) { --d: .14s; }
-.sf-pv-hero > .sf-reveal:nth-child(4) { --d: .21s; }
-.sf-pv-hero > .sf-reveal:nth-child(5) { --d: .28s; }
+.sf-pv-hero-copy > .sf-reveal:nth-child(1) { --d: 0s; }
+.sf-pv-hero-copy > .sf-reveal:nth-child(2) { --d: .07s; }
+.sf-pv-hero-copy > .sf-reveal:nth-child(3) { --d: .14s; }
+.sf-pv-hero-copy > .sf-reveal:nth-child(4) { --d: .21s; }
+.sf-pv-hero-copy > .sf-reveal:nth-child(5) { --d: .28s; }
+.sf-pv-hero-form { --d: .16s; }
 .sf-pv-steps-list > .sf-reveal:nth-child(2) { --d: .07s; }
 .sf-pv-steps-list > .sf-reveal:nth-child(3) { --d: .14s; }
 
@@ -692,10 +702,6 @@
    settles faster. Scoped to .sf-pv; the global reduced-motion rule still
    collapses the durations. */
 .sf-pv .sf-reveal { transform: translateY(14px); transition-duration: .45s, .45s; }
-.sf-pv .sf-reveal.sf-reveal-right { transform: translateX(22px); }
-@media (max-width: 760px) {
-  .sf-pv .sf-reveal.sf-reveal-right { transform: translateY(14px); }
-}
 
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .sf-pv .sf-primary-btn,

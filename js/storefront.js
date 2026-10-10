@@ -319,6 +319,7 @@
     ];
     return shell('<section class="sf-pv">' +
       '<div class="sf-pv-hero">' +
+      '<div class="sf-pv-hero-copy">' +
       '<p class="sf-eyebrow sf-reveal sf-reveal-up">' + esc(copy.eyebrow) + '</p>' +
       '<h1 class="sf-reveal sf-reveal-up">' + esc(copy.h1) + '</h1>' +
       '<p class="sf-pv-lede sf-reveal sf-reveal-up">' + esc(copy.lede) + '</p>' +
@@ -327,32 +328,14 @@
       pvTrustRow("sf-reveal sf-reveal-up") +
       '</div>' +
 
-      '<div class="sf-pv-steps"><h2 class="sf-pv-h2">What happens</h2><ol class="sf-pv-steps-list">' +
-      '<li class="sf-reveal sf-reveal-up"><span>01</span><div><b>Tell us about your property</b><p>Share the location, the property and what you are planning. The short form below is enough to start.</p></div></li>' +
-      '<li class="sf-reveal sf-reveal-up"><span>02</span><div><b>Have a short call with our team</b><p>A member of SEA ESTATES reviews your situation with you and asks about your plans, timing and the property itself.</p></div></li>' +
-       '<li class="sf-reveal sf-reveal-up"><span>03</span><div><b>Choose the service you need</b><p>Appraisal, selling support, broker contact, management, title or financing — we scope it, say what it costs, and you decide. There is no pressure to list.</p></div></li>' +
-      '</ol></div>' +
-
-      /* Objection handling directly before the ask. Every answer restates a
-         promise already made elsewhere on the page (free to ask, no
-         obligation, one business day, never sold); nothing numeric or
-         testimonial is invented. All items start collapsed. */
-      '<div class="sf-pv-faq sf-reveal sf-reveal-up"><h2 class="sf-pv-h2">Common questions</h2>' +
-      [
-        ["Is asking free?", "Yes — sending a request and the first conversation are free. If a formal appraisal or listing is the right next step, we explain the scope and fees first, so you decide before anything is charged or signed."],
-        ["Will you pressure me to list?", "No. There is no obligation to sell or list with us, and nothing goes to a broker or appraiser until you ask."],
-        ["What happens to my details?", "They are used only to respond to this request and are never sold. See our <a href=\"#/privacy\">Privacy Notice</a>."],
-        ["How soon will I hear back?", "A specialist replies within one business day."],
-        ["What can you help with?", "Professional appraisal, selling support, broker contact, property management, title and documentation, and financing options."]
-      ].map(function (pair) {
-        return '<details class="sf-pv-faq-item"><summary><h3>' + esc(pair[0]) + '</h3><span class="sf-pv-faq-chev" aria-hidden="true"></span></summary><div class="sf-pv-faq-body"><p>' + pair[1] + '</p></div></details>';
-      }).join("") + '</div>' +
-
-      '<div class="sf-pv-form-wrap" id="sf-pv-form"><div class="sf-pv-form-copy sf-reveal sf-reveal-up"><h2 class="sf-pv-h2">Tell us what you need</h2>' +
-      '<p>A few details and the service you are after. We reply within one business day.</p>' +
-       '<ul class="sf-pv-list"><li>No obligation to list your property</li><li>A real person reviews your request</li><li>Appraisal, selling, management, title or financing</li><li>Available asking listings are context, not confirmed sale prices</li></ul></div>' +
-      '<form class="sf-pv-form sf-reveal sf-reveal-right" data-sf-consult><label>Full name<input name="name" required maxlength="160" autocomplete="name" placeholder="Juan dela Cruz"></label>' +
-      '<label>Mobile number<input name="phone" required maxlength="50" autocomplete="tel" inputmode="tel" placeholder="09xx xxx xxxx"></label>' +
+      /* The request card sits inside the hero, so the form is visible without
+         any scroll on wide screens and immediately after the copy on phones. */
+      '<div class="sf-pv-hero-form sf-reveal sf-reveal-up" id="sf-pv-form"><div class="sf-pv-form-card">' +
+      '<h2 class="sf-pv-h2">Tell us what you need</h2>' +
+      '<p class="sf-pv-form-sub">A few details and the service you are after. We reply within one business day.</p>' +
+      '<form class="sf-pv-form" data-sf-consult>' +
+      '<div class="sf-pv-field-row"><label>Full name<input name="name" required maxlength="160" autocomplete="name" placeholder="Juan dela Cruz"></label>' +
+      '<label>Mobile number<input name="phone" required maxlength="50" autocomplete="tel" inputmode="tel" placeholder="09xx xxx xxxx"></label></div>' +
       '<label>Email<input type="email" name="email" maxlength="254" autocomplete="email" placeholder="you@example.com"></label>' +
       /* The option value is the human label, so the lead's message reads the
          same to the team as it does to the reader (a service key like "broker"
@@ -365,7 +348,33 @@
        '<label class="sf-consent"><input type="checkbox" name="consent" required><span>I consent to SEA ESTATES contacting me about my property. Read our <a href="#/privacy">Privacy Notice</a>. I can opt out of follow-up at any time.</span></label>' +
        '<button class="sf-primary-btn" type="submit">' + esc(copy.submit) + '</button>' +
       '<p class="sf-pv-micro">Takes 30 seconds. No spam. No obligation.</p>' +
-      '<p class="sf-form-status" aria-live="polite"></p></form></div></section>');
+      '<p class="sf-form-status" aria-live="polite"></p></form></div></div>' +
+      '</div>' +
+
+      '<div class="sf-pv-steps"><h2 class="sf-pv-h2">What happens</h2><ol class="sf-pv-steps-list">' +
+      '<li class="sf-reveal sf-reveal-up"><span>01</span><div><b>Tell us about your property</b><p>Share the location, the property and what you are planning. The short form is enough to start.</p></div></li>' +
+      '<li class="sf-reveal sf-reveal-up"><span>02</span><div><b>Have a short call with our team</b><p>A member of SEA ESTATES reviews your situation with you and asks about your plans, timing and the property itself.</p></div></li>' +
+       '<li class="sf-reveal sf-reveal-up"><span>03</span><div><b>Choose the service you need</b><p>Appraisal, selling support, broker contact, management, title or financing — we scope it, say what it costs, and you decide. There is no pressure to list.</p></div></li>' +
+      '</ol></div>' +
+
+      /* Objection handling after the ask: every answer restates a promise
+         already made elsewhere on the page (free to ask, no obligation, one
+         business day, never sold); nothing numeric or testimonial is
+         invented. All items start collapsed. */
+      '<div class="sf-pv-faq sf-reveal sf-reveal-up"><h2 class="sf-pv-h2">Common questions</h2>' +
+      [
+        ["Is asking free?", "Yes — sending a request and the first conversation are free. If a formal appraisal or listing is the right next step, we explain the scope and fees first, so you decide before anything is charged or signed."],
+        ["Will you pressure me to list?", "No. There is no obligation to sell or list with us, and nothing goes to a broker or appraiser until you ask."],
+        ["What happens to my details?", "They are used only to respond to this request and are never sold. See our <a href=\"#/privacy\">Privacy Notice</a>."],
+        ["How soon will I hear back?", "A specialist replies within one business day."],
+        ["What can you help with?", "Professional appraisal, selling support, broker contact, property management, title and documentation, and financing options."]
+      ].map(function (pair) {
+        return '<details class="sf-pv-faq-item"><summary><h3>' + esc(pair[0]) + '</h3><span class="sf-pv-faq-chev" aria-hidden="true"></span></summary><div class="sf-pv-faq-body"><p>' + pair[1] + '</p></div></details>';
+      }).join("") + '</div>' +
+
+      '<div class="sf-pv-close sf-reveal sf-reveal-up"><div><h2 class="sf-pv-h2">Ready when you are.</h2>' +
+      '<p>Send your details and a specialist replies within one business day. No obligation to sell or list.</p></div>' +
+      '<a class="sf-primary-btn" href="#sf-pv-form" data-sf-scroll="sf-pv-form">' + esc(copy.submit) + '</a></div></section>');
   }
 
   /* Contact details arrive asynchronously. They used to trigger a full
